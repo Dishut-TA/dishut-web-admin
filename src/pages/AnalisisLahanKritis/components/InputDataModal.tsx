@@ -33,7 +33,7 @@ const InputDataModal: React.FC<InputDataModalProps> = ({ isOpen, onClose }) => {
         onClick={onClose} 
       ></div>
 
-      <div className="relative bg-[#F5F5F5] rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative bg-customWhite rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
         
         <div className="absolute right-4 top-4 z-10">
           <button 

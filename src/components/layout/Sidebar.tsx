@@ -11,6 +11,7 @@ import {
   HiOutlineChevronUp,
   HiXMark 
 } from 'react-icons/hi2';
+import LOGO from "@/assets/images/LogoSigapFull2.png";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -25,8 +26,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
   };
 
   const navItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: <HiOutlineHome className="w-5 h-5" /> },
-    { name: 'Analisis CPI', path: '/analisis-cpi', icon: <HiOutlineChartBar className="w-5 h-5" /> },
+    { name: 'Dashboard', path: '/admin/dashboard', icon: <HiOutlineHome className="w-5 h-5" /> },
+    { name: 'Analisis CPI', path: '/admin/analisis-cpi', icon: <HiOutlineChartBar className="w-5 h-5" /> },
   ];
 
   const accordionMenus = [
@@ -35,10 +36,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
       title: 'Monitoring',
       icon: <HiOutlineComputerDesktop className="w-5 h-5" />,
       items: [
-        { name: 'Dashboard Pelaksanaan dan Monitoring', path: '/monitoring/dashboard' },
-        { name: 'Daftar Kegiatan', path: '/monitoring/kegiatan' },
-        { name: 'Verifikasi Pelaksanaan dan Monitoring', path: '/monitoring/verifikasi' },
-        { name: 'Rekap Pelaksanaan dan Monitoring', path: '/monitoring/rekap' },
+        { name: 'Dashboard Pelaksanaan dan Monitoring', path: '/admin/monitoring/dashboard' },
+        { name: 'Daftar Kegiatan', path: '/admin/monitoring/kegiatan' },
+        { name: 'Verifikasi Pelaksanaan dan Monitoring', path: '/admin/monitoring/verifikasi' },
+        { name: 'Rekap Pelaksanaan dan Monitoring', path: '/admin/monitoring/rekap' },
       ],
     },
     {
@@ -46,8 +47,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
       title: 'Evaluasi Penanaman Bibit',
       icon: <HiOutlineGlobeAlt className="w-5 h-5" />,
       items: [
-        { name: 'Dashboard Evaluasi', path: '/evaluasi/dashboard' },
-        { name: 'Data Evaluasi', path: '/evaluasi/data' },
+        { name: 'Dashboard Evaluasi', path: '/admin/evaluasi/dashboard' },
+        { name: 'Data Evaluasi', path: '/admin/evaluasi/data' },
       ],
     },
     {
@@ -55,8 +56,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
       title: 'Realisasi Bibit dan Donasi',
       icon: <HiOutlineArchiveBox className="w-5 h-5" />,
       items: [
-        { name: 'Dashboard Donasi', path: '/donasi/dashboard' },
-        { name: 'Program Donasi', path: '/donasi/program' },
+        { name: 'Dashboard Donasi', path: '/admin/donasi/dashboard' },
+        { name: 'Program Donasi', path: '/admin/donasi/program' },
       ],
     },
     {
@@ -64,9 +65,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
       title: 'Transparansi dan Manajemen Investasi',
       icon: <HiOutlineBookmark className="w-5 h-5" />,
       items: [
-        { name: 'Dashboard Transparansi dan Manajemen Investasi', path: '/investasi/dashboard' },
-        { name: 'Persetujuan Investor', path: '/investasi/persetujuan' },
-        { name: 'Data Investor', path: '/investasi/data' },
+        { name: 'Dashboard Transparansi dan Manajemen Investasi', path: '/admin/investasi/dashboard' },
+        { name: 'Persetujuan Investor', path: '/admin/investasi/persetujuan' },
+        { name: 'Data Investor', path: '/admin/investasi/data' },
       ],
     },
   ];
@@ -81,13 +82,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
       )}
 
       <aside 
-        className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-[#D5F0DE] flex flex-col transition-transform duration-300 ease-in-out ${
+        className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-greenAdmin flex flex-col transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } md:translate-x-0`}
       >
-        <div className="h-16 flex items-center justify-between px-6 md:justify-center mt-4 mb-6 shrink-0">
-          <div className="font-bold text-2xl text-white tracking-widest bg-[#89C78E] px-4 py-1 rounded-md shadow-sm">
-            SIGAP
+        <div className="flex items-center justify-between px-6 md:justify-center mt-4 mb-6 shrink-0">
+          <div className="font-bold text-2xl text-white tracking-widest px-4 py-1 rounded-md">
+            <img src={LOGO} alt="" />
           </div>
           <button 
             className="md:hidden text-gray-700 hover:bg-[#c4ebd0] p-1 rounded-md transition-colors"

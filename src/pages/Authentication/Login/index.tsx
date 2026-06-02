@@ -12,10 +12,10 @@ const Login: React.FC = () => {
         
         <div className="bg-white w-full max-w-xl p-8 sm:p-10 rounded-4xl shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-[#1B5E20] mb-2">
+            <h1 className="text-3xl font-bold text-primary mb-2">
               Selamat Datang
             </h1>
-            <p className="text-[#1B5E20] text-sm font-medium">
+            <p className="text-primary text-sm font-medium">
               Sistem Monitoring Berbasis Bukti Lapangan
             </p>
           </div>
@@ -42,7 +42,7 @@ const Login: React.FC = () => {
             />
 
             <div className="flex justify-end mb-8 -mt-2">
-              <a href="#" className="text-sm font-medium text-[#1B5E20] hover:underline">
+              <a href="#" className="text-sm font-medium text-primary hover:underline">
                 Lupa Kata Sandi?
               </a>
             </div>
