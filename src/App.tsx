@@ -1,11 +1,44 @@
-import './index.css'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import './index.css';
+import Login from './pages/Authentication/Login';
+import DashboardLayout from './components/layout/DashboardLayout';
+import AnalisisLahanKritis from './pages/AnalisisLahanKritis';
+import DashboardMonitoring from './pages/PelaksanaanDanMonitoring/DashboardMonitoring';
+import DaftarKegiatan from './pages/PelaksanaanDanMonitoring/DaftarKegiatan';
+import VerifikasiMonitoring from './pages/PelaksanaanDanMonitoring/VerifikasiMonitoring';
+import NotFound from './pages/NotFound';
+import DataEvaluasi from './pages/EvaluasiPenanamanBibit/DataEvaluasi';
+import DashboardEvaluasi from './pages/EvaluasiPenanamanBibit/DashboardEvaluasi';
 
 function App() {
   return (
-    <>
-      <h1 className='text-red-500 font-bold text-4xl text-center m-auto'>Hi, ini adalah web admin!</h1>
-    </>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+
+        <Route path="/" element={<DashboardLayout />}>
+          <Route index element={<Navigate to="/analisis-cpi" replace />} />
+          
+          {/* START OF MODUL 1 (ANALISIS LAHAN KRITIS)*/}
+          <Route path="analisis-cpi" element={<AnalisisLahanKritis />} />
+          {/* END OF MODUL 1 */}
+
+          {/* START OF MODUL 2 (PELAKSANAAN DAN MONITORING) */}
+          <Route path="monitoring/dashboard" element={<DashboardMonitoring />} />
+          <Route path="monitoring/kegiatan" element={<DaftarKegiatan />} />
+          <Route path="monitoring/verifikasi" element={<VerifikasiMonitoring />} />
+          {/* ENF OF MODUL 2 (PELAKSANAAN DAN MONITORING) */}
+          
+          {/* START OF MODUL 3 (EVALUASI PENANAMAN BIBIT) */}
+          <Route path="evaluasi/dashboard" element={<DashboardEvaluasi />} />
+          <Route path="evaluasi/data" element={<DataEvaluasi />} />
+          {/* END OF MODUL 3 (EVALUASI PENANAMAN BIBIT) */}
+        </Route>
+
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
