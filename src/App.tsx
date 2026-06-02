@@ -15,9 +15,10 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Navigate to="/admin" replace />} />
 
-        <Route path="/" element={<DashboardLayout />}>
-          <Route index element={<Navigate to="/analisis-cpi" replace />} />
+        <Route path="/admin" element={<DashboardLayout />}>
+          <Route index element={<Navigate to="analisis-cpi" replace />} />
           
           {/* START OF MODUL 1 (ANALISIS LAHAN KRITIS)*/}
           <Route path="analisis-cpi" element={<AnalisisLahanKritis />} />
