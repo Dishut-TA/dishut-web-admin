@@ -47,10 +47,10 @@ const ActiveDetail: React.FC<{ report: Report }> = ({ report }) => {
             <HiOutlineInformationCircle className="w-5 h-5 text-[#185325]" /> Kondisi Tanaman
           </div>
           <div className="flex gap-3">
-            <div className="flex-1 bg-[#E0F7FA] rounded-xl p-4 text-center flex flex-col justify-center">
+            {/* <div className="flex-1 bg-[#E0F7FA] rounded-xl p-4 text-center flex flex-col justify-center">
               <span className="text-xs text-cyan-800 font-semibold mb-1">SURVIVAL</span>
               <span className="text-2xl font-bold text-cyan-900">{details.survivalRate}</span>
-            </div>
+            </div> */}
             <div className="flex-1 bg-[#D5F0DE] rounded-xl p-4 text-center flex flex-col justify-center">
               <span className="text-xs text-green-800 font-semibold mb-1">KESEHATAN</span>
               <span className="text-xl font-bold text-green-900">{details.healthStatus}</span>

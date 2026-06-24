@@ -12,9 +12,9 @@ import DashboardEvaluasi from './pages/EvaluasiPenanamanBibit/DashboardEvaluasi'
 import RekapMonitoring from './pages/PelaksanaanDanMonitoring/RekapMonitoring';
 import ProgramDonasi from './pages/RealisasiBibitDonasi/ProgramDonasi';
 import DataDonatur from './pages/RealisasiBibitDonasi/DataDonatur';
+import PelaksanaanKegiatan from './pages/RealisasiBibitDonasi/PelaksanaanKegiatan';
 
 function App() {
-  // MARVA ZAHRA MALINDA WAHYUDI
   return (
     <BrowserRouter>
       <Routes>
@@ -43,6 +43,7 @@ function App() {
           {/* START OF MODUL 4 (REALISASI BIBIT DAN DONASI) */}
           <Route path="donasi/program" element={<ProgramDonasi />} />
           <Route path="donasi/donatur" element={<DataDonatur />} />
+          <Route path="donasi/pelaksanaan-kegiatan" element={<PelaksanaanKegiatan />} />
           {/* END OF MODUL 4 (REALISASI BIBIT DAN DONASI) */}
         </Route>
 

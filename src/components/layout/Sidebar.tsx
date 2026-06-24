@@ -59,7 +59,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
         { name: 'Dashboard Program', path: '/admin/donasi/dashboard' },
         { name: 'Data Program', path: '/admin/donasi/program' },
         { name: 'Data Donatur', path: '/admin/donasi/donatur' },
-        { name: 'Pelaksana Kegiatan', path: '/admin/donasi/pelaksana-kegiatan' },
+        { name: 'Pelaksana Kegiatan', path: '/admin/donasi/pelaksanaan-kegiatan' },
         { name: 'Pelaporan Data', path: '/admin/donasi/pelaporan-data' },
       ],
     },

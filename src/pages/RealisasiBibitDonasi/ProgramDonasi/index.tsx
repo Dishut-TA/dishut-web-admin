@@ -6,15 +6,11 @@ import {
   HiOutlinePencil 
 } from 'react-icons/hi2';
 
-type StatusProgram = 'Aktif' | 'Selesai' | 'Menunggu Verifikasi';
+// Import modal
+import CreateProgramModal from './components/CreateProgramModal';
+import DetailProgramModal, { type ProgramData } from './components/DetailProgramModal';
 
-interface ProgramData {
-  id: string;
-  nama: string;
-  lokasi: string;
-  terkumpul: string;
-  status: StatusProgram;
-}
+type StatusProgram = 'Aktif' | 'Selesai' | 'Menunggu Verifikasi';
 
 const mockDataProgram: ProgramData[] = [
   {
@@ -47,7 +43,6 @@ const mockDataProgram: ProgramData[] = [
   }
 ];
 
-// Disesuaikan agar style padding, font, dan warna senada dengan DataDonatur
 const getStatusBadge = (status: StatusProgram) => {
   const baseStyle = "px-4 py-1 rounded-full text-xs font-medium whitespace-nowrap";
   
@@ -65,19 +60,33 @@ const getStatusBadge = (status: StatusProgram) => {
 
 const ProgramDonasi: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // States untuk mengontrol modal
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedProgram, setSelectedProgram] = useState<ProgramData | null>(null);
 
   const filteredData = mockDataProgram.filter(program => 
     program.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
     program.lokasi.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Fungsi untuk membuka modal detail
+  const handleOpenDetail = (program: ProgramData) => {
+    setSelectedProgram(program);
+  };
+
+  // Fungsi untuk menutup modal detail
+  const handleCloseDetail = () => {
+    setSelectedProgram(null);
+  };
+
   return (
-    <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8">
+    <div className="relative flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8">
       
-      {/* --- HEADER --- */}
+      {/* Header & Search (Sama seperti sebelumnya) */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-customBlack mb-1">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">
             Data Program
           </h1>
           <p className="text-sm md:text-base text-gray-500">
@@ -86,7 +95,6 @@ const ProgramDonasi: React.FC = () => {
         </div>
         
         <div className="flex flex-col sm:flex-row gap-3 mt-2 md:mt-0">
-          {/* Search Input */}
           <div className="relative w-full sm:w-64">
             <HiOutlineMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input 
@@ -98,20 +106,21 @@ const ProgramDonasi: React.FC = () => {
             />
           </div>
           
-          {/* Button Buat Program */}
-          <button className="bg-[#2E7D32] hover:bg-primary text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2 shadow-sm whitespace-nowrap">
+          <button 
+            onClick={() => setIsCreateModalOpen(true)}
+            className="bg-primary hover:bg-[#144a18] text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2 shadow-sm whitespace-nowrap"
+          >
             <HiOutlinePlus className="w-5 h-5" strokeWidth={2.5} />
             Buat Program
           </button>
         </div>
       </div>
 
-      {/* --- TABLE SECTION --- */}
+      {/* Tabel */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              {/* Header tabel disamakan dengan DataDonatur */}
               <tr className="bg-[#DCECE0] text-gray-700 text-xs uppercase tracking-wider">
                 <th className="px-6 py-4 font-semibold whitespace-nowrap">Nama Program</th>
                 <th className="px-6 py-4 font-semibold whitespace-nowrap">Lokasi</th>
@@ -137,12 +146,16 @@ const ProgramDonasi: React.FC = () => {
                       {getStatusBadge(program.status)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap flex items-center justify-center gap-3">
+                      
+                      {/* --- TOMBOL MATA --- */}
                       <button 
+                        onClick={() => handleOpenDetail(program)} // Panggil fungsi saat diklik
                         title="Lihat Detail"
                         className="text-gray-400 hover:text-[#2E7D32] transition-colors"
                       >
                         <HiOutlineEye className="w-5 h-5" />
                       </button>
+
                       <button 
                         title="Edit Program"
                         className="text-gray-400 hover:text-[#2E7D32] transition-colors"
@@ -163,6 +176,19 @@ const ProgramDonasi: React.FC = () => {
           </table>
         </div>
       </div>
+
+      {/* --- RENDER MODALS --- */}
+      
+      <CreateProgramModal 
+        isOpen={isCreateModalOpen} 
+        onClose={() => setIsCreateModalOpen(false)} 
+      />
+
+      <DetailProgramModal 
+        isOpen={selectedProgram !== null} 
+        onClose={handleCloseDetail} 
+        program={selectedProgram}
+      />
 
     </div>
   );
