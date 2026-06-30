@@ -1,14 +1,120 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HiOutlineArrowLeft, HiOutlinePhoto } from 'react-icons/hi2';
+import { 
+  HiOutlineArrowLeft, 
+  HiOutlinePhoto,
+  HiOutlineMagnifyingGlassPlus,
+  HiOutlineMagnifyingGlassMinus,
+  HiOutlineArrowPath,
+  HiOutlinePencil,
+  HiOutlineTrash
+} from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 
 const BIBIT_OPTIONS = [
   'Mahoni', 'Sengon', 'Trembesi', 'Mangrove', 'Pucuk Merah', 'Beringin'
 ];
 
+// ==========================================
+// KOMPONEN: Zoomable Image Preview
+// ==========================================
+interface ZoomableImagePreviewProps {
+  src: string;
+  onClear: () => void;
+  onChangeClick: () => void;
+}
+
+const ZoomableImagePreview: React.FC<ZoomableImagePreviewProps> = ({ src, onClear, onChangeClick }) => {
+  const [scale, setScale] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStart = useRef({ x: 0, y: 0 });
+
+  // Fungsi Zoom
+  const handleZoomIn = (e: React.MouseEvent) => { e.preventDefault(); setScale(p => Math.min(p + 0.5, 4)); };
+  const handleZoomOut = (e: React.MouseEvent) => { e.preventDefault(); setScale(p => Math.max(p - 0.5, 1)); };
+  const handleReset = (e: React.MouseEvent) => { e.preventDefault(); setScale(1); setPosition({ x: 0, y: 0 }); };
+
+  // Fungsi Scroll Wheel untuk Zoom
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    if (e.deltaY < 0) setScale(p => Math.min(p + 0.2, 4));
+    else setScale(p => Math.max(p - 0.2, 1));
+  };
+
+  // Fungsi Drag (Mouse & Touch)
+  const startDrag = (clientX: number, clientY: number) => {
+    setIsDragging(true);
+    dragStart.current = { x: clientX - position.x, y: clientY - position.y };
+  };
+  const onDrag = (clientX: number, clientY: number) => {
+    if (!isDragging) return;
+    setPosition({ x: clientX - dragStart.current.x, y: clientY - dragStart.current.y });
+  };
+  const endDrag = () => setIsDragging(false);
+
+  return (
+    <div 
+      className="relative w-full h-56 md:h-72 rounded-2xl overflow-hidden bg-slate-100 group border-2 border-transparent hover:border-[#009262]/30 transition-colors"
+      onWheel={handleWheel}
+      onMouseLeave={endDrag}
+      onMouseUp={endDrag}
+      onMouseMove={(e) => onDrag(e.clientX, e.clientY)}
+      onMouseDown={(e) => startDrag(e.clientX, e.clientY)}
+      onTouchStart={(e) => startDrag(e.touches[0].clientX, e.touches[0].clientY)}
+      onTouchMove={(e) => onDrag(e.touches[0].clientX, e.touches[0].clientY)}
+      onTouchEnd={endDrag}
+    >
+      {/* Gambar dengan Transformasi */}
+      <img 
+        src={src} 
+        alt="Preview" 
+        draggable={false}
+        className={`w-full h-full object-cover ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+        style={{
+          transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
+          transition: isDragging ? 'none' : 'transform 0.2s ease-out' // Transisi halus hanya saat klik zoom/reset
+        }}
+      />
+
+      {/* Aksi Ganti / Hapus Foto (Kiri Atas) */}
+      <div className="absolute top-4 left-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <button type="button" onClick={onChangeClick} className="p-2 bg-white/90 backdrop-blur text-slate-700 hover:text-[#009262] rounded-lg shadow-sm transition-colors" title="Ganti Foto">
+          <HiOutlinePencil className="w-5 h-5" />
+        </button>
+        <button type="button" onClick={onClear} className="p-2 bg-white/90 backdrop-blur text-slate-700 hover:text-red-500 rounded-lg shadow-sm transition-colors" title="Hapus Foto">
+          <HiOutlineTrash className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Aksi Zoom (Kanan Bawah) */}
+      <div className="absolute bottom-4 right-4 flex gap-1.5 bg-white/90 backdrop-blur p-1.5 rounded-xl shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+        <button type="button" onClick={handleZoomOut} className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors" title="Zoom Out">
+          <HiOutlineMagnifyingGlassMinus className="w-5 h-5" />
+        </button>
+        <button type="button" onClick={handleReset} className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors" title="Reset Posisi">
+          <HiOutlineArrowPath className="w-5 h-5" />
+        </button>
+        <button type="button" onClick={handleZoomIn} className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors" title="Zoom In">
+          <HiOutlineMagnifyingGlassPlus className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Indikator Instruksi */}
+      <div className="absolute top-4 right-4 bg-black/50 text-white text-[10px] font-bold px-3 py-1.5 rounded-full pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+        Scroll / Drag
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// KOMPONEN UTAMA: CreateProgram
+// ==========================================
 const CreateProgram: React.FC = () => {
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const [selectedBibit, setSelectedBibit] = useState<string[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
@@ -26,6 +132,15 @@ const CreateProgram: React.FC = () => {
       const imageUrl = URL.createObjectURL(file);
       setSelectedImage(imageUrl);
     }
+  };
+
+  const clearImage = () => {
+    setSelectedImage(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const triggerFileInput = () => {
+    if (fileInputRef.current) fileInputRef.current.click();
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -61,14 +176,34 @@ const CreateProgram: React.FC = () => {
         <form onSubmit={handleSubmit}>
           
           <div className="p-6 md:p-8 space-y-8">
+            {/* --- UPLOAD FOTO AREA --- */}
             <div>
               <label className="block text-base font-bold text-slate-800 mb-3">
                 Foto Program / Lokasi <span className="text-red-500">*</span>
               </label>
-              <label className="relative flex flex-col items-center justify-center w-full h-56 md:h-72 border-2 border-slate-200 border-dashed rounded-2xl cursor-pointer hover:bg-emerald-50 hover:border-[#009262] transition-colors group overflow-hidden bg-slate-50">
-                {selectedImage ? (
-                  <img src={selectedImage} alt="Preview" className="w-full h-full object-cover" />
-                ) : (
+              
+              {/* Input File Tersembunyi */}
+              <input 
+                type="file" 
+                ref={fileInputRef}
+                className="hidden" 
+                accept="image/png, image/jpeg, image/webp" 
+                onChange={handleImageChange} 
+              />
+
+              {selectedImage ? (
+                // Komponen Preview Interaktif (Mencegah Klik default ke input file)
+                <ZoomableImagePreview 
+                  src={selectedImage} 
+                  onClear={clearImage}
+                  onChangeClick={triggerFileInput} 
+                />
+              ) : (
+                // State Kosong (Bisa di-klik untuk upload)
+                <div 
+                  onClick={triggerFileInput}
+                  className="relative flex flex-col items-center justify-center w-full h-56 md:h-72 border-2 border-slate-200 border-dashed rounded-2xl cursor-pointer hover:bg-emerald-50 hover:border-[#009262] transition-colors group overflow-hidden bg-slate-50"
+                >
                   <div className="flex flex-col items-center justify-center pt-5 pb-6 px-4 text-center">
                     <div className="p-4 bg-white shadow-sm border border-slate-100 text-[#009262] rounded-full mb-4 group-hover:scale-110 transition-transform">
                       <HiOutlinePhoto className="w-10 h-10" />
@@ -78,11 +213,11 @@ const CreateProgram: React.FC = () => {
                     </p>
                     <p className="text-sm text-slate-500">Mendukung format PNG, JPG, atau WEBP (Maks. 2MB)</p>
                   </div>
-                )}
-                <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
-              </label>
+                </div>
+              )}
             </div>
 
+            {/* --- INFO DASAR AREA --- */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
                 <label className="block text-sm font-bold text-slate-800 mb-2">
@@ -113,6 +248,7 @@ const CreateProgram: React.FC = () => {
               </div>
             </div>
 
+            {/* --- JENIS BIBIT AREA --- */}
             <div className="pt-2">
               <div className="mb-4">
                 <label className="block text-base font-bold text-slate-800">
@@ -146,6 +282,7 @@ const CreateProgram: React.FC = () => {
             </div>
           </div>
 
+          {/* --- FOOTER ACTION --- */}
           <div className="p-6 md:p-8 border-t border-slate-100 bg-slate-50 flex flex-col-reverse sm:flex-row items-center justify-end gap-3 md:gap-4">
             <button 
               type="button"

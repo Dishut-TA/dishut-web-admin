@@ -45,7 +45,6 @@ const mockDataProgram: ProgramData[] = [
 ];
 
 const getStatusBadge = (status: StatusProgram) => {
-  // Menyesuaikan sedikit ketebalan font dan padding agar sama dengan badge donatur
   const baseStyle = "px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap";
   
   switch (status) {
