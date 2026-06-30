@@ -102,8 +102,6 @@ const RoleBasedRedirect = () => {
         ? peranArray[0]?.nama
         : null;
 
-    console.log("Debug Role:", rawRoleName);
-
     if (!rawRoleName) return <Navigate to="/admin/login" replace />;
 
     const roleName = rawRoleName.trim().toLowerCase();

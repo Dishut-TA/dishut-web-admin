@@ -19,7 +19,6 @@ const DetailPengguna: React.FC = () => {
       try {
         setIsLoading(true);
         const data = await getUserById(id);
-        console.log(data)
         setProfileData(data);
       } catch (err: any) {
         setError(err.message);
