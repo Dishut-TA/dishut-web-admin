@@ -40,7 +40,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
     if (location.pathname.includes('/donasi')) setOpenMenu('donasi');
     else if (location.pathname.includes('/monitoring')) setOpenMenu('monitoring');
     else if (location.pathname.includes('/evaluasi')) setOpenMenu('evaluasi');
-    else if (location.pathname.includes('/investasi')) setOpenMenu('investasi');
+    else if (location.pathname.includes('/investasi') || location.pathname.includes('/rehabilitasi')) setOpenMenu('rehabilitasi');
     else if (location.pathname.includes('/manajemen-akun')) setOpenMenu('manajemen-akun');
   }, [location.pathname]);
 
@@ -65,7 +65,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
         ...(userRole !== "Kepala Bidang PDAS" ? [
           { name: 'Data Donatur', path: `${basePath}/donasi/donatur` },
           { name: 'Pelaksanaan Kegiatan', path: `${basePath}/donasi/pelaksanaan-kegiatan` },
-          // { name: 'Pelaporan Data', path: `${basePath}/donasi/pelaporan-data` },
         ] : [])
       ],
     },
@@ -94,10 +93,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
       id: 'evaluasi',
       title: 'Evaluasi Penanaman',
       icon: <HiOutlineGlobeAlt className="w-5 h-5" />,
-      items: [
-        { name: 'Dashboard Evaluasi', path: `${basePath}/evaluasi/dashboard` },
-        { name: 'Data Evaluasi', path: `${basePath}/evaluasi/data` },
-      ],
+      // PERUBAHAN: Menyesuaikan menu evaluasi berdasarkan role
+      items: userRole === "Kepala Bidang PDAS" 
+        ? [
+            { name: 'Penugasan', path: `${basePath}/evaluasi/penugasan` },
+            { name: 'Verifikasi Laporan', path: `${basePath}/evaluasi/verifikasi-laporan` },
+          ]
+        : [
+            { name: 'Dashboard Evaluasi', path: `${basePath}/evaluasi/dashboard` },
+            { name: 'Data Evaluasi', path: `${basePath}/evaluasi/data` },
+            { name: 'Tambah Evaluasi', path: `${basePath}/evaluasi/data/create` },
+            { name: 'Tugas Masuk', path: `${basePath}/evaluasi/tugas-masuk` },
+          ],
     },
     {
       id: 'manajemen-akun',
