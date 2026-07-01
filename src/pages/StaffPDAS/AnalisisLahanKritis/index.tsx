@@ -5,6 +5,11 @@ import InputDataModal from './components/InputDataModal';
 const AnalisisLahanKritis = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
+    const handleUploadSuccess = () => {
+        // Nanti Anda bisa panggil fungsi fetch ulang tabel di sini
+        console.log("Upload berhasil! Memperbarui tabel data...");
+    };
+
     return (
         <div className="flex flex-col gap-4 md:gap-6 relative">
             <h1 className="text-xl md:text-2xl font-bold text-gray-800">
@@ -53,7 +58,7 @@ const AnalisisLahanKritis = () => {
                         <tbody>
                             <tr>
                                 <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
-                                    Tidak ada Data!
+                                    Belum ada hasil analisis. Silakan unggah data GIS.
                                 </td>
                             </tr>
                         </tbody>
@@ -64,6 +69,7 @@ const AnalisisLahanKritis = () => {
             <InputDataModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
+                onSuccess={handleUploadSuccess}
             />
         </div>
     );

@@ -1,30 +1,90 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HiXMark } from 'react-icons/hi2';
+import { uploadDataGIS } from '@/services/gisService'; 
+import { ToastError, ToastLoading, ToastSuccess } from '@/utils/toastHelper';
 
 interface InputDataModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void; 
 }
 
-const InputDataModal: React.FC<InputDataModalProps> = ({ isOpen, onClose }) => {
+const InputDataModal: React.FC<InputDataModalProps> = ({ isOpen, onClose, onSuccess }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [namaProject, setNamaProject] = useState('');
+  const [files, setFiles] = useState<Record<string, File | null>>({
+    das: null,
+    dem: null,
+    tutupan_lahan: null,
+    curah_hujan: null,
+    jenis_tanah: null, // Zonasi diubah jadi jenis_tanah ngikutin Postman
+  });
+
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
+    document.body.style.overflow = isOpen ? 'hidden' : 'unset';
     return () => { document.body.style.overflow = 'unset'; };
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) {
+      setNamaProject('');
+      setFiles({ das: null, dem: null, tutupan_lahan: null, curah_hujan: null, jenis_tanah: null });
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldId: string) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setFiles(prev => ({ ...prev, [fieldId]: e.target.files![0] }));
+    }
+  };
 
   const formFields = [
     { id: 'das', label: 'Input Data Daerah Aliran Sungai (DAS)' }, 
     { id: 'dem', label: 'Input Data Elevation Model (DEM)' },
     { id: 'tutupan_lahan', label: 'Input Data Tutupan Lahan' },
     { id: 'curah_hujan', label: 'Input Data Curah Hujan' },
-    { id: 'zonasi', label: 'Input Data Zonasi' },
+    { id: 'jenis_tanah', label: 'Input Data Jenis Tanah' }, 
   ];
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!namaProject.trim()) {
+      return ToastError("Nama Project tidak boleh kosong!");
+    }
+
+    setIsLoading(true);
+    const loadingId = ToastLoading("Sedang mengunggah data GIS...");
+
+    try {
+      const formData = new FormData();
+      formData.append('nama_project', namaProject);
+      
+      // Default value yang diminta oleh API Postman 
+      formData.append('target_resolution', '5000');
+      formData.append('save_intermediate', 'true');
+      formData.append('ahp_matrix', JSON.stringify({ bobot_dem: 0.4 }));
+
+      Object.entries(files).forEach(([key, file]) => {
+        if (file) {
+          formData.append(key, file);
+        }
+      });
+
+      await uploadDataGIS(formData);
+
+      ToastSuccess("Data berhasil diunggah dan dianalisis!", loadingId);
+      if (onSuccess) onSuccess(); 
+      onClose();
+
+    } catch (error: any) {
+      ToastError(error.message || "Gagal mengunggah data", loadingId);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
@@ -33,20 +93,36 @@ const InputDataModal: React.FC<InputDataModalProps> = ({ isOpen, onClose }) => {
         onClick={onClose} 
       ></div>
 
-      <div className="relative bg-customWhite rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative bg-white rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
         
-        <div className="absolute right-4 top-4 z-10">
+        <div className="flex-none flex items-center justify-between p-6 border-b border-gray-100">
+          <h2 className="text-xl font-bold text-gray-800">Upload Data GIS</h2>
           <button 
             onClick={onClose}
-            className="p-1 text-gray-500 cursor-pointer hover:text-gray-800 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 text-gray-500 cursor-pointer hover:text-gray-800 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <HiXMark className="w-6 h-6" strokeWidth={2} />
+            <HiXMark className="w-5 h-5" strokeWidth={2} />
           </button>
         </div>
 
         <div className="p-6 md:p-8 overflow-y-auto custom-scrollbar flex-1">
-          <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-5 mt-2">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             
+            <div className="flex flex-col gap-2">
+              <label htmlFor="nama_project" className="text-sm font-semibold text-gray-800">
+                Nama Project <span className="text-red-500">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="nama_project"
+                required
+                value={namaProject}
+                onChange={(e) => setNamaProject(e.target.value)}
+                placeholder="Contoh: Analisis DAS Citarum Hulu"
+                className="w-full text-sm text-gray-800 border border-gray-300 rounded-lg px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-[#185325] focus:border-transparent transition-all"
+              />
+            </div>
+
             {formFields.map((field) => (
               <div key={field.id} className="flex flex-col gap-2">
                 <label htmlFor={field.id} className="text-sm font-semibold text-gray-800">
@@ -55,6 +131,7 @@ const InputDataModal: React.FC<InputDataModalProps> = ({ isOpen, onClose }) => {
                 <input 
                   type="file" 
                   id={field.id}
+                  onChange={(e) => handleFileChange(e, field.id)}
                   className="w-full text-sm text-gray-600 
                     border border-gray-300 rounded-lg cursor-pointer bg-white
                     focus:outline-none focus:ring-2 focus:ring-[#185325] focus:border-transparent
@@ -69,9 +146,10 @@ const InputDataModal: React.FC<InputDataModalProps> = ({ isOpen, onClose }) => {
 
             <button 
               type="submit"
-              className="mt-4 w-full cursor-pointer bg-[#185325] hover:bg-[#113d1b] text-white font-semibold rounded-full py-3.5 transition-colors shadow-sm"
+              disabled={isLoading}
+              className={`mt-4 w-full flex items-center justify-center bg-[#185325] text-white font-semibold rounded-full py-3.5 transition-colors shadow-sm ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#113d1b] cursor-pointer'}`}
             >
-              Simpan Data
+              {isLoading ? "Mengunggah..." : "Mulai Analisis"}
             </button>
 
           </form>
