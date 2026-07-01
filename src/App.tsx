@@ -6,6 +6,11 @@ import PageLoader from "./components/PageLoader";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoleGuard from "./components/RoleGuard";
 import DashboardStaffPDAS from "./pages/StaffPDAS/DashboardStaffPDAS";
+import ProgramAPBDList from "./pages/StaffPDAS/Investasi/ProgramAPBD";
+import CreateProgramAPBD from "./pages/StaffPDAS/Investasi/ProgramAPBD/CreateProgram";
+import ProgramCSRList from "./pages/StaffPDAS/Investasi/ProgramCSR";
+import VerifikasiBerkasCSR from "./pages/StaffPDAS/Investasi/ProgramCSR/VerifikasiBerkas";
+import MonitoringRiwayatList from "./pages/StaffPDAS/Investasi/MonitoringRiwayat";
 
 const Login = lazy(() => import("./pages/Authentication/Login"));
 const DashboardLayout = lazy(
@@ -61,7 +66,8 @@ const DashboardKabid = lazy(
   () => import("./pages/KepalaBidangPDAS/DashboardKABID"),
 );
 const DashhboardProgramKabid = lazy(
-  () => import("./pages/KepalaBidangPDAS/RealisasiBibitDonasi/DashboardProgramKabid"),
+  () =>
+    import("./pages/KepalaBidangPDAS/RealisasiBibitDonasi/DashboardProgramKabid"),
 );
 const DataProgramKabid = lazy(
   () => import("./pages/KepalaBidangPDAS/RealisasiBibitDonasi/DataProgram"),
@@ -146,35 +152,14 @@ function App() {
                 }
               >
                 <Route path="staff">
-                  <Route
-                    path="dashboard"
-                    element={<DashboardStaffPDAS />}
-                  />
+                  <Route path="dashboard" element={<DashboardStaffPDAS />} />
+                  {/* Modul 1 (CPI) */}
                   <Route
                     path="analisis-cpi"
                     element={<AnalisisLahanKritis />}
                   />
-                  <Route
-                    path="monitoring/dashboard"
-                    element={<DashboardMonitoring />}
-                  />
-                  <Route
-                    path="monitoring/kegiatan"
-                    element={<DaftarKegiatan />}
-                  />
-                  <Route
-                    path="monitoring/verifikasi"
-                    element={<VerifikasiMonitoring />}
-                  />
-                  <Route
-                    path="monitoring/rekap"
-                    element={<RekapMonitoring />}
-                  />
-                  <Route
-                    path="evaluasi/dashboard"
-                    element={<DashboardEvaluasi />}
-                  />
-                  <Route path="evaluasi/data" element={<DataEvaluasi />} />
+
+                  {/* Modul 2 (Realisasi Bibit dan Donasi) */}
                   <Route
                     path="donasi/dashboard"
                     element={<DashboardProgramStaff />}
@@ -196,6 +181,53 @@ function App() {
                     path="donasi/pelaporan-data"
                     element={<PelaporanData />}
                   />
+
+                  {/* Modul 3 (Investashit) */}
+                  <Route
+                    path="rehabilitasi/program-apbd"
+                    element={<ProgramAPBDList />}
+                  />
+                  <Route
+                    path="rehabilitasi/program-apbd/create"
+                    element={<CreateProgramAPBD />}
+                  />
+                  <Route
+                    path="rehabilitasi/program-csr"
+                    element={<ProgramCSRList />}
+                  />
+                  <Route
+                    path="rehabilitasi/program-csr/verifikasi/:id"
+                    element={<VerifikasiBerkasCSR />}
+                  />
+                  <Route
+                    path="rehabilitasi/monitoring-riwayat"
+                    element={<MonitoringRiwayatList />}
+                  />
+
+                  {/* Modul 4 (Pelaksanaan dan Monitoring Program) */}
+                  <Route
+                    path="monitoring/dashboard"
+                    element={<DashboardMonitoring />}
+                  />
+                  <Route
+                    path="monitoring/kegiatan"
+                    element={<DaftarKegiatan />}
+                  />
+                  <Route
+                    path="monitoring/verifikasi"
+                    element={<VerifikasiMonitoring />}
+                  />
+                  <Route
+                    path="monitoring/rekap"
+                    element={<RekapMonitoring />}
+                  />
+
+                  {/* Modul 5 (Evaluashit Penanaman Bibit) */}
+                  <Route
+                    path="evaluasi/dashboard"
+                    element={<DashboardEvaluasi />}
+                  />
+                  <Route path="evaluasi/data" element={<DataEvaluasi />} />
                 </Route>
               </Route>
 
@@ -208,7 +240,10 @@ function App() {
               >
                 <Route path="kabid">
                   <Route path="dashboard" element={<DashboardKabid />} />
-                  <Route path="donasi/dashboard" element={<DashhboardProgramKabid />} />
+                  <Route
+                    path="donasi/dashboard"
+                    element={<DashhboardProgramKabid />}
+                  />
                   <Route path="donasi/program" element={<DataProgramKabid />} />
                   <Route
                     path="manajemen-akun/data-pengguna"
