@@ -97,3 +97,31 @@ export interface KegiatanData {
   namaDonatur: string;
   rincianBibit: DetailBibitDana[];
 }
+
+export interface PetakUkur {
+  blok: string;
+  target: number;
+  tumbuh: number;
+  rerataTinggi: number;
+  persentase: number;
+  status: 'Memenuhi' | 'Tidak Memenuhi';
+}
+
+export interface EvaluasiProgramData {
+  id: string;
+  namaPerusahaan: string;
+  lokasi: string;
+  luasLahan: number;
+  jenisTanaman: string[];
+  tglEvaluasi: string;
+  hasilAkhir: {
+    persentaseTotal: number;
+    rerataTinggiTotal: number;
+    statusKelulusan: 'BERHASIL' | 'TIDAK BERHASIL';
+  };
+  timPenilai: {
+    ketua: string;
+    pendamping: string[];
+  };
+  rincianPU: PetakUkur[];
+}

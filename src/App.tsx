@@ -11,6 +11,10 @@ import CreateProgramAPBD from "./pages/StaffPDAS/Investasi/ProgramAPBD/CreatePro
 import ProgramCSRList from "./pages/StaffPDAS/Investasi/ProgramCSR";
 import VerifikasiBerkasCSR from "./pages/StaffPDAS/Investasi/ProgramCSR/VerifikasiBerkas";
 import MonitoringRiwayatList from "./pages/StaffPDAS/Investasi/MonitoringRiwayat";
+import CreateEvaluasi from "./pages/StaffPDAS/EvaluasiPenanamanBibit/DataEvaluasi/CreateEvaluasi";
+import StaffTugasEvaluasi from "./pages/StaffPDAS/EvaluasiPenanamanBibit/TugasMasuk";
+import KabidVerifikasiBAP from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/VerifikasiLaporan";
+import KabidPenugasan from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/Penugasan";
 
 const Login = lazy(() => import("./pages/Authentication/Login"));
 const DashboardLayout = lazy(
@@ -228,6 +232,9 @@ function App() {
                     element={<DashboardEvaluasi />}
                   />
                   <Route path="evaluasi/data" element={<DataEvaluasi />} />
+                  <Route path="evaluasi/data/create" element={<CreateEvaluasi />} />
+                  <Route path="evaluasi/tugas-masuk" element={<StaffTugasEvaluasi />} />
+                  
                 </Route>
               </Route>
 
@@ -268,6 +275,14 @@ function App() {
                   <Route
                     path="manajemen-akun/data-hak-akses/detail/:id"
                     element={<DetailHakAkses />}
+                  />
+                  <Route
+                    path="evaluasi/penugasan"
+                    element={<KabidPenugasan />}
+                  />
+                  <Route
+                    path="evaluasi/verifikasi-laporan"
+                    element={<KabidVerifikasiBAP />}
                   />
                 </Route>
               </Route>
