@@ -62,7 +62,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
         { name: 'Dashboard Program', path: `${basePath}/donasi/dashboard` },
         { name: 'Data Program', path: `${basePath}/donasi/program` },
         
-        // PERBAIKAN: Ubah "kepala_bidang" menjadi "Kepala Bidang PDAS"
         ...(userRole !== "Kepala Bidang PDAS" ? [
           { name: 'Data Donatur', path: `${basePath}/donasi/donatur` },
           { name: 'Pelaksanaan Kegiatan', path: `${basePath}/donasi/pelaksanaan-kegiatan` },
@@ -71,13 +70,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
       ],
     },
     {
-      id: 'investasi',
-      title: 'Transparansi Investasi',
+      id: 'rehabilitasi',
+      title: 'Rehabilitasi',
       icon: <HiOutlineBookmark className="w-5 h-5" />,
       items: [
-        { name: 'Dashboard Transparansi', path: `${basePath}/investasi/dashboard` },
-        { name: 'Persetujuan Investor', path: `${basePath}/investasi/persetujuan` },
-        { name: 'Data Investor', path: `${basePath}/investasi/data` },
+        { name: 'Program APBD', path: `${basePath}/rehabilitasi/program-apbd` },
+        { name: 'Program CSR', path: `${basePath}/rehabilitasi/program-csr` },
+        { name: 'Monitoring dan Riwayat', path: `${basePath}/rehabilitasi/monitoring-riwayat` },
       ],
     },    
     {
