@@ -13,16 +13,43 @@ import UploadBastModal from './components/UploadBastModal';
 type StatusKegiatan = 'Terkumpul' | 'Disalurkan';
 type ModalType = 'preview' | 'rincian' | 'upload' | null;
 
-interface KegiatanData {
+export interface DetailBibitDana {
+  nama: string;
+  jumlah: number;
+  hargaSatuan: number;
+}
+
+export interface KegiatanData {
   idTransaksi: string;
   program: string;
   jumlahBibit: number;
   status: StatusKegiatan;
+  namaDonatur: string;
+  rincianBibit: DetailBibitDana[];
 }
 
 const mockData: KegiatanData[] = [
-  { idTransaksi: 'TRX-101', program: 'Penghijauan Hulu Citarum', jumlahBibit: 50, status: 'Disalurkan' },
-  { idTransaksi: 'TRX-101', program: 'Penghijauan Hulu Citarum', jumlahBibit: 50, status: 'Terkumpul' },
+  { 
+    idTransaksi: 'TRX-101', 
+    program: 'Penghijauan Hulu Citarum', 
+    jumlahBibit: 50, 
+    status: 'Disalurkan',
+    namaDonatur: 'Budi Santoso',
+    rincianBibit: [
+      { nama: 'Mahoni', jumlah: 30, hargaSatuan: 15000 },
+      { nama: 'Sengon', jumlah: 20, hargaSatuan: 10000 }
+    ]
+  },
+  { 
+    idTransaksi: 'TRX-102', 
+    program: 'Pemulihan Lahan Kritis Cisadane', 
+    jumlahBibit: 100, 
+    status: 'Terkumpul',
+    namaDonatur: 'PT Alam Hijau',
+    rincianBibit: [
+      { nama: 'Trembesi', jumlah: 100, hargaSatuan: 20000 }
+    ]
+  },
 ];
 
 const stepperData = [
@@ -41,12 +68,17 @@ const StatusBadge = ({ status }: { status: StatusKegiatan }) => {
 
 const PelaksanaanKegiatan: React.FC = () => {
   const [activeModal, setActiveModal] = useState<ModalType>(null);
-  
-  // (Opsional) Jika nanti butuh data spesifik dari row yang di-klik, simpan ke state ini:
-  // const [selectedData, setSelectedData] = useState<KegiatanData | null>(null);
+  const [selectedData, setSelectedData] = useState<KegiatanData | null>(null);
 
-  const openModal = (type: ModalType) => setActiveModal(type);
-  const closeModal = () => setActiveModal(null);
+  const openModal = (type: ModalType, data: KegiatanData) => {
+    setSelectedData(data);
+    setActiveModal(type);
+  };
+
+  const closeModal = () => {
+    setActiveModal(null);
+    setSelectedData(null);
+  };
 
   return (
     <div className="relative flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8">
@@ -82,14 +114,18 @@ const PelaksanaanKegiatan: React.FC = () => {
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mt-2">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse min-w-200">
             <thead>
               <tr className="bg-[#DCECE0] text-[#3A4D3F] text-xs uppercase tracking-wider font-bold">
                 <th className="px-6 py-4 whitespace-nowrap">ID Transaksi</th>
                 <th className="px-6 py-4 whitespace-nowrap">Program/Lokasi</th>
+                
+                {/* --- TAMBAHAN HEADER JENIS BIBIT --- */}
+                <th className="px-6 py-4 whitespace-nowrap">Jenis Bibit</th>
+                
                 <th className="px-6 py-4 whitespace-nowrap text-center">Jumlah (Bibit)</th>
                 <th className="px-6 py-4 whitespace-nowrap">Status Saat Ini</th>
-                <th className="px-6 py-4 whitespace-nowrap text-center">Aksi (Verifikasi)</th>
+                <th className="px-6 py-4 whitespace-nowrap text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -97,6 +133,21 @@ const PelaksanaanKegiatan: React.FC = () => {
                 <tr key={index} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-6 py-4 text-sm font-semibold text-gray-800 whitespace-nowrap">{row.idTransaksi}</td>
                   <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">{row.program}</td>
+                  
+                  {/* --- TAMBAHAN KONTEN JENIS BIBIT --- */}
+                  <td className="px-6 py-4 max-w-62.5">
+                    <div className="flex flex-wrap gap-1.5">
+                      {row.rincianBibit.map((bibit, idx) => (
+                        <span 
+                          key={idx} 
+                          className="px-2 py-1 bg-white border border-gray-200 text-gray-600 rounded-md text-[11px] font-medium whitespace-nowrap shadow-sm"
+                        >
+                          {bibit.nama}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+
                   <td className="px-6 py-4 text-sm font-bold text-[#2E7D32] text-center whitespace-nowrap">{row.jumlahBibit}</td>
                   <td className="px-6 py-4 whitespace-nowrap"><StatusBadge status={row.status} /></td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -105,13 +156,13 @@ const PelaksanaanKegiatan: React.FC = () => {
                       {row.status === 'Disalurkan' ? (
                         <>
                           <button 
-                            onClick={() => openModal('preview')}
+                            onClick={() => openModal('preview', row)}
                             className="flex items-center justify-center gap-1.5 w-full px-3 py-1.5 bg-[#DCECE0] hover:bg-[#C8E0CD] text-[#2E7D32] text-xs font-bold rounded transition-colors"
                           >
                             <HiOutlineEye className="w-4 h-4" /> Lihat BAST
                           </button>
                           <button 
-                            onClick={() => openModal('rincian')}
+                            onClick={() => openModal('rincian', row)} 
                             className="flex items-center justify-center gap-1.5 w-full px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold rounded transition-colors"
                           >
                             <HiOutlineBanknotes className="w-4 h-4" /> Rincian Dana
@@ -120,19 +171,19 @@ const PelaksanaanKegiatan: React.FC = () => {
                       ) : (
                         <>
                           <button 
-                            onClick={() => openModal('preview')}
+                            onClick={() => openModal('preview', row)}
                             className="flex items-center justify-center gap-1.5 w-full px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold rounded transition-colors"
                           >
                             <HiOutlineDocumentText className="w-4 h-4" /> Cetak Draft BAST
                           </button>
                           <button 
-                            onClick={() => openModal('upload')}
+                            onClick={() => openModal('upload', row)}
                             className="flex items-center justify-center gap-1.5 w-full px-3 py-1.5 bg-[#DCECE0] hover:bg-[#C8E0CD] text-[#2E7D32] text-xs font-bold rounded transition-colors"
                           >
                             <HiOutlineCloudArrowUp className="w-4 h-4" /> Upload BAST
                           </button>
                           <button 
-                            onClick={() => openModal('rincian')}
+                            onClick={() => openModal('rincian', row)} 
                             className="flex items-center justify-center gap-1.5 w-full px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold rounded transition-colors"
                           >
                             <HiOutlineBanknotes className="w-4 h-4" /> Rincian Dana
@@ -148,9 +199,10 @@ const PelaksanaanKegiatan: React.FC = () => {
           </table>
         </div>
       </div>
+      
       <PreviewBastModal isOpen={activeModal === 'preview'} onClose={closeModal} />
-      <RincianDanaModal isOpen={activeModal === 'rincian'} onClose={closeModal} />
       <UploadBastModal isOpen={activeModal === 'upload'} onClose={closeModal} />
+      <RincianDanaModal isOpen={activeModal === 'rincian'} onClose={closeModal} data={selectedData} /> 
 
     </div>
   );

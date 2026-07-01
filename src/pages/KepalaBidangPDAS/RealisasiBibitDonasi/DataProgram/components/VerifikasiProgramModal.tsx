@@ -14,8 +14,7 @@ const VerifikasiProgramModal: React.FC<VerifikasiProgramModalProps> = ({
   isOpen, onClose, program, onSetuju, onTolak 
 }) => {
   useEffect(() => {
-    if (isOpen) document.body.style.overflow = 'hidden';
-    else document.body.style.overflow = 'unset';
+    document.body.style.overflow = isOpen ? 'hidden' : 'unset';
     return () => { document.body.style.overflow = 'unset'; };
   }, [isOpen]);
 
@@ -23,19 +22,42 @@ const VerifikasiProgramModal: React.FC<VerifikasiProgramModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm transition-all">
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         
-        <div className="flex items-center justify-between p-6 border-b border-slate-100">
-          <h2 className="text-xl font-bold text-slate-800">Verifikasi Program</h2>
-          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors">
+        <div className="flex items-center justify-between p-6 border-b border-gray-100">
+          <h2 className="text-xl font-bold text-gray-800">Verifikasi Program</h2>
+          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors">
             <HiOutlineXMark className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-6">
-          <p className="text-slate-600 text-sm leading-relaxed mb-6">
-            Validasi pengajuan program <span className="font-bold text-slate-900">"{program.nama}"</span> di lokasi <span className="font-semibold text-slate-800">{program.lokasi}</span>:
+        <div className="p-6 md:p-8">
+          <p className="text-gray-600 text-sm leading-relaxed mb-4">
+            Validasi pengajuan program <span className="font-bold text-gray-900">"{program.nama}"</span>:
           </p>
+
+          {/* TAMBAHAN: Rincian  Program untuk Verifikator */}
+          <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200 mb-6 space-y-3">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500 font-semibold">Lokasi Penanaman</span>
+              <span className="text-gray-800 font-bold">{program.lokasi}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500 font-semibold">Target Pengumpulan</span>
+              <span className="text-[#009262] font-bold">{program.terkumpul} Bibit</span>
+            </div>
+            <div className="pt-2 border-t border-gray-200">
+              <span className="block text-xs font-bold text-gray-500 uppercase mb-2">Jenis Bibit Disetujui</span>
+              <div className="flex flex-wrap gap-1.5">
+                 {/* Pastikan menggunakan interface DetailBibit yang bentuknya array of object {nama, jumlah} */}
+                 {program.jenisBibit?.map((bibit: any, idx: number) => (
+                    <span key={idx} className="px-2 py-1 bg-white border border-gray-200 text-gray-600 rounded-md text-xs font-semibold shadow-sm">
+                      {bibit.nama || bibit}
+                    </span>
+                 ))}
+              </div>
+            </div>
+          </div>
 
           <div className="flex flex-col gap-3">
             <button 

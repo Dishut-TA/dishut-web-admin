@@ -62,10 +62,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
         { name: 'Dashboard Program', path: `${basePath}/donasi/dashboard` },
         { name: 'Data Program', path: `${basePath}/donasi/program` },
         
-        ...(userRole !== "kepala_bidang" ? [
+        // PERBAIKAN: Ubah "kepala_bidang" menjadi "Kepala Bidang PDAS"
+        ...(userRole !== "Kepala Bidang PDAS" ? [
           { name: 'Data Donatur', path: `${basePath}/donasi/donatur` },
           { name: 'Pelaksanaan Kegiatan', path: `${basePath}/donasi/pelaksanaan-kegiatan` },
-          { name: 'Pelaporan Data', path: `${basePath}/donasi/pelaporan-data` },
+          // { name: 'Pelaporan Data', path: `${basePath}/donasi/pelaporan-data` },
         ] : [])
       ],
     },

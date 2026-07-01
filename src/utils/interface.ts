@@ -48,23 +48,52 @@ export interface UserProfile {
 
 export type StatusType = 'Terealisasi' | 'Disalurkan' | 'Terkumpul' | 'Menunggu Verifikasi';
 
+export interface DetailBibitDana {
+  nama: string;
+  jumlah: number;
+  hargaSatuan: number;
+}
+
 export interface DonaturData {
   idTransaksi: string;
   namaDonatur: string;
   program: string;
-  jumlahBibit: number;
+  jumlahBibit: number; 
   status: StatusType;
+  rincianBibit: DetailBibitDana[];
   tanggalDonasi?: string; 
-  totalNominal?: number; 
 }
 
 export type StatusProgram = 'Aktif' | 'Selesai' | 'Menunggu Verifikasi';
+
+export interface DetailBibit {
+  nama: string;
+  jumlah: number;
+}
 
 export interface ProgramData {
   id: string;
   nama: string;
   lokasi: string;
-  jenisBibit: string[];
-  terkumpul: string;
+  jenisBibit: DetailBibit[]; 
+  terkumpul: string | number;
   status: StatusProgram;
+}
+
+export type StatusKegiatan = 'Terkumpul' | 'Disalurkan';
+export type ModalType = 'preview' | 'rincian' | 'upload' | null;
+
+export interface DetailBibitDana {
+  nama: string;
+  jumlah: number;
+  hargaSatuan: number;
+}
+
+export interface KegiatanData {
+  idTransaksi: string;
+  program: string;
+  jumlahBibit: number;
+  status: StatusKegiatan;
+  namaDonatur: string;
+  rincianBibit: DetailBibitDana[];
 }
