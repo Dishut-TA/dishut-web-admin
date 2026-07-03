@@ -6,17 +6,10 @@ import {
   HiOutlineGlobeAsiaAustralia,
 } from "react-icons/hi2";
 import toast from "react-hot-toast";
-import VerifikasiDonaturModal from "../DataDonatur/components/VerifikasiDonaturModal";
-import type { DonaturData } from "@/utils/interface";
 
-interface StatData {
-  id: number;
-  label: string;
-  value: string | number;
-  icon: React.ElementType;
-  iconColor: string;
-  bgColor: string;
-}
+import VerifikasiDonaturModal from "../DataDonatur/components/VerifikasiDonaturModal";
+import StatCard, { type StatData } from "./components/StatCard";
+import type { DonaturData } from "@/utils/interface";
 
 interface VerificationData {
   id: number;
@@ -31,6 +24,7 @@ interface ProgressData {
   status: "Aktif" | "Selesai" | "Menunggu Verifikasi";
 }
 
+// --- MOCK DATA ---
 const STATS_DATA: StatData[] = [
   { id: 1, label: "Menunggu Verifikasi", value: 1, icon: HiOutlineExclamationCircle, iconColor: "text-amber-500", bgColor: "bg-amber-50" },
   { id: 2, label: "Bibit Siap Salur", value: 55, icon: HiOutlineCheckCircle, iconColor: "text-[#2E7D32]", bgColor: "bg-[#DCECE0]/50" },
@@ -49,29 +43,14 @@ const PROGRESS_DATA: ProgressData[] = [
   { id: 4, title: "Penanaman Mangrove Pesisir Utara", collected: "0", status: "Menunggu Verifikasi" },
 ];
 
-const StatCard = ({ data }: { data: StatData }) => {
-  const Icon = data.icon;
-  return (
-    <div className="bg-white p-5 md:p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between group">
-      <div className={`w-12 h-12 rounded-lg ${data.bgColor} flex items-center justify-center mb-4 transition-colors`}>
-        <Icon className={`w-7 h-7 ${data.iconColor}`} />
-      </div>
-      <div>
-        <h3 className="text-3xl font-bold text-gray-800 mb-1">{data.value}</h3>
-        <p className="text-sm font-medium text-gray-500">{data.label}</p>
-      </div>
-    </div>
-  );
-};
-
 const StatusBadge = ({ status }: { status: ProgressData["status"] }) => {
   const styles = {
-    Aktif: "bg-[#2E7D32] text-white",
-    Selesai: "bg-gray-200 text-gray-600",
-    "Menunggu Verifikasi": "bg-[#F2C94C] text-gray-800",
+    Aktif: "bg-[#e2f1e6] text-[#185325] border border-[#C8E0CD]",
+    Selesai: "bg-gray-100 text-gray-600 border border-gray-200",
+    "Menunggu Verifikasi": "bg-amber-50 text-amber-600 border border-amber-200",
   };
   return (
-    <span className={`px-4 py-1.5 text-[11px] font-bold rounded-full whitespace-nowrap ${styles[status]}`}>
+    <span className={`px-4 py-1.5 text-[11px] font-bold rounded-full whitespace-nowrap shadow-sm ${styles[status]}`}>
       {status}
     </span>
   );
@@ -82,33 +61,39 @@ const DashboardProgram: React.FC = () => {
   const [selectedDonatur, setSelectedDonatur] = useState<DonaturData | null>(null);
 
   const handleOpenVerifikasi = (item: VerificationData) => {
-    const detailParts = item.detail.split(" - ");
-    const jumlahBibitString = detailParts[0] ? detailParts[0].replace(/\D/g, "") : "0"; 
-    const jumlahBibitNumber = parseInt(jumlahBibitString, 10); 
-    const programName = detailParts[1] || "-";
+      const detailParts = item.detail.split(" - ");
+      const jumlahBibitString = detailParts[0] ? detailParts[0].replace(/\D/g, "") : "0"; 
+      const jumlahBibitNumber = parseInt(jumlahBibitString, 10); 
+      const programName = detailParts[1] || "-";
 
-    setSelectedDonatur({
-      idTransaksi: `TRX-00${item.id}`,
-      namaDonatur: item.companyName,
-      program: programName,
-      jumlahBibit: jumlahBibitNumber,
-      status: "Menunggu Verifikasi"
-    });
-    
-    setIsModalOpen(true);
-  };
+      setSelectedDonatur({
+        idTransaksi: `TRX-00${item.id}`,
+        namaDonatur: item.companyName,
+        program: programName,
+        jumlahBibit: jumlahBibitNumber,
+        status: "Menunggu Verifikasi",
+        // --- TAMBAHAN: Masukkan rincianBibit agar sesuai dengan interface ---
+        rincianBibit: [] 
+      });
+      
+      setIsModalOpen(true);
+    };
 
   const handleTerimaDonatur = () => {
     toast.success(`Donasi dari ${selectedDonatur?.namaDonatur} berhasil diverifikasi!`);
+    setIsModalOpen(false);
   };
 
   const handleTolakDonatur = () => {
     toast.error(`Donasi dari ${selectedDonatur?.namaDonatur} ditolak.`);
+    setIsModalOpen(false);
   };
 
   return (
     <>
       <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8">
+        
+        {/* HEADER */}
         <div className="mb-2">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">
             Dashboard Realisasi Bibit dan Donasi
@@ -125,25 +110,23 @@ const DashboardProgram: React.FC = () => {
           ))}
         </div>
 
-        {/* LIST SECTIONS */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 pt-2">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 pt-2 items-start">
           
-          {/* DONATUR BUTUH VERIFIKASI */}
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
-            <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-[#DCECE0]/20">
+            <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-[#f0f9f3]">
               <h2 className="font-bold text-gray-800">Donatur Butuh Verifikasi</h2>
-              <span className="bg-[#F2C94C] text-gray-800 text-[11px] font-bold px-3 py-1 rounded-full">
+              <span className="bg-[#F2C94C] text-gray-800 text-[11px] font-bold px-3 py-1 rounded-full shadow-sm">
                 {VERIFICATION_DATA.length} Baru
               </span>
             </div>
 
-            <div className="p-6 flex-1 bg-gray-50/50">
+            <div className="p-6 flex-1 bg-slate-50/50 min-h-75">
               {VERIFICATION_DATA.length > 0 ? (
                 <div className="space-y-4">
                   {VERIFICATION_DATA.map((item) => (
                     <div
                       key={item.id}
-                      className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-[#A5D6A7] transition-colors"
+                      className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-[#185325]/50 transition-colors"
                     >
                       <div>
                         <h4 className="font-bold text-gray-800">{item.companyName}</h4>
@@ -160,7 +143,7 @@ const DashboardProgram: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                <div className="h-full flex items-center justify-center text-gray-400 text-sm">
+                <div className="h-full flex items-center justify-center text-gray-400 text-sm font-medium">
                   Tidak ada data verifikasi baru.
                 </div>
               )}
@@ -173,7 +156,7 @@ const DashboardProgram: React.FC = () => {
               <h2 className="font-bold text-gray-800">Progress Program</h2>
             </div>
 
-            <div className="p-0">
+            <div className="p-0 overflow-y-auto max-h-100 custom-scrollbar">
               <ul className="divide-y divide-gray-100">
                 {PROGRESS_DATA.map((progress) => (
                   <li
@@ -184,7 +167,7 @@ const DashboardProgram: React.FC = () => {
                       <h4 className="font-bold text-gray-800">{progress.title}</h4>
                       <p className="text-sm text-gray-500 mt-1">
                         Total Terkumpul:{" "}
-                        <span className="font-bold text-[#2E7D32]">
+                        <span className="font-bold text-[#185325]">
                           {progress.collected}
                         </span>{" "}
                         Bibit
@@ -202,6 +185,7 @@ const DashboardProgram: React.FC = () => {
         </div>
       </div>
 
+      {/* MODALS */}
       <VerifikasiDonaturModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

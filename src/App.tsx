@@ -100,36 +100,29 @@ const DetailHakAkses = lazy(
 
 const RoleBasedRedirect = () => {
   const userStr = localStorage.getItem("user");
-
   if (!userStr) return <Navigate to="/admin/login" replace />;
 
   try {
     const userData = JSON.parse(userStr);
-
-    const peranArray = userData?.peran;
-    const rawRoleName =
-      Array.isArray(peranArray) && peranArray.length > 0
-        ? peranArray[0]?.nama
-        : null;
-
+    const rawRoleName = userData?.peran?.[0]?.nama;
     if (!rawRoleName) return <Navigate to="/admin/login" replace />;
 
     const roleName = rawRoleName.trim().toLowerCase();
 
-    if (roleName === "kepala bidang pdas" || roleName === "superadmin") {
+    // 1. Definisikan Kelompok Role
+    const kabidRoles = ["kepala bidang pdas", "superadmin", "kepala dinas"];
+    const staffRoles = ["pegawai", "staff pdas", "staff", "admin"];
+
+    // 2. Redirect berdasarkan kelompok
+    if (kabidRoles.includes(roleName)) {
       return <Navigate to="/admin/kabid/dashboard" replace />;
     }
 
-    if (
-      roleName === "pegawai" ||
-      "staff pdas" ||
-      roleName === "staff" ||
-      roleName === "admin" ||
-      ""
-    ) {
+    if (staffRoles.includes(roleName)) {
       return <Navigate to="/admin/staff/dashboard" replace />;
     }
 
+    // Jika tidak dikenali
     return <Navigate to="/admin/login" replace />;
   } catch (e) {
     return <Navigate to="/admin/login" replace />;

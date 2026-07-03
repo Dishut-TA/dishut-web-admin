@@ -108,7 +108,7 @@ const RoleTable: React.FC<RoleTableProps> = ({
                     item={item}
                     onView={(r) =>
                       navigate(
-                        `/admin/manajemen-akun/data-hak-akses/detail/${r.id}`,
+                        `/admin/kabid/manajemen-akun/data-hak-akses/detail/${r.id}`,
                       )
                     }
                     onEdit={onEdit}

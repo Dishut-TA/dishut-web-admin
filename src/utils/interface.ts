@@ -69,6 +69,7 @@ export type StatusProgram = 'Aktif' | 'Selesai' | 'Menunggu Verifikasi';
 export interface DetailBibit {
   nama: string;
   jumlah: number;
+  terealisasi: number; 
 }
 
 export interface ProgramData {
@@ -77,10 +78,11 @@ export interface ProgramData {
   lokasi: string;
   jenisBibit: DetailBibit[]; 
   terkumpul: string | number;
+  totalTerealisasi: string | number; 
   status: StatusProgram;
 }
 
-export type StatusKegiatan = 'Terkumpul' | 'Disalurkan';
+export type StatusKegiatan = 'Terkumpul' | 'Disalurkan' | 'Terealisasi';
 export type ModalType = 'preview' | 'rincian' | 'upload' | null;
 
 export interface DetailBibitDana {
