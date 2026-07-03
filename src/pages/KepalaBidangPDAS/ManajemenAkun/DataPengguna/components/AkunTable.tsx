@@ -104,7 +104,7 @@ const AkunTable: React.FC<AkunTableProps> = ({
                   <TableActions
                     item={item}
                     onView={(u) =>
-                      navigate(`/admin/manajemen-akun/data-pengguna/detail/${u.id}`)
+                      navigate(`/admin/kabid/manajemen-akun/data-pengguna/detail/${u.id}`)
                     }
                     onEdit={onEdit}
                     onDelete={onDelete}

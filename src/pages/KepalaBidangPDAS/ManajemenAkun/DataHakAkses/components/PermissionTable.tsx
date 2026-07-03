@@ -85,7 +85,7 @@ const PermissionTable: React.FC<PermissionTableProps> = ({
                     item={item}
                     onView={(p) =>
                       navigate(
-                        `/admin/manajemen-akun/data-peran-pengguna/detail/${p.id}`,
+                        `/admin/kabid/manajemen-akun/data-peran-pengguna/detail/${p.id}`,
                       )
                     }
                     onEdit={onEdit}

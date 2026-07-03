@@ -11,17 +11,19 @@ import type { ProgramData } from "@/utils/interface";
 
 type StatusProgram = "Aktif" | "Selesai" | "Menunggu Verifikasi";
 
+// Mock Data diperbarui dengan field 'terealisasi' dan 'totalTerealisasi'
 const mockDataProgram: ProgramData[] = [
   {
     id: "1",
     nama: "Penghijauan Hulu Citarum",
     lokasi: "Kab. Bandung",
     jenisBibit: [
-      { nama: "Mahoni", jumlah: 4000 },
-      { nama: "Sengon", jumlah: 2500 },
-      { nama: "Trembesi", jumlah: 2000 },
+      { nama: "Mahoni", jumlah: 4000, terealisasi: 4000 },
+      { nama: "Sengon", jumlah: 2500, terealisasi: 1500 },
+      { nama: "Trembesi", jumlah: 2000, terealisasi: 500 },
     ],
     terkumpul: "8.500",
+    totalTerealisasi: "6.000",
     status: "Aktif",
   },
   {
@@ -29,22 +31,24 @@ const mockDataProgram: ProgramData[] = [
     nama: "Pemulihan Lahan Kritis Cisadane",
     lokasi: "Kab. Bogor",
     jenisBibit: [
-      { nama: "Mahoni", jumlah: 4000 },
-      { nama: "Beringin", jumlah: 2500 },
-      { nama: "Trembesi", jumlah: 2000 },
+      { nama: "Mahoni", jumlah: 4000, terealisasi: 4000 },
+      { nama: "Beringin", jumlah: 2500, terealisasi: 2500 },
+      { nama: "Trembesi", jumlah: 2000, terealisasi: 2000 },
     ],
     terkumpul: "8.500",
-    status: "Aktif",
+    totalTerealisasi: "8.500",
+    status: "Selesai",
   },
   {
     id: "3",
     nama: "Penghijauan Hulu Citarum",
     lokasi: "Kab. Bandung",
     jenisBibit: [
-      { nama: "Trembesi", jumlah: 4000 },
-      { nama: "Beringin", jumlah: 2500 },
+      { nama: "Trembesi", jumlah: 4000, terealisasi: 1000 },
+      { nama: "Beringin", jumlah: 2500, terealisasi: 0 },
     ],
     terkumpul: "6.500",
+    totalTerealisasi: "1.000",
     status: "Aktif",
   },
   {
@@ -52,35 +56,25 @@ const mockDataProgram: ProgramData[] = [
     nama: "Hutan Kota Ciliwung",
     lokasi: "Jakarta Selatan",
     jenisBibit: [
-      { nama: "Trembesi", jumlah: 0 },
-      { nama: "Beringin", jumlah: 0 },
+      { nama: "Trembesi", jumlah: 0, terealisasi: 0 },
+      { nama: "Beringin", jumlah: 0, terealisasi: 0 },
     ],
     terkumpul: "0",
+    totalTerealisasi: "0",
     status: "Menunggu Verifikasi",
   },
 ];
 
 const getStatusBadge = (status: StatusProgram) => {
-  const baseStyle =
-    "px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap";
+  const baseStyle = "px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap";
 
   switch (status) {
     case "Aktif":
-      return (
-        <span className={`${baseStyle} bg-[#2E7D32] text-white`}>Aktif</span>
-      );
+      return <span className={`${baseStyle} bg-[#2E7D32] text-white`}>Aktif</span>;
     case "Selesai":
-      return (
-        <span className={`${baseStyle} bg-gray-200 text-gray-600`}>
-          Selesai
-        </span>
-      );
+      return <span className={`${baseStyle} bg-gray-200 text-gray-600`}>Selesai</span>;
     case "Menunggu Verifikasi":
-      return (
-        <span className={`${baseStyle} bg-[#F2C94C] text-gray-800`}>
-          Menunggu Verifikasi
-        </span>
-      );
+      return <span className={`${baseStyle} bg-[#F2C94C] text-gray-800`}>Menunggu Verifikasi</span>;
     default:
       return null;
   }
@@ -89,9 +83,7 @@ const getStatusBadge = (status: StatusProgram) => {
 const ProgramDonasi: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedProgram, setSelectedProgram] = useState<ProgramData | null>(
-    null,
-  );
+  const [selectedProgram, setSelectedProgram] = useState<ProgramData | null>(null);
 
   const filteredData = mockDataProgram.filter(
     (program) =>
@@ -147,19 +139,15 @@ const ProgramDonasi: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-200">
             <thead>
-              <tr className="bg-[#DCECE0] text-[#3A4D3F] text-[11px] uppercase tracking-wider font-bold">
+              <tr className="bg-[#DCECE0] text-[#3A4D3F] text-[11px] uppercase tracking-wider font-bold border-b border-gray-200">
                 <th className="px-6 py-4 whitespace-nowrap">Nama Program</th>
                 <th className="px-6 py-4 whitespace-nowrap">Lokasi</th>
                 <th className="px-6 py-4 whitespace-nowrap">Jenis Bibit</th>
-                <th className="px-6 py-4 whitespace-nowrap text-center">
-                  Terkumpul
-                </th>
-                <th className="px-6 py-4 whitespace-nowrap text-center">
-                  Status
-                </th>
-                <th className="px-6 py-4 whitespace-nowrap text-center">
-                  Aksi
-                </th>
+                <th className="px-6 py-4 whitespace-nowrap text-center">Terkumpul</th>
+                {/* Kolom Baru */}
+                <th className="px-6 py-4 whitespace-nowrap text-center">Terealisasi</th>
+                <th className="px-6 py-4 whitespace-nowrap text-center">Status</th>
+                <th className="px-6 py-4 whitespace-nowrap text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -169,7 +157,7 @@ const ProgramDonasi: React.FC = () => {
                     key={program.id}
                     className="hover:bg-gray-50/50 transition-colors"
                   >
-                    <td className="px-6 py-4 text-sm font-medium text-gray-700 whitespace-nowrap">
+                    <td className="px-6 py-4 text-sm font-bold text-gray-800 whitespace-nowrap">
                       {program.nama}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
@@ -180,29 +168,29 @@ const ProgramDonasi: React.FC = () => {
                       <div className="flex flex-wrap gap-1.5">
                         {program.jenisBibit && program.jenisBibit.length > 0 ? (
                           program.jenisBibit.map((bibit, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center justify-between gap-3 px-2 py-1 bg-gray-50 border border-gray-200 rounded-lg shadow-sm"
-                            >
-                              <span className="text-sm font-semibold text-gray-700">
-                                {bibit.nama}
-                              </span>
-                            </div>
+                            <span key={index} className="px-2 py-1 bg-white border border-gray-200 text-gray-600 rounded-md text-[11px] font-medium whitespace-nowrap shadow-sm">
+                              {bibit.nama}
+                            </span>
                           ))
                         ) : (
-                          <span className="text-sm text-gray-400 italic">
-                            Belum ada jenis bibit yang ditentukan.
-                          </span>
+                          <span className="text-sm text-gray-400 italic">Belum ditentukan.</span>
                         )}
                       </div>
                     </td>
 
-                    <td className="px-6 py-4 text-sm font-bold text-[#2E7D32] text-center whitespace-nowrap">
+                    <td className="px-6 py-4 text-sm font-bold text-gray-600 text-center whitespace-nowrap">
                       {program.terkumpul}
                     </td>
+                    
+                    {/* Data Baru Terealisasi */}
+                    <td className="px-6 py-4 text-sm font-bold text-[#185325] text-center whitespace-nowrap">
+                      {program.totalTerealisasi}
+                    </td>
+
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       {getStatusBadge(program.status)}
                     </td>
+                    
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center justify-center gap-2">
                         <button
@@ -224,10 +212,7 @@ const ProgramDonasi: React.FC = () => {
                 ))
               ) : (
                 <tr>
-                  <td
-                    colSpan={6}
-                    className="px-6 py-12 text-center text-sm text-gray-500"
-                  >
+                  <td colSpan={7} className="px-6 py-12 text-center text-sm text-gray-500">
                     Program tidak ditemukan.
                   </td>
                 </tr>

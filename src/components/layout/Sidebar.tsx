@@ -21,20 +21,27 @@ interface SidebarProps {
   setIsOpen: (isOpen: boolean) => void;
 }
 
+const ROLES = {
+  KABID: "kepala bidang pdas",
+  STAFF: "staff pdas",
+  PEGAWAI: "pegawai",
+  SUPERADMIN: "superadmin"
+};
+
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
   const { user } = useAuth();
   const location = useLocation();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
 
   const userStr = localStorage.getItem("user");
-  let userRole = "staff"; 
+  let userRole = ROLES.STAFF; 
   
   if (userStr) {
     const userData = JSON.parse(userStr);
-    userRole = userData?.peran?.[0]?.nama || "staff";
+    userRole = userData?.peran?.[0]?.nama?.toLowerCase() || ROLES.STAFF;
   }
   
-  const basePath = userRole === "Kepala Bidang PDAS" ? "/admin/kabid" : "/admin/staff";
+  const basePath = [ROLES.KABID, ROLES.SUPERADMIN].includes(userRole) ? "/admin/kabid" : "/admin/staff";
 
   useEffect(() => {
     if (location.pathname.includes('/donasi')) setOpenMenu('donasi');
@@ -59,13 +66,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
       title: 'Realisasi Bibit dan Donasi',
       icon: <HiOutlineArchiveBox className="w-5 h-5" />,
       items: [
-        { name: 'Dashboard Program', path: `${basePath}/donasi/dashboard` },
-        { name: 'Data Program', path: `${basePath}/donasi/program` },
-        
-        ...(userRole !== "Kepala Bidang PDAS" ? [
-          { name: 'Data Donatur', path: `${basePath}/donasi/donatur` },
-          { name: 'Pelaksanaan Kegiatan', path: `${basePath}/donasi/pelaksanaan-kegiatan` },
-        ] : [])
+        { name: 'Dashboard Program', path: `${basePath}/donasi/dashboard`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN, ROLES.STAFF, ROLES.PEGAWAI] },
+        { name: 'Data Program', path: `${basePath}/donasi/program`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN, ROLES.STAFF, ROLES.PEGAWAI] },
+        { name: 'Data Donatur', path: `${basePath}/donasi/donatur`, allowedRoles: [ROLES.STAFF, ROLES.PEGAWAI] },
+        { name: 'Pelaksanaan Kegiatan', path: `${basePath}/donasi/pelaksanaan-kegiatan`, allowedRoles: [ROLES.STAFF, ROLES.PEGAWAI] },
       ],
     },
     {
@@ -73,9 +77,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
       title: 'Rehabilitasi',
       icon: <HiOutlineBookmark className="w-5 h-5" />,
       items: [
-        { name: 'Program APBD', path: `${basePath}/rehabilitasi/program-apbd` },
-        { name: 'Program CSR', path: `${basePath}/rehabilitasi/program-csr` },
-        { name: 'Monitoring dan Riwayat', path: `${basePath}/rehabilitasi/monitoring-riwayat` },
+        { name: 'Program APBD', path: `${basePath}/rehabilitasi/program-apbd`, allowedRoles: [ROLES.STAFF, ROLES.PEGAWAI] },
+        { name: 'Program CSR', path: `${basePath}/rehabilitasi/program-csr`, allowedRoles: [ROLES.STAFF, ROLES.PEGAWAI] },
+        { name: 'Monitoring dan Riwayat', path: `${basePath}/rehabilitasi/monitoring-riwayat`, allowedRoles: [ROLES.STAFF, ROLES.PEGAWAI] },
       ],
     },    
     {
@@ -83,46 +87,46 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
       title: 'Monitoring',
       icon: <HiOutlineComputerDesktop className="w-5 h-5" />,
       items: [
-        { name: 'Dashboard Monitoring', path: `${basePath}/monitoring/dashboard` },
-        { name: 'Daftar Kegiatan', path: `${basePath}/monitoring/kegiatan` },
-        { name: 'Verifikasi Monitoring', path: `${basePath}/monitoring/verifikasi` },
-        { name: 'Rekap Monitoring', path: `${basePath}/monitoring/rekap` },
+        { name: 'Dashboard Monitoring', path: `${basePath}/monitoring/dashboard`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN, ROLES.STAFF, ROLES.PEGAWAI] },
+        { name: 'Daftar Kegiatan', path: `${basePath}/monitoring/kegiatan`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN, ROLES.STAFF, ROLES.PEGAWAI] },
+        { name: 'Verifikasi Monitoring', path: `${basePath}/monitoring/verifikasi`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN, ROLES.STAFF, ROLES.PEGAWAI] },
+        { name: 'Rekap Monitoring', path: `${basePath}/monitoring/rekap`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN, ROLES.STAFF, ROLES.PEGAWAI] },
       ],
     },
     {
       id: 'evaluasi',
       title: 'Evaluasi Penanaman',
       icon: <HiOutlineGlobeAlt className="w-5 h-5" />,
-      // PERUBAHAN: Menyesuaikan menu evaluasi berdasarkan role
-      items: userRole === "Kepala Bidang PDAS" 
-        ? [
-            { name: 'Penugasan', path: `${basePath}/evaluasi/penugasan` },
-            { name: 'Verifikasi Laporan', path: `${basePath}/evaluasi/verifikasi-laporan` },
-          ]
-        : [
-            { name: 'Dashboard Evaluasi', path: `${basePath}/evaluasi/dashboard` },
-            { name: 'Data Evaluasi', path: `${basePath}/evaluasi/data` },
-            { name: 'Tambah Evaluasi', path: `${basePath}/evaluasi/data/create` },
-            { name: 'Tugas Masuk', path: `${basePath}/evaluasi/tugas-masuk` },
-          ],
+      items: [
+        // Menu Kabid
+        { name: 'Penugasan', path: `${basePath}/evaluasi/penugasan`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN] },
+        { name: 'Verifikasi Laporan', path: `${basePath}/evaluasi/verifikasi-laporan`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN] },
+        // Menu Staff
+        { name: 'Dashboard Evaluasi', path: `${basePath}/evaluasi/dashboard`, allowedRoles: [ROLES.STAFF, ROLES.PEGAWAI] },
+        { name: 'Data Evaluasi', path: `${basePath}/evaluasi/data`, allowedRoles: [ROLES.STAFF, ROLES.PEGAWAI] },
+        { name: 'Tugas Masuk', path: `${basePath}/evaluasi/tugas-masuk`, allowedRoles: [ROLES.STAFF, ROLES.PEGAWAI] },
+      ],
     },
     {
       id: 'manajemen-akun',
       title: 'Manajemen Akun',
       icon: <HiOutlineUser className="w-5 h-5" />,
       items: [
-        { name: 'Data Pengguna', path: `${basePath}/manajemen-akun/data-pengguna` },
-        { name: 'Data Peran Pengguna', path: `${basePath}/manajemen-akun/data-peran-pengguna` },
-        { name: 'Data Hak Akses', path: `${basePath}/manajemen-akun/data-hak-akses` },
+        { name: 'Data Pengguna', path: `${basePath}/manajemen-akun/data-pengguna`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN, ROLES.STAFF, ROLES.PEGAWAI] },
+        { name: 'Data Peran Pengguna', path: `${basePath}/manajemen-akun/data-peran-pengguna`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN, ROLES.STAFF, ROLES.PEGAWAI] },
+        { name: 'Data Hak Akses', path: `${basePath}/manajemen-akun/data-hak-akses`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN, ROLES.STAFF, ROLES.PEGAWAI] },
       ],
     },    
   ];
 
-  const filteredAccordionMenus = accordionMenus.filter((menu) => {
-    if(menu.id === "manajemen-akun") {
-      return canManageAccounts(user) || userRole === "Kepala Bidang PDAS"; 
+  const filteredAccordionMenus = accordionMenus.map(menu => ({
+    ...menu,
+    items: menu.items.filter(subItem => subItem.allowedRoles.includes(userRole))
+  })).filter(menu => {
+    if (menu.id === "manajemen-akun") {
+      return canManageAccounts(user) || userRole === ROLES.KABID; 
     }
-    return true;
+    return menu.items.length > 0;
   });
 
   return (
