@@ -15,6 +15,11 @@ import CreateEvaluasi from "./pages/StaffPDAS/EvaluasiPenanamanBibit/DataEvaluas
 import StaffTugasEvaluasi from "./pages/StaffPDAS/EvaluasiPenanamanBibit/TugasMasuk";
 import KabidVerifikasiBAP from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/VerifikasiLaporan";
 import KabidPenugasan from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/Penugasan";
+import DaftarUsulanAPBD from "./pages/KepalaBidangPDAS/Investasi/ProgramUsulanAPBDKABID";
+import VerifikasiAPBD from "./pages/KepalaBidangPDAS/Investasi/ProgramUsulanAPBDKABID/VerifikasiAPBD";
+import DaftarUsulanCSR from "./pages/KepalaBidangPDAS/Investasi/ProgramCSRKABID/Index";
+import VerifikasiCSR from "./pages/KepalaBidangPDAS/Investasi/ProgramCSRKABID/VerifikasiCSR";
+import RiwayatKeputusan from "./pages/KepalaBidangPDAS/Investasi/RiwayatKeputusan";
 
 const Login = lazy(() => import("./pages/Authentication/Login"));
 const DashboardLayout = lazy(
@@ -143,140 +148,76 @@ function App() {
 
               <Route
                 element={
-                  <RoleGuard
-                    allowedRoles={["pegawai", "Staff PDAS", "admin"]}
-                  />
-                }
-              >
+                  <RoleGuard allowedRoles={["pegawai", "Staff PDAS", "admin"]} />
+                }>
                 <Route path="staff">
                   <Route path="dashboard" element={<DashboardStaffPDAS />} />
                   {/* Modul 1 (CPI) */}
-                  <Route
-                    path="analisis-cpi"
-                    element={<AnalisisLahanKritis />}
-                  />
+                  <Route path="analisis-cpi" element={<AnalisisLahanKritis />} />
 
                   {/* Modul 2 (Realisasi Bibit dan Donasi) */}
-                  <Route
-                    path="donasi/dashboard"
-                    element={<DashboardProgramStaff />}
-                  />
-                  <Route
-                    path="donasi/program"
-                    element={<ProgramDonasiStaff />}
-                  />
-                  <Route
-                    path="donasi/program/create"
-                    element={<CreateProgram />}
-                  />
+                  <Route path="donasi/dashboard" element={<DashboardProgramStaff />} />
+                  <Route path="donasi/program" element={<ProgramDonasiStaff />} />
+                  <Route path="donasi/program/create" element={<CreateProgram />} />
                   <Route path="donasi/donatur" element={<DataDonatur />} />
-                  <Route
-                    path="donasi/pelaksanaan-kegiatan"
-                    element={<PelaksanaanKegiatan />}
-                  />
-                  <Route
-                    path="donasi/pelaporan-data"
-                    element={<PelaporanData />}
-                  />
+                  <Route path="donasi/pelaksanaan-kegiatan" element={<PelaksanaanKegiatan />} />
+                  <Route path="donasi/pelaporan-data" element={<PelaporanData />} />
 
                   {/* Modul 3 (Investashit) */}
-                  <Route
-                    path="rehabilitasi/program-apbd"
-                    element={<ProgramAPBDList />}
-                  />
-                  <Route
-                    path="rehabilitasi/program-apbd/create"
-                    element={<CreateProgramAPBD />}
-                  />
-                  <Route
-                    path="rehabilitasi/program-csr"
-                    element={<ProgramCSRList />}
-                  />
-                  <Route
-                    path="rehabilitasi/program-csr/verifikasi/:id"
-                    element={<VerifikasiBerkasCSR />}
-                  />
-                  <Route
-                    path="rehabilitasi/monitoring-riwayat"
-                    element={<MonitoringRiwayatList />}
-                  />
+                  <Route path="rehabilitasi/program-apbd" element={<ProgramAPBDList />} />
+                  <Route path="rehabilitasi/program-apbd/create" element={<CreateProgramAPBD />} />
+                  <Route path="rehabilitasi/program-csr" element={<ProgramCSRList />} />
+                  <Route path="rehabilitasi/program-csr/verifikasi/:id" element={<VerifikasiBerkasCSR />} />
+                  <Route path="rehabilitasi/monitoring-riwayat" element={<MonitoringRiwayatList />} />
 
                   {/* Modul 4 (Pelaksanaan dan Monitoring Program) */}
-                  <Route
-                    path="monitoring/dashboard"
-                    element={<DashboardMonitoring />}
-                  />
-                  <Route
-                    path="monitoring/kegiatan"
-                    element={<DaftarKegiatan />}
-                  />
-                  <Route
-                    path="monitoring/verifikasi"
-                    element={<VerifikasiMonitoring />}
-                  />
-                  <Route
-                    path="monitoring/rekap"
-                    element={<RekapMonitoring />}
-                  />
+                  <Route path="monitoring/dashboard" element={<DashboardMonitoring />} />
+                  <Route path="monitoring/kegiatan" element={<DaftarKegiatan />}/>
+                  <Route path="monitoring/verifikasi" element={<VerifikasiMonitoring />} />
+                  <Route path="monitoring/rekap" element={<RekapMonitoring />} />
 
                   {/* Modul 5 (Evaluashit Penanaman Bibit) */}
-                  <Route
-                    path="evaluasi/dashboard"
-                    element={<DashboardEvaluasi />}
-                  />
+                  <Route path="evaluasi/dashboard" element={<DashboardEvaluasi />} />
                   <Route path="evaluasi/data" element={<DataEvaluasi />} />
                   <Route path="evaluasi/data/create" element={<CreateEvaluasi />} />
                   <Route path="evaluasi/tugas-masuk" element={<StaffTugasEvaluasi />} />
-                  
                 </Route>
               </Route>
 
-              <Route
-                element={
-                  <RoleGuard
-                    allowedRoles={["Kepala Bidang PDAS", "superadmin"]}
-                  />
+              <Route element={
+                  <RoleGuard allowedRoles={["Kepala Bidang PDAS", "superadmin"]} />
                 }
               >
                 <Route path="kabid">
                   <Route path="dashboard" element={<DashboardKabid />} />
-                  <Route
-                    path="donasi/dashboard"
-                    element={<DashhboardProgramKabid />}
-                  />
+
+                  {/* Modul 1 (Analisis CPI) */}
+                  <Route path="analisis-cpi" element={<AnalisisLahanKritis />} />
+
+                  {/* Modul 2 (Donashit) */}
+                  <Route path="donasi/dashboard" element={<DashhboardProgramKabid />} />
                   <Route path="donasi/program" element={<DataProgramKabid />} />
-                  <Route
-                    path="manajemen-akun/data-pengguna"
-                    element={<DataPengguna />}
-                  />
-                  <Route
-                    path="manajemen-akun/data-pengguna/detail/:id"
-                    element={<DetailPengguna />}
-                  />
-                  <Route
-                    path="manajemen-akun/data-peran-pengguna"
-                    element={<DataPeranPengguna />}
-                  />
-                  <Route
-                    path="manajemen-akun/data-peran-pengguna/detail/:id"
-                    element={<DetailRole />}
-                  />
-                  <Route
-                    path="manajemen-akun/data-hak-akses"
-                    element={<DataHakAkses />}
-                  />
-                  <Route
-                    path="manajemen-akun/data-hak-akses/detail/:id"
-                    element={<DetailHakAkses />}
-                  />
-                  <Route
-                    path="evaluasi/penugasan"
-                    element={<KabidPenugasan />}
-                  />
-                  <Route
-                    path="evaluasi/verifikasi-laporan"
-                    element={<KabidVerifikasiBAP />}
-                  />
+
+                  {/* Modul 3 (Investahit) */}
+                  <Route path="rehabilitasi/program-apbd" element={<DaftarUsulanAPBD />} />
+                  <Route path="rehabilitasi/program-apbd/verifikasi/:id" element={<VerifikasiAPBD />} />
+                  <Route path="rehabilitasi/program-csr" element={<DaftarUsulanCSR />} />
+                  <Route path="rehabilitasi/program-csr/verifikasi/:id" element={<VerifikasiCSR />} />
+                  <Route path="rehabilitasi/riwayat-keputusan" element={<RiwayatKeputusan />} />
+
+                  {/* Modul 4 (Pelaksanaan dan Monitoring Program) */}
+
+                  {/* Modul 5 (Evaluashit) */}
+                  <Route path="evaluasi/penugasan" element={<KabidPenugasan />} />
+                  <Route path="evaluasi/verifikasi-laporan" element={<KabidVerifikasiBAP />} />
+
+                  {/* Manajemen Akun */}
+                  <Route path="manajemen-akun/data-pengguna" element={<DataPengguna />} />
+                  <Route path="manajemen-akun/data-pengguna/detail/:id" element={<DetailPengguna />} />
+                  <Route path="manajemen-akun/data-peran-pengguna" element={<DataPeranPengguna />} />
+                  <Route path="manajemen-akun/data-peran-pengguna/detail/:id" element={<DetailRole />} />
+                  <Route path="manajemen-akun/data-hak-akses" element={<DataHakAkses />} />
+                  <Route path="manajemen-akun/data-hak-akses/detail/:id" element={<DetailHakAkses />} />
                 </Route>
               </Route>
             </Route>
