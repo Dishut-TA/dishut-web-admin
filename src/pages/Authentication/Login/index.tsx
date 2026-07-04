@@ -86,12 +86,6 @@ const Login: React.FC = () => {
               }
             />
 
-            <div className="flex justify-end mb-8 -mt-2">
-              <a href="#" className="text-sm font-medium text-[#185325] hover:underline">
-                Lupa Kata Sandi?
-              </a>
-            </div>
-
             <Button type="submit" variant="primary" disabled={isLoading}>
               {isLoading ? "Memproses..." : "Masuk"}
             </Button>

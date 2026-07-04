@@ -80,14 +80,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
         { name: 'Program APBD', path: `${basePath}/rehabilitasi/program-apbd`, allowedRoles: [ROLES.STAFF, ROLES.PEGAWAI] },
         { name: 'Program CSR', path: `${basePath}/rehabilitasi/program-csr`, allowedRoles: [ROLES.STAFF, ROLES.PEGAWAI] },
         { name: 'Monitoring dan Riwayat', path: `${basePath}/rehabilitasi/monitoring-riwayat`, allowedRoles: [ROLES.STAFF, ROLES.PEGAWAI] },
+
+        { name: 'Program APBD', path: `${basePath}/rehabilitasi/program-apbd`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN] },
+        { name: 'Program CSR', path: `${basePath}/rehabilitasi/program-csr`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN] },
+        { name: 'Riwayat Keputusan Validasi', path: `${basePath}/rehabilitasi/riwayat-keputusan`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN] },
       ],
     },    
     {
       id: 'monitoring',
-      title: 'Monitoring',
+      title: 'Pelaksanaan dan Monitoring Program',
       icon: <HiOutlineComputerDesktop className="w-5 h-5" />,
       items: [
-        { name: 'Dashboard Monitoring', path: `${basePath}/monitoring/dashboard`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN, ROLES.STAFF, ROLES.PEGAWAI] },
+        { name: 'Dashboard Pelaksanaan dan Monitoring', path: `${basePath}/monitoring/dashboard`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN, ROLES.STAFF, ROLES.PEGAWAI] },
         { name: 'Daftar Kegiatan', path: `${basePath}/monitoring/kegiatan`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN, ROLES.STAFF, ROLES.PEGAWAI] },
         { name: 'Verifikasi Monitoring', path: `${basePath}/monitoring/verifikasi`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN, ROLES.STAFF, ROLES.PEGAWAI] },
         { name: 'Rekap Monitoring', path: `${basePath}/monitoring/rekap`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN, ROLES.STAFF, ROLES.PEGAWAI] },
@@ -95,7 +99,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
     },
     {
       id: 'evaluasi',
-      title: 'Evaluasi Penanaman',
+      title: 'Evaluasi Penanaman Bibit',
       icon: <HiOutlineGlobeAlt className="w-5 h-5" />,
       items: [
         // Menu Kabid
