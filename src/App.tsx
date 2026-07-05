@@ -5,103 +5,53 @@ import CustomToaster from "./components/CustomToaster";
 import PageLoader from "./components/PageLoader";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoleGuard from "./components/RoleGuard";
-import DashboardStaffPDAS from "./pages/StaffPDAS/DashboardStaffPDAS";
-import ProgramAPBDList from "./pages/StaffPDAS/Investasi/ProgramAPBD";
-import CreateProgramAPBD from "./pages/StaffPDAS/Investasi/ProgramAPBD/CreateProgram";
-import ProgramCSRList from "./pages/StaffPDAS/Investasi/ProgramCSR";
-import VerifikasiBerkasCSR from "./pages/StaffPDAS/Investasi/ProgramCSR/VerifikasiBerkas";
-import MonitoringRiwayatList from "./pages/StaffPDAS/Investasi/MonitoringRiwayat";
-import CreateEvaluasi from "./pages/StaffPDAS/EvaluasiPenanamanBibit/DataEvaluasi/CreateEvaluasi";
-import StaffTugasEvaluasi from "./pages/StaffPDAS/EvaluasiPenanamanBibit/TugasMasuk";
-import KabidVerifikasiBAP from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/VerifikasiLaporan";
-import KabidPenugasan from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/Penugasan";
-import DaftarUsulanAPBD from "./pages/KepalaBidangPDAS/Investasi/ProgramUsulanAPBDKABID";
-import VerifikasiAPBD from "./pages/KepalaBidangPDAS/Investasi/ProgramUsulanAPBDKABID/VerifikasiAPBD";
-import DaftarUsulanCSR from "./pages/KepalaBidangPDAS/Investasi/ProgramCSRKABID/Index";
-import VerifikasiCSR from "./pages/KepalaBidangPDAS/Investasi/ProgramCSRKABID/VerifikasiCSR";
-import RiwayatKeputusan from "./pages/KepalaBidangPDAS/Investasi/RiwayatKeputusan";
-
+import { ROLE_REDIRECTS, ROLES } from "./utils/roles";
+import DashboardKTH from "./pages/KelompokTaniHutan/Dashboard";
 const Login = lazy(() => import("./pages/Authentication/Login"));
-const DashboardLayout = lazy(
-  () => import("./components/layout/DashboardLayout"),
-);
+const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Profile = lazy(() => import("./pages/Profile"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-const AnalisisLahanKritis = lazy(
-  () => import("./pages/StaffPDAS/AnalisisLahanKritis"),
-);
-const DashboardMonitoring = lazy(
-  () =>
-    import("./pages/StaffPDAS/PelaksanaanDanMonitoring/DashboardMonitoring"),
-);
-const DaftarKegiatan = lazy(
-  () => import("./pages/StaffPDAS/PelaksanaanDanMonitoring/DaftarKegiatan"),
-);
-const VerifikasiMonitoring = lazy(
-  () =>
-    import("./pages/StaffPDAS/PelaksanaanDanMonitoring/VerifikasiMonitoring"),
-);
-const RekapMonitoring = lazy(
-  () => import("./pages/StaffPDAS/PelaksanaanDanMonitoring/RekapMonitoring"),
-);
-const DashboardEvaluasi = lazy(
-  () => import("./pages/StaffPDAS/EvaluasiPenanamanBibit/DashboardEvaluasi"),
-);
-const DataEvaluasi = lazy(
-  () => import("./pages/StaffPDAS/EvaluasiPenanamanBibit/DataEvaluasi"),
-);
-const DashboardProgramStaff = lazy(
-  () => import("./pages/StaffPDAS/RealisasiBibitDonasi/Dashboard"),
-);
-const ProgramDonasiStaff = lazy(
-  () => import("./pages/StaffPDAS/RealisasiBibitDonasi/ProgramDonasi"),
-);
-const CreateProgram = lazy(
-  () =>
-    import("./pages/StaffPDAS/RealisasiBibitDonasi/ProgramDonasi/CreateProgram"),
-);
-const DataDonatur = lazy(
-  () => import("./pages/StaffPDAS/RealisasiBibitDonasi/DataDonatur"),
-);
-const PelaksanaanKegiatan = lazy(
-  () => import("./pages/StaffPDAS/RealisasiBibitDonasi/PelaksanaanKegiatan"),
-);
-const PelaporanData = lazy(
-  () => import("./pages/StaffPDAS/RealisasiBibitDonasi/PelaporanData"),
-);
+// Staff PDAS Import
+const DashboardStaffPDAS = lazy(() => import("./pages/StaffPDAS/DashboardStaffPDAS"));
+const ProgramAPBDList = lazy(() => import("./pages/StaffPDAS/Investasi/ProgramAPBD"));
+const CreateProgramAPBD = lazy(() => import("./pages/StaffPDAS/Investasi/ProgramAPBD/CreateProgram"));
+const ProgramCSRList = lazy(() => import("./pages/StaffPDAS/Investasi/ProgramCSR"));
+const VerifikasiBerkasCSR = lazy(() => import("./pages/StaffPDAS/Investasi/ProgramCSR/VerifikasiBerkas"));
+const MonitoringRiwayatList = lazy(() => import("./pages/StaffPDAS/Investasi/MonitoringRiwayat"));
+const CreateEvaluasi = lazy(() => import("./pages/StaffPDAS/EvaluasiPenanamanBibit/DataEvaluasi/CreateEvaluasi"));
+const StaffTugasEvaluasi = lazy(() => import("./pages/StaffPDAS/EvaluasiPenanamanBibit/TugasMasuk"));
+const AnalisisLahanKritis = lazy(() => import("./pages/StaffPDAS/AnalisisLahanKritis"));
+const DashboardMonitoring = lazy(() => import("./pages/StaffPDAS/PelaksanaanDanMonitoring/DashboardMonitoring"));
+const DaftarKegiatan = lazy(() => import("./pages/StaffPDAS/PelaksanaanDanMonitoring/DaftarKegiatan"));
+const VerifikasiMonitoring = lazy(() => import("./pages/StaffPDAS/PelaksanaanDanMonitoring/VerifikasiMonitoring"));
+const RekapMonitoring = lazy(() => import("./pages/StaffPDAS/PelaksanaanDanMonitoring/RekapMonitoring"));
+const DashboardEvaluasi = lazy(() => import("./pages/StaffPDAS/EvaluasiPenanamanBibit/DashboardEvaluasi"));
+const DataEvaluasi = lazy(() => import("./pages/StaffPDAS/EvaluasiPenanamanBibit/DataEvaluasi"));
+const DashboardProgramStaff = lazy(() => import("./pages/StaffPDAS/RealisasiBibitDonasi/Dashboard"));
+const ProgramDonasiStaff = lazy(() => import("./pages/StaffPDAS/RealisasiBibitDonasi/ProgramDonasi"));
+const CreateProgram = lazy(() => import("./pages/StaffPDAS/RealisasiBibitDonasi/ProgramDonasi/CreateProgram"));
+const DataDonatur = lazy(() => import("./pages/StaffPDAS/RealisasiBibitDonasi/DataDonatur"));
+const PelaksanaanKegiatan = lazy(() => import("./pages/StaffPDAS/RealisasiBibitDonasi/PelaksanaanKegiatan"));
+const PelaporanData = lazy(() => import("./pages/StaffPDAS/RealisasiBibitDonasi/PelaporanData"));
 
-const DashboardKabid = lazy(
-  () => import("./pages/KepalaBidangPDAS/DashboardKABID"),
-);
-const DashhboardProgramKabid = lazy(
-  () =>
-    import("./pages/KepalaBidangPDAS/RealisasiBibitDonasi/DashboardProgramKabid"),
-);
-const DataProgramKabid = lazy(
-  () => import("./pages/KepalaBidangPDAS/RealisasiBibitDonasi/DataProgram"),
-);
-const DataPengguna = lazy(
-  () => import("./pages/KepalaBidangPDAS/ManajemenAkun/DataPengguna"),
-);
-const DetailPengguna = lazy(
-  () =>
-    import("./pages/KepalaBidangPDAS/ManajemenAkun/DataPengguna/DetailPengguna"),
-);
-const DataPeranPengguna = lazy(
-  () => import("./pages/KepalaBidangPDAS/ManajemenAkun/DataPeranPengguna"),
-);
-const DetailRole = lazy(
-  () =>
-    import("./pages/KepalaBidangPDAS/ManajemenAkun/DataPeranPengguna/components/DetailRole"),
-);
-const DataHakAkses = lazy(
-  () => import("./pages/KepalaBidangPDAS/ManajemenAkun/DataHakAkses"),
-);
-const DetailHakAkses = lazy(
-  () =>
-    import("./pages/KepalaBidangPDAS/ManajemenAkun/DataHakAkses/components/DetailHakAkses"),
-);
+// Kabid Import
+const DashboardKabid = lazy(() => import("./pages/KepalaBidangPDAS/DashboardKABID"));
+const DashhboardProgramKabid = lazy(() => import("./pages/KepalaBidangPDAS/RealisasiBibitDonasi/DashboardProgramKabid"));
+const DataProgramKabid = lazy(() => import("./pages/KepalaBidangPDAS/RealisasiBibitDonasi/DataProgram"));
+const DataPengguna = lazy(() => import("./pages/KepalaBidangPDAS/ManajemenAkun/DataPengguna"));
+const DetailPengguna = lazy(() => import("./pages/KepalaBidangPDAS/ManajemenAkun/DataPengguna/DetailPengguna"));
+const DataPeranPengguna = lazy(() => import("./pages/KepalaBidangPDAS/ManajemenAkun/DataPeranPengguna"));
+const DetailRole = lazy(() => import("./pages/KepalaBidangPDAS/ManajemenAkun/DataPeranPengguna/components/DetailRole"));
+const DataHakAkses = lazy(() => import("./pages/KepalaBidangPDAS/ManajemenAkun/DataHakAkses"));
+const DetailHakAkses = lazy(() => import("./pages/KepalaBidangPDAS/ManajemenAkun/DataHakAkses/components/DetailHakAkses"));
+const KabidVerifikasiBAP = lazy(() => import("./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/VerifikasiLaporan"));
+const KabidPenugasan = lazy(() => import("./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/Penugasan"));
+const DaftarUsulanAPBD = lazy(() => import("./pages/KepalaBidangPDAS/Investasi/ProgramUsulanAPBDKABID"));
+const VerifikasiAPBD = lazy(() => import("./pages/KepalaBidangPDAS/Investasi/ProgramUsulanAPBDKABID/VerifikasiAPBD"));
+const DaftarUsulanCSR = lazy(() => import("./pages/KepalaBidangPDAS/Investasi/ProgramCSRKABID/Index"));
+const VerifikasiCSR = lazy(() => import("./pages/KepalaBidangPDAS/Investasi/ProgramCSRKABID/VerifikasiCSR"));
+const RiwayatKeputusan = lazy(() => import("./pages/KepalaBidangPDAS/Investasi/RiwayatKeputusan"));
 
 const RoleBasedRedirect = () => {
   const userStr = localStorage.getItem("user");
@@ -109,26 +59,9 @@ const RoleBasedRedirect = () => {
 
   try {
     const userData = JSON.parse(userStr);
-    const rawRoleName = userData?.peran?.[0]?.nama;
-    if (!rawRoleName) return <Navigate to="/admin/login" replace />;
-
-    const roleName = rawRoleName.trim().toLowerCase();
-
-    // 1. Definisikan Kelompok Role
-    const kabidRoles = ["kepala bidang pdas", "superadmin", "kepala dinas"];
-    const staffRoles = ["pegawai", "staff pdas", "staff", "admin"];
-
-    // 2. Redirect berdasarkan kelompok
-    if (kabidRoles.includes(roleName)) {
-      return <Navigate to="/admin/kabid/dashboard" replace />;
-    }
-
-    if (staffRoles.includes(roleName)) {
-      return <Navigate to="/admin/staff/dashboard" replace />;
-    }
-
-    // Jika tidak dikenali
-    return <Navigate to="/admin/login" replace />;
+    const roleName = userData?.peran?.[0]?.nama?.trim().toLowerCase();
+    
+    return <Navigate to={ROLE_REDIRECTS[roleName] || "/admin/login"} replace />;
   } catch (e) {
     return <Navigate to="/admin/login" replace />;
   }
@@ -146,16 +79,16 @@ function App() {
               <Route index element={<RoleBasedRedirect />} />
               <Route path="profile" element={<Profile />} />
 
-              <Route
-                element={
-                  <RoleGuard allowedRoles={["pegawai", "Staff PDAS", "admin"]} />
-                }>
+              {/* Staff PDAS */}
+              <Route element={<RoleGuard allowedRoles={[ROLES.STAFF]} />}>
                 <Route path="staff">
+                  <Route index element={<Navigate to="dashboard" replace />} />
                   <Route path="dashboard" element={<DashboardStaffPDAS />} />
-                  {/* Modul 1 (CPI) */}
+                  
+                  {/* CPI */}
                   <Route path="analisis-cpi" element={<AnalisisLahanKritis />} />
 
-                  {/* Modul 2 (Realisasi Bibit dan Donasi) */}
+                  {/* Donasi */}
                   <Route path="donasi/dashboard" element={<DashboardProgramStaff />} />
                   <Route path="donasi/program" element={<ProgramDonasiStaff />} />
                   <Route path="donasi/program/create" element={<CreateProgram />} />
@@ -163,20 +96,20 @@ function App() {
                   <Route path="donasi/pelaksanaan-kegiatan" element={<PelaksanaanKegiatan />} />
                   <Route path="donasi/pelaporan-data" element={<PelaporanData />} />
 
-                  {/* Modul 3 (Investashit) */}
+                  {/* Rehabilitasi / Investasi */}
                   <Route path="rehabilitasi/program-apbd" element={<ProgramAPBDList />} />
                   <Route path="rehabilitasi/program-apbd/create" element={<CreateProgramAPBD />} />
                   <Route path="rehabilitasi/program-csr" element={<ProgramCSRList />} />
                   <Route path="rehabilitasi/program-csr/verifikasi/:id" element={<VerifikasiBerkasCSR />} />
                   <Route path="rehabilitasi/monitoring-riwayat" element={<MonitoringRiwayatList />} />
 
-                  {/* Modul 4 (Pelaksanaan dan Monitoring Program) */}
+                  {/* Monitoring */}
                   <Route path="monitoring/dashboard" element={<DashboardMonitoring />} />
                   <Route path="monitoring/kegiatan" element={<DaftarKegiatan />}/>
                   <Route path="monitoring/verifikasi" element={<VerifikasiMonitoring />} />
                   <Route path="monitoring/rekap" element={<RekapMonitoring />} />
 
-                  {/* Modul 5 (Evaluashit Penanaman Bibit) */}
+                  {/* Evaluasi */}
                   <Route path="evaluasi/dashboard" element={<DashboardEvaluasi />} />
                   <Route path="evaluasi/data" element={<DataEvaluasi />} />
                   <Route path="evaluasi/data/create" element={<CreateEvaluasi />} />
@@ -184,34 +117,26 @@ function App() {
                 </Route>
               </Route>
 
-              <Route element={
-                  <RoleGuard allowedRoles={["Kepala Bidang PDAS", "superadmin"]} />
-                }
-              >
+              {/* KABID PDAS */}
+              <Route element={<RoleGuard allowedRoles={[ROLES.KABID, ROLES.SUPERADMIN]} />}>
                 <Route path="kabid">
+                  <Route index element={<Navigate to="dashboard" replace />} />
                   <Route path="dashboard" element={<DashboardKabid />} />
 
-                  {/* Modul 1 (Analisis CPI) */}
                   <Route path="analisis-cpi" element={<AnalisisLahanKritis />} />
 
-                  {/* Modul 2 (Donashit) */}
                   <Route path="donasi/dashboard" element={<DashhboardProgramKabid />} />
                   <Route path="donasi/program" element={<DataProgramKabid />} />
 
-                  {/* Modul 3 (Investahit) */}
                   <Route path="rehabilitasi/program-apbd" element={<DaftarUsulanAPBD />} />
                   <Route path="rehabilitasi/program-apbd/verifikasi/:id" element={<VerifikasiAPBD />} />
                   <Route path="rehabilitasi/program-csr" element={<DaftarUsulanCSR />} />
                   <Route path="rehabilitasi/program-csr/verifikasi/:id" element={<VerifikasiCSR />} />
                   <Route path="rehabilitasi/riwayat-keputusan" element={<RiwayatKeputusan />} />
 
-                  {/* Modul 4 (Pelaksanaan dan Monitoring Program) */}
-
-                  {/* Modul 5 (Evaluashit) */}
                   <Route path="evaluasi/penugasan" element={<KabidPenugasan />} />
                   <Route path="evaluasi/verifikasi-laporan" element={<KabidVerifikasiBAP />} />
 
-                  {/* Manajemen Akun */}
                   <Route path="manajemen-akun/data-pengguna" element={<DataPengguna />} />
                   <Route path="manajemen-akun/data-pengguna/detail/:id" element={<DetailPengguna />} />
                   <Route path="manajemen-akun/data-peran-pengguna" element={<DataPeranPengguna />} />
@@ -220,6 +145,15 @@ function App() {
                   <Route path="manajemen-akun/data-hak-akses/detail/:id" element={<DetailHakAkses />} />
                 </Route>
               </Route>
+
+              {/* KTH */}
+              <Route element={<RoleGuard allowedRoles={[ROLES.KTH]} />}>
+                <Route path="kth">
+                  <Route index element={<Navigate to="dashboard" replace />} />
+                  <Route path="dashboard" element={<DashboardKTH />} />
+                </Route>
+              </Route>
+
             </Route>
           </Route>
 
