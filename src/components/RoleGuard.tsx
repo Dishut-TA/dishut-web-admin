@@ -16,10 +16,12 @@ const RoleGuard: React.FC<RoleGuardProps> = ({ allowedRoles }) => {
 
   let currentUserRole = "";
   if (user?.peran && user.peran.length > 0) {
-    currentUserRole = user.peran[0].nama;
+    currentUserRole = user.peran[0].nama.trim().toLowerCase();
   }
 
-  if (!currentUserRole || !allowedRoles.includes(currentUserRole)) {
+  const normalizedAllowedRoles = allowedRoles.map(role => role.trim().toLowerCase());
+
+  if (!currentUserRole || !normalizedAllowedRoles.includes(currentUserRole)) {
     ToastError("Akses Ditolak: Anda tidak memiliki izin untuk halaman ini.");
     return <Navigate to="/admin" replace />;
   }
