@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HiOutlineFunnel, HiOutlineEye } from 'react-icons/hi2';
+import { HiOutlineFunnel, HiOutlineEye, HiOutlinePlus } from 'react-icons/hi2';
 
 interface LaporanProyekData {
   id: string;
@@ -41,7 +41,7 @@ const mockData: LaporanProyekData[] = [
   },
 ];
 
-const LaporanProyekIndex: React.FC = () => {
+const LaporanProyekIndexKTH: React.FC = () => {
   const navigate = useNavigate();
 
   return (
@@ -52,12 +52,12 @@ const LaporanProyekIndex: React.FC = () => {
         </h1>
         
         <div className="flex items-center gap-3">
-          {/* <button 
-            onClick={() => navigate('/admin/staff/bupm/laporan-proyek/create')}
+          <button 
+            onClick={() => navigate('/admin/kth/investasi/laporan-proyek/create')}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-lg transition-colors shadow-sm active:scale-95"
           >
             Buat Laporan Proyek <HiOutlinePlus className="w-4 h-4" strokeWidth={2.5} />
-          </button> */}
+          </button>
           
           <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-50 transition-colors shadow-sm active:scale-95">
             <HiOutlineFunnel className="w-4 h-4" /> Filter
@@ -113,4 +113,4 @@ const LaporanProyekIndex: React.FC = () => {
   );
 };
 
-export default LaporanProyekIndex;
+export default LaporanProyekIndexKTH;

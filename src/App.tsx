@@ -24,6 +24,25 @@ import DetailInvestasiKABIDBUPM from "./pages/KepalaBidangBUPM/DataInvestasi/Det
 import DataInvestorIndexKABIDBUPM from "./pages/KepalaBidangBUPM/DataInvestor";
 import DetailInvestorKABIDBUPM from "./pages/KepalaBidangBUPM/DataInvestor/DetailInvestor";
 import LaporanProyekIndexKABIDBUPM from "./pages/KepalaBidangBUPM/LaporanProyek";
+import AjukanProgramCSR from "./pages/KelompokTaniHutan/Rehabilitasi/AjukanProgramCSR";
+import RiwayatPengajuan from "./pages/KelompokTaniHutan/Rehabilitasi/RiwayatPengajuan";
+import UpdateProgres from "./pages/KelompokTaniHutan/Rehabilitasi/UpdateProgress";
+import DataInvestasiKTH from "./pages/KelompokTaniHutan/DataInvestasiKTH/DataInvestasi";
+import CreateInvestasi from "./pages/KelompokTaniHutan/DataInvestasiKTH/Create";
+import PersetujuanInvestasi from "./pages/KelompokTaniHutan/InvestasiKTH/PersetujuanInvestasi";
+import DetailPersetujuan from "./pages/KelompokTaniHutan/InvestasiKTH/PersetujuanInvestasi/DetailPersetujuan";
+import DataInvestorIndexKTH from "./pages/KelompokTaniHutan/DataInvestorKTH";
+import DetailInvestorKTH from "./pages/KelompokTaniHutan/DataInvestorKTH/DetailInvestor";
+import LaporanProyekIndexKTH from "./pages/KelompokTaniHutan/InvestasiKTH/LaporanProyekKTH";
+import CreateLaporanProyek from "./pages/KelompokTaniHutan/InvestasiKTH/LaporanProyekKTH/CreateLaporanProyek";
+import CreateLaporanUsaha from "./pages/KelompokTaniHutan/InvestasiKTH/LaporanInvestasi/LaporanUsaha/CreateLaporanUsaha";
+import LaporanUsaha from "./pages/KelompokTaniHutan/InvestasiKTH/LaporanInvestasi/LaporanUsaha";
+import LaporanKeuangan from "./pages/KelompokTaniHutan/InvestasiKTH/LaporanInvestasi/LaporanKeuangan";
+import CreateLaporanKeuangan from "./pages/KelompokTaniHutan/InvestasiKTH/LaporanInvestasi/LaporanKeuangan/CreateLaporanKeuangan";
+import CreateLaporanBiayaPengeluaran from "./pages/KelompokTaniHutan/InvestasiKTH/LaporanInvestasi/LaporanBiayaPengeluaran/CreateLaporanBiayaPengeluaran";
+import BiayaPengeluaranIndex from "./pages/KelompokTaniHutan/InvestasiKTH/LaporanInvestasi/LaporanBiayaPengeluaran";
+import BiayaPemasukanIndex from "./pages/KelompokTaniHutan/InvestasiKTH/LaporanInvestasi/LaporanBiayaPemasukan";
+import BiayaPemasukanCreate from "./pages/KelompokTaniHutan/InvestasiKTH/LaporanInvestasi/LaporanBiayaPemasukan/CreateBiayaPemasukan";
 const Login = lazy(() => import("./pages/Authentication/Login"));
 const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -168,6 +187,25 @@ function App() {
                 <Route path="kth">
                   <Route index element={<Navigate to="dashboard" replace />} />
                   <Route path="dashboard" element={<DashboardKTH />} />
+                  <Route path="rehabilitasi/ajukan-program-csr" element={<AjukanProgramCSR />} />
+                  <Route path="rehabilitasi/riwayat-pengajuan" element={<RiwayatPengajuan />} />
+                  <Route path="rehabilitasi/update-progres" element={<UpdateProgres />} />
+                  <Route path="investasi/data" element={<DataInvestasiKTH />} />
+                  <Route path="investasi/data/create" element={<CreateInvestasi />} />
+                  <Route path="investasi/persetujuan" element={<PersetujuanInvestasi />} />
+                  <Route path="investasi/persetujuan/detail/:id" element={<DetailPersetujuan />} />
+                  <Route path="investasi/investor" element={<DataInvestorIndexKTH />} />
+                  <Route path="investasi/investor/detail/:id" element={<DetailInvestorKTH />} />
+                  <Route path="investasi/laporan-proyek" element={<LaporanProyekIndexKTH />} />
+                  <Route path="investasi/laporan-proyek/create" element={<CreateLaporanProyek />} />
+                  <Route path="laporan-investasi/usaha" element={<LaporanUsaha />} />
+                  <Route path="laporan-investasi/usaha/create" element={<CreateLaporanUsaha />} />
+                  <Route path="laporan-investasi/keuangan" element={<LaporanKeuangan />} />
+                  <Route path="laporan-investasi/keuangan/create" element={<CreateLaporanKeuangan />} />
+                  <Route path="laporan-investasi/pengeluaran" element={<BiayaPengeluaranIndex />} />
+                  <Route path="laporan-investasi/pengeluaran/create" element={<CreateLaporanBiayaPengeluaran />} />
+                  <Route path="laporan-investasi/pemasukan" element={<BiayaPemasukanIndex />} />
+                  <Route path="laporan-investasi/pemasukan/create" element={<BiayaPemasukanCreate />} />
                 </Route>
               </Route>
 
