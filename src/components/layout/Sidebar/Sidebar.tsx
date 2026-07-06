@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { 
-  HiOutlineHome, 
-  HiOutlineChartBar, 
-  HiOutlineComputerDesktop, 
+import {
+  HiOutlineHome,
+  HiOutlineChartBar,
+  HiOutlineComputerDesktop,
   HiOutlineGlobeAlt,
-  HiOutlineArchiveBox, 
+  HiOutlineArchiveBox,
   HiOutlineBookmark,
-  HiXMark, 
+  HiXMark,
   HiOutlineUser,
   HiOutlineDocumentText,
   HiOutlineClock,
   HiOutlineChartPie,
   HiOutlineBanknotes,
   HiOutlineUsers,
-  HiOutlineDocumentChartBar
+  HiOutlineDocumentChartBar,
+  HiOutlineMap,
+  HiOutlinePresentationChartLine
 } from 'react-icons/hi2';
 import LOGO from "@/assets/images/LogoSigapFull2.png";
 import { useAuth } from '@/context/AuthContext';
@@ -34,13 +36,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
 
   const userStr = localStorage.getItem("user");
-  let userRole = ROLES.STAFF; 
-  
+  let userRole = ROLES.STAFF;
+
   if (userStr) {
     const userData = JSON.parse(userStr);
     userRole = userData?.peran?.[0]?.nama?.toLowerCase() || ROLES.STAFF;
   }
-  
+
   const toggleMenu = (menuId: string) => {
     setOpenMenu(openMenu === menuId ? null : menuId);
   };
@@ -56,53 +58,53 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
   }, [location.pathname]);
 
   const navItems = [
-    { 
-      name: 'Dashboard', 
-      path: `${basePath}/dashboard`, 
+    {
+      name: 'Dashboard',
+      path: `${basePath}/dashboard`,
       icon: <HiOutlineHome className="w-5 h-5" />,
-      allowedRoles: Object.values(ROLES) 
+      allowedRoles: Object.values(ROLES)
     },
-    { 
-      name: 'Analisis CPI', 
-      path: `${basePath}/analisis-cpi`, 
+    {
+      name: 'Analisis CPI',
+      path: `${basePath}/analisis-cpi`,
       icon: <HiOutlineChartBar className="w-5 h-5" />,
-      allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN, ROLES.STAFF] 
+      allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN, ROLES.STAFF]
     },
-    { 
-      name: 'Tinjau Proposal', 
-      path: `${basePath}/tinjau-proposal`, 
+    {
+      name: 'Tinjau Proposal',
+      path: `${basePath}/tinjau-proposal`,
       icon: <HiOutlineDocumentText className="w-5 h-5" />,
-      allowedRoles: [ROLES.CSR] 
+      allowedRoles: [ROLES.CSR]
     },
-    { 
-      name: 'Riwayat Proposal', 
-      path: `${basePath}/riwayat-proposal`, 
+    {
+      name: 'Riwayat Proposal',
+      path: `${basePath}/riwayat-proposal`,
       icon: <HiOutlineClock className="w-5 h-5" />,
-      allowedRoles: [ROLES.CSR] 
+      allowedRoles: [ROLES.CSR]
     },
-    { 
-      name: 'Monitoring Proyek', 
-      path: `${basePath}/monitoring-proyek`, 
+    {
+      name: 'Monitoring Proyek',
+      path: `${basePath}/monitoring-proyek`,
       icon: <HiOutlineChartPie className="w-5 h-5" />,
-      allowedRoles: [ROLES.CSR] 
+      allowedRoles: [ROLES.CSR]
     },
-    { 
-      name: 'Data Investasi', 
-      path: `${basePath}/data-investasi`, 
+    {
+      name: 'Data Investasi',
+      path: `${basePath}/data-investasi`,
       icon: <HiOutlineBanknotes className="w-5 h-5" />,
-      allowedRoles: [ROLES.STAFFBUPM, ROLES.KABIDBUPM] 
+      allowedRoles: [ROLES.STAFFBUPM, ROLES.KABIDBUPM]
     },
-    { 
-      name: 'Data Investor', 
-      path: `${basePath}/data-investor`, 
+    {
+      name: 'Data Investor',
+      path: `${basePath}/data-investor`,
       icon: <HiOutlineUsers className="w-5 h-5" />,
-      allowedRoles: [ROLES.STAFFBUPM, ROLES.KABIDBUPM] 
+      allowedRoles: [ROLES.STAFFBUPM, ROLES.KABIDBUPM]
     },
-    { 
-      name: 'Laporan Proyek', 
-      path: `${basePath}/laporan-proyek`, 
+    {
+      name: 'Laporan Proyek',
+      path: `${basePath}/laporan-proyek`,
       icon: <HiOutlineDocumentChartBar className="w-5 h-5" />,
-      allowedRoles: [ROLES.STAFFBUPM, ROLES.KABIDBUPM] 
+      allowedRoles: [ROLES.STAFFBUPM, ROLES.KABIDBUPM]
     },
   ];
 
@@ -126,12 +128,43 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
         { name: 'Program APBD', path: `${basePath}/rehabilitasi/program-apbd`, allowedRoles: [ROLES.STAFF] },
         { name: 'Program CSR', path: `${basePath}/rehabilitasi/program-csr`, allowedRoles: [ROLES.STAFF] },
         { name: 'Monitoring dan Riwayat', path: `${basePath}/rehabilitasi/monitoring-riwayat`, allowedRoles: [ROLES.STAFF] },
-
         { name: 'Program APBD', path: `${basePath}/rehabilitasi/program-apbd`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN] },
         { name: 'Program CSR', path: `${basePath}/rehabilitasi/program-csr`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN] },
         { name: 'Riwayat Keputusan Validasi', path: `${basePath}/rehabilitasi/riwayat-keputusan`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN] },
       ],
-    },    
+    },
+    {
+      id: 'rehabilitasi-kth',
+      title: 'Rehabilitasi (CSR)',
+      icon: <HiOutlineMap className="w-5 h-5" />,
+      items: [
+        { name: 'Ajukan Program CSR', path: `${basePath}/rehabilitasi/ajukan-program-csr`, allowedRoles: [ROLES.KTH] },
+        { name: 'Riwayat Pengajuan', path: `${basePath}/rehabilitasi/riwayat-pengajuan`, allowedRoles: [ROLES.KTH] },
+        { name: 'Update Progres', path: `${basePath}/rehabilitasi/update-progres`, allowedRoles: [ROLES.KTH] },
+      ],
+    },
+    {
+      id: 'investasi-kth',
+      title: 'Investasi',
+      icon: <HiOutlinePresentationChartLine className="w-5 h-5" />,
+      items: [
+        { name: 'Data Investasi', path: `${basePath}/investasi/data`, allowedRoles: [ROLES.KTH] },
+        { name: 'Persetujuan Investor', path: `${basePath}/investasi/persetujuan`, allowedRoles: [ROLES.KTH] },
+        { name: 'Data Investor', path: `${basePath}/investasi/investor`, allowedRoles: [ROLES.KTH] },
+        { name: 'Laporan Proyek', path: `${basePath}/investasi/laporan-proyek`, allowedRoles: [ROLES.KTH] },
+      ],
+    },
+    {
+      id: 'laporan-investasi-kth',
+      title: 'Laporan Investasi',
+      icon: <HiOutlineChartPie className="w-5 h-5" />,
+      items: [
+        { name: 'Laporan Usaha', path: `${basePath}/laporan-investasi/usaha`, allowedRoles: [ROLES.KTH] },
+        { name: 'Laporan Keuangan', path: `${basePath}/laporan-investasi/keuangan`, allowedRoles: [ROLES.KTH] },
+        { name: 'Biaya Pengeluaran', path: `${basePath}/laporan-investasi/pengeluaran`, allowedRoles: [ROLES.KTH] },
+        { name: 'Biaya Pemasukan', path: `${basePath}/laporan-investasi/pemasukan`, allowedRoles: [ROLES.KTH] },
+      ],
+    },
     {
       id: 'monitoring',
       title: 'Pelaksanaan dan Monitoring Program',
@@ -164,7 +197,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
         { name: 'Data Peran Pengguna', path: `${basePath}/manajemen-akun/data-peran-pengguna`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN, ROLES.STAFF] },
         { name: 'Data Hak Akses', path: `${basePath}/manajemen-akun/data-hak-akses`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN, ROLES.STAFF] },
       ],
-    },    
+    },
   ];
 
   const filteredNavItems = navItems.filter(item => item.allowedRoles.includes(userRole));
@@ -177,7 +210,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
     <>
       {isOpen && <div className="fixed inset-0 bg-black/40 z-40 md:hidden" onClick={() => setIsOpen(false)} />}
       <aside className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-greenAdmin flex flex-col transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
-        
+
         <div className="flex items-center justify-between px-6 md:justify-center mt-4 mb-6 shrink-0">
           <div className="font-bold text-2xl text-white tracking-widest px-4 py-1 rounded-md">
             <img src={LOGO} alt="SIGAP Logo" />
@@ -186,7 +219,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
             <HiXMark className="w-6 h-6" />
           </button>
         </div>
-        
+
         <nav className="flex-1 px-4 space-y-2 overflow-y-auto pb-4 custom-scrollbar">
           {filteredNavItems.map((item) => (
             <SingleMenu key={item.name} item={item} setIsOpen={setIsOpen} />
