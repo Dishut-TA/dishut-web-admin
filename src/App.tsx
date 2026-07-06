@@ -7,6 +7,11 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import RoleGuard from "./components/RoleGuard";
 import { ROLE_REDIRECTS, ROLES } from "./utils/roles";
 import DashboardKTH from "./pages/KelompokTaniHutan/Dashboard";
+import DashboardCSR from "./pages/CSR/DashboardCSR";
+import TinjauProposal from "./pages/CSR/TinjauProposal";
+import DetailTinjauProposal from "./pages/CSR/TinjauProposal/DetailTinjauProposal";
+import RiwayatProposal from "./pages/CSR/RiwayatProposal";
+import MonitoringProyek from "./pages/CSR/MonitoringProyek";
 const Login = lazy(() => import("./pages/Authentication/Login"));
 const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -154,6 +159,17 @@ function App() {
                 </Route>
               </Route>
 
+              {/* CSR */}
+              <Route element={<RoleGuard allowedRoles={[ROLES.CSR]} />}>
+                <Route path="csr">
+                  <Route index element={<Navigate to="dashboard" replace />} />
+                  <Route path="dashboard" element={<DashboardCSR />} />
+                  <Route path="tinjau-proposal" element={<TinjauProposal />} />
+                  <Route path="tinjau-proposal/detail/:id" element={<DetailTinjauProposal />} />
+                  <Route path="riwayat-proposal" element={<RiwayatProposal />} />
+                  <Route path="monitoring-proyek" element={<MonitoringProyek />} />
+                </Route>
+              </Route>
             </Route>
           </Route>
 

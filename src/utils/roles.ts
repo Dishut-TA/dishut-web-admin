@@ -2,7 +2,8 @@ export const ROLES = {
   KABID: "kepala bidang pdas",
   SUPERADMIN: "superadmin",
   STAFF: "staff pdas",
-  KTH: "kelompok tani hutan (kth)"
+  KTH: "kelompok tani hutan (kth)",
+  CSR: "csr"
 };
 
 export const ROLE_BASE_PATHS: Record<string, string> = {
@@ -10,6 +11,7 @@ export const ROLE_BASE_PATHS: Record<string, string> = {
   [ROLES.SUPERADMIN]: "/admin/kabid", 
   [ROLES.STAFF]: "/admin/staff",
   [ROLES.KTH]: "/admin/kth", 
+  [ROLES.CSR]: "/admin/csr", 
 };
 
 export const ROLE_REDIRECTS: Record<string, string> = {
@@ -18,4 +20,5 @@ export const ROLE_REDIRECTS: Record<string, string> = {
   "admin": "/admin/staff",
   "staff pdas": "/admin/staff",
   "kelompok tani hutan (kth)": "/admin/kth",
+  "csr": "/admin/csr",
 };
