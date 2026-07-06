@@ -11,7 +11,10 @@ import {
   HiOutlineUser,
   HiOutlineDocumentText,
   HiOutlineClock,
-  HiOutlineChartPie
+  HiOutlineChartPie,
+  HiOutlineBanknotes,
+  HiOutlineUsers,
+  HiOutlineDocumentChartBar
 } from 'react-icons/hi2';
 import LOGO from "@/assets/images/LogoSigapFull2.png";
 import { useAuth } from '@/context/AuthContext';
@@ -82,7 +85,25 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
       path: `${basePath}/monitoring-proyek`, 
       icon: <HiOutlineChartPie className="w-5 h-5" />,
       allowedRoles: [ROLES.CSR] 
-    }
+    },
+    { 
+      name: 'Data Investasi', 
+      path: `${basePath}/data-investasi`, 
+      icon: <HiOutlineBanknotes className="w-5 h-5" />,
+      allowedRoles: [ROLES.STAFFBUPM, ROLES.KABIDBUPM] 
+    },
+    { 
+      name: 'Data Investor', 
+      path: `${basePath}/data-investor`, 
+      icon: <HiOutlineUsers className="w-5 h-5" />,
+      allowedRoles: [ROLES.STAFFBUPM, ROLES.KABIDBUPM] 
+    },
+    { 
+      name: 'Laporan Proyek', 
+      path: `${basePath}/laporan-proyek`, 
+      icon: <HiOutlineDocumentChartBar className="w-5 h-5" />,
+      allowedRoles: [ROLES.STAFFBUPM, ROLES.KABIDBUPM] 
+    },
   ];
 
   const accordionMenus = [

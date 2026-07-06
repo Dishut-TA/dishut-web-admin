@@ -12,6 +12,18 @@ import TinjauProposal from "./pages/CSR/TinjauProposal";
 import DetailTinjauProposal from "./pages/CSR/TinjauProposal/DetailTinjauProposal";
 import RiwayatProposal from "./pages/CSR/RiwayatProposal";
 import MonitoringProyek from "./pages/CSR/MonitoringProyek";
+import DashboardStaffBUPM from "./pages/StaffBUPM/Dashboard";
+import DataInvestasi from "./pages/StaffBUPM/DataInvestasi";
+import DetailInvestasi from "./pages/StaffBUPM/DataInvestasi/DetailInvestasi";
+import DataInvestorIndex from "./pages/StaffBUPM/DataInvestor";
+import DetailInvestor from "./pages/StaffBUPM/DataInvestor/DetailInvestor";
+import LaporanProyekIndex from "./pages/StaffBUPM/LaporanProyek";
+import DashboardKABIDBUPM from "./pages/KepalaBidangBUPM/Dashboard";
+import DataInvestasiKABIDBUPM from "./pages/KepalaBidangBUPM/DataInvestasi";
+import DetailInvestasiKABIDBUPM from "./pages/KepalaBidangBUPM/DataInvestasi/DetailInvestasiKABIDBUPM";
+import DataInvestorIndexKABIDBUPM from "./pages/KepalaBidangBUPM/DataInvestor";
+import DetailInvestorKABIDBUPM from "./pages/KepalaBidangBUPM/DataInvestor/DetailInvestor";
+import LaporanProyekIndexKABIDBUPM from "./pages/KepalaBidangBUPM/LaporanProyek";
 const Login = lazy(() => import("./pages/Authentication/Login"));
 const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -168,6 +180,34 @@ function App() {
                   <Route path="tinjau-proposal/detail/:id" element={<DetailTinjauProposal />} />
                   <Route path="riwayat-proposal" element={<RiwayatProposal />} />
                   <Route path="monitoring-proyek" element={<MonitoringProyek />} />
+                </Route>
+              </Route>
+
+              {/* Staff BUPM */}
+              <Route element={<RoleGuard allowedRoles={[ROLES.STAFFBUPM]} />}>
+                <Route path="staff/bupm">
+                  <Route index element={<Navigate to="dashboard" replace />} />
+                  <Route path="dashboard" element={<DashboardStaffBUPM />} />
+                  <Route path="data-investasi" element={<DataInvestasi />} />
+                  <Route path="data-investasi/konfirmasi/:id" element={<DetailInvestasi />} />
+                  <Route path="data-investasi/detail/:id" element={<DetailInvestasi />} />
+                  <Route path="data-investor" element={<DataInvestorIndex />} />
+                  <Route path="data-investor/detail/:id" element={<DetailInvestor />} />
+                  <Route path="laporan-proyek" element={<LaporanProyekIndex />} />
+                </Route>
+              </Route>
+
+              {/* Kabid BUPM */}
+              <Route element={<RoleGuard allowedRoles={[ROLES.KABIDBUPM]} />}>
+                <Route path="kabid/bupm">
+                  <Route index element={<Navigate to="dashboard" replace />} />
+                  <Route path="dashboard" element={<DashboardKABIDBUPM />} />
+                  <Route path="data-investasi" element={<DataInvestasiKABIDBUPM />} />
+                  <Route path="data-investasi/validasi/:id" element={<DetailInvestasiKABIDBUPM />} />
+                  <Route path="data-investasi/detail/:id" element={<DetailInvestasiKABIDBUPM />} />
+                  <Route path="data-investor" element={<DataInvestorIndexKABIDBUPM />} />
+                  <Route path="data-investor/detail/:id" element={<DetailInvestorKABIDBUPM />} />
+                  <Route path="laporan-proyek" element={<LaporanProyekIndexKABIDBUPM />} />
                 </Route>
               </Route>
             </Route>
