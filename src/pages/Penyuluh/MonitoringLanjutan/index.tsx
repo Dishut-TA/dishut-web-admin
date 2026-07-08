@@ -49,7 +49,7 @@ const MonitoringLanjutanIndex: React.FC = () => {
         </span>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto w-full">
           <table className="w-full text-left border-collapse min-w-225">
             <thead className="bg-[#DCECE0] text-[#3A4D3F] text-xs uppercase tracking-wider font-bold">
@@ -66,7 +66,7 @@ const MonitoringLanjutanIndex: React.FC = () => {
                   <td className="px-6 py-5 whitespace-nowrap">
                     <div className="flex flex-col gap-1">
                       <span className="text-sm font-bold text-gray-800">{item.namaProgram}</span>
-                      <span className="text-xs font-semibold text-[#185325] bg-[#DCECE0] px-2 py-0.5 rounded-md w-max">
+                      <span className="text-xs font-semibold text-[#185325] bg-[#DCECE0] px-2 py-0.5 rounded-full w-max">
                         {item.mitra}
                       </span>
                     </div>
@@ -82,11 +82,11 @@ const MonitoringLanjutanIndex: React.FC = () => {
                   <td className="px-6 py-5">
                     <div className="flex flex-col gap-2 max-w-xs">
                       {item.status === 'DALAM PELAKSANAAN' ? (
-                        <span className="px-3 py-1 bg-blue-50 text-blue-700 border border-blue-100 rounded-full text-[10px] font-bold shadow-sm whitespace-nowrap w-max uppercase tracking-wider">
+                        <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-[10px] font-bold whitespace-nowrap w-max uppercase tracking-wider">
                           DALAM PELAKSANAAN
                         </span>
                       ) : (
-                        <span className="px-3 py-1 bg-red-50 text-red-700 border border-red-100 rounded-full text-[10px] font-bold shadow-sm whitespace-nowrap w-max uppercase tracking-wider">
+                        <span className="px-3 py-1 bg-red-50 text-red-700 rounded-full text-[10px] font-bold whitespace-nowrap w-max uppercase tracking-wider">
                           PERLU PERBAIKAN
                         </span>
                       )}
@@ -103,14 +103,14 @@ const MonitoringLanjutanIndex: React.FC = () => {
                     {item.status === 'PERLU PERBAIKAN' ? (
                        <button 
                          onClick={() => navigate(`/admin/penyuluh/monitoring-lanjutan/form/${item.id}?mode=perbaikan`)}
-                         className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-colors active:scale-95 shadow-sm"
+                         className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-full transition-colors active:scale-95 shadow-sm"
                        >
                          <HiOutlinePencilSquare className="w-4 h-4" /> Lapor Perbaikan
                        </button>
                     ) : (
                        <button 
                          onClick={() => navigate(`/admin/penyuluh/monitoring-lanjutan/form/${item.id}?mode=input`)}
-                         className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-white border border-[#185325] text-[#185325] hover:bg-[#f0f9f3] text-xs font-bold rounded-lg transition-colors active:scale-95 shadow-sm"
+                         className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-white border border-[#185325] text-[#185325] hover:bg-[#f0f9f3] text-xs font-bold rounded-full transition-colors active:scale-95 shadow-sm"
                        >
                          <HiOutlinePlus className="w-4 h-4" /> Input Monitoring
                        </button>

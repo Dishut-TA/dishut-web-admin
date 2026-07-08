@@ -71,14 +71,14 @@ const ValidasiLokasi: React.FC = () => {
                     {item.batasWaktu}
                   </td>
                   <td className="px-6 py-4 text-center whitespace-nowrap">
-                    <span className="px-3 py-1 bg-[#FEF3C7] text-yellow-800 rounded-full text-[11px] font-bold shadow-sm uppercase tracking-wider">
+                    <span className="px-3 py-1 bg-[#FEF3C7] text-yellow-800 rounded-full text-[11px] font-bold uppercase tracking-wider">
                       {item.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 flex justify-center whitespace-nowrap">
+                  <td className="mx-auto whitespace-nowrap">
                     <button 
                       onClick={() => navigate(`/admin/penyuluh/validasi-lokasi/create/${item.id}`)}
-                      className="flex items-center gap-1.5 text-sm font-bold text-gray-800 hover:text-[#185325] transition-colors"
+                      className="flex items-center mx-auto gap-1.5 text-sm cursor-pointer font-bold text-gray-800 hover:text-[#185325] transition-colors"
                     >
                       <HiOutlinePlus className="w-4 h-4 stroke-2" /> Input Validasi
                     </button>

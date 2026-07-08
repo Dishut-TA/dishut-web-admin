@@ -69,11 +69,9 @@ const VerifikasiDanaCSR: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8">
-      
-      {/* Header & Search */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">
+          <h1 className="text-2xl font-bold text-gray-800 mb-1">
             Verifikasi Dana CSR
           </h1>
         </div>
@@ -90,7 +88,6 @@ const VerifikasiDanaCSR: React.FC = () => {
         </div>
       </div>
 
-      {/* Tabel */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mt-2">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-225">

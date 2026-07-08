@@ -69,16 +69,14 @@ const VerifikasiDanaCSRKABID: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8">
-      
-      {/* Header & Search */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">
+          <h1 className="text-2xl font-bold text-gray-800 mb-1">
             Verifikasi Dana CSR
           </h1>
         </div>
 
-        <div className="relative w-full md:w-80">
+        <div className="relative w-full md:w-72">
           <HiOutlineMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input 
             type="text" 

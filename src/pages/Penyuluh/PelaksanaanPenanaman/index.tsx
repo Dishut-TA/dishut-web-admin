@@ -50,9 +50,9 @@ const PelaksanaanPenanamanIndex: React.FC = () => {
 
   const getStatusBadge = (status: StatusPelaksanaan) => {
     if (status === 'SIAP DILAKSANAKAN') {
-      return <span className="px-4 py-1 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-full text-[11px] font-bold shadow-sm whitespace-nowrap">SIAP DILAKSANAKAN</span>;
+      return <span className="px-4 py-1 bg-indigo-50 text-indigo-700 rounded-full text-[11px] font-bold whitespace-nowrap">SIAP DILAKSANAKAN</span>;
     }
-    return <span className="px-4 py-1 bg-blue-50 text-blue-700 border border-blue-100 rounded-full text-[11px] font-bold shadow-sm whitespace-nowrap">DALAM PELAKSANAAN</span>;
+    return <span className="px-4 py-1 bg-blue-50 text-blue-700 rounded-full text-[11px] font-bold whitespace-nowrap">DALAM PELAKSANAAN</span>;
   };
 
   return (

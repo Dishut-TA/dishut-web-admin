@@ -184,8 +184,8 @@ function App() {
 
                   <Route path="rehabilitasi/program-apbd" element={<DaftarUsulanAPBD />} />
                   <Route path="rehabilitasi/program-apbd/verifikasi/:id" element={<VerifikasiAPBD />} />
-                  <Route path="rehabilitasi/program-csr" element={<DaftarUsulanCSR />} />
-                  <Route path="rehabilitasi/program-csr/verifikasi/:id" element={<VerifikasiCSR />} />
+                  <Route path="rehabilitasi/validasi-csr" element={<DaftarUsulanCSR />} />
+                  <Route path="rehabilitasi/validasi-csr/verifikasi/:id" element={<VerifikasiCSR />} />
                   <Route path="rehabilitasi/verifikasi-dana-csr" element={<VerifikasiDanaCSRKABID />} />
                   <Route path="rehabilitasi/verifikasi-dana-csr/detail/:id" element={<DetailVerifikasiDanaCSRKABID />} />
                   <Route path="rehabilitasi/riwayat-keputusan" element={<RiwayatKeputusan />} />

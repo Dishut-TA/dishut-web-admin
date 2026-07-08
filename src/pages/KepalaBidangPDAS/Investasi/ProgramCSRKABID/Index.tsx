@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  HiOutlineCheckBadge,
   HiOutlineMagnifyingGlass,
   HiOutlineArrowRight
 } from 'react-icons/hi2';
@@ -41,12 +40,9 @@ const DaftarUsulanCSR: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8">
-      
-      {/* --- HEADER --- */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <HiOutlineCheckBadge className="w-6 h-6 text-[#185325]" />
-          <h1 className="text-xl md:text-2xl font-bold text-gray-800">
+          <h1 className="text-2xl font-bold text-gray-800">
             Daftar Proposal Mandiri KTH Terverifikasi Staff
           </h1>
         </div>
@@ -102,7 +98,7 @@ const DaftarUsulanCSR: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 flex justify-center whitespace-nowrap">
                       <button 
-                        onClick={() => navigate(`/admin/kabid/rehabilitasi/program-csr/verifikasi/${item.id}`)}
+                        onClick={() => navigate(`/admin/kabid/rehabilitasi/validasi-csr/verifikasi/${item.id}`)}
                         className="flex items-center gap-2 px-4 py-1.5 bg-white border border-[#185325] text-[#185325] hover:bg-[#f0f9f3] text-xs font-bold rounded-full transition-colors"
                       >
                         Periksa Berkas <HiOutlineArrowRight className="w-3 h-3" />

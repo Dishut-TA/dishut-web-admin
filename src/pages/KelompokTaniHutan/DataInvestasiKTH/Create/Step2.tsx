@@ -54,7 +54,7 @@ const Step2: React.FC<StepProps> = ({ data, updateData, onNext }) => {
         Tambah Milestone <HiOutlinePlus className="w-4 h-4" strokeWidth={2.5} />
       </button>
 
-      <button onClick={onNext} className="w-full py-3.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-xl transition-colors">
+      <button onClick={onNext} className="w-full py-3.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors">
         Selanjutnya &gt;
       </button>
 
