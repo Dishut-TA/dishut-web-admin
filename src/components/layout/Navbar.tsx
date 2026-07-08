@@ -89,7 +89,7 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 md:gap-5">
+        <div className="flex items-center gap-2">
           
           <div className="relative" ref={notifRef}>
             <button 

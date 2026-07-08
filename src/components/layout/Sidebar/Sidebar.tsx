@@ -16,7 +16,10 @@ import {
   HiOutlineUsers,
   HiOutlineDocumentChartBar,
   HiOutlineMap,
-  HiOutlinePresentationChartLine
+  HiOutlinePresentationChartLine,
+  HiOutlineEye,
+  HiOutlineSparkles,
+  HiOutlineMapPin
 } from 'react-icons/hi2';
 import LOGO from "@/assets/images/LogoSigapFull2.png";
 import { useAuth } from '@/context/AuthContext';
@@ -111,6 +114,24 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
       path: `${basePath}/laporan-proyek`,
       icon: <HiOutlineDocumentChartBar className="w-5 h-5" />,
       allowedRoles: [ROLES.STAFFBUPM, ROLES.KABIDBUPM]
+    },
+    {
+      name: 'Validasi Lokasi',
+      path: `${basePath}/validasi-lokasi`,
+      icon: <HiOutlineMapPin  className="w-5 h-5" />,
+      allowedRoles: [ROLES.PENYULUH]
+    },
+    {
+      name: 'Pelaksanaan Penanaman',
+      path: `${basePath}/pelaksanaan-penanaman`,
+      icon: <HiOutlineSparkles  className="w-5 h-5" />,
+      allowedRoles: [ROLES.PENYULUH]
+    },
+    {
+      name: 'Monitoring Lanjutan',
+      path: `${basePath}/monitoring-lanjutan`,
+      icon: <HiOutlineEye  className="w-5 h-5" />,
+      allowedRoles: [ROLES.PENYULUH]
     },
   ];
 

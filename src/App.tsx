@@ -52,6 +52,13 @@ import DetailLaporanKeuangan from "./pages/CSR/LaporanKeuanganCSR/DetailLaporanK
 import LaporanDanaIndex from "./pages/KelompokTaniHutan/InvestasiKTH/LaporanDana";
 import CreateLaporanDana from "./pages/KelompokTaniHutan/InvestasiKTH/LaporanDana/CreateLaporanDana";
 import DetailLaporanDana from "./pages/KelompokTaniHutan/InvestasiKTH/LaporanDana/DetailLaporanDana";
+import ValidasiLokasi from "./pages/Penyuluh/ValidasiLokasi";
+import CreateValidasi from "./pages/Penyuluh/ValidasiLokasi/CreateValidasi";
+import DashboardPenyuluh from "./pages/Penyuluh/Dashboard";
+import PelaksanaanPenanamanIndex from "./pages/Penyuluh/PelaksanaanPenanaman";
+import InputProgresPage from "./pages/Penyuluh/PelaksanaanPenanaman/CreateProgress";
+import MonitoringLanjutanIndex from "./pages/Penyuluh/MonitoringLanjutan";
+import FormMonitoringPage from "./pages/Penyuluh/MonitoringLanjutan/FormMonitoringPage";
 const Login = lazy(() => import("./pages/Authentication/Login"));
 const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -105,7 +112,7 @@ const RoleBasedRedirect = () => {
   try {
     const userData = JSON.parse(userStr);
     const roleName = userData?.peran?.[0]?.nama?.trim().toLowerCase();
-    
+
     return <Navigate to={ROLE_REDIRECTS[roleName] || "/admin/login"} replace />;
   } catch (e) {
     return <Navigate to="/admin/login" replace />;
@@ -129,7 +136,7 @@ function App() {
                 <Route path="staff">
                   <Route index element={<Navigate to="dashboard" replace />} />
                   <Route path="dashboard" element={<DashboardStaffPDAS />} />
-                  
+
                   {/* CPI */}
                   <Route path="analisis-cpi" element={<AnalisisLahanKritis />} />
 
@@ -152,7 +159,7 @@ function App() {
 
                   {/* Monitoring */}
                   <Route path="monitoring/dashboard" element={<DashboardMonitoring />} />
-                  <Route path="monitoring/kegiatan" element={<DaftarKegiatan />}/>
+                  <Route path="monitoring/kegiatan" element={<DaftarKegiatan />} />
                   <Route path="monitoring/verifikasi" element={<VerifikasiMonitoring />} />
                   <Route path="monitoring/rekap" element={<RekapMonitoring />} />
 
@@ -264,6 +271,20 @@ function App() {
                   <Route path="data-investor" element={<DataInvestorIndexKABIDBUPM />} />
                   <Route path="data-investor/detail/:id" element={<DetailInvestorKABIDBUPM />} />
                   <Route path="laporan-proyek" element={<LaporanProyekIndexKABIDBUPM />} />
+                </Route>
+              </Route>
+
+              {/* Penyuluh */}
+              <Route element={<RoleGuard allowedRoles={["penyuluh"]} />}>
+                <Route path="penyuluh">
+                  <Route index element={<Navigate to="dashboard" replace />} />
+                  <Route path="dashboard" element={<DashboardPenyuluh />} />
+                  <Route path="validasi-lokasi" element={<ValidasiLokasi />} />
+                  <Route path="validasi-lokasi/create/:id" element={<CreateValidasi />} />
+                  <Route path="pelaksanaan-penanaman" element={<PelaksanaanPenanamanIndex />} />
+                  <Route path="pelaksanaan-penanaman/create/:id" element={<InputProgresPage />} />
+                  <Route path="monitoring-lanjutan" element={<MonitoringLanjutanIndex />} />
+                  <Route path="monitoring-lanjutan/form/:id" element={<FormMonitoringPage />} />
                 </Route>
               </Route>
             </Route>
