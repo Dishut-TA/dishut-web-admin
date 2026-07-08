@@ -89,6 +89,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
       allowedRoles: [ROLES.CSR]
     },
     {
+      name: 'Laporan Keuangan',
+      path: `${basePath}/laporan-keuangan`,
+      icon: <HiOutlineChartPie className="w-5 h-5" />,
+      allowedRoles: [ROLES.CSR]
+    },
+    {
       name: 'Data Investasi',
       path: `${basePath}/data-investasi`,
       icon: <HiOutlineBanknotes className="w-5 h-5" />,
@@ -125,11 +131,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
       title: 'Rehabilitasi',
       icon: <HiOutlineBookmark className="w-5 h-5" />,
       items: [
+        // staff pdas
         { name: 'Program APBD', path: `${basePath}/rehabilitasi/program-apbd`, allowedRoles: [ROLES.STAFF] },
-        { name: 'Program CSR', path: `${basePath}/rehabilitasi/program-csr`, allowedRoles: [ROLES.STAFF] },
+        { name: 'Validasi CSR', path: `${basePath}/rehabilitasi/program-csr`, allowedRoles: [ROLES.STAFF] },
+        { name: 'Verifikasi Dana CSR', path: `${basePath}/rehabilitasi/verifikasi-dana-csr`, allowedRoles: [ROLES.STAFF] },
         { name: 'Monitoring dan Riwayat', path: `${basePath}/rehabilitasi/monitoring-riwayat`, allowedRoles: [ROLES.STAFF] },
+        // kabid pdas
         { name: 'Program APBD', path: `${basePath}/rehabilitasi/program-apbd`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN] },
         { name: 'Program CSR', path: `${basePath}/rehabilitasi/program-csr`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN] },
+        { name: 'Validasi CSR', path: `${basePath}/rehabilitasi/program-csr`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN] },
+        { name: 'Verifikasi Dana CSR', path: `${basePath}/rehabilitasi/verifikasi-dana-csr`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN] },
         { name: 'Riwayat Keputusan Validasi', path: `${basePath}/rehabilitasi/riwayat-keputusan`, allowedRoles: [ROLES.KABID, ROLES.SUPERADMIN] },
       ],
     },
@@ -141,6 +152,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
         { name: 'Ajukan Program CSR', path: `${basePath}/rehabilitasi/ajukan-program-csr`, allowedRoles: [ROLES.KTH] },
         { name: 'Riwayat Pengajuan', path: `${basePath}/rehabilitasi/riwayat-pengajuan`, allowedRoles: [ROLES.KTH] },
         { name: 'Update Progres', path: `${basePath}/rehabilitasi/update-progres`, allowedRoles: [ROLES.KTH] },
+        { name: 'Laporan Dana', path: `${basePath}/rehabilitasi/laporan-dana`, allowedRoles: [ROLES.KTH] },
       ],
     },
     {

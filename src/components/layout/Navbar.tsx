@@ -7,11 +7,12 @@ import {
   HiOutlineChevronDown,
   HiOutlineUser,
   HiOutlineCog8Tooth,
-  HiOutlineArrowRightOnRectangle
+  HiOutlineArrowRightOnRectangle,
 } from 'react-icons/hi2';
 import ConfirmAlert from '@/components/ConfirmAlert'; 
 import { ToastError, ToastLoading, ToastSuccess } from "@/utils/toastHelper";
 import { useAuth } from '@/context/AuthContext'; 
+import NotificationDropdown from '../NotificationDropdown';
 
 interface NavbarProps {
   onMenuClick: () => void;
@@ -20,7 +21,9 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
   const { user, logout } = useAuth(); 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);  
   const navigate = useNavigate();
   const [isLogoutAlertOpen, setIsLogoutAlertOpen] = useState(false);
   const [isLogoutLoading, setIsLogoutLoading] = useState(false);
@@ -38,6 +41,9 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsProfileOpen(false);
       }
+      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+        setIsNotifOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -46,7 +52,6 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
   const executeLogout = async () => {
     setIsLogoutLoading(true);
     const loadingId = ToastLoading("Sedang keluar dari sistem...");
-
     try {
       await logout(); 
       ToastSuccess("Anda berhasil keluar", loadingId);
@@ -54,7 +59,6 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
       navigate("/admin/login"); 
     } catch (error: any) {
       ToastError("Terjadi kesalahan saat keluar", loadingId);
-      console.error(error);
     } finally {
       setIsLogoutLoading(false);
     }
@@ -86,16 +90,34 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
         </div>
 
         <div className="flex items-center gap-2 md:gap-5">
-          <button className="relative p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
-            <HiOutlineBell className="w-6 h-6" />
-            <span className="absolute top-1.5 right-1.5 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
-              3
-            </span>
-          </button>
+          
+          <div className="relative" ref={notifRef}>
+            <button 
+              onClick={() => {
+                setIsNotifOpen(!isNotifOpen);
+                setIsProfileOpen(false);
+              }}
+              className="relative cursor-pointer p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors active:scale-95"
+            >
+              <HiOutlineBell className="w-6 h-6" />
+              {primaryRole.toLowerCase().includes('kth') && (
+                <span className="absolute top-1.5 right-1.5 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold border-2 border-white">
+                  2
+                </span>
+              )}
+            </button>
+
+            {primaryRole.toLowerCase().includes('kth') && (
+              <NotificationDropdown isOpen={isNotifOpen} onClose={() => setIsNotifOpen(false)} />
+            )}
+          </div>
           
           <div className="relative" ref={dropdownRef}>
             <button 
-              onClick={() => setIsProfileOpen(!isProfileOpen)}
+              onClick={() => {
+                setIsProfileOpen(!isProfileOpen);
+                setIsNotifOpen(false);
+              }}
               className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-1.5 md:pr-2 md:pl-3 rounded-full md:rounded-lg transition-colors border border-transparent hover:border-gray-100"
             >
               <HiOutlineChevronDown className={`w-4 h-4 text-gray-600 transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} />
@@ -106,44 +128,24 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
               </div>
             </button>
 
-            {isProfileOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 py-2 z-50 transform origin-top-right transition-all">
-                
-                <div className="px-4 py-3 border-b border-gray-100 mb-1 bg-gray-50/50">
-                  <p className="text-sm font-bold text-gray-800 capitalize truncate">{formattedName}</p>
-                  <p className="text-xs text-gray-500 font-medium mt-0.5 uppercase tracking-wider">{primaryRole}</p>
-                </div>
-
-                <button 
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-[#185325] hover:bg-[#D5F0DE]/40 transition-colors"
-                  onClick={() => {
-                    setIsProfileOpen(false);
-                    navigate('/admin/profile'); 
-                  }}
-                >
-                  <HiOutlineUser className="w-5 h-5" /> Profile
-                </button>
-                
-                <button 
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-[#185325] hover:bg-[#D5F0DE]/40 transition-colors"
-                  onClick={() => setIsProfileOpen(false)}
-                >
-                  <HiOutlineCog8Tooth className="w-5 h-5" /> Pengaturan
-                </button>
-                
-                <div className="my-1 border-t border-gray-100"></div>
-                
-                <button 
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-[#185325] hover:bg-red-50 hover:text-red-600 transition-colors group"
-                  onClick={() => {
-                    setIsProfileOpen(false);
-                    setIsLogoutAlertOpen(true); 
-                  }}
-                >
-                  <HiOutlineArrowRightOnRectangle className="w-5 h-5 group-hover:text-red-600" /> Keluar
-                </button>
+            <div className={`absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 py-2 z-50 transform origin-top-right transition-all duration-300 ease-out
+              ${isProfileOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-95 opacity-0 -translate-y-2 pointer-events-none'}`}
+            >
+              <div className="px-4 py-3 border-b border-gray-100 mb-1 bg-gray-50/50">
+                <p className="text-sm font-bold text-gray-800 capitalize truncate">{formattedName}</p>
+                <p className="text-xs text-gray-500 font-medium mt-0.5 uppercase tracking-wider">{primaryRole}</p>
               </div>
-            )}
+              <button onClick={() => { setIsProfileOpen(false); navigate('/admin/profile'); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-[#185325] hover:bg-[#D5F0DE]/40 transition-colors">
+                <HiOutlineUser className="w-5 h-5" /> Profile
+              </button>
+              <button onClick={() => setIsProfileOpen(false)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-[#185325] hover:bg-[#D5F0DE]/40 transition-colors">
+                <HiOutlineCog8Tooth className="w-5 h-5" /> Pengaturan
+              </button>
+              <div className="my-1 border-t border-gray-100"></div>
+              <button onClick={() => { setIsProfileOpen(false); setIsLogoutAlertOpen(true); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-[#185325] hover:bg-red-50 hover:text-red-600 transition-colors group">
+                <HiOutlineArrowRightOnRectangle className="w-5 h-5 group-hover:text-red-600" /> Keluar
+              </button>
+            </div>
           </div>
         </div>
       </header>
