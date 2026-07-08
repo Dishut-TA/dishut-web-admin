@@ -22,7 +22,7 @@ const RoleGuard: React.FC<RoleGuardProps> = ({ allowedRoles }) => {
   const normalizedAllowedRoles = allowedRoles.map(role => role.trim().toLowerCase());
 
   if (!currentUserRole || !normalizedAllowedRoles.includes(currentUserRole)) {
-    ToastError("Akses Ditolak: Anda tidak memiliki izin untuk halaman ini.");
+    ToastError("Akses Ditolak: Anda tidak memiliki izin untuk halaman ini.", "unauthorized");
     return <Navigate to="/admin" replace />;
   }
 

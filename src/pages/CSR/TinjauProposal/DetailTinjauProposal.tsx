@@ -5,7 +5,9 @@ import {
   HiOutlineUser,
   HiOutlineMapPin,
   HiOutlineXMark,
-  HiOutlineCheckCircle
+  HiOutlineCheckCircle,
+  HiOutlineCloud,
+  HiOutlineCalendarDays
 } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 
@@ -13,6 +15,9 @@ const DetailTinjauProposal: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [tanggapan, setTanggapan] = useState('');
+  
+  // State untuk mengontrol Modal Penyaluran Dana
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const detailData = {
     id: id || 'CSR-001',
@@ -29,8 +34,8 @@ const DetailTinjauProposal: React.FC = () => {
       toast.error('Harap isi tanggapan resmi perusahaan sebelum menyetujui.');
       return;
     }
-    toast.success('Pendanaan disetujui! Pemberitahuan telah dikirim ke Dinas.');
-    navigate(-1);
+    // Buka modal alih-alih langsung submit
+    setIsModalOpen(true);
   };
 
   const handleReject = () => {
@@ -42,8 +47,15 @@ const DetailTinjauProposal: React.FC = () => {
     navigate(-1);
   };
 
+  // Fungsi untuk submit dari dalam modal
+  const handleConfirmPenyaluran = () => {
+    setIsModalOpen(false);
+    toast.success('Bukti transfer berhasil dikirim! Pendanaan disetujui.');
+    navigate(-1);
+  };
+
   return (
-    <div className="flex flex-col gap-6 w-full mx-auto pb-12">
+    <div className="flex flex-col gap-6 w-full mx-auto pb-12 relative">
       <button 
         onClick={() => navigate(-1)}
         className="flex items-center gap-2 text-sm font-bold text-gray-700 hover:text-[#185325] self-start transition-colors"
@@ -54,7 +66,7 @@ const DetailTinjauProposal: React.FC = () => {
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 md:p-10 flex flex-col">
         <div className="mb-8">
-          <span className="inline-block px-3 py-1 bg-[#DCECE0] text-primary text-xs font-bold rounded-md mb-3">
+          <span className="inline-block px-3 py-1 bg-[#DCECE0] text-[#185325] text-xs font-bold rounded-md mb-3">
             {detailData.id}
           </span>
           <h1 className="text-2xl font-bold text-gray-800 uppercase">Tinjau Pengajuan</h1>
@@ -64,14 +76,14 @@ const DetailTinjauProposal: React.FC = () => {
           <div className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-gray-500">Kelompok Tani Hutan Pemohon</span>
             <div className="flex items-center gap-2 font-bold text-gray-800 text-sm">
-              <HiOutlineUser className="w-4 h-4 text-primary" />
+              <HiOutlineUser className="w-4 h-4 text-[#185325]" />
               {detailData.kthPemohon}
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-gray-500">Nama Ketua KTH</span>
             <div className="flex items-center gap-2 font-bold text-gray-800 text-sm">
-              <HiOutlineUser className="w-4 h-4 text-primary" />
+              <HiOutlineUser className="w-4 h-4 text-[#185325]" />
               {detailData.ketuaKTH}
             </div>
           </div>
@@ -119,7 +131,7 @@ const DetailTinjauProposal: React.FC = () => {
               maxLength={500}
               className="w-full h-32 p-4 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-[#185325] focus:border-[#185325] resize-none"
             />
-            <div className="absolute bottom-3 right-4 text-[10px] text-primary font-medium">
+            <div className="absolute bottom-3 right-4 text-[10px] text-[#185325] font-medium">
               {tanggapan.length}/500
             </div>
           </div>
@@ -139,8 +151,89 @@ const DetailTinjauProposal: React.FC = () => {
             <HiOutlineCheckCircle className="w-5 h-5" /> Setuju Pendanaan
           </button>
         </div>
-
       </div>
+
+      {/* --- MODAL PENYALURAN DANA CSR --- */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden zoom-in-95 relative p-8">
+            
+            {/* Tombol Close (X) */}
+            <button 
+              onClick={() => setIsModalOpen(false)} 
+              className="absolute right-6 top-6 text-gray-500 hover:text-gray-800 transition-colors"
+            >
+              <HiOutlineXMark className="w-6 h-6" />
+            </button>
+
+            {/* Header Modal */}
+            <div className="mb-6">
+              <h2 className="text-xl font-bold text-gray-800 mb-1">Penyaluran Dana CSR</h2>
+              <p className="text-sm text-gray-500">
+                Silakan unggah resi transfer bank Anda untuk mendanai proyek ini
+              </p>
+            </div>
+
+            {/* Kotak Info Hijau */}
+            <div className="bg-[#DCECE0] rounded-xl p-5 mb-6">
+              <div className="flex text-sm mb-2">
+                <span className="w-36 text-gray-700 font-medium">Nama Proyek</span>
+                <span className="font-bold text-[#185325]">: Rehabilitasi Citarum</span>
+              </div>
+              <div className="flex text-sm">
+                <span className="w-36 text-gray-700 font-medium">Total Nominal Dana</span>
+                <span className="font-bold text-[#185325]">: Rp 100.000.000</span>
+              </div>
+            </div>
+
+            {/* Form Inputs */}
+            <div className="space-y-5 mb-10">
+              {/* Tanggal Transfer */}
+              <div>
+                <label className="block text-sm text-gray-700 mb-2">Tanggal Transfer</label>
+                <div className="relative">
+                  <input 
+                    type="date" 
+                    className="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring-1 focus:ring-[#185325] text-gray-600 appearance-none bg-white"
+                  />
+                  <HiOutlineCalendarDays className="absolute right-4 top-3.5 w-5 h-5 text-gray-500 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Unggah Bukti */}
+              <div>
+                <label className="block text-sm text-gray-700 mb-2">Unggah Bukti Transfer</label>
+                <label className="flex items-center justify-between w-full px-4 py-3 border border-gray-300 rounded-full cursor-pointer hover:bg-gray-50 transition-colors">
+                  <span className="text-sm text-gray-400">Upload file</span>
+                  <HiOutlineCloud className="w-5 h-5 text-gray-500" />
+                  <input type="file" className="hidden" accept=".jpg,.jpeg,.png,.pdf" />
+                </label>
+                <p className="text-[11px] italic text-gray-600 mt-2 font-medium">
+                  Format JPG, PNG, PDF
+                </p>
+              </div>
+            </div>
+
+            {/* Buttons Batal & Kirim */}
+            <div className="flex justify-end gap-4">
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                className="px-10 py-2.5 bg-[#E5E7EB] hover:bg-gray-300 text-gray-700 text-sm font-bold rounded-full transition-colors"
+              >
+                Batal
+              </button>
+              <button 
+                onClick={handleConfirmPenyaluran}
+                className="px-10 py-2.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors shadow-sm"
+              >
+                Kirim
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

@@ -43,6 +43,15 @@ import CreateLaporanBiayaPengeluaran from "./pages/KelompokTaniHutan/InvestasiKT
 import BiayaPengeluaranIndex from "./pages/KelompokTaniHutan/InvestasiKTH/LaporanInvestasi/LaporanBiayaPengeluaran";
 import BiayaPemasukanIndex from "./pages/KelompokTaniHutan/InvestasiKTH/LaporanInvestasi/LaporanBiayaPemasukan";
 import BiayaPemasukanCreate from "./pages/KelompokTaniHutan/InvestasiKTH/LaporanInvestasi/LaporanBiayaPemasukan/CreateBiayaPemasukan";
+import DetailVerifikasiDanaCSRKABID from "./pages/KepalaBidangPDAS/VerifikasiDanaCSR/DetailVerifikasiDanaCSRKKABID";
+import VerifikasiDanaCSRKABID from "./pages/KepalaBidangPDAS/VerifikasiDanaCSR";
+import VerifikasiDanaCSR from "./pages/StaffPDAS/Investasi/VerifikasiDanaCSRSTAFF";
+import DetailVerifikasiDanaCSR from "./pages/StaffPDAS/Investasi/VerifikasiDanaCSRSTAFF/DetailVerifikasiDanaCSR";
+import LaporanKeuanganIndex from "./pages/CSR/LaporanKeuanganCSR";
+import DetailLaporanKeuangan from "./pages/CSR/LaporanKeuanganCSR/DetailLaporanKeuanganCSR";
+import LaporanDanaIndex from "./pages/KelompokTaniHutan/InvestasiKTH/LaporanDana";
+import CreateLaporanDana from "./pages/KelompokTaniHutan/InvestasiKTH/LaporanDana/CreateLaporanDana";
+import DetailLaporanDana from "./pages/KelompokTaniHutan/InvestasiKTH/LaporanDana/DetailLaporanDana";
 const Login = lazy(() => import("./pages/Authentication/Login"));
 const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -137,6 +146,8 @@ function App() {
                   <Route path="rehabilitasi/program-apbd/create" element={<CreateProgramAPBD />} />
                   <Route path="rehabilitasi/program-csr" element={<ProgramCSRList />} />
                   <Route path="rehabilitasi/program-csr/verifikasi/:id" element={<VerifikasiBerkasCSR />} />
+                  <Route path="rehabilitasi/verifikasi-dana-csr" element={<VerifikasiDanaCSR />} />
+                  <Route path="rehabilitasi/verifikasi-dana-csr/detail/:id" element={<DetailVerifikasiDanaCSR />} />
                   <Route path="rehabilitasi/monitoring-riwayat" element={<MonitoringRiwayatList />} />
 
                   {/* Monitoring */}
@@ -168,6 +179,8 @@ function App() {
                   <Route path="rehabilitasi/program-apbd/verifikasi/:id" element={<VerifikasiAPBD />} />
                   <Route path="rehabilitasi/program-csr" element={<DaftarUsulanCSR />} />
                   <Route path="rehabilitasi/program-csr/verifikasi/:id" element={<VerifikasiCSR />} />
+                  <Route path="rehabilitasi/verifikasi-dana-csr" element={<VerifikasiDanaCSRKABID />} />
+                  <Route path="rehabilitasi/verifikasi-dana-csr/detail/:id" element={<DetailVerifikasiDanaCSRKABID />} />
                   <Route path="rehabilitasi/riwayat-keputusan" element={<RiwayatKeputusan />} />
 
                   <Route path="evaluasi/penugasan" element={<KabidPenugasan />} />
@@ -190,6 +203,9 @@ function App() {
                   <Route path="rehabilitasi/ajukan-program-csr" element={<AjukanProgramCSR />} />
                   <Route path="rehabilitasi/riwayat-pengajuan" element={<RiwayatPengajuan />} />
                   <Route path="rehabilitasi/update-progres" element={<UpdateProgres />} />
+                  <Route path="rehabilitasi/laporan-dana" element={<LaporanDanaIndex />} />
+                  <Route path="rehabilitasi/laporan-dana/create" element={<CreateLaporanDana />} />
+                  <Route path="rehabilitasi/laporan-dana/detail/:id" element={<DetailLaporanDana />} />
                   <Route path="investasi/data" element={<DataInvestasiKTH />} />
                   <Route path="investasi/data/create" element={<CreateInvestasi />} />
                   <Route path="investasi/persetujuan" element={<PersetujuanInvestasi />} />
@@ -218,6 +234,8 @@ function App() {
                   <Route path="tinjau-proposal/detail/:id" element={<DetailTinjauProposal />} />
                   <Route path="riwayat-proposal" element={<RiwayatProposal />} />
                   <Route path="monitoring-proyek" element={<MonitoringProyek />} />
+                  <Route path="laporan-keuangan" element={<LaporanKeuanganIndex />} />
+                  <Route path="laporan-keuangan/detail/:id" element={<DetailLaporanKeuangan />} />
                 </Route>
               </Route>
 
