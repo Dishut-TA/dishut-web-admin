@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { HiOutlineChevronLeft } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 
 const DetailPersetujuan: React.FC = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  // const { id } = useParams();
   
   const [isAgreed, setIsAgreed] = useState(false);
 

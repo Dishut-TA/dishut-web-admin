@@ -16,7 +16,7 @@ interface ProposalCSR {
 const TinjauProposal: React.FC = () => {
   const navigate = useNavigate();
   
-  const [data, setData] = useState<ProposalCSR[]>([
+  const [data] = useState<ProposalCSR[]>([
     {
       id: 'CSR-001',
       rencanaKemitraan: 'Rehabilitasi Lahan Subang',

@@ -12,21 +12,29 @@ import ExportLaporanModal from './components/ExportLaporanModal';
 import DetailProgramModal from '@/pages/StaffPDAS/RealisasiBibitDonasi/ProgramDonasi/components/DetailProgramModal';
 
 const mockDataProgram: ProgramData[] = [
+
   { 
     id: '1', 
     nama: 'Penghijauan Hulu Citarum', 
     lokasi: 'Kab. Bandung', 
-    jenisBibit: [{ nama: 'Mahoni', jumlah: 5000 }, { nama: 'Sengon', jumlah: 3500 }], 
+    jenisBibit: [
+      { nama: 'Mahoni', jumlah: 5000, terealisasi: 0 },
+      { nama: 'Sengon', jumlah: 3500, terealisasi: 0 }
+    ],
     terkumpul: '8.500', 
-    status: 'Aktif' 
+    status: 'Aktif',
+    totalTerealisasi: '0'
   },
   { 
     id: '4', 
     nama: 'Penanaman Mangrove Pesisir Utara', 
     lokasi: 'Kab. Bekasi', 
-    jenisBibit: [{ nama: 'Mangrove', jumlah: 2000 }], 
+    jenisBibit: [
+      { nama: 'Mangrove', jumlah: 2000, terealisasi: 0 }
+    ],
     terkumpul: '0', 
-    status: 'Menunggu Verifikasi' 
+    status: 'Menunggu Verifikasi',
+    totalTerealisasi: '0'
   }
 ];
 

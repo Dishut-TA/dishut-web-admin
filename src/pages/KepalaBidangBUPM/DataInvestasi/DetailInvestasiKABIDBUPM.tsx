@@ -41,7 +41,7 @@ const DetailInvestasiKABIDBUPM: React.FC = () => {
     ]
   };
 
-  const handleRevisionSubmit = (alasan: string) => {
+  const handleRevisionSubmit = (_alasan: string) => {
     setShowRevisionModal(false);
     toast.error('Proposal dikembalikan untuk revisi.');
     navigate(-1);
