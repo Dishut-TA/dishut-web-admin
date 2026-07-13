@@ -59,6 +59,7 @@ import PelaksanaanPenanamanIndex from "./pages/Penyuluh/PelaksanaanPenanaman";
 import InputProgresPage from "./pages/Penyuluh/PelaksanaanPenanaman/CreateProgress";
 import MonitoringLanjutanIndex from "./pages/Penyuluh/MonitoringLanjutan";
 import FormMonitoringPage from "./pages/Penyuluh/MonitoringLanjutan/FormMonitoringPage";
+import DetailInvestasiKTH from "./pages/KelompokTaniHutan/DataInvestasiKTH/DetailInvestasiKTH";
 const Login = lazy(() => import("./pages/Authentication/Login"));
 const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -215,6 +216,7 @@ function App() {
                   <Route path="rehabilitasi/laporan-dana/detail/:id" element={<DetailLaporanDana />} />
                   <Route path="investasi/data" element={<DataInvestasiKTH />} />
                   <Route path="investasi/data/create" element={<CreateInvestasi />} />
+                  <Route path="investasi/data/detail/:id" element={<DetailInvestasiKTH />} />
                   <Route path="investasi/persetujuan" element={<PersetujuanInvestasi />} />
                   <Route path="investasi/persetujuan/detail/:id" element={<DetailPersetujuan />} />
                   <Route path="investasi/investor" element={<DataInvestorIndexKTH />} />
