@@ -100,7 +100,7 @@ const DataInvestasiKTH: React.FC = () => {
                   <td className="px-6 py-4 flex justify-center whitespace-nowrap">
                     <button 
                       title="Lihat Detail"
-                      onClick={() => navigate(`/admin/kth/investasi/detail/${item.id}`)}
+                      onClick={() => navigate(`/admin/kth/investasi/data/detail/${item.id}`)}
                       className="p-1.5 text-gray-500 hover:text-[#185325] hover:bg-[#DCECE0] rounded-full transition-colors"
                     >
                       <HiOutlineEye className="w-5 h-5" />

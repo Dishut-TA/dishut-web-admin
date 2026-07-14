@@ -59,6 +59,25 @@ import PelaksanaanPenanamanIndex from "./pages/Penyuluh/PelaksanaanPenanaman";
 import InputProgresPage from "./pages/Penyuluh/PelaksanaanPenanaman/CreateProgress";
 import MonitoringLanjutanIndex from "./pages/Penyuluh/MonitoringLanjutan";
 import FormMonitoringPage from "./pages/Penyuluh/MonitoringLanjutan/FormMonitoringPage";
+import DetailInvestasiKTH from "./pages/KelompokTaniHutan/DataInvestasiKTH/DetailInvestasiKTH";
+import InputEvaluasi from "./pages/StaffPDAS/EvaluasiPenanamanBibit/Penugasan/InputEvaluasi";
+import CreateInisiasiPenugasanEvaluasiKABID from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/InisiasiPenugasanEvaluasi/CreateInisiasiPenugasanEvaluasiKABID";
+import DataEvaluasiIndex from "./pages/StaffPDAS/EvaluasiPenanamanBibit/DataEvaluasi/DataEvaluasiIndex";
+import DraftLaporanIndividu from "./pages/StaffPDAS/EvaluasiPenanamanBibit/DataEvaluasi/DraftLaporanIndividu";
+import PenugasanEvaluasiSTAFFPDAS from "./pages/StaffPDAS/EvaluasiPenanamanBibit/Penugasan";
+import CreatePengesahanLaporanKabid from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/LaporanEvaluasi/CreatePengesahanLaporanKabid";
+import PengesahanLaporanKABID from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/LaporanEvaluasi";
+import CreatePenugasanEvaluasiStaffPDAS from "./pages/StaffPDAS/EvaluasiPenanamanBibit/Penugasan/InputEvaluasi";
+import InisiasiPenugasanEvaluasiKABID from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/InisiasiPenugasanEvaluasi";
+import DetailInisiasiPenugasan from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/InisiasiPenugasanEvaluasi/DetailInisiasiPenugasanEvaluasiKABID";
+import PerhitunganHasilEvaluasiStaff from "./pages/StaffPDAS/EvaluasiPenanamanBibit/PerhitunganHasilEvaluasi";
+import DetailPerhitunganHasilEvaluasiStaff from "./pages/StaffPDAS/EvaluasiPenanamanBibit/PerhitunganHasilEvaluasi/DetailPerhitunganHasilEvaluasiStaff";
+import ValidasiDataEvaluasiKABID from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/ValidasiDataEvaluasi";
+import DetailEvaluasiDataEvaluasiKABID from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/ValidasiDataEvaluasi/DetailValidasiDataEvaluasiKABID";
+import LaporanEvaluasiStaffPDAS from "./pages/StaffPDAS/EvaluasiPenanamanBibit/LaporanEvaluasiStaffPDAS";
+import CreateLaporanEvaluasiStaffPDAS from "./pages/StaffPDAS/EvaluasiPenanamanBibit/LaporanEvaluasiStaffPDAS/CreateLaporanEvaluasiStaffPDAS";
+import LaporanEvaluasiKABID from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/LaporanEvaluasi/LaporanEvaluasiKABID";
+import PengesahanLaporanEvaluasiKabid from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/LaporanEvaluasi/PengesahanLaporanEvaluasiKabid";
 const Login = lazy(() => import("./pages/Authentication/Login"));
 const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -71,7 +90,7 @@ const CreateProgramAPBD = lazy(() => import("./pages/StaffPDAS/Investasi/Program
 const ProgramCSRList = lazy(() => import("./pages/StaffPDAS/Investasi/ProgramCSR"));
 const VerifikasiBerkasCSR = lazy(() => import("./pages/StaffPDAS/Investasi/ProgramCSR/VerifikasiBerkas"));
 const MonitoringRiwayatList = lazy(() => import("./pages/StaffPDAS/Investasi/MonitoringRiwayat"));
-const CreateEvaluasi = lazy(() => import("./pages/StaffPDAS/EvaluasiPenanamanBibit/DataEvaluasi/CreateEvaluasi"));
+// const CreateEvaluasi = lazy(() => import("./pages/StaffPDAS/EvaluasiPenanamanBibit/DataEvaluasi/CreateEvaluasi"));
 const StaffTugasEvaluasi = lazy(() => import("./pages/StaffPDAS/EvaluasiPenanamanBibit/TugasMasuk"));
 const AnalisisLahanKritis = lazy(() => import("./pages/StaffPDAS/AnalisisLahanKritis"));
 const DashboardMonitoring = lazy(() => import("./pages/StaffPDAS/PelaksanaanDanMonitoring/DashboardMonitoring"));
@@ -79,7 +98,7 @@ const DaftarKegiatan = lazy(() => import("./pages/StaffPDAS/PelaksanaanDanMonito
 const VerifikasiMonitoring = lazy(() => import("./pages/StaffPDAS/PelaksanaanDanMonitoring/VerifikasiMonitoring"));
 const RekapMonitoring = lazy(() => import("./pages/StaffPDAS/PelaksanaanDanMonitoring/RekapMonitoring"));
 const DashboardEvaluasi = lazy(() => import("./pages/StaffPDAS/EvaluasiPenanamanBibit/DashboardEvaluasi"));
-const DataEvaluasi = lazy(() => import("./pages/StaffPDAS/EvaluasiPenanamanBibit/DataEvaluasi"));
+// const DataEvaluasi = lazy(() => import("./pages/StaffPDAS/EvaluasiPenanamanBibit/DataEvaluasi"));
 const DashboardProgramStaff = lazy(() => import("./pages/StaffPDAS/RealisasiBibitDonasi/Dashboard"));
 const ProgramDonasiStaff = lazy(() => import("./pages/StaffPDAS/RealisasiBibitDonasi/ProgramDonasi"));
 const CreateProgram = lazy(() => import("./pages/StaffPDAS/RealisasiBibitDonasi/ProgramDonasi/CreateProgram"));
@@ -98,7 +117,7 @@ const DetailRole = lazy(() => import("./pages/KepalaBidangPDAS/ManajemenAkun/Dat
 const DataHakAkses = lazy(() => import("./pages/KepalaBidangPDAS/ManajemenAkun/DataHakAkses"));
 const DetailHakAkses = lazy(() => import("./pages/KepalaBidangPDAS/ManajemenAkun/DataHakAkses/components/DetailHakAkses"));
 const KabidVerifikasiBAP = lazy(() => import("./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/VerifikasiLaporan"));
-const KabidPenugasan = lazy(() => import("./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/Penugasan"));
+// const KabidPenugasan = lazy(() => import("./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/Penugasan"));
 const DaftarUsulanAPBD = lazy(() => import("./pages/KepalaBidangPDAS/Investasi/ProgramUsulanAPBDKABID"));
 const VerifikasiAPBD = lazy(() => import("./pages/KepalaBidangPDAS/Investasi/ProgramUsulanAPBDKABID/VerifikasiAPBD"));
 const DaftarUsulanCSR = lazy(() => import("./pages/KepalaBidangPDAS/Investasi/ProgramCSRKABID/Index"));
@@ -165,8 +184,15 @@ function App() {
 
                   {/* Evaluasi */}
                   <Route path="evaluasi/dashboard" element={<DashboardEvaluasi />} />
-                  <Route path="evaluasi/data" element={<DataEvaluasi />} />
-                  <Route path="evaluasi/data/create" element={<CreateEvaluasi />} />
+                  <Route path="evaluasi/data" element={<DataEvaluasiIndex />} />
+                  <Route path="evaluasi/hasil" element={<PerhitunganHasilEvaluasiStaff />} />
+                  <Route path="evaluasi/hasil/detail/:id" element={<DetailPerhitunganHasilEvaluasiStaff />} />
+                  <Route path="evaluasi/data/create/:id" element={<InputEvaluasi />} />
+                  <Route path="evaluasi/laporan" element={<LaporanEvaluasiStaffPDAS />} />
+                  <Route path="evaluasi/laporan/create/:id" element={<CreateLaporanEvaluasiStaffPDAS />} />
+                  <Route path="evaluasi/laporan-individu" element={<DraftLaporanIndividu />} />
+                  <Route path="evaluasi/penugasan" element={<PenugasanEvaluasiSTAFFPDAS />} />
+                  <Route path="evaluasi/penugasan/create/:id" element={<CreatePenugasanEvaluasiStaffPDAS />} />
                   <Route path="evaluasi/tugas-masuk" element={<StaffTugasEvaluasi />} />
                 </Route>
               </Route>
@@ -190,8 +216,21 @@ function App() {
                   <Route path="rehabilitasi/verifikasi-dana-csr/detail/:id" element={<DetailVerifikasiDanaCSRKABID />} />
                   <Route path="rehabilitasi/riwayat-keputusan" element={<RiwayatKeputusan />} />
 
-                  <Route path="evaluasi/penugasan" element={<KabidPenugasan />} />
-                  <Route path="evaluasi/verifikasi-laporan" element={<KabidVerifikasiBAP />} />
+                  <Route path="evaluasi/penugasan" element={<InisiasiPenugasanEvaluasiKABID />} />
+                  <Route path="evaluasi/penugasan/create" element={<CreateInisiasiPenugasanEvaluasiKABID />} />
+                  <Route path="evaluasi/penugasan/detail/:id" element={<DetailInisiasiPenugasan />} />
+                  <Route path="evaluasi/validasi-evaluasi" element={<ValidasiDataEvaluasiKABID />} />
+                  <Route path="evaluasi/validasi-evaluasi/detail/:id" element={<DetailEvaluasiDataEvaluasiKABID />} />
+                  <Route path="evaluasi/validasi-evaluasi/detail/:id" element={<DetailEvaluasiDataEvaluasiKABID />} />
+                  <Route path="evaluasi/laporan" element={<LaporanEvaluasiKABID />} />
+                  <Route path="evaluasi/laporan/create/:id" element={<PengesahanLaporanEvaluasiKabid />} />
+
+                  {/* blm fixx */}
+                  {/* <Route path="evaluasi/laporan" element={<PengesahanLaporanKABID />} />
+                  <Route path="evaluasi/laporan/:id" element={<CreatePengesahanLaporanKabid />} />
+                  <Route path="evaluasi/laporan/:id" element={<CreatePengesahanLaporanKabid />} />
+                  <Route path="evaluasi/verifikasi-laporan" element={<KabidVerifikasiBAP />} /> */}
+                  {/* blm fixx */}
 
                   <Route path="manajemen-akun/data-pengguna" element={<DataPengguna />} />
                   <Route path="manajemen-akun/data-pengguna/detail/:id" element={<DetailPengguna />} />
@@ -215,6 +254,7 @@ function App() {
                   <Route path="rehabilitasi/laporan-dana/detail/:id" element={<DetailLaporanDana />} />
                   <Route path="investasi/data" element={<DataInvestasiKTH />} />
                   <Route path="investasi/data/create" element={<CreateInvestasi />} />
+                  <Route path="investasi/data/detail/:id" element={<DetailInvestasiKTH />} />
                   <Route path="investasi/persetujuan" element={<PersetujuanInvestasi />} />
                   <Route path="investasi/persetujuan/detail/:id" element={<DetailPersetujuan />} />
                   <Route path="investasi/investor" element={<DataInvestorIndexKTH />} />

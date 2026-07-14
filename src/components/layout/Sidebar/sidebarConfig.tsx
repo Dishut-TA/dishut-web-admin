@@ -74,8 +74,11 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
                 id: 'evaluasi', title: 'Evaluasi Penanaman Bibit', icon: <HiOutlineGlobeAlt className="w-5 h-5" />,
                 items: [
                     { name: 'Dashboard Evaluasi', path: `${basePath}/evaluasi/dashboard` },
-                    { name: 'Data Evaluasi', path: `${basePath}/evaluasi/data` },
-                    { name: 'Tugas Masuk', path: `${basePath}/evaluasi/tugas-masuk` },
+                    // { name: 'Data Evaluasi', path: `${basePath}/evaluasi/data` },
+                    { name: 'Penugasan Evaluasi', path: `${basePath}/evaluasi/penugasan` },
+                    { name: 'Perhitungan Hasil Evaluasi', path: `${basePath}/evaluasi/hasil` },
+                    { name: 'Laporan Evaluasi', path: `${basePath}/evaluasi/laporan` },
+                    // { name: 'Tugas Masuk', path: `${basePath}/evaluasi/tugas-masuk` },
                 ],
             },
             ...(canManageAccounts(user) ? [menuManajemenAkun] : [])
@@ -106,8 +109,10 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
             {
                 id: 'evaluasi', title: 'Evaluasi Penanaman Bibit', icon: <HiOutlineGlobeAlt className="w-5 h-5" />,
                 items: [
-                    { name: 'Penugasan', path: `${basePath}/evaluasi/penugasan` },
-                    { name: 'Verifikasi Laporan', path: `${basePath}/evaluasi/verifikasi-laporan` },
+                    { name: 'Penugasan Evaluasi', path: `${basePath}/evaluasi/penugasan` },
+                    { name: 'Validasi Data Evaluasi', path: `${basePath}/evaluasi/validasi-evaluasi` },
+                    // { name: 'Verifikasi Laporan', path: `${basePath}/evaluasi/verifikasi-laporan` },
+                    { name: 'Laporan Evaluasi', path: `${basePath}/evaluasi/laporan` },
                 ],
             },
             ...(userRole === ROLES.KABID || canManageAccounts(user) ? [menuManajemenAkun] : [])
