@@ -26,7 +26,7 @@ const StatSummaryCard: React.FC<StatSummaryCardProps> = ({ title, value, unit, i
       </div>
       
       <div>
-        <h3 className="text-3xl font-black text-gray-800 tracking-tight">
+        <h3 className="text-3xl font-bold text-gray-800 tracking-tight">
           {value} <span className="text-sm font-semibold text-gray-500">{unit}</span>
         </h3>
         <p className="text-sm font-medium text-gray-500 mt-1">{title}</p>

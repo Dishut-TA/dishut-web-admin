@@ -46,11 +46,10 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ isOpen, onC
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 z-40 md:hidden" onClick={onClose} />
+        <div className="fixed inset-0 z-40" onClick={onClose} />
       )}
-
       <div 
-        className={`absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-96 bg-white rounded-2xl shadow-[0_10px_40px_rgb(0,0,0,0.15)] border border-gray-100 p-4 z-50 transform origin-top-right transition-all duration-300 ease-out
+        className={`absolute -right-10 sm:right-0 mt-3 w-[calc(100vw-2rem)] max-w-90 bg-white rounded-2xl shadow-[0_10px_40px_rgb(0,0,0,0.15)] border border-gray-100 p-4 z-50 transform origin-top-right transition-all duration-300 ease-out
           ${isOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-95 opacity-0 -translate-y-2 pointer-events-none'}
         `}
       >
@@ -61,7 +60,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ isOpen, onC
           </span>
         </div>
 
-        <div className="space-y-4 max-h-[70vh] overflow-y-auto no-scrollbar pb-2">
+        <div className="space-y-4 max-h-[60vh] overflow-y-auto no-scrollbar pb-2">
           {notifications.length > 0 ? (
             notifications.map((notif) => (
               <div key={notif.id} className="border border-dashed border-gray-300 hover:border-[#185325]/40 rounded-xl p-4 relative bg-white transition-colors group">
@@ -83,13 +82,13 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ isOpen, onC
                   {notif.pihakPendana} telah mengirim <strong>{notif.nominal}</strong> untuk proyek <strong>{notif.namaProyek}.</strong>
                 </p>
                 
-                <div className="flex justify-end gap-3">
-                  <button className="px-5 py-2 bg-gray-100 text-gray-400 text-xs font-bold rounded-full cursor-not-allowed">
+                <div className="flex justify-end gap-2 sm:gap-3">
+                  <button className="px-4 sm:px-5 py-2 bg-gray-100 text-gray-400 text-[11px] sm:text-xs font-bold rounded-full cursor-not-allowed">
                     Lihat Resi
                   </button>
                   <button 
                     onClick={() => handleKonfirmasiClick(notif)}
-                    className="px-5 py-2 bg-[#185325] hover:bg-[#123d1c] text-white text-xs font-bold rounded-full transition-transform active:scale-95 shadow-sm"
+                    className="px-4 sm:px-5 py-2 bg-[#185325] hover:bg-[#123d1c] text-white text-[11px] sm:text-xs font-bold rounded-full transition-transform active:scale-95 shadow-sm whitespace-nowrap"
                   >
                     Konfirmasi
                   </button>
