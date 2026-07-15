@@ -10,8 +10,6 @@ const AnalisisLahanKritis = () => {
 
     const handleUploadSuccess = (responseData: any) => {
         console.log("Upload berhasil! Data API:", responseData);
-        // Catatan: Sesuaikan 'responseData.geojson' dengan struktur JSON asli dari backend Anda
-        // Biasanya API mengembalikan geojson di dalam responseData.data atau langsung.
         const gisGeoJSON = responseData?.data?.geojson || responseData?.geojson || responseData;
         
         setGeoData(gisGeoJSON);
@@ -26,14 +24,13 @@ const AnalisisLahanKritis = () => {
         if (status.includes('kritis')) {
             return { color: '#F59E0B', fillColor: '#fde047', fillOpacity: 0.7, weight: 1 }; 
         }
-        // Tidak Kritis
         return { color: '#10B981', fillColor: '#86efac', fillOpacity: 0.7, weight: 1 }; 
     };
 
     return (
         <div className="flex flex-col gap-4 md:gap-6 relative">
             <h1 className="text-xl md:text-2xl font-bold text-gray-800">
-                Analisis Conservation Priority Index (CPI)
+                Dashboard Analisis CPI
             </h1>
 
             <div className="bg-white rounded-xl shadow-sm p-4 md:p-6 border border-gray-100">
@@ -66,7 +63,6 @@ const AnalisisLahanKritis = () => {
                                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                             />
-                            {/* Render GeoJSON dan aplikasikan warna (style) */}
                             <GeoJSON 
                                 key={Math.random()}
                                 data={geoData} 
@@ -112,6 +108,7 @@ const AnalisisLahanKritis = () => {
                                 <th className="px-4 md:px-6 py-3 md:py-4 font-bold whitespace-nowrap">Desa</th>
                                 <th className="px-4 md:px-6 py-3 md:py-4 font-bold whitespace-nowrap text-center">Status Lahan</th>
                                 <th className="px-4 md:px-6 py-3 md:py-4 font-bold whitespace-nowrap text-center">Skor CPI</th>
+                                <th className="px-4 md:px-6 py-3 md:py-4 font-bold whitespace-nowrap text-center">Rekomendasi Intervensi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -127,11 +124,14 @@ const AnalisisLahanKritis = () => {
                                         <td className="px-4 md:px-6 py-4 text-center text-[#185325] font-bold">
                                             {feature.properties?.cpi_score ? Number(feature.properties.cpi_score).toFixed(2) : '-'}
                                         </td>
+                                        <td className="px-4 md:px-6 py-4 text-center text-[#185325] font-bold">
+                                            -
+                                        </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                                    <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
                                         Belum ada hasil analisis. Silakan unggah data GIS.
                                     </td>
                                 </tr>

@@ -24,7 +24,7 @@ import DetailInvestasiKABIDBUPM from "./pages/KepalaBidangBUPM/DataInvestasi/Det
 import DataInvestorIndexKABIDBUPM from "./pages/KepalaBidangBUPM/DataInvestor";
 import DetailInvestorKABIDBUPM from "./pages/KepalaBidangBUPM/DataInvestor/DetailInvestor";
 import LaporanProyekIndexKABIDBUPM from "./pages/KepalaBidangBUPM/LaporanProyek";
-import AjukanProgramCSR from "./pages/KelompokTaniHutan/Rehabilitasi/AjukanProgramCSR";
+import AjukanProgramCSR from "./pages/KelompokTaniHutan/Rehabilitasi/PendanaanCSR/AjukanProgramCSR";
 import RiwayatPengajuan from "./pages/KelompokTaniHutan/Rehabilitasi/RiwayatPengajuan";
 import UpdateProgres from "./pages/KelompokTaniHutan/Rehabilitasi/UpdateProgress";
 import DataInvestasiKTH from "./pages/KelompokTaniHutan/DataInvestasiKTH/DataInvestasi";
@@ -65,8 +65,8 @@ import CreateInisiasiPenugasanEvaluasiKABID from "./pages/KepalaBidangPDAS/Evalu
 import DataEvaluasiIndex from "./pages/StaffPDAS/EvaluasiPenanamanBibit/DataEvaluasi/DataEvaluasiIndex";
 import DraftLaporanIndividu from "./pages/StaffPDAS/EvaluasiPenanamanBibit/DataEvaluasi/DraftLaporanIndividu";
 import PenugasanEvaluasiSTAFFPDAS from "./pages/StaffPDAS/EvaluasiPenanamanBibit/Penugasan";
-import CreatePengesahanLaporanKabid from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/LaporanEvaluasi/CreatePengesahanLaporanKabid";
-import PengesahanLaporanKABID from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/LaporanEvaluasi";
+// import CreatePengesahanLaporanKabid from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/LaporanEvaluasi/CreatePengesahanLaporanKabid";
+// import PengesahanLaporanKABID from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/LaporanEvaluasi";
 import CreatePenugasanEvaluasiStaffPDAS from "./pages/StaffPDAS/EvaluasiPenanamanBibit/Penugasan/InputEvaluasi";
 import InisiasiPenugasanEvaluasiKABID from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/InisiasiPenugasanEvaluasi";
 import DetailInisiasiPenugasan from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/InisiasiPenugasanEvaluasi/DetailInisiasiPenugasanEvaluasiKABID";
@@ -78,6 +78,8 @@ import LaporanEvaluasiStaffPDAS from "./pages/StaffPDAS/EvaluasiPenanamanBibit/L
 import CreateLaporanEvaluasiStaffPDAS from "./pages/StaffPDAS/EvaluasiPenanamanBibit/LaporanEvaluasiStaffPDAS/CreateLaporanEvaluasiStaffPDAS";
 import LaporanEvaluasiKABID from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/LaporanEvaluasi/LaporanEvaluasiKABID";
 import PengesahanLaporanEvaluasiKabid from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/LaporanEvaluasi/PengesahanLaporanEvaluasiKabid";
+import PendanaanCSR from "./pages/KelompokTaniHutan/Rehabilitasi/PendanaanCSR";
+import PendanaanAPBD from "./pages/KelompokTaniHutan/Rehabilitasi/PendanaanAPBD";
 const Login = lazy(() => import("./pages/Authentication/Login"));
 const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -116,7 +118,7 @@ const DataPeranPengguna = lazy(() => import("./pages/KepalaBidangPDAS/ManajemenA
 const DetailRole = lazy(() => import("./pages/KepalaBidangPDAS/ManajemenAkun/DataPeranPengguna/components/DetailRole"));
 const DataHakAkses = lazy(() => import("./pages/KepalaBidangPDAS/ManajemenAkun/DataHakAkses"));
 const DetailHakAkses = lazy(() => import("./pages/KepalaBidangPDAS/ManajemenAkun/DataHakAkses/components/DetailHakAkses"));
-const KabidVerifikasiBAP = lazy(() => import("./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/VerifikasiLaporan"));
+// const KabidVerifikasiBAP = lazy(() => import("./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/VerifikasiLaporan"));
 // const KabidPenugasan = lazy(() => import("./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/Penugasan"));
 const DaftarUsulanAPBD = lazy(() => import("./pages/KepalaBidangPDAS/Investasi/ProgramUsulanAPBDKABID"));
 const VerifikasiAPBD = lazy(() => import("./pages/KepalaBidangPDAS/Investasi/ProgramUsulanAPBDKABID/VerifikasiAPBD"));
@@ -246,7 +248,9 @@ function App() {
                 <Route path="kth">
                   <Route index element={<Navigate to="dashboard" replace />} />
                   <Route path="dashboard" element={<DashboardKTH />} />
-                  <Route path="rehabilitasi/ajukan-program-csr" element={<AjukanProgramCSR />} />
+                  <Route path="rehabilitasi/pendanaan-csr" element={<PendanaanCSR />} />
+                  <Route path="rehabilitasi/pendanaan-csr/create" element={<AjukanProgramCSR />} />
+                  <Route path="rehabilitasi/pendanaan-apbd" element={<PendanaanAPBD />} />
                   <Route path="rehabilitasi/riwayat-pengajuan" element={<RiwayatPengajuan />} />
                   <Route path="rehabilitasi/update-progres" element={<UpdateProgres />} />
                   <Route path="rehabilitasi/laporan-dana" element={<LaporanDanaIndex />} />

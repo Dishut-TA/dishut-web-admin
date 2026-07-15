@@ -158,10 +158,11 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
         single: [dashboard],
         accordion: [
             {
-                id: 'rehabilitasi-kth', title: 'Rehabilitasi (CSR)', icon: <HiOutlineMap className="w-5 h-5" />,
+                id: 'rehabilitasi-kth', title: 'Rehabilitasi', icon: <HiOutlineMap className="w-5 h-5" />,
                 items: [
-                    { name: 'Ajukan Program CSR', path: `${basePath}/rehabilitasi/ajukan-program-csr` },
-                    { name: 'Riwayat Pengajuan', path: `${basePath}/rehabilitasi/riwayat-pengajuan` },
+                    { name: 'Pendanaan CSR', path: `${basePath}/rehabilitasi/pendanaan-csr` },
+                    { name: 'Pendanaan APBD', path: `${basePath}/rehabilitasi/pendanaan-apbd` },
+                    // { name: 'Riwayat Pengajuan', path: `${basePath}/rehabilitasi/riwayat-pengajuan` },
                     { name: 'Update Progres', path: `${basePath}/rehabilitasi/update-progres` },
                     { name: 'Laporan Dana', path: `${basePath}/rehabilitasi/laporan-dana` },
                 ],
