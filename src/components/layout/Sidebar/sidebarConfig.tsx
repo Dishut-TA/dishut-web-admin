@@ -56,7 +56,7 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
                 items: [
                     { name: 'Dashboard Program', path: `${basePath}/donasi/dashboard` },
                     { name: 'Data Program', path: `${basePath}/donasi/program` },
-                    { name: 'Data Donatur', path: `${basePath}/donasi/donatur` },
+                    { name: 'Data Donasi', path: `${basePath}/donasi/donatur` },
                     { name: 'Pelaksanaan Kegiatan', path: `${basePath}/donasi/pelaksanaan-kegiatan` },
                 ],
             },

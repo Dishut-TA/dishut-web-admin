@@ -48,9 +48,9 @@ const DetailVerifikasiLapanganKabid: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-5xl mx-auto pb-12">
-      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-bold text-gray-700 hover:text-[#185325] self-start transition-colors">
-        <HiOutlineChevronLeft className="w-4 h-4" strokeWidth={2.5} /> Kembali ke Daftar Verifikasi
+    <div className="flex flex-col gap-6 w-full mx-auto pb-12">
+      <button onClick={() => navigate(-1)} className="flex cursor-pointer items-center gap-2 text-sm font-bold text-gray-700 hover:text-[#185325] self-start transition-colors">
+        <HiOutlineChevronLeft className="w-4 h-4" strokeWidth={2.5} /> Kembali
       </button>
 
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-10">
@@ -89,29 +89,25 @@ const DetailVerifikasiLapanganKabid: React.FC = () => {
                   const persen = hitungPersenPerPU(item.rencana, item.tumbuh);
                   const isAnomali = item.anomali; // Murni mengambil state anomali dari data
                   const isLulus = parseFloat(persen) >= 75;
-                  
                   return (
                     <React.Fragment key={idx}>
-                      {/* Baris Utama */}
                       <tr className={`hover:bg-gray-50 ${isAnomali ? 'bg-red-50/30' : ''}`}>
                         <td className="px-5 py-4 font-bold text-[#185325]">{item.pu}</td>
                         <td className="px-5 py-4 text-center">{item.rencana}</td>
                         <td className="px-5 py-4 text-center font-bold text-gray-800">{item.tumbuh}</td>
                         
-                        {/* Kolom Persentase Tumbuh */}
-                        <td className={`px-5 py-4 text-center border-x border-gray-100 font-black ${isLulus ? 'text-[#00A859]' : 'text-red-500'}`}>
+                        <td className={`px-5 py-4 text-center border-x border-gray-100 font-bold ${isLulus ? 'text-[#00A859]' : 'text-red-500'}`}>
                           {persen}%
                         </td>
 
                         <td className={`px-5 py-4 text-center ${isAnomali ? 'text-red-600 font-bold' : ''}`}>{item.tinggi} cm</td>
                         <td className="px-5 py-4 text-xs text-gray-500 font-medium">{item.koordinat}</td>
                         <td className="px-5 py-4 flex justify-center">
-                          <button title="Lihat Foto" className="text-blue-600 hover:text-blue-800 bg-blue-50 p-2 rounded-lg transition-colors">
+                          <button title="Lihat Foto" className="text-primary hover:text-tertiary bg-greenAdmin cursor-pointer p-2 rounded-full transition-colors">
                             <HiOutlinePhoto className="w-5 h-5" />
                           </button>
                         </td>
                       </tr>
-                      {/* Baris Peringatan Anomali (Jika Ada) */}
                       {isAnomali && (
                         <tr className="bg-red-50 border-b border-red-100">
                           <td colSpan={7} className="px-5 py-2.5 text-xs text-red-600 font-medium">
@@ -130,10 +126,7 @@ const DetailVerifikasiLapanganKabid: React.FC = () => {
           </div>
         </div>
 
-        {/* DECISION AREA */}
         <div className="border-t border-gray-100 pt-8">
-          
-          {/* Form Catatan Revisi */}
           {showRevisi && (
             <div className="mb-6 p-5 bg-gray-50 border border-gray-200 rounded-2xl animate-in fade-in zoom-in-95 duration-200">
               <label className="block text-sm font-bold text-gray-800 mb-2">Catatan Revisi untuk Tim Penilai <span className="text-red-500">*</span></label>
@@ -142,7 +135,7 @@ const DetailVerifikasiLapanganKabid: React.FC = () => {
                 value={catatanRevisi}
                 onChange={(e) => setCatatanRevisi(e.target.value)}
                 placeholder="Tuliskan instruksi perbaikan..."
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-[#185325] outline-none resize-none mb-4 shadow-inner"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-[#185325] resize-none mb-4"
               />
               <div className="flex justify-end gap-3">
                 <button onClick={() => setShowRevisi(false)} className="px-5 py-2.5 bg-white border border-gray-300 text-gray-700 font-bold rounded-xl text-sm hover:bg-gray-50 transition-colors">
@@ -155,7 +148,6 @@ const DetailVerifikasiLapanganKabid: React.FC = () => {
             </div>
           )}
 
-          {/* Tombol Aksi Utama */}
           {!showRevisi && (
             <div className="flex flex-col sm:flex-row justify-end gap-4">
               <button 

@@ -144,7 +144,6 @@ const ProgramDonasi: React.FC = () => {
                 <th className="px-6 py-4 whitespace-nowrap">Lokasi</th>
                 <th className="px-6 py-4 whitespace-nowrap">Jenis Bibit</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">Terkumpul</th>
-                {/* Kolom Baru */}
                 <th className="px-6 py-4 whitespace-nowrap text-center">Terealisasi</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">Status</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">Aksi</th>
@@ -182,7 +181,6 @@ const ProgramDonasi: React.FC = () => {
                       {program.terkumpul}
                     </td>
                     
-                    {/* Data Baru Terealisasi */}
                     <td className="px-6 py-4 text-sm font-bold text-[#185325] text-center whitespace-nowrap">
                       {program.totalTerealisasi}
                     </td>

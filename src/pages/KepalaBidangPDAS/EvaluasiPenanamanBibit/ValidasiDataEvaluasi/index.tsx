@@ -66,11 +66,11 @@ const ValidasiDataEvaluasiKABID: React.FC = () => {
                   <td className="px-6 py-5 text-center text-sm font-bold text-gray-700">{item.totalPU} Petak</td>
                   <td className="px-6 py-5 text-center">
                     {item.anomali ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-red-50 text-red-600 rounded-md text-[10px] font-bold border border-red-100">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-red-50 text-red-600 rounded-full text-[10px] font-bold border border-red-100">
                         <HiOutlineExclamationTriangle className="w-3.5 h-3.5" /> Anomali Terdeteksi
                       </span>
                     ) : (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-50 text-green-600 rounded-md text-[10px] font-bold border border-green-100">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-50 text-green-600 rounded-full text-[10px] font-bold border border-green-100">
                         <HiCheckCircle className="w-3.5 h-3.5" /> Tidak ada Anomali
                       </span>
                     )}
@@ -80,10 +80,10 @@ const ValidasiDataEvaluasiKABID: React.FC = () => {
                       {item.status}
                     </span>
                   </td>
-                  <td className="px-6 py-5 flex justify-center">
+                  <td className="px-6 py-5 mx-auto text-center">
                     <button 
                       onClick={() => navigate(`/admin/kabid/evaluasi/validasi-evaluasi/detail/${item.id}`)}
-                      className="flex items-center justify-center gap-1.5 px-4 py-2 border-2 border-[#185325] text-[#185325] hover:bg-[#f0f9f3] text-xs font-bold rounded-lg transition-colors shadow-sm"
+                      className="flex items-center justify-center cursor-pointer gap-1.5 px-4 py-2 border border-[#185325] text-[#185325] hover:bg-[#f0f9f3] text-xs font-bold rounded-lg transition-colors"
                     >
                       <HiOutlineClipboardDocumentCheck className="w-4 h-4" /> Tinjau Data
                     </button>

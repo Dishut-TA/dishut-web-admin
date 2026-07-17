@@ -11,8 +11,6 @@ import toast from 'react-hot-toast';
 
 const DetailPerhitunganHasilEvaluasiStaff: React.FC = () => {
   const navigate = useNavigate();
-
-  // State untuk mengontrol jalannya alur sesuai Activity Diagram
   const [isCalculating, setIsCalculating] = useState(false);
   const [hasCalculated, setHasCalculated] = useState(false);
   const [isLoadingMap, setIsLoadingMap] = useState(false);
@@ -31,7 +29,6 @@ const DetailPerhitunganHasilEvaluasiStaff: React.FC = () => {
     { pu: 'PU-4', rencana: 40, tumbuh: 28, tinggi: 110.0, koordinat: '-6.24, 106.85' }, 
   ];
 
-  // State untuk menampung hasil integrasi CPI (Sesuai output akhir dari Sistem di AD 3)
   const [hasilIntegrasi, setHasilIntegrasi] = useState({
     persenTumbuhGlobal: '0.00',
     skorCPILingkungan: '0.00', // Diambil dari Modul Analisis CPI
@@ -44,7 +41,6 @@ const DetailPerhitunganHasilEvaluasiStaff: React.FC = () => {
     return ((tumbuh / rencana) * 100).toFixed(2);
   };
 
-  // Alur AD 3: Mengajukan Proses Perhitungan Hasil Evaluasi
   const handleHitung = () => {
     setIsCalculating(true);
     const loading = toast.loading('Sistem sedang menghitung persentase, menarik skor CPI, dan merumuskan rekomendasi...');
@@ -97,13 +93,11 @@ const DetailPerhitunganHasilEvaluasiStaff: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-6 w-full mx-auto pb-12">
-      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-bold text-gray-700 hover:text-[#185325] self-start transition-colors">
-        <HiOutlineChevronLeft className="w-4 h-4" strokeWidth={2.5} /> Kembali ke Daftar Program
+      <button onClick={() => navigate(-1)} className="flex cursor-pointer items-center gap-2 text-sm font-bold text-primary hover:text-tertiary self-start transition-colors">
+        <HiOutlineChevronLeft className="w-4 h-4" strokeWidth={2.5} /> Kembali
       </button>
 
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-10">
-        
-        {/* HEADER */}
         <div className="border-b border-gray-100 pb-6 mb-8">
           <h1 className="text-xl md:text-2xl font-bold text-gray-800 mb-4">Detail Perhitungan Hasil Evaluasi</h1>
           <div className="bg-[#f8fbf9] border border-[#DCECE0] rounded-xl p-5 text-sm text-gray-700 space-y-2">
