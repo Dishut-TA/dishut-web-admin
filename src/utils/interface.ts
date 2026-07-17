@@ -36,14 +36,28 @@ export interface RoleType {
   diperbarui_pada: string;
 }
 
+export interface ProfilDetail {
+  id: number;
+  nip: string | null;
+  no_telp: string | null;
+  tanggal_lahir: string | null;
+  alamat: string | null;
+  foto_profile: string | null;
+}
+
 export interface UserProfile {
   id: number;
   nama_pengguna: string;
   email: string;
-  nip: string;
+  nip: string | null;
   peran: RoleType[];
   dibuat_pada: string;
   diperbarui_pada: string;
+  profil?: ProfilDetail; 
+  no_telp?: string | null;
+  tanggal_lahir?: string | null;
+  alamat?: string | null;
+  foto_profile?: string | null;
 }
 
 export type StatusType = 'Terealisasi' | 'Disalurkan' | 'Terkumpul' | 'Menunggu Verifikasi';

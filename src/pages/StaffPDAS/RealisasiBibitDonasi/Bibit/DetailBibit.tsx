@@ -23,7 +23,7 @@ const DetailBibit: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto pb-12">
+    <div className="w-full mx-auto pb-12">
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           <button 
@@ -50,7 +50,7 @@ const DetailBibit: React.FC = () => {
               </span>
               <span className="text-xs font-bold text-gray-400">ID: {bibitData.id}</span>
             </div>
-            <h2 className="text-3xl font-black text-[#185325] mb-2">{bibitData.nama}</h2>
+            <h2 className="text-3xl font-bold text-[#185325] mb-2">{bibitData.nama}</h2>
             <div className="flex items-center gap-1.5 text-sm font-semibold text-gray-600">
               <HiOutlineCheckBadge className="w-5 h-5 text-blue-500" />
               Status: {bibitData.sertifikasi}
@@ -77,7 +77,7 @@ const DetailBibit: React.FC = () => {
                       {item.spek}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <span className="text-lg font-black text-[#185325]">
+                      <span className="text-lg font-bold text-[#185325]">
                         {formatRupiah(item.harga)}
                       </span>
                     </td>
@@ -88,7 +88,6 @@ const DetailBibit: React.FC = () => {
           </div>
           
           <div className="mt-4 p-4 bg-blue-50/50 rounded-xl border border-blue-100 flex items-start gap-3">
-            <div className="mt-0.5 text-blue-500 font-bold text-lg">ℹ</div>
             <p className="text-xs text-blue-800 leading-relaxed">
               Harga di atas dihitung berdasarkan penawaran katalog vendor dan digunakan sistem untuk mengkalkulasi estimasi anggaran secara otomatis saat Kelompok Tani atau CSR melakukan penyusunan RAB rehabilitasi lahan.
             </p>
