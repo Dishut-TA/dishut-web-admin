@@ -79,7 +79,7 @@ const InisiasiPenugasanKABID: React.FC = () => {
                     <button 
                       onClick={() => navigate(`/admin/kabid/evaluasi/penugasan/detail/${item.id}`)}
                       title="Lihat Detail Penugasan"
-                      className="p-2 text-gray-500 hover:text-[#185325] hover:bg-[#DCECE0] rounded-lg transition-colors shadow-sm border border-transparent hover:border-[#185325]/20"
+                      className="p-2 text-gray-500 hover:text-[#185325] hover:bg-greenAdmin transition-colors rounded-full cursor-pointer"
                     >
                       <HiOutlineEye className="w-5 h-5" />
                     </button>

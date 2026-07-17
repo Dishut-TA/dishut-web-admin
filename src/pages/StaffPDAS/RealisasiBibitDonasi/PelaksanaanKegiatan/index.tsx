@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { 
   HiOutlineArrowRight, 
-  HiOutlineEye, 
   HiOutlineDocumentText, 
   HiOutlineCloudArrowUp,
   HiOutlinePhoto
@@ -9,8 +8,8 @@ import {
 import toast from 'react-hot-toast'; 
 
 import PreviewBastModal from './components/PreviewBastModal';
-import RincianDanaModal from './components/RincianDanaModal';
 import UploadBastModal from './components/UploadBastModal';
+import RincianDanaModal from './components/RincianDanaModal';
 
 export type StatusKegiatan = 'Terkumpul' | 'Disalurkan' | 'Terealisasi';
 type ModalType = 'previewBAST' | 'rincian' | 'uploadBAST' | null;
@@ -149,7 +148,7 @@ const PelaksanaanKegiatan: React.FC = () => {
                 <th className="px-6 py-4 whitespace-nowrap">Jenis & Jumlah Bibit</th>
                 <th className="px-6 py-4 whitespace-nowrap">Status Saat Ini</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">Dokumen & Administrasi</th>
-                <th className="px-6 py-4 whitespace-nowrap text-center">Aksi</th>
+                {/* <th className="px-6 py-4 whitespace-nowrap text-center">Aksi</th> */}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -216,7 +215,7 @@ const PelaksanaanKegiatan: React.FC = () => {
                   </td>
 
                   {/* KOLOM AKSI: Hanya Ikon Mata */}
-                  <td className="px-6 py-4 whitespace-nowrap align-middle">
+                  {/* <td className="px-6 py-4 whitespace-nowrap align-middle">
                     <div className="flex items-center justify-center">
                       <button 
                         onClick={() => openModal('rincian', row)} 
@@ -226,7 +225,7 @@ const PelaksanaanKegiatan: React.FC = () => {
                         <HiOutlineEye className="w-5 h-5" />
                       </button>
                     </div>
-                  </td>
+                  </td> */}
                 </tr>
               ))}
             </tbody>

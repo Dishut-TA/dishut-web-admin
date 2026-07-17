@@ -4,14 +4,84 @@ import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css'; 
 import InputDataModal from './components/InputDataModal';
 
+// --- DUMMY DATA GEOJSON ---
+const dummyGeoJSON = {
+    type: "FeatureCollection",
+    features: [
+        {
+            type: "Feature",
+            properties: {
+                kabupaten: "Bandung",
+                kecamatan: "Lembang",
+                desa: "Cikole",
+                status: "Sangat Kritis",
+                cpi_score: 85.5
+            },
+            geometry: {
+                type: "Polygon",
+                // Format koordinat: [Longitude, Latitude]
+                coordinates: [[
+                    [107.60, -6.82],
+                    [107.65, -6.82],
+                    [107.65, -6.78],
+                    [107.60, -6.78],
+                    [107.60, -6.82]
+                ]]
+            }
+        },
+        {
+            type: "Feature",
+            properties: {
+                kabupaten: "Bandung Barat",
+                kecamatan: "Parongpong",
+                desa: "Cihideung",
+                status: "Kritis",
+                cpi_score: 65.2
+            },
+            geometry: {
+                type: "Polygon",
+                coordinates: [[
+                    [107.50, -6.85],
+                    [107.55, -6.85],
+                    [107.55, -6.80],
+                    [107.50, -6.80],
+                    [107.50, -6.85]
+                ]]
+            }
+        },
+        {
+            type: "Feature",
+            properties: {
+                kabupaten: "Bandung",
+                kecamatan: "Ciwidey",
+                desa: "Panundaan",
+                status: "Tidak Kritis",
+                cpi_score: 25.1
+            },
+            geometry: {
+                type: "Polygon",
+                coordinates: [[
+                    [107.40, -7.15],
+                    [107.45, -7.15],
+                    [107.45, -7.10],
+                    [107.40, -7.10],
+                    [107.40, -7.15]
+                ]]
+            }
+        }
+    ]
+};
+// ---------------------------
+
 const AnalisisLahanKritis = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [geoData, setGeoData] = useState<any>(null);
+    
+    // Memasukkan dummyGeoJSON sebagai nilai default di state
+    const [geoData, setGeoData] = useState<any>(dummyGeoJSON);
 
     const handleUploadSuccess = (responseData: any) => {
         console.log("Upload berhasil! Data API:", responseData);
         const gisGeoJSON = responseData?.data?.geojson || responseData?.geojson || responseData;
-        
         setGeoData(gisGeoJSON);
     };
 
@@ -56,7 +126,7 @@ const AnalisisLahanKritis = () => {
                     {geoData ? (
                         <MapContainer 
                             center={[-6.9204, 107.6046]} 
-                            zoom={8} 
+                            zoom={10} // Aku ubah zoom dari 8 ke 10 agar areanya terlihat lebih jelas di sekitar Bandung
                             style={{ height: '100%', width: '100%' }}
                         >
                             <TileLayer

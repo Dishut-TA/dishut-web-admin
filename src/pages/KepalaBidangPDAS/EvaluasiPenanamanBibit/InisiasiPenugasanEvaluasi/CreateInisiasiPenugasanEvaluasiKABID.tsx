@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   HiOutlineChevronLeft, 
-  HiOutlineDocumentText, 
   HiOutlineUserPlus, 
   HiOutlineTrash 
 } from 'react-icons/hi2';
@@ -37,9 +36,6 @@ const CreateInisiasiPenugasan: React.FC = () => {
           <div>
             <h1 className="text-xl md:text-2xl font-bold text-gray-800">Buat Penugasan Evaluasi Baru</h1>
             <p className="text-sm text-gray-500 mt-1">Upload surat tugas dari kementerian dan tunjuk Tim Penilai.</p>
-          </div>
-          <div className="p-3 bg-[#f0f9f3] rounded-xl hidden md:block">
-            <HiOutlineDocumentText className="w-8 h-8 text-[#185325]" />
           </div>
         </div>
 

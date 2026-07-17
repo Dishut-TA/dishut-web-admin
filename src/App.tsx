@@ -80,6 +80,9 @@ import LaporanEvaluasiKABID from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibi
 import PengesahanLaporanEvaluasiKabid from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/LaporanEvaluasi/PengesahanLaporanEvaluasiKabid";
 import PendanaanCSR from "./pages/KelompokTaniHutan/Rehabilitasi/PendanaanCSR";
 import PendanaanAPBD from "./pages/KelompokTaniHutan/Rehabilitasi/PendanaanAPBD";
+import IndexBibit from "./pages/StaffPDAS/RealisasiBibitDonasi/Bibit";
+import CreateBibit from "./pages/StaffPDAS/RealisasiBibitDonasi/Bibit/CreateBibit";
+import DetailBibit from "./pages/StaffPDAS/RealisasiBibitDonasi/Bibit/DetailBibit";
 const Login = lazy(() => import("./pages/Authentication/Login"));
 const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -162,6 +165,9 @@ function App() {
                   <Route path="analisis-cpi" element={<AnalisisLahanKritis />} />
 
                   {/* Donasi */}
+                  <Route path="donasi/master/bibit" element={<IndexBibit />} />
+                  <Route path="donasi/master/bibit/create" element={<CreateBibit />} />
+                  <Route path="donasi/master/bibit/detail/:id" element={<DetailBibit />} />
                   <Route path="donasi/dashboard" element={<DashboardProgramStaff />} />
                   <Route path="donasi/program" element={<ProgramDonasiStaff />} />
                   <Route path="donasi/program/create" element={<CreateProgram />} />

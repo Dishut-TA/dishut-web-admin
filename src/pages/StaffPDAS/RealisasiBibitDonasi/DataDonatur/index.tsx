@@ -67,11 +67,9 @@ const DataDonatur = () => {
       <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">
-            Data Donatur
+            Data Donasi
           </h1>
-          <p className="text-sm md:text-base text-gray-500">
-            Lakukan pengecekan bukti transfer dan validasi data donatur.
-          </p>
+
         </div>
 
         <div className="relative w-full md:w-80">
