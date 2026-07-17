@@ -1,5 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { HiXMark, HiOutlineCamera } from "react-icons/hi2";
+import React, { useState, useEffect, useRef } from "react";
+import { 
+  HiXMark, 
+  HiOutlineCamera,
+  HiOutlineTrash, 
+  HiOutlineMagnifyingGlassPlus, 
+  HiOutlineMagnifyingGlassMinus,
+  HiOutlineArrowPath
+} from "react-icons/hi2";
 import { updateUser } from "@/services/authService";
 import { getAllRoles } from "@/services/rbac.service";
 
@@ -29,13 +36,37 @@ const EditAkunModal: React.FC<EditAkunModalProps> = ({
     peran: "",
   });
   
+  const [roles, setRoles] = useState<RoleType[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingRoles, setIsLoadingRoles] = useState(false);
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+
+  // --- STATE UNTUK FOTO PROFILE (DRAG, DROP, ZOOM, PAN) ---
   const [fotoFile, setFotoFile] = useState<File | null>(null);
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isAlertOpen, setIsAlertOpen] = useState(false);
-  const [roles, setRoles] = useState<RoleType[]>([]);
-  const [isLoadingRoles, setIsLoadingRoles] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+  
+  const [scale, setScale] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDraggingImg, setIsDraggingImg] = useState(false);
+  
+  const dragStart = useRef({ x: 0, y: 0 });
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // ==========================================
+  // DEKLARASI FUNGSI DI ATAS useEffect
+  // ==========================================
+  const handleClearPhoto = () => {
+    setFotoFile(null);
+    setFotoPreview(null);
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  // ==========================================
+  // EFFECT HOOKS
+  // ==========================================
   useEffect(() => {
     if (isOpen) {
       const fetchRoles = async () => {
@@ -62,26 +93,110 @@ const EditAkunModal: React.FC<EditAkunModalProps> = ({
         kata_sandi: "",
         peran: userData.peran && userData.peran.length > 0 ? userData.peran[0].nama : "" 
       });
-      setFotoPreview((userData.profil)?.foto_profile || null);
-      setFotoFile(null); 
+      
+      // Mengambil foto dari object profil bersarang (fallback ke properti luar jika ada)
+      const existingPhoto = userData.profil?.foto_profile || userData.foto_profile;
+      setFotoPreview(existingPhoto || null);
+      
+      setFotoFile(null);
+      setScale(1);
+      setPosition({ x: 0, y: 0 });
     }
   }, [isOpen, userData]);
 
   if (!isOpen || !userData) return null;
 
+  // ==========================================
+  // HANDLERS FORM & FOTO
+  // ==========================================
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
+  const processFile = (file: File) => {
+    if (file && file.type.startsWith('image/')) {
       setFotoFile(file);
       setFotoPreview(URL.createObjectURL(file));
+      setScale(1);
+      setPosition({ x: 0, y: 0 });
+    } else {
+      ToastError("Hanya file gambar yang diperbolehkan!");
     }
   };
 
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) processFile(e.target.files[0]);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = () => setIsDragOver(false);
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      processFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  // --- INTERAKSI ZOOM & PAN FOTO ---
+  const handleZoomIn = (e: React.MouseEvent) => { e.preventDefault(); setScale(p => Math.min(p + 0.5, 4)); };
+  const handleZoomOut = (e: React.MouseEvent) => { e.preventDefault(); setScale(p => Math.max(p - 0.5, 1)); };
+  const handleResetZoom = (e: React.MouseEvent) => { e.preventDefault(); setScale(1); setPosition({ x: 0, y: 0 }); };
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    if (e.deltaY < 0) setScale(p => Math.min(p + 0.2, 4));
+    else setScale(p => Math.max(p - 0.2, 1));
+  };
+  const startDrag = (clientX: number, clientY: number) => {
+    setIsDraggingImg(true);
+    dragStart.current = { x: clientX - position.x, y: clientY - position.y };
+  };
+  const onDrag = (clientX: number, clientY: number) => {
+    if (!isDraggingImg) return;
+    setPosition({ x: clientX - dragStart.current.x, y: clientY - dragStart.current.y });
+  };
+  const endDrag = () => setIsDraggingImg(false);
+
+  const getCroppedImage = async (): Promise<File | null> => {
+    if (!fotoPreview || !fotoFile) return null;
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.src = fotoPreview;
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const size = 112;
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return resolve(null);
+
+        const scaleCover = Math.max(size / img.width, size / img.height);
+        const drawWidth = img.width * scaleCover;
+        const drawHeight = img.height * scaleCover;
+
+        ctx.clearRect(0, 0, size, size);
+        ctx.translate(size / 2 + position.x, size / 2 + position.y);
+        ctx.scale(scale, scale);
+        ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+
+        canvas.toBlob((blob) => {
+          if (!blob) return resolve(null);
+          resolve(new File([blob], fotoFile.name, { type: fotoFile.type }));
+        }, fotoFile.type);
+      };
+    });
+  };
+
+  // ==========================================
+  // SUBMIT DATA
+  // ==========================================
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsAlertOpen(true);
@@ -93,6 +208,7 @@ const EditAkunModal: React.FC<EditAkunModalProps> = ({
     const loadingId = ToastLoading("Memperbarui data akun & profil...");
 
     try {
+      // 1. UPDATE USER DATA (JSON)
       const userPayload: any = {
         nama_pengguna: formData.nama_pengguna,
         email: formData.email,
@@ -103,11 +219,14 @@ const EditAkunModal: React.FC<EditAkunModalProps> = ({
       }
       
       await updateUser(userData.id, userPayload);
+      
+      // 2. UPDATE PROFIL DATA (FormData)
       const pegawaiFormData = new FormData();
       pegawaiFormData.append("nip", formData.nip || "");
       
       if (fotoFile) {
-        pegawaiFormData.append("foto_profile", fotoFile);
+        const croppedFile = await getCroppedImage() || fotoFile;
+        pegawaiFormData.append("foto_profile", croppedFile);
       }
       
       pegawaiFormData.append("_method", "PUT"); 
@@ -140,29 +259,68 @@ const EditAkunModal: React.FC<EditAkunModalProps> = ({
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto no-scrollbar">
-            
-            {/* AREA UPLOAD FOTO PROFILE */}
-            <div className="flex flex-col items-center justify-center mb-2">
-              <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-slate-100 shadow-sm group bg-slate-50">
-                {fotoPreview ? (
-                  <img src={fotoPreview} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-slate-400">
-                    <HiOutlineCamera className="w-8 h-8" />
+            <div className="flex flex-col items-center justify-center mb-4">
+              <input 
+                type="file" 
+                ref={fileInputRef}
+                accept="image/jpeg, image/png, image/webp" 
+                className="hidden" 
+                onChange={handlePhotoChange} 
+              />
+
+              {!fotoPreview ? (
+                <div 
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`relative w-28 h-28 rounded-full overflow-hidden border-4 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all ${
+                    isDragOver ? 'border-[#185325] bg-[#185325]/10 scale-105' : 'border-slate-300 bg-slate-50 hover:bg-slate-100 hover:border-[#185325]/50'
+                  }`}
+                >
+                  <HiOutlineCamera className={`w-8 h-8 ${isDragOver ? 'text-[#185325]' : 'text-slate-400'}`} />
+                  <span className={`text-[10px] font-bold mt-1 text-center px-2 ${isDragOver ? 'text-[#185325]' : 'text-slate-400'}`}>
+                    Upload / Drop
+                  </span>
+                </div>
+              ) : (
+                <div className="relative group flex flex-col items-center">
+                  <div 
+                    className="relative w-28 h-28 rounded-full overflow-hidden border-4 border-white shadow-md bg-slate-100 cursor-grab active:cursor-grabbing"
+                    onWheel={handleWheel}
+                    onMouseLeave={endDrag}
+                    onMouseUp={endDrag}
+                    onMouseMove={(e) => onDrag(e.clientX, e.clientY)}
+                    onMouseDown={(e) => startDrag(e.clientX, e.clientY)}
+                  >
+                    <img 
+                      src={fotoPreview} 
+                      alt="Preview" 
+                      draggable={false}
+                      className="w-full h-full object-contain"
+                      style={{
+                        transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
+                        transition: isDraggingImg ? 'none' : 'transform 0.1s ease-out' 
+                      }}
+                    />
+                    
+                    <button 
+                      type="button" 
+                      onClick={handleClearPhoto} 
+                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-3 bg-red-500/80 text-white rounded-full opacity-0 group-hover:opacity-100 hover:bg-red-600 transition-all z-10"
+                    >
+                      <HiOutlineTrash className="w-5 h-5" />
+                    </button>
                   </div>
-                )}
-                
-                <label className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                  <HiOutlineCamera className="w-6 h-6 text-white" />
-                  <input 
-                    type="file" 
-                    accept="image/jpeg, image/png, image/webp" 
-                    className="hidden" 
-                    onChange={handlePhotoChange} 
-                  />
-                </label>
-              </div>
-              <span className="text-xs font-semibold text-slate-500 mt-2">Klik foto untuk mengubah</span>
+
+                  {/* Kontrol Zoom */}
+                  <div className="flex items-center gap-2 mt-3 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full shadow-sm">
+                    <button type="button" onClick={handleZoomOut} className="p-1 text-slate-500 hover:text-[#185325] transition-colors"><HiOutlineMagnifyingGlassMinus className="w-4 h-4" /></button>
+                    <button type="button" onClick={handleResetZoom} className="p-1 text-slate-500 hover:text-[#185325] transition-colors"><HiOutlineArrowPath className="w-4 h-4" /></button>
+                    <button type="button" onClick={handleZoomIn} className="p-1 text-slate-500 hover:text-[#185325] transition-colors"><HiOutlineMagnifyingGlassPlus className="w-4 h-4" /></button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* FIELD INPUT LAINNYA */}
