@@ -182,6 +182,56 @@ const CreateValidasi: React.FC = () => {
 
         </form>
       </div>
+            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 md:p-10">
+        <h2 className="text-xl font-bold text-gray-800 mb-8">Riwayat Monitoring</h2>
+
+        <div className="relative py-4 overflow-hidden">
+          {/* Garis Vertikal Tengah */}
+          <div className="absolute left-5.25 md:left-1/2 top-0 bottom-0 w-0.5 bg-[#C5E1A5] md:-translate-x-1/2"></div>
+
+          <div className="space-y-8">
+            
+            {/* Item 1: Kanan pada Desktop */}
+            <div className="relative flex flex-col md:flex-row items-center w-full">
+              <div className="hidden md:block md:w-1/2 md:pr-10"></div>
+              
+              <div className="absolute left-3.5 md:left-1/2 w-4 h-4 bg-white border-2 border-[#185325] rounded-full transform md:-translate-x-1/2 top-4 md:top-1/2 md:-translate-y-1/2 z-10"></div>
+              
+              <div className="w-full md:w-1/2 pl-14 md:pl-10">
+                <div className="bg-[#EEF1EB] rounded-xl p-5 shadow-sm border border-[#DCECE0]">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-bold text-gray-800 text-sm md:text-base">Update Kondisi Tanaman</h4>
+                    <span className="text-[10px] md:text-xs text-gray-500 ml-4 font-medium whitespace-nowrap">Hari ini, 09:30</span>
+                  </div>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    Kondisi tanaman sehat, namun butuh penambalan di beberapa spot karena hama.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Item 2: Kiri pada Desktop */}
+            <div className="relative flex flex-col md:flex-row items-center w-full">
+              <div className="w-full md:w-1/2 pl-14 md:pl-0 md:pr-10">
+                <div className="bg-[#EEF1EB] rounded-xl p-5 shadow-sm border border-[#DCECE0]">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-bold text-gray-800 text-sm md:text-base">Pengecekan Rutin</h4>
+                    <span className="text-[10px] md:text-xs text-gray-500 ml-4 font-medium whitespace-nowrap">2 hari yang lalu</span>
+                  </div>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    Tidak ada kendala berarti. Cuaca mendukung proses penyiraman alami.
+                  </p>
+                </div>
+              </div>
+
+              <div className="absolute left-3.5 md:left-1/2 w-4 h-4 bg-white border-2 border-[#185325] rounded-full transform md:-translate-x-1/2 top-4 md:top-1/2 md:-translate-y-1/2 z-10"></div>
+              
+              <div className="hidden md:block md:w-1/2 pl-10"></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

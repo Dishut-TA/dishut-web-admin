@@ -49,7 +49,7 @@ const CreateBibit: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto pb-12">
+    <div className="w-full mx-auto pb-12">
       <div className="flex items-center gap-4 mb-8">
         <button 
           onClick={() => navigate(-1)}
@@ -141,6 +141,24 @@ const CreateBibit: React.FC = () => {
                         />
                       </div>
                     </div>
+                    
+                    {/* Input Stok Awa; */}
+                    <div className="flex-1 w-full grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[10px] font-bold text-gray-500 uppercase mb-1 block">Stok Awal (Batang)</label>
+                        <input 
+                          type="number" required value={spek.tinggiMin} onChange={e => handleChangeSpek(spek.id, 'tinggiMin', e.target.value)}
+                          placeholder="30" className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#185325]"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-gray-500 uppercase mb-1 block">Tinggi Maks (cm) <span className="lowercase font-normal text-gray-400">*opsional</span></label>
+                        <input 
+                          type="number" value={spek.tinggiMax} onChange={e => handleChangeSpek(spek.id, 'tinggiMax', e.target.value)}
+                          placeholder="60" className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#185325]"
+                        />
+                      </div>
+                    </div>
 
                     {/* Input Harga */}
                     <div className="flex-1 w-full relative">
@@ -175,7 +193,7 @@ const CreateBibit: React.FC = () => {
             <button type="button" onClick={() => navigate(-1)} className="px-6 py-3 rounded-xl bg-white border border-gray-200 text-gray-700 font-bold hover:bg-gray-50 transition-colors shadow-sm">
               Batal
             </button>
-            <button type="submit" className="px-8 py-3 rounded-xl bg-gradient-to-r from-[#185325] to-[#227a36] text-white font-bold transition-transform active:scale-95 shadow-md">
+            <button type="submit" className="px-8 py-3 rounded-xl bg-linear-to-r from-[#185325] to-[#227a36] text-white font-bold transition-transform active:scale-95 shadow-md">
               Simpan Data Bibit
             </button>
           </div>

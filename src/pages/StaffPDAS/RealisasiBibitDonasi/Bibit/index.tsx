@@ -33,8 +33,8 @@ const IndexBibit: React.FC = () => {
             />
           </div>
           <button 
-            onClick={() => navigate('/admin/staff/donasi/master/bibit/create')}
-            className="bg-linear-to-r from-[#185325] to-[#227a36] text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:shadow-lg hover:-translate-y-0.5 transition-all"
+            onClick={() => navigate('/admin/staff/donasi/bibit/create')}
+            className="bg-primary text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:shadow-lg hover:-translate-y-0.5 transition-all"
           >
             <HiOutlinePlus className="w-4 h-4" strokeWidth={2.5} /> Tambah Bibit
           </button>
@@ -71,7 +71,7 @@ const IndexBibit: React.FC = () => {
                   <td className="px-6 py-4 text-sm font-bold text-[#185325]">{item.rentangHarga}</td>
                   <td className="px-6 py-4 flex justify-center">
                     <button 
-                      onClick={() => navigate(`/admin/staff/donasi/master/bibit/detail/${item.id}`)}
+                      onClick={() => navigate(`/admin/staff/donasi/bibit/detail/${item.id}`)}
                       className="p-2 text-gray-400 hover:text-[#185325] hover:bg-[#DCECE0] rounded-xl transition-all"
                       title="Lihat Detail"
                     >

@@ -41,6 +41,8 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
         icon: <HiOutlineComputerDesktop className="w-5 h-5" />,
         items: [
             { name: 'Dashboard Pelaksanaan dan Monitoring', path: `${basePath}/monitoring/dashboard` },
+            { name: 'Penugasan Penyuluh', path: `${basePath}/monitoring/penugasan-penyuluh` },
+            { name: 'Hasil Validasi Penyuluh', path: `${basePath}/monitoring/hasil-validasi-penyuluh` },
             { name: 'Daftar Kegiatan', path: `${basePath}/monitoring/kegiatan` },
             { name: 'Verifikasi Monitoring', path: `${basePath}/monitoring/verifikasi` },
             { name: 'Rekap Monitoring', path: `${basePath}/monitoring/rekap` },
@@ -55,6 +57,7 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
                 id: 'donasi', title: 'Realisasi Bibit dan Donasi', icon: <HiOutlineArchiveBox className="w-5 h-5" />,
                 items: [
                     { name: 'Dashboard Program', path: `${basePath}/donasi/dashboard` },
+                    { name: 'Data Bibit', path: `${basePath}/donasi/bibit` },
                     { name: 'Data Program', path: `${basePath}/donasi/program` },
                     { name: 'Data Donasi', path: `${basePath}/donasi/donatur` },
                     { name: 'Pelaksanaan Kegiatan', path: `${basePath}/donasi/pelaksanaan-kegiatan` },

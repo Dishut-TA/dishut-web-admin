@@ -83,6 +83,10 @@ import PendanaanAPBD from "./pages/KelompokTaniHutan/Rehabilitasi/PendanaanAPBD"
 import IndexBibit from "./pages/StaffPDAS/RealisasiBibitDonasi/Bibit";
 import CreateBibit from "./pages/StaffPDAS/RealisasiBibitDonasi/Bibit/CreateBibit";
 import DetailBibit from "./pages/StaffPDAS/RealisasiBibitDonasi/Bibit/DetailBibit";
+import PenugasanPenyuluh from "./pages/StaffPDAS/PelaksanaanDanMonitoring/PenugasanPenyuluh";
+import HasilValidasiPenyuluh from "./pages/StaffPDAS/PelaksanaanDanMonitoring/HasilValidasiPenyuluh";
+import DetailHasilValidasi from "./pages/StaffPDAS/PelaksanaanDanMonitoring/HasilValidasiPenyuluh/DetailHasilValidasi";
+import ProsesValidasiPenyuluh from "./pages/StaffPDAS/PelaksanaanDanMonitoring/HasilValidasiPenyuluh/ProsesHasilValidasiPenyuluh";
 const Login = lazy(() => import("./pages/Authentication/Login"));
 const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -165,9 +169,9 @@ function App() {
                   <Route path="analisis-cpi" element={<AnalisisLahanKritis />} />
 
                   {/* Donasi */}
-                  <Route path="donasi/master/bibit" element={<IndexBibit />} />
-                  <Route path="donasi/master/bibit/create" element={<CreateBibit />} />
-                  <Route path="donasi/master/bibit/detail/:id" element={<DetailBibit />} />
+                  <Route path="donasi/bibit" element={<IndexBibit />} />
+                  <Route path="donasi/bibit/create" element={<CreateBibit />} />
+                  <Route path="donasi/bibit/detail/:id" element={<DetailBibit />} />
                   <Route path="donasi/dashboard" element={<DashboardProgramStaff />} />
                   <Route path="donasi/program" element={<ProgramDonasiStaff />} />
                   <Route path="donasi/program/create" element={<CreateProgram />} />
@@ -186,6 +190,10 @@ function App() {
 
                   {/* Monitoring */}
                   <Route path="monitoring/dashboard" element={<DashboardMonitoring />} />
+                  <Route path="monitoring/penugasan-penyuluh" element={<PenugasanPenyuluh />} />
+                  <Route path="monitoring/hasil-validasi-penyuluh/" element={<HasilValidasiPenyuluh />} />
+                  <Route path="monitoring/hasil-validasi-penyuluh/detail/:id" element={<DetailHasilValidasi />} />
+                  <Route path="monitoring/hasil-validasi-penyuluh/proses/:id" element={<ProsesValidasiPenyuluh />} />
                   <Route path="monitoring/kegiatan" element={<DaftarKegiatan />} />
                   <Route path="monitoring/verifikasi" element={<VerifikasiMonitoring />} />
                   <Route path="monitoring/rekap" element={<RekapMonitoring />} />
