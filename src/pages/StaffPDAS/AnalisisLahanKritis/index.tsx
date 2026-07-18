@@ -4,89 +4,57 @@ import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css'; 
 import InputDataModal from './components/InputDataModal';
 
-// --- DUMMY DATA GEOJSON ---
-const dummyGeoJSON = {
-    type: "FeatureCollection",
-    features: [
-        {
-            type: "Feature",
-            properties: {
-                kabupaten: "Bandung",
-                kecamatan: "Lembang",
-                desa: "Cikole",
-                status: "Sangat Kritis",
-                cpi_score: 85.5
-            },
-            geometry: {
-                type: "Polygon",
-                // Format koordinat: [Longitude, Latitude]
-                coordinates: [[
-                    [107.60, -6.82],
-                    [107.65, -6.82],
-                    [107.65, -6.78],
-                    [107.60, -6.78],
-                    [107.60, -6.82]
-                ]]
-            }
-        },
-        {
-            type: "Feature",
-            properties: {
-                kabupaten: "Bandung Barat",
-                kecamatan: "Parongpong",
-                desa: "Cihideung",
-                status: "Kritis",
-                cpi_score: 65.2
-            },
-            geometry: {
-                type: "Polygon",
-                coordinates: [[
-                    [107.50, -6.85],
-                    [107.55, -6.85],
-                    [107.55, -6.80],
-                    [107.50, -6.80],
-                    [107.50, -6.85]
-                ]]
-            }
-        },
-        {
-            type: "Feature",
-            properties: {
-                kabupaten: "Bandung",
-                kecamatan: "Ciwidey",
-                desa: "Panundaan",
-                status: "Tidak Kritis",
-                cpi_score: 25.1
-            },
-            geometry: {
-                type: "Polygon",
-                coordinates: [[
-                    [107.40, -7.15],
-                    [107.45, -7.15],
-                    [107.45, -7.10],
-                    [107.40, -7.10],
-                    [107.40, -7.15]
-                ]]
-            }
-        }
-    ]
-};
-// ---------------------------
+const API_URL = import.meta.env.VITE_API_MASTER_URL || "http://localhost:8000/api";
 
 const AnalisisLahanKritis = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    
-    // Memasukkan dummyGeoJSON sebagai nilai default di state
-    const [geoData, setGeoData] = useState<any>(dummyGeoJSON);
+    const [geoData, setGeoData] = useState<any>(null);
+    const [tableData, setTableData] = useState<any[]>([]);
+    const [isLoadingData, setIsLoadingData] = useState(false);
 
-    const handleUploadSuccess = (responseData: any) => {
+    const handleUploadSuccess = async (responseData: any) => {
         console.log("Upload berhasil! Data API:", responseData);
-        const gisGeoJSON = responseData?.data?.geojson || responseData?.geojson || responseData;
-        setGeoData(gisGeoJSON);
+        
+        const projectId = responseData?.data?.id;
+        const token = localStorage.getItem("token");
+
+        if (!projectId || !token) return;
+
+        setIsLoadingData(true);
+
+        try {
+            // 1. FETCH DATA TABEL (ZONAL STATISTICS)
+            const tableRes = await fetch(`${API_URL}/projects/${projectId}/table`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const tableJson = await tableRes.json();
+            setTableData(tableJson.data || []);
+
+            // 2. FETCH DATA MAP (GEOJSON)
+            const mapRes = await fetch(`${API_URL}/projects/${projectId}/map`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const mapJson = await mapRes.json();
+
+            // Sesuai dengan controller Anda, kadang kembaliannya langsung GeoJSON, 
+            // kadang bentuk url { geojson_url: "..." }
+            if (mapJson.type === "FeatureCollection") {
+                setGeoData(mapJson);
+            } else if (mapJson.geojson_url) {
+                const directGeoRes = await fetch(mapJson.geojson_url);
+                const directGeoJson = await directGeoRes.json();
+                setGeoData(directGeoJson);
+            }
+            
+        } catch (error) {
+            console.error("Gagal menarik data hasil analisis dari server:", error);
+        } finally {
+            setIsLoadingData(false);
+        }
     };
 
     const getFeatureStyle = (feature: any) => {
-        const status = feature.properties?.status?.toLowerCase() || feature.properties?.kriteria?.toLowerCase() || '';
+        const status = feature.properties?.status_lahan_kritis?.toLowerCase() || feature.properties?.status?.toLowerCase() || '';
         
         if (status.includes('sangat kritis')) {
             return { color: '#EF4444', fillColor: '#fca5a5', fillOpacity: 0.7, weight: 1 }; 
@@ -123,10 +91,15 @@ const AnalisisLahanKritis = () => {
                 </div>
 
                 <div className="w-full h-75 md:h-100 lg:h-125 bg-blue-50/50 rounded-lg border border-blue-100 overflow-hidden relative flex items-center justify-center z-0">
-                    {geoData ? (
+                    {isLoadingData ? (
+                        <div className="flex flex-col items-center text-[#185325]">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#185325] mb-3"></div>
+                            <span className="font-bold">Merender Peta Spasial...</span>
+                        </div>
+                    ) : geoData ? (
                         <MapContainer 
                             center={[-6.9204, 107.6046]} 
-                            zoom={10} // Aku ubah zoom dari 8 ke 10 agar areanya terlihat lebih jelas di sekitar Bandung
+                            zoom={10}
                             style={{ height: '100%', width: '100%' }}
                         >
                             <TileLayer
@@ -134,12 +107,19 @@ const AnalisisLahanKritis = () => {
                                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                             />
                             <GeoJSON 
-                                key={Math.random()}
+                                key={geoData.projectId}
                                 data={geoData} 
                                 style={getFeatureStyle}
                                 onEachFeature={(feature, layer) => {
-                                    const status = feature.properties?.status || feature.properties?.kriteria || 'Tidak Diketahui';
-                                    layer.bindPopup(`<strong>Status Lahan:</strong> ${status}`);
+                                    const namaDesa = feature.properties?.desa_kelurahan || feature.properties?.desa || 'Tidak Diketahui';
+                                    const status = feature.properties?.status_lahan_kritis || feature.properties?.status || 'Tidak Diketahui';
+                                    const skor = feature.properties?.skor_cpi_rata2 ? Number(feature.properties.skor_cpi_rata2).toFixed(2) : '-';
+                                    
+                                    layer.bindPopup(
+                                        `<strong>Desa:</strong> ${namaDesa}<br/>
+                                         <strong>Status Lahan:</strong> ${status}<br/>
+                                         <strong>Skor CPI:</strong> ${skor}`
+                                    );
                                 }}
                             />
                         </MapContainer>
@@ -153,6 +133,7 @@ const AnalisisLahanKritis = () => {
                     )}
                 </div>
 
+                {/* LEGEND */}
                 {geoData && (
                     <div className="flex items-center gap-6 mt-4 justify-center md:justify-start">
                         <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -168,6 +149,7 @@ const AnalisisLahanKritis = () => {
                 )}
             </div>
 
+            {/* TABEL DATA ZONAL STATISTICS */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="overflow-x-auto w-full">
                     <table className="w-full min-w-200 text-sm text-left">
@@ -182,27 +164,27 @@ const AnalisisLahanKritis = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {geoData && geoData.features && geoData.features.length > 0 ? (
-                                geoData.features.slice(0, 10).map((feature: any, idx: number) => (
+                            {tableData && tableData.length > 0 ? (
+                                tableData.map((row: any, idx: number) => (
                                     <tr key={idx} className="border-b border-gray-50 hover:bg-gray-50/50">
-                                        <td className="px-4 md:px-6 py-4">{feature.properties?.kabupaten || '-'}</td>
-                                        <td className="px-4 md:px-6 py-4">{feature.properties?.kecamatan || '-'}</td>
-                                        <td className="px-4 md:px-6 py-4">{feature.properties?.desa || '-'}</td>
+                                        <td className="px-4 md:px-6 py-4">{row.kota_kabupaten || row.kabupaten || '-'}</td>
+                                        <td className="px-4 md:px-6 py-4">{row.kecamatan || '-'}</td>
+                                        <td className="px-4 md:px-6 py-4">{row.desa_kelurahan || row.desa || '-'}</td>
                                         <td className="px-4 md:px-6 py-4 text-center font-bold">
-                                            {feature.properties?.status || feature.properties?.kriteria || '-'}
+                                            {row.status_lahan_kritis || '-'}
                                         </td>
                                         <td className="px-4 md:px-6 py-4 text-center text-[#185325] font-bold">
-                                            {feature.properties?.cpi_score ? Number(feature.properties.cpi_score).toFixed(2) : '-'}
+                                            {row.skor_cpi_rata2 ? Number(row.skor_cpi_rata2).toFixed(2) : '-'}
                                         </td>
                                         <td className="px-4 md:px-6 py-4 text-center text-[#185325] font-bold">
-                                            -
+                                            {row.rekomendasi_intervensi || '-'}
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
                                     <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
-                                        Belum ada hasil analisis. Silakan unggah data GIS.
+                                        Belum ada hasil analisis zonal. Silakan unggah data GIS.
                                     </td>
                                 </tr>
                             )}
