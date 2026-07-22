@@ -1,51 +1,48 @@
 import { useState } from 'react';
-import { mockReports } from './data';
-import ReportCard from './components/ReportCard';
-import EmptyStateDetail from './components/EmptyStateDetail';
-import ActiveDetail from './components/ActiveDetail';
+import { type Report, mockReports } from './data';
+import MonitoringTable from './components/MonitoringTable';
+import DetailMonitoringModal from './components/DetailMonitoringModal';
 
 const VerifikasiMonitoring = () => {
-  const [activeReportId, setActiveReportId] = useState<string | null>(null);
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const activeReport = mockReports.find(report => report.id === activeReportId);
+  const handleOpenDetail = (report: Report) => {
+    setSelectedReport(report);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setTimeout(() => setSelectedReport(null), 200);
+  };
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto">
-      
-      <div>
-        <h1 className="text-2xl font-bold text-gray-800 mb-1">
-          Verifikasi Monitoring
-        </h1>
-        <p className="text-gray-500 text-sm">
-          Otorisasi dan validasi data lapangan berbasis koordinat
-        </p>
+    <div className="flex flex-col gap-6 w-full mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800 mb-1">
+            Verifikasi Monitoring
+          </h1>
+          <p className="text-gray-500 text-sm">
+            Tinjau, otorisasi, dan validasi data progres lapangan berbasis koordinat.
+          </p>
+        </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6 items-start">
-        
-        <div className="w-full lg:w-1/3 flex flex-col gap-4">
-          <h2 className="text-xs font-bold text-gray-400 tracking-wider mb-1">DATA MONITORING MASUK</h2>
-          <div className="flex flex-col gap-4 overflow-y-auto custom-scrollbar lg:max-h-200 pr-1">
-            {mockReports.map((report) => (
-              <ReportCard 
-                key={report.id} 
-                report={report} 
-                isActive={activeReportId === report.id}
-                onClick={() => setActiveReportId(report.id)}
-              />
-            ))}
-          </div>
-        </div>
+      {/* Komponen Tabel Utama */}
+      <MonitoringTable 
+        reports={mockReports} 
+        onViewDetail={handleOpenDetail} 
+      />
 
-        <div className="w-full lg:w-2/3 sticky top-6">
-          {activeReport ? (
-            <ActiveDetail report={activeReport} />
-          ) : (
-            <EmptyStateDetail />
-          )}
-        </div>
+      {/* Komponen Modal Interaktif */}
+      <DetailMonitoringModal 
+        isOpen={isModalOpen} 
+        onClose={handleCloseModal} 
+        report={selectedReport} 
+      />
 
-      </div>
     </div>
   );
 };

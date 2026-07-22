@@ -50,7 +50,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
         />
       )}
       
-      <aside className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-greenAdmin flex flex-col transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
+      <aside className={`fixed md:static inset-y-0 left-0 z-50 w-72 bg-greenAdmin flex flex-col transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
         <div className="flex items-center justify-between px-6 md:justify-center mt-4 mb-6 shrink-0">
           <div className="font-bold text-2xl text-white tracking-widest px-4 py-1 rounded-md">
             <img src={LOGO} alt="SIGAP Logo" />

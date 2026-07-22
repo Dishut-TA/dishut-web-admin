@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { HiOutlinePlus, HiOutlineMagnifyingGlass } from 'react-icons/hi2';
-import InputKegiatanModal from '../components/RencanaProgramModal';
-import ActivityTable from '../components/ActivityTable';
+import InputKegiatanModal from './components/RencanaProgramModal';
+import ActivityTable from './components/ActivityTable';
 
 export interface Activity {
   id: number;
@@ -80,7 +80,7 @@ const DaftarKegiatan: React.FC = () => {
       <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">
-            Daftar Kegiatan
+            Daftar Kegiatan Program Rehabilitasi
           </h1>
           <p className="text-sm md:text-base text-gray-500">
             Kelola dan monitor detail seluruh kegiatan lapangan.
@@ -126,9 +126,7 @@ const DaftarKegiatan: React.FC = () => {
       </div>
 
       <ActivityTable 
-        data={filteredData} 
-        onViewDetail={(id: number) => console.log("Buka Modal Detail untuk ID:", id)} 
-      />
+        data={filteredData} />
 
       <InputKegiatanModal 
         isOpen={isModalOpen} 

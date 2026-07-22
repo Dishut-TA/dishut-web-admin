@@ -87,6 +87,8 @@ import PenugasanPenyuluh from "./pages/StaffPDAS/PelaksanaanDanMonitoring/Penuga
 import HasilValidasiPenyuluh from "./pages/StaffPDAS/PelaksanaanDanMonitoring/HasilValidasiPenyuluh";
 import DetailHasilValidasi from "./pages/StaffPDAS/PelaksanaanDanMonitoring/HasilValidasiPenyuluh/DetailHasilValidasi";
 import ProsesValidasiPenyuluh from "./pages/StaffPDAS/PelaksanaanDanMonitoring/HasilValidasiPenyuluh/ProsesHasilValidasiPenyuluh";
+import DetailPenugasanPenyuluh from "./pages/StaffPDAS/PelaksanaanDanMonitoring/PenugasanPenyuluh/DetailPenugasanPenyuluh";
+import DetailKegiatan from "./pages/StaffPDAS/PelaksanaanDanMonitoring/DaftarKegiatan/DetailKegiatan";
 const Login = lazy(() => import("./pages/Authentication/Login"));
 const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -191,10 +193,12 @@ function App() {
                   {/* Monitoring */}
                   <Route path="monitoring/dashboard" element={<DashboardMonitoring />} />
                   <Route path="monitoring/penugasan-penyuluh" element={<PenugasanPenyuluh />} />
+                  <Route path="monitoring/penugasan-penyuluh/detail/:id" element={<DetailPenugasanPenyuluh />} />
                   <Route path="monitoring/hasil-validasi-penyuluh/" element={<HasilValidasiPenyuluh />} />
                   <Route path="monitoring/hasil-validasi-penyuluh/detail/:id" element={<DetailHasilValidasi />} />
                   <Route path="monitoring/hasil-validasi-penyuluh/proses/:id" element={<ProsesValidasiPenyuluh />} />
                   <Route path="monitoring/kegiatan" element={<DaftarKegiatan />} />
+                  <Route path="monitoring/kegiatan/detail/:id" element={<DetailKegiatan />} />
                   <Route path="monitoring/verifikasi" element={<VerifikasiMonitoring />} />
                   <Route path="monitoring/rekap" element={<RekapMonitoring />} />
 

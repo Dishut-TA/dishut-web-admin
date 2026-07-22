@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { HiXMark } from 'react-icons/hi2';
-import MapPolygonDraw from './MapPolygonDraw'; // Import komponen peta
+import MapPolygonDraw from '../../components/MapPolygonDraw';
 
 interface RencanaProgramModalProps {
   isOpen: boolean;
@@ -8,10 +8,8 @@ interface RencanaProgramModalProps {
 }
 
 const RencanaProgramModal: React.FC<RencanaProgramModalProps> = ({ isOpen, onClose }) => {
-  // State untuk mengontrol form kondisional (Donasi / Investasi)
   const [jenisProgram, setJenisProgram] = useState('Program Mandiri');
 
-  // Mencegah scroll pada background
   useEffect(() => {
     if (isOpen) document.body.style.overflow = 'hidden';
     else document.body.style.overflow = 'unset';
@@ -22,13 +20,8 @@ const RencanaProgramModal: React.FC<RencanaProgramModalProps> = ({ isOpen, onClo
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-      {/* Backdrop Hitam Blur */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose}></div>
-
-      {/* Konten Modal */}
       <div className="relative bg-white w-full max-w-4xl rounded-xl shadow-2xl flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
-        
-        {/* Header Modal (Warna Hijau Sesuai Desain) */}
         <div className="flex items-center justify-between px-6 py-4 bg-primary text-white shrink-0">
           <h2 className="text-lg font-bold">Rencana Program RURHL Baru</h2>
           <button onClick={onClose} className="p-1 text-white/80 hover:text-white transition-colors">
@@ -36,17 +29,13 @@ const RencanaProgramModal: React.FC<RencanaProgramModalProps> = ({ isOpen, onClo
           </button>
         </div>
 
-        {/* Body Form (Bisa di-scroll) */}
         <div className="p-6 overflow-y-auto custom-scrollbar flex-1 bg-white">
           <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-5">
-            
-            {/* Baris 1: Full Width */}
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-bold text-gray-700">Nama Program Rehabilitasi <span className="text-red-500">*</span></label>
               <input type="text" placeholder="Contoh: Penghijauan Kembali Lereng Cimanuk Selatan" className="w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary" />
             </div>
 
-            {/* Grid 2 Kolom untuk Inputan Sedang */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-bold text-gray-700">Pilih Wilayah Prioritas Terkait <span className="text-red-500">*</span></label>
@@ -62,13 +51,12 @@ const RencanaProgramModal: React.FC<RencanaProgramModalProps> = ({ isOpen, onClo
                   onChange={(e) => setJenisProgram(e.target.value)}
                   className="w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-white cursor-pointer"
                 >
-                  <option value="Program Mandiri">Program Mandiri</option>
                   <option value="Program Donasi">Program Donasi</option>
-                  <option value="Program Investasi">Program Investasi</option>
+                  <option value="Program APBD">Program APBD</option>
+                  <option value="Program CSR">Program CSR</option>
                 </select>
               </div>
 
-              {/* RENDER KONDISIONAL: Jika Program Donasi */}
               {jenisProgram === 'Program Donasi' && (
                 <div className="flex flex-col gap-1.5 animate-in fade-in slide-in-from-top-2">
                   <label className="text-sm font-bold text-gray-700">List Program Donasi <span className="text-red-500">*</span></label>
@@ -78,12 +66,20 @@ const RencanaProgramModal: React.FC<RencanaProgramModalProps> = ({ isOpen, onClo
                 </div>
               )}
 
-              {/* RENDER KONDISIONAL: Jika Program Investasi */}
-              {jenisProgram === 'Program Investasi' && (
+              {jenisProgram === 'Program APBD' && (
                 <div className="flex flex-col gap-1.5 animate-in fade-in slide-in-from-top-2">
-                  <label className="text-sm font-bold text-gray-700">List Program Investasi <span className="text-red-500">*</span></label>
+                  <label className="text-sm font-bold text-gray-700">List Program APBD <span className="text-red-500">*</span></label>
                   <select className="w-full border border-blue-300 bg-blue-50 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer">
-                    <option>-- Pilih Program Investasi --</option>
+                    <option>-- Pilih Program APBD --</option>
+                  </select>
+                </div>
+              )}
+
+              {jenisProgram === 'Program CSR' && (
+                <div className="flex flex-col gap-1.5 animate-in fade-in slide-in-from-top-2">
+                  <label className="text-sm font-bold text-gray-700">List Program CSR <span className="text-red-500">*</span></label>
+                  <select className="w-full border border-blue-300 bg-blue-50 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer">
+                    <option>-- Pilih Program CSR --</option>
                   </select>
                 </div>
               )}
@@ -103,7 +99,6 @@ const RencanaProgramModal: React.FC<RencanaProgramModalProps> = ({ isOpen, onClo
               </div>
             </div>
 
-            {/* Input Full Width */}
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-bold text-gray-700">Jenis Kegiatan Fisik Lapangan <span className="text-red-500">*</span></label>
               <input type="text" placeholder="Mencangkul, membuat terasering, menanam, pembibitan..." className="w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary" />
@@ -131,7 +126,6 @@ const RencanaProgramModal: React.FC<RencanaProgramModalProps> = ({ isOpen, onClo
                 <input type="text" placeholder="APBN, APBD Provinsi, CSR Swasta, dll." className="w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary" />
               </div>
               
-              {/* Double Date Picker */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-bold text-gray-700">Pasangan Jadwal Pelaksanaan (Mulai - Selesai) <span className="text-red-500">*</span></label>
                 <div className="flex items-center gap-2">
@@ -158,7 +152,6 @@ const RencanaProgramModal: React.FC<RencanaProgramModalProps> = ({ isOpen, onClo
               </div>
             </div>
 
-            {/* --- INTEGRASI PETA --- */}
             <div className="mt-4 pt-4 border-t border-gray-200">
               <MapPolygonDraw />
             </div>
@@ -166,7 +159,6 @@ const RencanaProgramModal: React.FC<RencanaProgramModalProps> = ({ isOpen, onClo
           </form>
         </div>
 
-        {/* Footer Tombol Aksi */}
         <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-end gap-3 shrink-0">
           <button type="button" onClick={onClose} className="px-6 py-2 border border-gray-300 text-gray-700 font-bold rounded-md hover:bg-gray-100 transition-colors">
             Batal
