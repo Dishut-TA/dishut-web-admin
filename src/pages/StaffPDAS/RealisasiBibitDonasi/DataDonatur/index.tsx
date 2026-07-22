@@ -4,11 +4,12 @@ import { HiOutlineEye } from 'react-icons/hi2';
 
 import DetailDonaturModal from './components/DetailDonaturModal';
 import VerifikasiDonaturModal from './components/VerifikasiDonaturModal';
-import type { DonaturData, StatusType } from '@/utils/interface'; // Sesuaikan
+import type { DonaturData, StatusType } from '@/utils/interface';
 
 const mockData: DonaturData[] = [
   { 
     idTransaksi: 'TRX-101', 
+    idDonasi: 'DNS-101', 
     namaDonatur: 'Ahmad Rifai', 
     program: 'Penghijauan Hulu Citarum', 
     jumlahBibit: 50, 
@@ -20,6 +21,7 @@ const mockData: DonaturData[] = [
   },
   { 
     idTransaksi: 'TRX-102', 
+    idDonasi: 'DNS-102', 
     namaDonatur: 'PT Hijau Bersama', 
     program: 'Pemulihan Lahan Kritis Cisadane', 
     jumlahBibit: 500, 
@@ -55,7 +57,6 @@ const DataDonatur = () => {
   const [selectedDetailDonatur, setSelectedDetailDonatur] = useState<DonaturData | null>(null);
   const [selectedVerifDonatur, setSelectedVerifDonatur] = useState<DonaturData | null>(null);
 
-  // Filter Search
   const filteredData = mockData.filter(donatur => 
     donatur.idTransaksi.toLowerCase().includes(searchTerm.toLowerCase()) ||
     donatur.namaDonatur.toLowerCase().includes(searchTerm.toLowerCase())
@@ -63,7 +64,6 @@ const DataDonatur = () => {
 
   return (
     <div className="relative flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8">
-      
       <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">
@@ -89,7 +89,7 @@ const DataDonatur = () => {
           <table className="w-full text-left border-collapse min-w-200">
             <thead>
               <tr className="bg-[#DCECE0] text-[#3A4D3F] text-[11px] uppercase tracking-wider font-bold">
-                <th className="px-6 py-4 whitespace-nowrap">ID Transaksi</th>
+                <th className="px-6 py-4 whitespace-nowrap">ID Donasi</th>
                 <th className="px-6 py-4 whitespace-nowrap">Nama Donatur</th>
                 <th className="px-6 py-4 whitespace-nowrap">Program</th>
                 <th className="px-6 py-4 whitespace-nowrap">Jenis Bibit</th>
@@ -101,7 +101,7 @@ const DataDonatur = () => {
             <tbody className="divide-y divide-gray-100">
               {filteredData.map((row, index) => (
                 <tr key={index} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4 text-sm font-medium text-gray-700 whitespace-nowrap">{row.idTransaksi}</td>
+                  <td className="px-6 py-4 text-sm font-medium text-gray-700 whitespace-nowrap">{row.idDonasi}</td>
                   <td className="px-6 py-4 text-sm font-semibold text-gray-800 whitespace-nowrap">{row.namaDonatur}</td>
                   <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">{row.program}</td>
                   

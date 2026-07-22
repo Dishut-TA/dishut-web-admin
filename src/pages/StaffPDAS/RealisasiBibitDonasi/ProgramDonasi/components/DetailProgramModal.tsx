@@ -130,7 +130,7 @@ const DetailProgramModal: React.FC<DetailProgramModalProps> = ({
            
            <div className="flex flex-col text-center md:text-right">
              <span className="text-xs font-bold text-[#185325] uppercase tracking-wider">Total Terealisasi</span>
-             <span className="text-2xl font-black text-[#185325]">{program.totalTerealisasi} <span className="text-base font-bold">Bibit</span></span>
+             <span className="text-2xl font-bold text-[#185325]">{program.totalTerealisasi} <span className="text-base font-bold">Bibit</span></span>
            </div>
         </div>
 

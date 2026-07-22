@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { 
-  HiOutlineArrowRight, 
   HiOutlineDocumentText, 
   HiOutlineCloudArrowUp,
   HiOutlinePhoto
 } from 'react-icons/hi2';
 import toast from 'react-hot-toast'; 
-
 import PreviewBastModal from './components/PreviewBastModal';
 import UploadBastModal from './components/UploadBastModal';
 import RincianDanaModal from './components/RincianDanaModal';
@@ -22,6 +20,7 @@ export interface DetailBibitDana {
 
 export interface KegiatanData {
   idTransaksi: string;
+  idDonasi: string;
   program: string;
   jumlahBibit: number;
   status: StatusKegiatan;
@@ -34,6 +33,7 @@ export interface KegiatanData {
 const mockData: KegiatanData[] = [
   { 
     idTransaksi: 'TRX-101', 
+    idDonasi: 'DNS-101', 
     program: 'Penghijauan Hulu Citarum', 
     jumlahBibit: 50, 
     status: 'Terkumpul',
@@ -47,21 +47,23 @@ const mockData: KegiatanData[] = [
   },
   { 
     idTransaksi: 'TRX-102', 
+    idDonasi: 'DNS-102', 
     program: 'Pemulihan Lahan Kritis Cisadane', 
     jumlahBibit: 100, 
     status: 'Disalurkan',
     namaDonatur: 'PT Alam Hijau',
     bastUrl: 'https://example.com/bast.pdf',
-    buktiTanamUrl: null, // BAST sudah ada, tapi belum ditanam
+    buktiTanamUrl: null, 
     rincianBibit: [
       { nama: 'Trembesi', jumlah: 100, hargaSatuan: 20000 }
     ]
   },
   { 
     idTransaksi: 'TRX-103', 
+    idDonasi: 'DNS-103', 
     program: 'Hutan Kota Jabar', 
     jumlahBibit: 200, 
-    status: 'Terealisasi', // Status otomatis karena bukti tanam sudah ditarik dari modul lain
+    status: 'Terealisasi',
     namaDonatur: 'Komunitas Bumi',
     bastUrl: 'https://example.com/bast.pdf',
     buktiTanamUrl: 'https://example.com/foto-tanam.jpg',
@@ -69,13 +71,6 @@ const mockData: KegiatanData[] = [
       { nama: 'Ketapang', jumlah: 200, hargaSatuan: 25000 }
     ]
   },
-];
-
-const stepperData = [
-  { step: 1, title: 'Status "Terkumpul"', desc: 'Bibit tersedia dari dana donatur.', isActive: false },
-  { step: 2, title: 'Upload BAST', desc: 'Serah terima bibit ke KTH. Status menjadi "Disalurkan".', isActive: true },
-  { step: 3, title: 'Integrasi Modul Monitoring', desc: 'Sistem menarik bukti tanam dari modul rehabilitasi.', isActive: false },
-  { step: 4, title: 'Status "Terealisasi"', desc: 'Proses donasi selesai secara End-to-End.', isActive: false },
 ];
 
 const StatusBadge = ({ status }: { status: StatusKegiatan }) => {
@@ -105,8 +100,6 @@ const PelaksanaanKegiatan: React.FC = () => {
 
   return (
     <div className="relative flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8">
-      
-      {/* HEADER */}
       <div>
         <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">Pelaksanaan Kegiatan (Donasi)</h1>
         <p className="text-sm md:text-base text-gray-600">
@@ -114,36 +107,12 @@ const PelaksanaanKegiatan: React.FC = () => {
         </p>
       </div>
 
-      {/* STEPPER INFO */}
-      <div className="bg-[#E6F4EA]/50 rounded-2xl p-5 md:p-6 shadow-sm border border-[#C8E6C9]">
-        <h2 className="text-sm font-bold text-gray-800 mb-6">Mekanisme Status Penyaluran & Integrasi Sistem:</h2>
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-2">
-          {stepperData.map((item, index) => (
-            <React.Fragment key={item.step}>
-              <div className="flex flex-col items-center text-center max-w-50 w-full">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mb-3 shadow-sm border-2 ${
-                    item.isActive ? 'bg-[#185325] text-white border-[#185325]' : 'bg-white text-gray-400 border-gray-300'
-                  }`}>
-                  {item.step}
-                </div>
-                <h3 className={`text-xs font-bold mb-1 ${item.isActive ? 'text-[#185325]' : 'text-gray-500'}`}>{item.title}</h3>
-                <p className="text-[10px] text-gray-500 leading-tight">{item.desc}</p>
-              </div>
-              {index < stepperData.length - 1 && (
-                <div className="hidden md:flex text-gray-300"><HiOutlineArrowRight className="w-5 h-5" /></div>
-              )}
-            </React.Fragment>
-          ))}
-        </div>
-      </div>
-
-      {/* MAIN TABLE */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mt-2">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-225">
             <thead>
               <tr className="bg-[#DCECE0] text-[#3A4D3F] text-[11px] uppercase tracking-wider font-bold border-b border-gray-200">
-                <th className="px-6 py-4 whitespace-nowrap">ID Transaksi</th>
+                <th className="px-6 py-4 whitespace-nowrap">ID Donasi</th>
                 <th className="px-6 py-4 whitespace-nowrap">Program / Lokasi</th>
                 <th className="px-6 py-4 whitespace-nowrap">Jenis & Jumlah Bibit</th>
                 <th className="px-6 py-4 whitespace-nowrap">Status Saat Ini</th>
@@ -154,7 +123,7 @@ const PelaksanaanKegiatan: React.FC = () => {
             <tbody className="divide-y divide-gray-100">
               {mockData.map((row, index) => (
                 <tr key={index} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4 text-sm font-semibold text-gray-800 whitespace-nowrap">{row.idTransaksi}</td>
+                  <td className="px-6 py-4 text-sm font-semibold text-gray-800 whitespace-nowrap">{row.idDonasi}</td>
                   
                   <td className="px-6 py-4">
                     <span className="block text-sm font-bold text-[#185325]">{row.program}</span>
@@ -176,17 +145,14 @@ const PelaksanaanKegiatan: React.FC = () => {
                     <StatusBadge status={row.status} />
                   </td>
 
-                  {/* KOLOM BARU: Dokumen & Administrasi */}
                   <td className="px-6 py-4 align-middle">
                     <div className="flex flex-col items-center justify-center gap-2 w-full max-w-40 mx-auto">
-                      
-                      {/* Logic BAST */}
                       {row.bastUrl ? (
                         <button 
                           onClick={() => openModal('previewBAST', row)}
                           className="flex items-center justify-center gap-1.5 w-full px-3 py-1.5 bg-[#f0f9f3] border border-[#C8E0CD] hover:bg-[#e2f1e6] text-[#185325] text-[11px] font-bold rounded-lg transition-colors shadow-sm"
                         >
-                          <HiOutlineDocumentText className="w-4 h-4" /> BAST Disetujui
+                          <HiOutlineDocumentText className="w-4 h-4" /> BAST Disimpan
                         </button>
                       ) : (
                         <button 
@@ -197,7 +163,6 @@ const PelaksanaanKegiatan: React.FC = () => {
                         </button>
                       )}
 
-                      {/* Logic Bukti Tanam (Otomatis) */}
                       {row.buktiTanamUrl ? (
                         <button 
                           onClick={() => toast.success('Membuka foto bukti tanam dari modul monitoring...')} // Bisa diganti buka modal image
@@ -214,7 +179,6 @@ const PelaksanaanKegiatan: React.FC = () => {
                     </div>
                   </td>
 
-                  {/* KOLOM AKSI: Hanya Ikon Mata */}
                   {/* <td className="px-6 py-4 whitespace-nowrap align-middle">
                     <div className="flex items-center justify-center">
                       <button 
@@ -233,7 +197,6 @@ const PelaksanaanKegiatan: React.FC = () => {
         </div>
       </div>
       
-      {/* MODALS */}
       <PreviewBastModal isOpen={activeModal === 'previewBAST'} onClose={closeModal} />
       <UploadBastModal isOpen={activeModal === 'uploadBAST'} onClose={closeModal} />
       <RincianDanaModal isOpen={activeModal === 'rincian'} onClose={closeModal} data={selectedData} /> 
