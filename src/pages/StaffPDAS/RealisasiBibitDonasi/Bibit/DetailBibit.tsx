@@ -5,7 +5,6 @@ import { HiOutlineArrowLeft, HiOutlinePencilSquare, HiOutlineCheckBadge } from '
 const DetailBibit: React.FC = () => {
   const navigate = useNavigate();
 
-  // Mock data yang merefleksikan dokumen CV. Calakan Bina Lingkungan (Akasia Mangium)
   const bibitData = {
     id: 'BBT-002',
     nama: 'Akasia Mangium (Acacia mangium)',
@@ -58,7 +57,6 @@ const DetailBibit: React.FC = () => {
           </div>
         </div>
 
-        {/* Tabel Harga Berdasarkan Ukuran */}
         <div>
           <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider mb-4">Struktur Harga Berdasarkan Spesifikasi</h3>
           

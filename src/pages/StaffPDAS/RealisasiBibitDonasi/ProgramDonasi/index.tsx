@@ -1,97 +1,96 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   HiOutlineMagnifyingGlass,
   HiOutlinePlus,
   HiOutlineEye,
   HiOutlinePencil,
 } from "react-icons/hi2";
-import DetailProgramModal from "./components/DetailProgramModal";
 import { useNavigate } from "react-router-dom";
-import type { ProgramData } from "@/utils/interface";
+import toast from "react-hot-toast";
+import DetailProgramModal from "./components/DetailProgramModal";
+import { getDonationProgramsAPI } from "@/services/program-donasi.service";
 
-type StatusProgram = "Aktif" | "Selesai" | "Menunggu Verifikasi";
+export interface MappedProgramData {
+  id: string;
+  nama: string;
+  lokasi: string;
+  jenisBibit: {
+    nama: string;
+    jumlah: number;
+    terealisasi: number;
+  }[];
+  terkumpul: string;
+  totalTerealisasi: string;
+  status: string;
+}
 
-// Mock Data diperbarui dengan field 'terealisasi' dan 'totalTerealisasi'
-const mockDataProgram: ProgramData[] = [
-  {
-    id: "1",
-    nama: "Penghijauan Hulu Citarum",
-    lokasi: "Kab. Bandung",
-    jenisBibit: [
-      { nama: "Mahoni", jumlah: 4000, terealisasi: 4000 },
-      { nama: "Sengon", jumlah: 2500, terealisasi: 1500 },
-      { nama: "Trembesi", jumlah: 2000, terealisasi: 500 },
-    ],
-    terkumpul: "8.500",
-    totalTerealisasi: "6.000",
-    status: "Aktif",
-  },
-  {
-    id: "2",
-    nama: "Pemulihan Lahan Kritis Cisadane",
-    lokasi: "Kab. Bogor",
-    jenisBibit: [
-      { nama: "Mahoni", jumlah: 4000, terealisasi: 4000 },
-      { nama: "Beringin", jumlah: 2500, terealisasi: 2500 },
-      { nama: "Trembesi", jumlah: 2000, terealisasi: 2000 },
-    ],
-    terkumpul: "8.500",
-    totalTerealisasi: "8.500",
-    status: "Selesai",
-  },
-  {
-    id: "3",
-    nama: "Penghijauan Hulu Citarum",
-    lokasi: "Kab. Bandung",
-    jenisBibit: [
-      { nama: "Trembesi", jumlah: 4000, terealisasi: 1000 },
-      { nama: "Beringin", jumlah: 2500, terealisasi: 0 },
-    ],
-    terkumpul: "6.500",
-    totalTerealisasi: "1.000",
-    status: "Aktif",
-  },
-  {
-    id: "4",
-    nama: "Hutan Kota Ciliwung",
-    lokasi: "Jakarta Selatan",
-    jenisBibit: [
-      { nama: "Trembesi", jumlah: 0, terealisasi: 0 },
-      { nama: "Beringin", jumlah: 0, terealisasi: 0 },
-    ],
-    terkumpul: "0",
-    totalTerealisasi: "0",
-    status: "Menunggu Verifikasi",
-  },
-];
-
-const getStatusBadge = (status: StatusProgram) => {
+const getStatusBadge = (status: string) => {
   const baseStyle = "px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap";
 
-  switch (status) {
-    case "Aktif":
+  switch (status.toLowerCase()) {
+    case "active":
+    case "aktif":
       return <span className={`${baseStyle} bg-[#2E7D32] text-white`}>Aktif</span>;
-    case "Selesai":
+    case "selesai":
+    case "completed":
       return <span className={`${baseStyle} bg-gray-200 text-gray-600`}>Selesai</span>;
-    case "Menunggu Verifikasi":
+    case "menunggu verifikasi":
+    case "pending":
       return <span className={`${baseStyle} bg-[#F2C94C] text-gray-800`}>Menunggu Verifikasi</span>;
     default:
-      return null;
+      return <span className={`${baseStyle} bg-gray-100 text-gray-600`}>{status}</span>;
   }
 };
 
 const ProgramDonasi: React.FC = () => {
   const navigate = useNavigate();
+  
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedProgram, setSelectedProgram] = useState<ProgramData | null>(null);
+  const [selectedProgram, setSelectedProgram] = useState<MappedProgramData | null>(null);
+  const [programsData, setProgramsData] = useState<MappedProgramData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filteredData = mockDataProgram.filter(
+  useEffect(() => {
+    fetchPrograms();
+  }, []);
+
+  const fetchPrograms = async () => {
+    setIsLoading(true);
+    try {
+      const response = await getDonationProgramsAPI();
+      
+      const mappedData: MappedProgramData[] = response.payload.map((item) => ({
+        id: item.id.toString(),
+        nama: item.name,
+        lokasi: item.location,
+        terkumpul: item.total_seeds_collected.toLocaleString('id-ID'),
+        totalTerealisasi: item.total_seeds_realized.toLocaleString('id-ID'),
+        status: item.status,
+        // Placeholder UI: Karena Backend belum mengirimkan data relasi jenis bibit
+        jenisBibit: [
+          { 
+            nama: `ID Spek: ${item.seed_specification_id}`, 
+            jumlah: 0, 
+            terealisasi: 0 
+          }
+        ]
+      }));
+
+      setProgramsData(mappedData);
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const filteredData = programsData.filter(
     (program) =>
       program.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
       program.lokasi.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const handleOpenDetail = (program: ProgramData) => {
+  const handleOpenDetail = (program: MappedProgramData) => {
     setSelectedProgram(program);
   };
 
@@ -124,9 +123,7 @@ const ProgramDonasi: React.FC = () => {
           </div>
 
           <button
-            onClick={() => {
-              navigate("/admin/staff/donasi/program/create");
-            }}
+            onClick={() => navigate("/admin/staff/donasi/program/create")}
             className="bg-[#185325] hover:bg-[#123d1c] text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2 shadow-sm whitespace-nowrap active:scale-95"
           >
             <HiOutlinePlus className="w-5 h-5" strokeWidth={2.5} />
@@ -137,7 +134,7 @@ const ProgramDonasi: React.FC = () => {
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mt-2">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-200">
+          <table className="w-full text-left border-collapse min-w-225">
             <thead>
               <tr className="bg-[#DCECE0] text-[#3A4D3F] text-[11px] uppercase tracking-wider font-bold border-b border-gray-200">
                 <th className="px-6 py-4 whitespace-nowrap">Nama Program</th>
@@ -150,7 +147,17 @@ const ProgramDonasi: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filteredData.length > 0 ? (
+              
+              {isLoading ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center">
+                    <div className="flex flex-col items-center justify-center gap-3">
+                      <span className="w-8 h-8 border-4 border-gray-200 border-t-[#185325] rounded-full animate-spin"></span>
+                      <p className="text-sm font-bold text-gray-500">Memuat data program donasi...</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredData.length > 0 ? (
                 filteredData.map((program) => (
                   <tr
                     key={program.id}
@@ -215,16 +222,19 @@ const ProgramDonasi: React.FC = () => {
                   </td>
                 </tr>
               )}
+
             </tbody>
           </table>
         </div>
       </div>
 
-      <DetailProgramModal
-        isOpen={selectedProgram !== null}
-        onClose={handleCloseDetail}
-        program={selectedProgram}
-      />
+      {selectedProgram && (
+        <DetailProgramModal
+          isOpen={selectedProgram !== null}
+          onClose={handleCloseDetail}
+          program={selectedProgram as any} 
+        />
+      )}
     </div>
   );
 };
