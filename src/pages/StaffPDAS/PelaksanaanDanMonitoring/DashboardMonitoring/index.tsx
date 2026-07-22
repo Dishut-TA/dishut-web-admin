@@ -4,9 +4,18 @@ import {
   HiOutlineCheckCircle,
   HiOutlinePresentationChartLine,
   HiOutlineExclamationCircle,
-  HiOutlineClock
+  HiOutlineClock,
+  HiOutlineDocumentArrowDown,
+  HiOutlineMapPin,
+  HiOutlineUserGroup
 } from 'react-icons/hi2';
-import StatCard from '@/components/StatCard'; 
+import DashboardStatCard from './components/DashboardStatCard';
+import FilterWilayah from './components/FilterWilayah';
+import SebaranKegiatanChart from './components/SebaranKegiatanChart';
+import DetailAgregatTable from './components/DetailAgregatTabel';
+import KinerjaPenyuluhTable from './components/KinerjaPenyuluhTable';
+import RiwayatMonitoringTimeline from './components/RiwayatMonitoringTimeline';
+import { PiPlant } from 'react-icons/pi';
 
 const DashboardMonitoring: React.FC = () => {
   const statsData = [
@@ -33,11 +42,35 @@ const DashboardMonitoring: React.FC = () => {
       value: '1',
       colorTheme: 'red' as const,
       icon: <HiOutlineExclamationCircle className="w-6 h-6" />
-    }
+    },
+    {
+      title: 'Total Laporan',
+      value: '3',
+      colorTheme: 'red' as const,
+      icon: <HiOutlineExclamationCircle className="w-6 h-6" />
+    },
+    {
+      title: 'Penyuluh Aktif',
+      value: '5',
+      colorTheme: 'blue' as const,
+      icon: <HiOutlineUserGroup className="w-6 h-6" />
+    },
+    {
+      title: 'Total Wilayah (CDK)',
+      value: '3',
+      colorTheme: 'green' as const,
+      icon: <HiOutlineMapPin className="w-6 h-6" />
+    },
+    {
+      title: 'Total Bibit Ditanam',
+      value: '3.000',
+      colorTheme: 'green' as const,
+      icon: <PiPlant className="w-6 h-6" />
+    },
   ];
 
   return (
-    <div className="flex flex-col gap-6 w-full">
+    <div className="flex flex-col gap-6 w-full max-w-350 mx-auto">
       <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800 mb-1">
@@ -48,15 +81,21 @@ const DashboardMonitoring: React.FC = () => {
           </p>
         </div>
         
-        <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm text-sm text-gray-600 whitespace-nowrap w-fit">
-          <HiOutlineClock className="w-4 h-4 text-gray-400" />
-          <span>Update terakhir: 28 April 2026</span>
+        <div className="flex gap-3">
+          <div className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-xl border border-gray-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] text-sm font-medium text-gray-600 whitespace-nowrap">
+            <HiOutlineClock className="w-4 h-4 text-gray-400" />
+            <span>Update terakhir: 28 April 2026</span>
+          </div>
+          <button className="bg-[#185325] hover:bg-[#123d1c] text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center gap-2 shadow-sm">
+            <HiOutlineDocumentArrowDown className="w-5 h-5" />
+            Ekspor Rekap
+          </button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {statsData.map((stat, index) => (
-          <StatCard
+          <DashboardStatCard
             key={index}
             title={stat.title}
             value={stat.value}
@@ -69,34 +108,41 @@ const DashboardMonitoring: React.FC = () => {
       <div className="bg-white rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 overflow-hidden flex flex-col">
         <div className="p-6 border-b border-gray-50">
           <h2 className="text-lg font-bold text-gray-800 mb-1">Peta Sebaran Kegiatan</h2>
-          <p className="text-sm text-gray-500">Visualisasi lokasi kegiatan berdasarkan koordinat laporan</p>
+          <p className="text-sm text-gray-500 font-medium">Visualisasi lokasi kegiatan berdasarkan koordinat laporan</p>
         </div>
         
         <div className="relative w-full h-100 md:h-125 lg:h-150 bg-[#EBF3FA]">
-          
-          <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200 p-3 z-10 flex flex-wrap gap-4 text-xs font-semibold text-gray-600">
-            <div className="flex items-center gap-2">
-              <span className="w-4 h-2.5 rounded-sm bg-green-500"></span>
-              Berjalan
+          <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-xl shadow-sm border border-gray-200 p-4 z-10 flex flex-col gap-3 text-xs font-bold text-gray-700">
+            <div className="flex items-center gap-3">
+              <span className="w-4 h-4 rounded-full bg-green-500 shadow-inner"></span> Berjalan
             </div>
-            <div className="flex items-center gap-2">
-              <span className="w-4 h-2.5 rounded-sm bg-orange-400"></span>
-              Selesai
+            <div className="flex items-center gap-3">
+              <span className="w-4 h-4 rounded-full bg-orange-400 shadow-inner"></span> Selesai
             </div>
-            <div className="flex items-center gap-2">
-              <span className="w-4 h-2.5 rounded-sm bg-red-500"></span>
-              Bermasalah
+            <div className="flex items-center gap-3">
+              <span className="w-4 h-4 rounded-full bg-red-500 shadow-inner"></span> Bermasalah
             </div>
           </div>
 
           <div className="w-full h-full flex items-center justify-center">
-             <span className="text-gray-400 text-sm border-2 border-dashed border-gray-300 px-6 py-3 rounded-xl">
+             <span className="text-gray-400 font-bold text-sm border-2 border-dashed border-gray-300 px-6 py-3 rounded-xl">
                [Integrasi Komponen Peta GIS di Sini]
              </span>
           </div>
-
         </div>
       </div>
+
+      <hr className="border-gray-200 my-2" />
+
+      <FilterWilayah />
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <SebaranKegiatanChart />
+        <DetailAgregatTable />
+      </div>
+
+      <KinerjaPenyuluhTable />
+      <RiwayatMonitoringTimeline />
 
     </div>
   );

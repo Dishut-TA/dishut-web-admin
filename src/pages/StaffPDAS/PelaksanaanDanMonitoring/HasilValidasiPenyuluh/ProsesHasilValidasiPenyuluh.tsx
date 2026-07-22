@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HiCheckCircle, HiExclamationCircle, HiOutlineArrowPath, HiOutlineXMark, HiOutlineCheck } from 'react-icons/hi2';
+import { HiCheckCircle, HiExclamationCircle, HiOutlineArrowPath, HiOutlineXMark, HiOutlineCheck, HiXCircle } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 
 const ProsesValidasiPenyuluh: React.FC = () => {
@@ -68,14 +68,14 @@ const ProsesValidasiPenyuluh: React.FC = () => {
                       <td className="px-4 py-3 font-medium text-gray-800">Koordinat</td>
                       <td className="px-4 py-3 text-gray-600">2.345678° S,<br/>138.765432° E</td>
                       <td className="px-4 py-3 text-gray-600">2.346123° S,<br/>138.766210° E</td>
-                      <td className="px-4 py-3 text-center"><span className="text-yellow-500 font-bold">⚠️</span></td>
+                      <td className="px-4 py-3 text-center"><HiXCircle className="w-5 h-5 text-red-500 mx-auto" /></td>
                       <td className="px-4 py-3 text-gray-600">Selisih 93 m</td>
                     </tr>
                     <tr className="hover:bg-gray-50">
                       <td className="px-4 py-3 font-medium text-gray-800">Luas Lahan</td>
                       <td className="px-4 py-3 text-gray-600">125,50 Ha</td>
                       <td className="px-4 py-3 text-gray-600">118,40 Ha</td>
-                      <td className="px-4 py-3 text-center"><span className="text-yellow-500 font-bold">⚠️</span></td>
+                      <td className="px-4 py-3 text-center"><HiXCircle className="w-5 h-5 text-red-500 mx-auto" /></td>
                       <td className="px-4 py-3 text-gray-600">Selisih 7,10 Ha (5,66%)</td>
                     </tr>
                     <tr className="hover:bg-gray-50">
@@ -89,7 +89,7 @@ const ProsesValidasiPenyuluh: React.FC = () => {
                       <td className="px-4 py-3 font-medium text-gray-800">Akses Lokasi</td>
                       <td className="px-4 py-3 text-gray-600">Sedang</td>
                       <td className="px-4 py-3 text-gray-600">Sulit</td>
-                      <td className="px-4 py-3 text-center"><span className="text-yellow-500 font-bold">⚠️</span></td>
+                      <td className="px-4 py-3 text-center"><HiXCircle className="w-5 h-5 text-red-500 mx-auto" /></td>
                       <td className="px-4 py-3 text-gray-600">Perlu dicatat</td>
                     </tr>
                     <tr className="hover:bg-gray-50">

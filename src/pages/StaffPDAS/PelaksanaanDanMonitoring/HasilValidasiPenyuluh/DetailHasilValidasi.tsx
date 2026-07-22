@@ -18,11 +18,7 @@ const DetailHasilValidasi: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        {/* KOLOM KIRI (Informasi Data) */}
         <div className="lg:col-span-7 space-y-6">
-          
-          {/* Card 1: Informasi Lokasi */}
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <h3 className="text-[#185325] font-bold flex items-center gap-2 mb-4 border-b border-gray-50 pb-3">
               <HiOutlineInformationCircle className="w-5 h-5" /> Informasi Lokasi
@@ -37,7 +33,6 @@ const DetailHasilValidasi: React.FC = () => {
             </div>
           </div>
 
-          {/* Card 2: Data Awal Lokasi */}
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <h3 className="text-[#185325] font-bold flex items-center gap-2 mb-4 border-b border-gray-50 pb-3">
               <HiOutlineDocumentText className="w-5 h-5" /> Data Awal Lokasi
@@ -50,7 +45,6 @@ const DetailHasilValidasi: React.FC = () => {
             </div>
           </div>
 
-          {/* Card 3: Hasil Validasi Lapangan */}
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <h3 className="text-[#185325] font-bold flex items-center gap-2 mb-4 border-b border-gray-50 pb-3">
               <HiOutlineClipboardDocumentCheck className="w-5 h-5" /> Hasil Validasi Lapangan
@@ -68,16 +62,11 @@ const DetailHasilValidasi: React.FC = () => {
           </div>
 
         </div>
-
-        {/* KOLOM KANAN (Visual & Media) */}
         <div className="lg:col-span-5 space-y-6">
-          
-          {/* Map Card */}
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <h3 className="text-gray-800 font-bold mb-4">Peta Lokasi</h3>
             <div className="w-full h-72 rounded-xl overflow-hidden relative border border-gray-200">
               <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=600&auto=format&fit=crop" alt="Map satellite" className="w-full h-full object-cover" />
-              {/* Overlay Polygon Simulasi */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="w-48 h-40 bg-blue-500/30 border-2 border-blue-200 relative rotate-6 rounded-sm">
                   <div className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border border-blue-500 rounded-full"></div>
@@ -92,7 +81,6 @@ const DetailHasilValidasi: React.FC = () => {
             </div>
           </div>
 
-          {/* Photo Gallery Card */}
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-gray-800 font-bold">Dokumentasi Lapangan</h3>

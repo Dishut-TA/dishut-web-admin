@@ -6,7 +6,6 @@ import {
   HiOutlineBell,
   HiOutlineChevronDown,
   HiOutlineUser,
-  HiOutlineCog8Tooth,
   HiOutlineArrowRightOnRectangle,
 } from "react-icons/hi2";
 import ConfirmAlert from "@/components/ConfirmAlert";
@@ -172,12 +171,6 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-[#185325] hover:bg-[#D5F0DE]/40 transition-colors"
               >
                 <HiOutlineUser className="w-5 h-5" /> Profile
-              </button>
-              <button
-                onClick={() => setIsProfileOpen(false)}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-[#185325] hover:bg-[#D5F0DE]/40 transition-colors"
-              >
-                <HiOutlineCog8Tooth className="w-5 h-5" /> Pengaturan
               </button>
               <div className="my-1 border-t border-gray-100"></div>
               <button
