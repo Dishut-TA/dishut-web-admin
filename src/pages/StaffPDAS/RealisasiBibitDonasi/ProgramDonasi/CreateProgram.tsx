@@ -14,7 +14,6 @@ const BIBIT_OPTIONS = [
   'Mahoni', 'Sengon', 'Trembesi', 'Mangrove', 'Pucuk Merah', 'Beringin'
 ];
 
-// Interface untuk data bibit yang dipilih beserta spesifikasinya
 interface BibitTerpilih {
   id: string;
   nama: string;
@@ -30,13 +29,11 @@ const CreateProgram: React.FC = () => {
   const [daftarBibit, setDaftarBibit] = useState<BibitTerpilih[]>([]);
   const [namaBibitBaru, setNamaBibitBaru] = useState('');
 
-  // --- PLACEHOLDER LOGIKA HARGA ---
-  // Nanti fungsi ini tinggal diubah sesuai dokumen spesifikasi harga yang Anda miliki
   const hitungHarga = (tinggi: number | '') => {
     if (tinggi === '' || tinggi <= 0) return 0;
-    if (tinggi <= 50) return 15000;  // Contoh: <= 50cm = Rp 15.000
-    if (tinggi <= 100) return 35000; // Contoh: 51-100cm = Rp 35.000
-    return 75000;                    // Contoh: > 100cm = Rp 75.000
+    if (tinggi <= 50) return 15000;  
+    if (tinggi <= 100) return 35000; 
+    return 75000;                    
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,7 +53,6 @@ const CreateProgram: React.FC = () => {
     if (fileInputRef.current) fileInputRef.current.click();
   };
 
-  // Fungsi untuk toggle (centang) bibit bawaan
   const toggleBibitDefault = (namaBibit: string) => {
     const isExist = daftarBibit.some(b => b.nama === namaBibit);
     
@@ -70,7 +66,6 @@ const CreateProgram: React.FC = () => {
     }
   };
 
-  // Fungsi untuk menambahkan bibit kustom baru
   const handleTambahBibitBaru = () => {
     if (!namaBibitBaru.trim()) {
       toast.error('Nama bibit baru tidak boleh kosong.');
@@ -91,7 +86,6 @@ const CreateProgram: React.FC = () => {
     toast.success(`${namaBibitBaru} berhasil ditambahkan!`);
   };
 
-  // Fungsi untuk update tinggi tanaman & merubah harga secara otomatis
   const handleUpdateTinggi = (id: string, tinggiStr: string) => {
     const tinggiVal = tinggiStr === '' ? '' : Number(tinggiStr);
     const hargaBaru = hitungHarga(tinggiVal);
@@ -105,7 +99,6 @@ const CreateProgram: React.FC = () => {
     setDaftarBibit(prev => prev.filter(b => b.id !== id));
   };
 
-  // Format angka ke mata uang Rupiah
   const formatRupiah = (angka: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
   };
@@ -118,7 +111,6 @@ const CreateProgram: React.FC = () => {
       return;
     }
 
-    // Validasi apakah ada bibit yang belum diisi tingginya
     const isTinggiKosong = daftarBibit.some(b => b.tinggi === '' || b.tinggi <= 0);
     if (isTinggiKosong) {
       toast.error('Mohon isi spesifikasi tinggi tanaman untuk semua bibit yang dipilih.');
@@ -132,7 +124,7 @@ const CreateProgram: React.FC = () => {
   };
 
   return (
-    <div className="w-full mx-auto p-4 md:p-6 pb-12 max-w-5xl">
+    <div className="w-full mx-auto pb-12">
       <div className="flex items-center gap-4 mb-8">
         <button 
           onClick={() => navigate(-1)}
@@ -149,8 +141,6 @@ const CreateProgram: React.FC = () => {
       <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
         <form onSubmit={handleSubmit}>
           <div className="p-6 md:p-8 space-y-8">
-            
-            {/* --- UPLOAD FOTO AREA --- */}
             <div>
               <label className="block text-base font-bold text-slate-800 mb-3">
                 Foto Program / Lokasi <span className="text-red-500">*</span>

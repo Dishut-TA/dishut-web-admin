@@ -68,11 +68,11 @@ const DashboardProgram: React.FC = () => {
 
       setSelectedDonatur({
         idTransaksi: `TRX-00${item.id}`,
+        idDonasi: `TRX-00${item.id}`,
         namaDonatur: item.companyName,
         program: programName,
         jumlahBibit: jumlahBibitNumber,
         status: "Menunggu Verifikasi",
-        // --- TAMBAHAN: Masukkan rincianBibit agar sesuai dengan interface ---
         rincianBibit: [] 
       });
       
@@ -92,8 +92,6 @@ const DashboardProgram: React.FC = () => {
   return (
     <>
       <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8">
-        
-        {/* HEADER */}
         <div className="mb-2">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">
             Dashboard Realisasi Bibit dan Donasi
@@ -103,7 +101,6 @@ const DashboardProgram: React.FC = () => {
           </p>
         </div>
 
-        {/* STATISTIC CARDS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {STATS_DATA.map((stat) => (
             <StatCard key={stat.id} data={stat} />
@@ -150,7 +147,6 @@ const DashboardProgram: React.FC = () => {
             </div>
           </div>
 
-          {/* PROGRESS PROGRAM */}
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm flex flex-col overflow-hidden">
             <div className="p-6 border-b border-gray-100 bg-white">
               <h2 className="font-bold text-gray-800">Progress Program</h2>
@@ -185,7 +181,6 @@ const DashboardProgram: React.FC = () => {
         </div>
       </div>
 
-      {/* MODALS */}
       <VerifikasiDonaturModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

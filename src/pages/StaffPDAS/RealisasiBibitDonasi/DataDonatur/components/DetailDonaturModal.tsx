@@ -36,7 +36,7 @@ const DetailDonaturModal: React.FC<DetailDonaturModalProps> = ({ isOpen, onClose
       <div className="w-full max-w-lg bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
         
         <div className="flex-none flex items-center justify-between p-6 pb-4 border-b border-gray-100">
-          <h2 className="text-xl font-bold text-gray-800">Detail Donatur</h2>
+          <h2 className="text-xl font-bold text-gray-800">Detail Donasi</h2>
           <button onClick={onClose} className="p-2 rounded-full text-gray-400 hover:bg-gray-100 transition-colors">
             <HiOutlineXMark className="w-6 h-6" />
           </button>

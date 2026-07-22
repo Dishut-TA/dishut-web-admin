@@ -70,6 +70,7 @@ export interface DetailBibitDana {
 
 export interface DonaturData {
   idTransaksi: string;
+  idDonasi: string;
   namaDonatur: string;
   program: string;
   jumlahBibit: number; 
