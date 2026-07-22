@@ -2,27 +2,32 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HiOutlineArrowLeft, HiOutlinePlus, HiOutlineTrash, HiOutlineCurrencyDollar } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
+import { 
+  createBibitAPI, 
+  createSeedSpecificationAPI, 
+  type BibitPayload 
+} from '@/services/bibit.service';
 
 interface SpekHarga {
   id: number;
   tinggiMin: string;
   tinggiMax: string;
+  stokAwal: string;
   harga: string;
 }
 
 const CreateBibit: React.FC = () => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
   const [namaBibit, setNamaBibit] = useState('');
   const [kategori, setKategori] = useState('Tanaman Kehutanan');
   const [sertifikasi, setSertifikasi] = useState('');
-  
-  // State dinamis untuk spesifikasi tinggi dan harga
   const [spekHarga, setSpekHarga] = useState<SpekHarga[]>([
-    { id: Date.now(), tinggiMin: '30', tinggiMax: '60', harga: '' }
+    { id: Date.now(), tinggiMin: '30', tinggiMax: '60', stokAwal: '', harga: '' }
   ]);
 
   const handleAddSpek = () => {
-    setSpekHarga([...spekHarga, { id: Date.now(), tinggiMin: '', tinggiMax: '', harga: '' }]);
+    setSpekHarga([...spekHarga, { id: Date.now(), tinggiMin: '', tinggiMax: '', stokAwal: '', harga: '' }]);
   };
 
   const handleRemoveSpek = (id: number) => {
@@ -37,15 +42,56 @@ const CreateBibit: React.FC = () => {
     setSpekHarga(spekHarga.map(item => item.id === id ? { ...item, [field]: value } : item));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const hasEmptyFields = spekHarga.some(s => !s.harga || !s.tinggiMin);
+    
+    const hasEmptyFields = spekHarga.some(s => !s.harga || !s.tinggiMin || !s.stokAwal);
     if (hasEmptyFields) {
-      toast.error('Pastikan semua rentang tinggi dan harga telah diisi.');
+      toast.error('Pastikan semua rentang tinggi, stok, dan harga telah diisi.');
       return;
     }
-    toast.success('Master Data Bibit berhasil disimpan!');
-    navigate(-1);
+
+    setIsLoading(true);
+    const loadingToast = toast.loading('Menyimpan data master bibit...');
+
+    try {
+      const bibitPayload: BibitPayload = {
+        kode: `S-${Math.floor(Math.random() * 10000)}`, 
+        nama: namaBibit,
+        jenis: "Kayu",
+        kategori: kategori,
+        deskripsi: sertifikasi || `Master data bibit ${namaBibit}`,
+        status: "aktif"
+      };
+
+      const responseBibit = await createBibitAPI(bibitPayload);
+      const newBibitId = responseBibit?.payload?.id || responseBibit?.data?.id || responseBibit?.id;
+
+      if (!newBibitId) {
+        throw new Error('Gagal mendapatkan ID Bibit dari server.');
+      }
+
+      toast.loading('Menyimpan spesifikasi dan harga...', { id: loadingToast });
+
+      const spekPromises = spekHarga.map((spek) => {
+        return createSeedSpecificationAPI({
+          seed_id: newBibitId,
+          min_height: Number(spek.tinggiMin),
+          max_height: Number(spek.tinggiMax) || 0, 
+          stock: Number(spek.stokAwal),
+          price: Number(spek.harga)
+        });
+      });
+
+      await Promise.all(spekPromises);
+      toast.success('Master Data Bibit beserta spesifikasinya berhasil disimpan!', { id: loadingToast });
+      navigate(-1);
+
+    } catch (error: any) {
+      toast.error(error.message, { id: loadingToast });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -67,7 +113,6 @@ const CreateBibit: React.FC = () => {
         <form onSubmit={handleSubmit}>
           
           <div className="p-8 space-y-8">
-            {/* Informasi Dasar Bibit */}
             <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100 space-y-6">
               <h3 className="text-sm font-bold text-[#185325] uppercase tracking-wider mb-2">Informasi Dasar</h3>
               
@@ -102,7 +147,6 @@ const CreateBibit: React.FC = () => {
               </div>
             </div>
 
-            {/* Dinamis Input: Tinggi & Harga */}
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -119,12 +163,11 @@ const CreateBibit: React.FC = () => {
 
               <div className="space-y-4">
                 {spekHarga.map((spek, index) => (
-                  <div key={spek.id} className="flex flex-col md:flex-row gap-4 items-start md:items-center p-4 border border-gray-200 rounded-2xl bg-white shadow-sm group">
+                  <div key={spek.id} className="flex flex-col xl:flex-row gap-4 items-start xl:items-center p-4 border border-gray-200 rounded-2xl bg-white shadow-sm group">
                     <span className="w-6 h-6 flex items-center justify-center bg-gray-100 text-gray-500 text-xs font-bold rounded-full shrink-0">
                       {index + 1}
                     </span>
                     
-                    {/* Input Rentang Tinggi */}
                     <div className="flex-1 w-full grid grid-cols-2 gap-3">
                       <div>
                         <label className="text-[10px] font-bold text-gray-500 uppercase mb-1 block">Tinggi Min (cm)</label>
@@ -142,25 +185,14 @@ const CreateBibit: React.FC = () => {
                       </div>
                     </div>
                     
-                    {/* Input Stok Awa; */}
-                    <div className="flex-1 w-full grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="text-[10px] font-bold text-gray-500 uppercase mb-1 block">Stok Awal (Batang)</label>
-                        <input 
-                          type="number" required value={spek.tinggiMin} onChange={e => handleChangeSpek(spek.id, 'tinggiMin', e.target.value)}
-                          placeholder="30" className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#185325]"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[10px] font-bold text-gray-500 uppercase mb-1 block">Tinggi Maks (cm) <span className="lowercase font-normal text-gray-400">*opsional</span></label>
-                        <input 
-                          type="number" value={spek.tinggiMax} onChange={e => handleChangeSpek(spek.id, 'tinggiMax', e.target.value)}
-                          placeholder="60" className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#185325]"
-                        />
-                      </div>
+                    <div className="flex-1 w-full">
+                      <label className="text-[10px] font-bold text-gray-500 uppercase mb-1 block">Stok Awal (Batang)</label>
+                      <input 
+                        type="number" required value={spek.stokAwal} onChange={e => handleChangeSpek(spek.id, 'stokAwal', e.target.value)}
+                        placeholder="1000" className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#185325]"
+                      />
                     </div>
 
-                    {/* Input Harga */}
                     <div className="flex-1 w-full relative">
                       <label className="text-[10px] font-bold text-gray-500 uppercase mb-1 block">Harga Per Batang</label>
                       <div className="relative">
@@ -174,10 +206,9 @@ const CreateBibit: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Hapus Baris */}
                     <button 
                       type="button" onClick={() => handleRemoveSpek(spek.id)}
-                      className="p-2.5 mt-5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+                      className="p-2.5 mt-4 xl:mt-5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"
                       title="Hapus Spesifikasi"
                     >
                       <HiOutlineTrash className="w-5 h-5" />
@@ -189,12 +220,21 @@ const CreateBibit: React.FC = () => {
 
           </div>
 
-          <div className="p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3">
+          <div className="p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3 rounded-b-3xl">
             <button type="button" onClick={() => navigate(-1)} className="px-6 py-3 rounded-xl bg-white border border-gray-200 text-gray-700 font-bold hover:bg-gray-50 transition-colors shadow-sm">
               Batal
             </button>
-            <button type="submit" className="px-8 py-3 rounded-xl bg-linear-to-r from-[#185325] to-[#227a36] text-white font-bold transition-transform active:scale-95 shadow-md">
-              Simpan Data Bibit
+            <button 
+              type="submit" 
+              disabled={isLoading}
+              className="px-8 py-3 rounded-xl bg-[#185325] text-white font-bold transition-transform active:scale-95 shadow-md flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                  Menyimpan...
+                </>
+              ) : 'Simpan Data Bibit'}
             </button>
           </div>
         </form>
