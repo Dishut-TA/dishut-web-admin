@@ -1,4 +1,5 @@
-import type { KegiatanData } from '@/utils/interface';
+import type { KegiatanData } from '..';
+import { StatusBadge } from '..';
 import React, { useEffect } from 'react';
 import { HiOutlineBanknotes, HiOutlineXMark } from 'react-icons/hi2';
 
@@ -27,8 +28,11 @@ const RincianDanaModal: React.FC<RincianDanaModalProps> = ({ isOpen, onClose, da
       <div className="w-full max-w-lg bg-white rounded-3xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         
         <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
-          <h2 className="text-xl font-bold text-gray-800">Rincian Alokasi Dana</h2>
-          <button onClick={onClose} className="p-2 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl font-bold text-gray-800">Rincian Alokasi Dana</h2>
+            <StatusBadge status={data.status} />
+          </div>
+          <button onClick={onClose} className="p-2 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer">
             <HiOutlineXMark className="w-5 h-5" />
           </button>
         </div>

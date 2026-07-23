@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { 
   HiOutlineDocumentText, 
   HiOutlineCloudArrowUp,
-  HiOutlinePhoto
+  HiOutlinePhoto,
+  HiOutlineEye
 } from 'react-icons/hi2';
 import toast from 'react-hot-toast'; 
 import PreviewBastModal from './components/PreviewBastModal';
@@ -73,7 +74,7 @@ const mockData: KegiatanData[] = [
   },
 ];
 
-const StatusBadge = ({ status }: { status: StatusKegiatan }) => {
+export const StatusBadge = ({ status }: { status: StatusKegiatan }) => {
   switch (status) {
     case 'Terealisasi':
       return <span className="px-4 py-1.5 rounded-full text-[11px] font-bold bg-[#e2f1e6] text-[#185325] whitespace-nowrap border border-[#C8E0CD]">Terealisasi</span>;
@@ -113,11 +114,13 @@ const PelaksanaanKegiatan: React.FC = () => {
             <thead>
               <tr className="bg-[#DCECE0] text-[#3A4D3F] text-[11px] uppercase tracking-wider font-bold border-b border-gray-200">
                 <th className="px-6 py-4 whitespace-nowrap">ID Donasi</th>
-                <th className="px-6 py-4 whitespace-nowrap">Program / Lokasi</th>
+                {/* PEMISAHAN KOLOM DISINI */}
+                <th className="px-6 py-4 whitespace-nowrap">Nama Donatur</th>
+                <th className="px-6 py-4 whitespace-nowrap">Program</th>
                 <th className="px-6 py-4 whitespace-nowrap">Jenis & Jumlah Bibit</th>
                 <th className="px-6 py-4 whitespace-nowrap">Status Saat Ini</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">Dokumen & Administrasi</th>
-                {/* <th className="px-6 py-4 whitespace-nowrap text-center">Aksi</th> */}
+                <th className="px-6 py-4 whitespace-nowrap text-center">Rincian</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -125,9 +128,12 @@ const PelaksanaanKegiatan: React.FC = () => {
                 <tr key={index} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-6 py-4 text-sm font-semibold text-gray-800 whitespace-nowrap">{row.idDonasi}</td>
                   
-                  <td className="px-6 py-4">
-                    <span className="block text-sm font-bold text-[#185325]">{row.program}</span>
-                    <span className="block text-xs text-gray-500 mt-0.5">Oleh: {row.namaDonatur}</span>
+                  {/* DATA DIPISAH SESUAI KOLOM */}
+                  <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">
+                    {row.namaDonatur}
+                  </td>
+                  <td className="px-6 py-4 text-sm font-bold text-[#185325] whitespace-nowrap">
+                    {row.program}
                   </td>
                   
                   <td className="px-6 py-4">
@@ -150,14 +156,14 @@ const PelaksanaanKegiatan: React.FC = () => {
                       {row.bastUrl ? (
                         <button 
                           onClick={() => openModal('previewBAST', row)}
-                          className="flex items-center justify-center gap-1.5 w-full px-3 py-1.5 bg-[#f0f9f3] border border-[#C8E0CD] hover:bg-[#e2f1e6] text-[#185325] text-[11px] font-bold rounded-lg transition-colors shadow-sm"
+                          className="flex items-center justify-center gap-1.5 w-full px-3 py-1.5 bg-[#f0f9f3] border border-[#C8E0CD] hover:bg-[#e2f1e6] text-[#185325] text-[11px] font-bold rounded-lg transition-colors shadow-sm cursor-pointer"
                         >
                           <HiOutlineDocumentText className="w-4 h-4" /> BAST Disimpan
                         </button>
                       ) : (
                         <button 
                           onClick={() => openModal('uploadBAST', row)}
-                          className="flex items-center justify-center gap-1.5 w-full px-3 py-1.5 bg-[#185325] hover:bg-[#123d1c] text-white text-[11px] font-bold rounded-lg transition-colors shadow-sm"
+                          className="flex items-center justify-center gap-1.5 w-full px-3 py-1.5 bg-[#185325] hover:bg-[#123d1c] text-white text-[11px] font-bold rounded-lg transition-colors shadow-sm cursor-pointer"
                         >
                           <HiOutlineCloudArrowUp className="w-4 h-4" /> Upload BAST
                         </button>
@@ -165,8 +171,8 @@ const PelaksanaanKegiatan: React.FC = () => {
 
                       {row.buktiTanamUrl ? (
                         <button 
-                          onClick={() => toast.success('Membuka foto bukti tanam dari modul monitoring...')} // Bisa diganti buka modal image
-                          className="flex items-center justify-center gap-1.5 w-full px-3 py-1.5 bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-600 text-[11px] font-bold rounded-lg transition-colors shadow-sm"
+                          onClick={() => toast.success('Membuka foto bukti tanam...')}
+                          className="flex items-center justify-center gap-1.5 w-full px-3 py-1.5 bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-600 text-[11px] font-bold rounded-lg transition-colors shadow-sm cursor-pointer"
                         >
                           <HiOutlinePhoto className="w-4 h-4" /> Bukti Penanaman
                         </button>
@@ -175,21 +181,21 @@ const PelaksanaanKegiatan: React.FC = () => {
                           Menunggu integrasi data tanam
                         </span>
                       )}
-
                     </div>
                   </td>
 
-                  {/* <td className="px-6 py-4 whitespace-nowrap align-middle">
+                  {/* TOMBOL UNTUK MEMBUKA MODAL RINCIAN (Yang menampilkan status transaksi) */}
+                  <td className="px-6 py-4 whitespace-nowrap align-middle">
                     <div className="flex items-center justify-center">
                       <button 
                         onClick={() => openModal('rincian', row)} 
                         title="Lihat Rincian Dana"
-                        className="p-2 text-gray-400 hover:text-[#185325] hover:bg-[#f0f9f3] rounded-lg transition-colors"
+                        className="p-2 text-gray-400 hover:text-[#185325] hover:bg-[#f0f9f3] rounded-lg transition-colors cursor-pointer"
                       >
                         <HiOutlineEye className="w-5 h-5" />
                       </button>
                     </div>
-                  </td> */}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -200,7 +206,6 @@ const PelaksanaanKegiatan: React.FC = () => {
       <PreviewBastModal isOpen={activeModal === 'previewBAST'} onClose={closeModal} />
       <UploadBastModal isOpen={activeModal === 'uploadBAST'} onClose={closeModal} />
       <RincianDanaModal isOpen={activeModal === 'rincian'} onClose={closeModal} data={selectedData} /> 
-
     </div>
   );
 };

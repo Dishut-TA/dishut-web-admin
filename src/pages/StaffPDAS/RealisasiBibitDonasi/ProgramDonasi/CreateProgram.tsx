@@ -1,4 +1,3 @@
-// File: src/pages/CreateProgram.tsx
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -10,12 +9,9 @@ import {
 } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 import ZoomableImagePreview from './components/ZoomableImagePreview';
-
-// Import Services
 import { getBibitsAPI, getSeedSpecificationsAPI } from '@/services/bibit.service';
 import { createDonationProgramAPI, type DonationProgramPayload } from '@/services/program-donasi.service';
 
-// Interface gabungan Bibit + Spesifikasi Harga
 interface MergedBibitSpec {
   spec_id: number;
   bibit_nama: string;
@@ -24,6 +20,12 @@ interface MergedBibitSpec {
   price: number;
 }
 
+const locationKthMap: Record<string, string> = {
+  "Blok 1 Kertasari": "KTH Kertasari Makmur",
+  "Blok Cisurupan": "KTH Cisurupan Lestari",
+  "Blue Water Tornado": "KTH Banyu Biru",
+};
+
 const CreateProgram: React.FC = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -31,6 +33,9 @@ const CreateProgram: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [namaProgram, setNamaProgram] = useState('');
   const [lokasiLahan, setLokasiLahan] = useState('');
+  const [kthPelaksana, setKthPelaksana] = useState('');
+  const [tanggalMulai, setTanggalMulai] = useState('');
+  const [tanggalSelesai, setTanggalSelesai] = useState('');
   const [bibitOptions, setBibitOptions] = useState<MergedBibitSpec[]>([]);
   const [isFetchingBibit, setIsFetchingBibit] = useState(true);
   const [selectedSpecId, setSelectedSpecId] = useState('');
@@ -88,6 +93,14 @@ const CreateProgram: React.FC = () => {
     if (fileInputRef.current) fileInputRef.current.click();
   };
 
+  // Handler Auto-fill KTH Berdasarkan Lokasi Lahan
+  const handleLocationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const loc = e.target.value;
+    setLokasiLahan(loc);
+    // Set KTH secara otomatis dari mapping, atau kosongkan jika tidak ada
+    setKthPelaksana(locationKthMap[loc] || '');
+  };
+
   const handleTambahBibit = () => {
     if (!selectedSpecId) {
       toast.error('Pilih spesifikasi bibit dari dropdown terlebih dahulu.');
@@ -124,21 +137,28 @@ const CreateProgram: React.FC = () => {
       return;
     }
 
+    if (!tanggalMulai || !tanggalSelesai) {
+      toast.error('Harap lengkapi periode tanggal mulai dan tanggal selesai program.');
+      return;
+    }
+
     setIsLoading(true);
     const loadingToast = toast.loading('Mengajukan program donasi...');
 
     try {
-      // Backend saat ini hanya menerima 1 seed_specification_id
-      // Kita kirim spec_id dari bibit pertama yang ada di daftar
+      // Backend saat ini menerima seed_specification_id tunggal, kita kirim yang pertama.
+      // Serta kita menyertakan data tambahan jika diperlukan oleh API.
       const payload: DonationProgramPayload = {
         analysis_result_id: null,
-        kth_id: 1, 
+        kth_id: 1, // Jika ini butuh dinamis, sesuaikan value KTH yang di-autofill
         seed_specification_id: daftarBibit[0].spec_id, 
         name: namaProgram,
         location: lokasiLahan,
         total_seeds_collected: 0,
         total_seeds_realized: 0,
-        status: "Active"
+        status: "Active",
+        // start_date: tanggalMulai, // Aktifkan field ini jika backend sudah menerimanya
+        // end_date: tanggalSelesai, // Aktifkan field ini jika backend sudah menerimanya
       };
 
       await createDonationProgramAPI(payload);
@@ -199,10 +219,11 @@ const CreateProgram: React.FC = () => {
                   className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#009262]/20 focus:border-[#009262] transition-all shadow-sm"
                 />
               </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-bold text-slate-800 mb-2">Pilih Lahan Kritis (Tervalidasi) <span className="text-red-500">*</span></label>
+              
+              <div>
+                <label className="block text-sm font-bold text-slate-800 mb-2">Pilih Lahan Kritis (Tervalidasi CPI) <span className="text-red-500">*</span></label>
                 <select 
-                  required value={lokasiLahan} onChange={e => setLokasiLahan(e.target.value)}
+                  required value={lokasiLahan} onChange={handleLocationChange}
                   className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#009262]/20 focus:border-[#009262] transition-all cursor-pointer shadow-sm"
                 >
                   <option value="" disabled>-- Pilih Area Lahan --</option>
@@ -210,6 +231,33 @@ const CreateProgram: React.FC = () => {
                   <option value="Blok Cisurupan">Blok Cisurupan - 8 Ha (Survei)</option>
                   <option value="Blue Water Tornado">Blue Water Tornado</option>
                 </select>
+              </div>
+
+              {/* AUTO-FILL KTH */}
+              <div>
+                <label className="block text-sm font-bold text-slate-800 mb-2">Kelompok Tani Hutan Terkait (Otomatis)</label>
+                <input 
+                  type="text" disabled value={kthPelaksana}
+                  placeholder="Akan terisi otomatis setelah lahan dipilih..."
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-slate-500 cursor-not-allowed transition-all shadow-sm"
+                />
+              </div>
+
+              {/* PERIODE PROGRAM */}
+              <div>
+                <label className="block text-sm font-bold text-slate-800 mb-2">Tanggal Mulai <span className="text-red-500">*</span></label>
+                <input 
+                  type="date" required value={tanggalMulai} onChange={e => setTanggalMulai(e.target.value)}
+                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#009262]/20 focus:border-[#009262] transition-all shadow-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-slate-800 mb-2">Tanggal Selesai <span className="text-red-500">*</span></label>
+                <input 
+                  type="date" required value={tanggalSelesai} onChange={e => setTanggalSelesai(e.target.value)}
+                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#009262]/20 focus:border-[#009262] transition-all shadow-sm"
+                />
               </div>
             </div>
 

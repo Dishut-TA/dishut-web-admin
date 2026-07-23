@@ -12,7 +12,6 @@ import ExportLaporanModal from './components/ExportLaporanModal';
 import DetailProgramModal from '@/pages/StaffPDAS/RealisasiBibitDonasi/ProgramDonasi/components/DetailProgramModal';
 
 const mockDataProgram: ProgramData[] = [
-
   { 
     id: '1', 
     nama: 'Penghijauan Hulu Citarum', 
@@ -103,7 +102,7 @@ const KabidProgramDonasi: React.FC = () => {
           
           <button 
             onClick={() => setIsExportModalOpen(true)}
-            className="bg-primary hover:bg-[#063727] text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2 shadow-sm whitespace-nowrap active:scale-95"
+            className="bg-primary hover:bg-[#063727] text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2 shadow-sm whitespace-nowrap active:scale-95 cursor-pointer"
           >
             <HiOutlineArrowDownTray className="w-5 h-5" strokeWidth={2} />
             Export Laporan
@@ -120,6 +119,7 @@ const KabidProgramDonasi: React.FC = () => {
                 <th className="px-6 py-4 whitespace-nowrap">Lokasi</th>
                 <th className="px-6 py-4 whitespace-nowrap">Jenis Bibit</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">Terkumpul</th>
+                <th className="px-6 py-4 whitespace-nowrap text-center">Terealisasi</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">Status</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">Aksi</th>
               </tr>
@@ -131,7 +131,6 @@ const KabidProgramDonasi: React.FC = () => {
                     <td className="px-6 py-4 text-sm font-medium text-gray-700 whitespace-nowrap">{program.nama}</td>
                     <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">{program.lokasi}</td>
                     
-                    {/* Render Jenis Bibit */}
                     <td className="px-6 py-4 max-w-62.5">
                       <div className="flex flex-wrap gap-1.5">
                         {program.jenisBibit.map((bibit: any, index: number) => (
@@ -148,6 +147,11 @@ const KabidProgramDonasi: React.FC = () => {
                     <td className="px-6 py-4 text-sm font-bold text-[#2E7D32] text-center whitespace-nowrap">
                       {program.terkumpul}
                     </td>
+                    
+                    {/* TAMBAHAN KOLOM: TEREALISASI */}
+                    <td className="px-6 py-4 text-sm font-bold text-[#185325] text-center whitespace-nowrap">
+                      {program.totalTerealisasi}
+                    </td>
 
                     <td className="px-6 py-4 text-center whitespace-nowrap">
                        {getStatusBadge(program.status)}
@@ -157,7 +161,7 @@ const KabidProgramDonasi: React.FC = () => {
                       {program.status === 'Menunggu Verifikasi' ? (
                         <button 
                           onClick={() => handleOpenVerifikasi(program)}
-                          className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-[#185325] hover:bg-[#123d1c] text-white text-xs font-bold rounded-full transition-colors active:scale-95 shadow-sm"
+                          className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-[#185325] hover:bg-[#123d1c] text-white text-xs font-bold rounded-full transition-colors active:scale-95 shadow-sm cursor-pointer"
                         >
                           <HiOutlineCheckBadge className="w-4 h-4" /> Verifikasi
                         </button>
@@ -165,7 +169,7 @@ const KabidProgramDonasi: React.FC = () => {
                         <button 
                           onClick={() => handleOpenDetail(program)}
                           title="Lihat Detail"
-                          className="p-1.5 text-gray-400 hover:text-[#2E7D32] hover:bg-green-50 rounded-lg transition-colors"
+                          className="p-1.5 text-gray-400 hover:text-[#2E7D32] hover:bg-green-50 rounded-lg transition-colors cursor-pointer"
                         >
                           <HiOutlineEye className="w-5 h-5" />
                         </button>
@@ -175,7 +179,7 @@ const KabidProgramDonasi: React.FC = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-sm text-gray-500">
+                  <td colSpan={7} className="px-6 py-12 text-center text-sm text-gray-500">
                     Program tidak ditemukan.
                   </td>
                 </tr>
@@ -185,7 +189,6 @@ const KabidProgramDonasi: React.FC = () => {
         </div>
       </div>
 
-      {/* Render Modals */}
       <VerifikasiProgramModal 
         isOpen={isVerifModalOpen} 
         onClose={() => setIsVerifModalOpen(false)} 

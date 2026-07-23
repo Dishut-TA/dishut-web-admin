@@ -13,7 +13,8 @@ import {
 } from "@/services/bibit.service";
 
 interface MappedBibitData extends BibitResponseData {
-  rentangHargaFormat: string;
+  hargaFormat: string;
+  totalStok: number;
 }
 
 const IndexBibit: React.FC = () => {
@@ -21,7 +22,6 @@ const IndexBibit: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [bibitData, setBibitData] = useState<MappedBibitData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  // const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     fetchData();
@@ -47,26 +47,16 @@ const IndexBibit: React.FC = () => {
       const specs = spekRes.payload;
 
       const mergedData: MappedBibitData[] = bibits.map((bibit) => {
+        // Ambil spesifikasi yang sesuai dengan bibit ini
         const relatedSpecs = specs.filter((spec) => spec.seed_id === bibit.id);
-
-        let rentangHarga = "Belum diatur";
-
-        if (relatedSpecs.length > 0) {
-          const prices = relatedSpecs.map((s) => Number(s.price));
-
-          const minPrice = Math.min(...prices);
-          const maxPrice = Math.max(...prices);
-
-          if (minPrice === maxPrice) {
-            rentangHarga = formatRupiah(minPrice);
-          } else {
-            rentangHarga = `${formatRupiah(minPrice)} - ${formatRupiah(maxPrice)}`;
-          }
-        }
+        const spec = relatedSpecs.length > 0 ? relatedSpecs[0] : null;
 
         return {
           ...bibit,
-          rentangHargaFormat: rentangHarga,
+          // Ambil harga pasti (tunggal)
+          hargaFormat: spec ? formatRupiah(Number(spec.price)) : "Belum diatur",
+          // Ambil stok
+          totalStok: spec ? Number(spec.stock) : 0,
         };
       });
 
@@ -92,8 +82,7 @@ const IndexBibit: React.FC = () => {
             Manajemen Data Bibit & Harga
           </h1>
           <p className="text-sm text-gray-500 mt-1">
-            Kelola master data bibit beserta spesifikasi harga per tinggi
-            tanaman.
+            Kelola master data dan pantau ketersediaan stok bibit tanaman.
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
@@ -124,14 +113,15 @@ const IndexBibit: React.FC = () => {
                 <th className="px-6 py-4">Kode</th>
                 <th className="px-6 py-4">Nama Spesies / Bibit</th>
                 <th className="px-6 py-4">Kategori</th>
-                <th className="px-6 py-4">Rentang Harga</th>
+                <th className="px-6 py-4">Stok Bibit</th>
+                <th className="px-6 py-4">Harga Satuan</th>
                 <th className="px-6 py-4 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {isLoading ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center">
+                  <td colSpan={6} className="px-6 py-12 text-center">
                     <div className="flex flex-col items-center justify-center gap-3">
                       <span className="w-8 h-8 border-4 border-gray-200 border-t-[#185325] rounded-full animate-spin"></span>
                       <p className="text-sm font-bold text-gray-500">
@@ -168,9 +158,15 @@ const IndexBibit: React.FC = () => {
                         {item.kategori}
                       </span>
                     </td>
+                    
+                    {/* KOLOM STOK BARU */}
+                    <td className="px-6 py-4 text-sm font-bold text-gray-800">
+                      {item.totalStok} Batang
+                    </td>
 
+                    {/* HARGA FIXED */}
                     <td className="px-6 py-4 text-sm font-bold text-[#185325]">
-                      {item.rentangHargaFormat}
+                      {item.hargaFormat}
                     </td>
 
                     <td className="px-6 py-4 flex justify-center">
@@ -190,7 +186,7 @@ const IndexBibit: React.FC = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center">
+                  <td colSpan={6} className="px-6 py-12 text-center">
                     <p className="text-sm font-bold text-gray-500">
                       Tidak ada data bibit yang ditemukan.
                     </p>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HiOutlineArrowLeft, HiOutlinePlus, HiOutlineTrash, HiOutlineCurrencyDollar } from 'react-icons/hi2';
+import { HiOutlineArrowLeft, HiOutlineCurrencyDollar } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 import { 
   createBibitAPI, 
@@ -8,46 +8,22 @@ import {
   type BibitPayload 
 } from '@/services/bibit.service';
 
-interface SpekHarga {
-  id: number;
-  tinggiMin: string;
-  tinggiMax: string;
-  stokAwal: string;
-  harga: string;
-}
-
 const CreateBibit: React.FC = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [namaBibit, setNamaBibit] = useState('');
   const [kategori, setKategori] = useState('Tanaman Kehutanan');
   const [sertifikasi, setSertifikasi] = useState('');
-  const [spekHarga, setSpekHarga] = useState<SpekHarga[]>([
-    { id: Date.now(), tinggiMin: '30', tinggiMax: '60', stokAwal: '', harga: '' }
-  ]);
-
-  const handleAddSpek = () => {
-    setSpekHarga([...spekHarga, { id: Date.now(), tinggiMin: '', tinggiMax: '', stokAwal: '', harga: '' }]);
-  };
-
-  const handleRemoveSpek = (id: number) => {
-    if (spekHarga.length === 1) {
-      toast.error('Minimal harus ada 1 spesifikasi harga.');
-      return;
-    }
-    setSpekHarga(spekHarga.filter(item => item.id !== id));
-  };
-
-  const handleChangeSpek = (id: number, field: keyof SpekHarga, value: string) => {
-    setSpekHarga(spekHarga.map(item => item.id === id ? { ...item, [field]: value } : item));
-  };
+  
+  // State Tunggal (Fixed)
+  const [stokAwal, setStokAwal] = useState('');
+  const [harga, setHarga] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const hasEmptyFields = spekHarga.some(s => !s.harga || !s.tinggiMin || !s.stokAwal);
-    if (hasEmptyFields) {
-      toast.error('Pastikan semua rentang tinggi, stok, dan harga telah diisi.');
+    if (!harga || !stokAwal) {
+      toast.error('Pastikan stok awal dan harga bibit telah diisi.');
       return;
     }
 
@@ -71,20 +47,18 @@ const CreateBibit: React.FC = () => {
         throw new Error('Gagal mendapatkan ID Bibit dari server.');
       }
 
-      toast.loading('Menyimpan spesifikasi dan harga...', { id: loadingToast });
+      toast.loading('Menyimpan stok dan harga...', { id: loadingToast });
 
-      const spekPromises = spekHarga.map((spek) => {
-        return createSeedSpecificationAPI({
-          seed_id: newBibitId,
-          min_height: Number(spek.tinggiMin),
-          max_height: Number(spek.tinggiMax) || 0, 
-          stock: Number(spek.stokAwal),
-          price: Number(spek.harga)
-        });
+      // Hanya membuat SATU spesifikasi (Harga & Stok Fixed)
+      await createSeedSpecificationAPI({
+        seed_id: newBibitId,
+        min_height: 0, // Dikosongkan/0 karena instruksi fokus ke nominal tunggal tanpa rentang
+        max_height: 0, 
+        stock: Number(stokAwal),
+        price: Number(harga)
       });
 
-      await Promise.all(spekPromises);
-      toast.success('Master Data Bibit beserta spesifikasinya berhasil disimpan!', { id: loadingToast });
+      toast.success('Master Data Bibit beserta harganya berhasil disimpan!', { id: loadingToast });
       navigate(-1);
 
     } catch (error: any) {
@@ -99,13 +73,13 @@ const CreateBibit: React.FC = () => {
       <div className="flex items-center gap-4 mb-8">
         <button 
           onClick={() => navigate(-1)}
-          className="p-2.5 rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-sm"
+          className="p-2.5 rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-sm cursor-pointer"
         >
           <HiOutlineArrowLeft className="w-5 h-5" />
         </button>
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Tambah Master Bibit Baru</h1>
-          <p className="text-sm text-gray-500">Definisikan harga bibit berdasarkan rentang tinggi tanaman.</p>
+          <p className="text-sm text-gray-500">Definisikan informasi dasar, stok, dan harga per unit bibit.</p>
         </div>
       </div>
 
@@ -147,87 +121,46 @@ const CreateBibit: React.FC = () => {
               </div>
             </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-sm font-bold text-[#185325] uppercase tracking-wider">Spesifikasi Harga per Batang</h3>
-                  <p className="text-xs text-gray-500 mt-1">Tambahkan rentang ukuran tinggi dan harganya. (Kosongkan 'Maks' jika ukuran lebih dari batas).</p>
-                </div>
-                <button 
-                  type="button" onClick={handleAddSpek}
-                  className="px-4 py-2 bg-emerald-50 text-[#185325] text-xs font-bold rounded-lg border border-emerald-200 hover:bg-emerald-100 transition-colors flex items-center gap-1.5"
-                >
-                  <HiOutlinePlus className="w-4 h-4" /> Tambah Ukuran
-                </button>
+            <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100 space-y-6">
+              <div>
+                <h3 className="text-sm font-bold text-[#185325] uppercase tracking-wider">Manajemen Harga & Stok</h3>
+                <p className="text-xs text-gray-500 mt-1">Sesuai ketentuan, harga bersifat fixed (pasti) per 1 unit/batang bibit.</p>
               </div>
 
-              <div className="space-y-4">
-                {spekHarga.map((spek, index) => (
-                  <div key={spek.id} className="flex flex-col xl:flex-row gap-4 items-start xl:items-center p-4 border border-gray-200 rounded-2xl bg-white shadow-sm group">
-                    <span className="w-6 h-6 flex items-center justify-center bg-gray-100 text-gray-500 text-xs font-bold rounded-full shrink-0">
-                      {index + 1}
-                    </span>
-                    
-                    <div className="flex-1 w-full grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="text-[10px] font-bold text-gray-500 uppercase mb-1 block">Tinggi Min (cm)</label>
-                        <input 
-                          type="number" required value={spek.tinggiMin} onChange={e => handleChangeSpek(spek.id, 'tinggiMin', e.target.value)}
-                          placeholder="30" className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#185325]"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[10px] font-bold text-gray-500 uppercase mb-1 block">Tinggi Maks (cm) <span className="lowercase font-normal text-gray-400">*opsional</span></label>
-                        <input 
-                          type="number" value={spek.tinggiMax} onChange={e => handleChangeSpek(spek.id, 'tinggiMax', e.target.value)}
-                          placeholder="60" className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#185325]"
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="flex-1 w-full">
-                      <label className="text-[10px] font-bold text-gray-500 uppercase mb-1 block">Stok Awal (Batang)</label>
-                      <input 
-                        type="number" required value={spek.stokAwal} onChange={e => handleChangeSpek(spek.id, 'stokAwal', e.target.value)}
-                        placeholder="1000" className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#185325]"
-                      />
-                    </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="w-full">
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Stok Awal (Batang) <span className="text-red-500">*</span></label>
+                  <input 
+                    type="number" required value={stokAwal} onChange={e => setStokAwal(e.target.value)}
+                    placeholder="Contoh: 1000" className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#185325]/20 focus:border-[#185325] transition-all"
+                  />
+                </div>
 
-                    <div className="flex-1 w-full relative">
-                      <label className="text-[10px] font-bold text-gray-500 uppercase mb-1 block">Harga Per Batang</label>
-                      <div className="relative">
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                          <HiOutlineCurrencyDollar className="w-5 h-5" />
-                        </div>
-                        <input 
-                          type="number" required value={spek.harga} onChange={e => handleChangeSpek(spek.id, 'harga', e.target.value)}
-                          placeholder="2800" className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm font-bold text-[#185325] focus:outline-none focus:border-[#185325]"
-                        />
-                      </div>
+                <div className="w-full relative">
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Harga Per Batang (Rp) <span className="text-red-500">*</span></label>
+                  <div className="relative">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
+                      <HiOutlineCurrencyDollar className="w-5 h-5" />
                     </div>
-
-                    <button 
-                      type="button" onClick={() => handleRemoveSpek(spek.id)}
-                      className="p-2.5 mt-4 xl:mt-5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"
-                      title="Hapus Spesifikasi"
-                    >
-                      <HiOutlineTrash className="w-5 h-5" />
-                    </button>
+                    <input 
+                      type="number" required value={harga} onChange={e => setHarga(e.target.value)}
+                      placeholder="Contoh: 15000" className="w-full pl-12 pr-4 py-3 bg-white border border-gray-300 rounded-xl text-sm font-bold text-[#185325] focus:outline-none focus:ring-2 focus:ring-[#185325]/20 focus:border-[#185325] transition-all"
+                    />
                   </div>
-                ))}
+                </div>
               </div>
             </div>
 
           </div>
 
           <div className="p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3 rounded-b-3xl">
-            <button type="button" onClick={() => navigate(-1)} className="px-6 py-3 rounded-xl bg-white border border-gray-200 text-gray-700 font-bold hover:bg-gray-50 transition-colors shadow-sm">
+            <button type="button" onClick={() => navigate(-1)} className="px-6 py-3 rounded-xl bg-white border border-gray-200 text-gray-700 font-bold hover:bg-gray-50 transition-colors shadow-sm cursor-pointer">
               Batal
             </button>
             <button 
               type="submit" 
               disabled={isLoading}
-              className="px-8 py-3 rounded-xl bg-[#185325] text-white font-bold transition-transform active:scale-95 shadow-md flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+              className="px-8 py-3 rounded-xl bg-[#185325] hover:bg-[#123d1c] text-white font-bold transition-transform active:scale-95 shadow-md flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
             >
               {isLoading ? (
                 <>
