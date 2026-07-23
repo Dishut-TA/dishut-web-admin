@@ -6,9 +6,9 @@ const PendanaanCSR: React.FC = () => {
   const navigate = useNavigate();
 
   const mockData = [
-    { id: '#PROP-CSR-001', judul: 'Reboisasi Hulu Sungai DAS', anggaran: 'Rp300.000.000', status: 'Menunggu Verifikasi Dinas' },
-    { id: '#PROP-CSR-002', judul: 'Penghijauan Lahan Kritis', anggaran: 'Rp150.000.000', status: 'Mencari Mitra CSR' },
-    { id: '#PROP-CSR-003', judul: 'Pembangunan Kebun Bibit', anggaran: 'Rp500.000.000', status: 'Didanai' },
+    { id: 'CSR-001', judul: 'Reboisasi Hulu Sungai DAS', anggaran: 'Rp300.000.000', status: 'Menunggu Verifikasi' },
+    { id: 'CSR-002', judul: 'Penghijauan Lahan Kritis', anggaran: 'Rp150.000.000', status: 'Mencari Mitra CSR' },
+    { id: 'CSR-003', judul: 'Pembangunan Kebun Bibit', anggaran: 'Rp500.000.000', status: 'Disetujui' },
   ];
 
   return (
@@ -51,7 +51,7 @@ const PendanaanCSR: React.FC = () => {
                 <td className="px-6 py-4 text-sm font-bold text-[#185325]">{item.anggaran}</td>
                 <td className="px-6 py-4">
                   <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${
-                    item.status === 'Didanai' ? 'bg-green-100 text-green-700' : 
+                    item.status === 'Disetujui' ? 'bg-green-100 text-green-700' : 
                     item.status === 'Mencari Mitra CSR' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-700'
                   }`}>
                     {item.status}

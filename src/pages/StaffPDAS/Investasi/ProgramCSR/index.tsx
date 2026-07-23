@@ -1,35 +1,39 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HiOutlineMagnifyingGlass, HiOutlineArrowRight, HiOutlineXCircle } from 'react-icons/hi2';
+import { HiOutlineMagnifyingGlass, HiOutlineArrowRight, HiOutlineXCircle, HiOutlineEye } from 'react-icons/hi2';
 
-type StatusCSR = 'Menunggu Validasi' | 'Direvisi' | 'Diteruskan';
+type StatusCSR = 'Menunggu Persetujuan' | 'Disetujui' | 'Ditolak';
 
 interface CSRProposal {
   id: string;
-  rencanaKemitraan: string;
-  kthPengusul: string;
-  lokasi: string;
+  namaProgram: string;
+  kth: string;
   anggaran: number;
   status: StatusCSR;
 }
 
-// --- MOCK DATA (Ubah menjadi [] untuk melihat Empty State) ---
+// --- MOCK DATA DISESUAIKAN DENGAN GAMBAR ---
 const mockData: CSRProposal[] = [
   {
     id: 'CSR-001',
-    rencanaKemitraan: 'Rehabilitasi Lahan Subang',
-    kthPengusul: 'KTH Rimba',
-    lokasi: 'Desa Sukamulya',
-    anggaran: 80000000,
-    status: 'Menunggu Validasi'
+    namaProgram: 'Reboisasi Hulu Sungai DAS',
+    kth: 'KTH Rimba',
+    anggaran: 300000000,
+    status: 'Menunggu Persetujuan'
   },
   {
-    id: 'CSR-002',
-    rencanaKemitraan: 'Penanaman Pohon Pelindung DAS',
-    kthPengusul: 'KTH Maju Jaya',
-    lokasi: 'Desa Cikahuripan',
-    anggaran: 120000000,
-    status: 'Menunggu Validasi'
+    id: 'CSR-001', // ID dibuat sama sesuai gambar
+    namaProgram: 'Reboisasi Hulu Sungai DAS',
+    kth: 'KTH Rimba',
+    anggaran: 300000000,
+    status: 'Disetujui'
+  },
+  {
+    id: 'CSR-001', // ID dibuat sama sesuai gambar
+    namaProgram: 'Reboisasi Hulu Sungai DAS',
+    kth: 'KTH Rimba',
+    anggaran: 300000000,
+    status: 'Ditolak'
   }
 ];
 
@@ -39,12 +43,26 @@ const ProgramCSRList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredData = data.filter(item => 
-    item.rencanaKemitraan.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.kthPengusul.toLowerCase().includes(searchTerm.toLowerCase())
+    item.namaProgram.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.kth.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Format ke "Rp300.000.000" (Tanpa spasi sesuai gambar)
   const formatRupiah = (angka: number) => {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(angka);
+    return 'Rp' + angka.toLocaleString('id-ID');
+  };
+
+  const renderStatusBadge = (status: StatusCSR) => {
+    switch (status) {
+      case 'Menunggu Persetujuan':
+        return <span className="px-4 py-1.5 bg-gray-200 text-gray-700 rounded-full text-[11px] font-bold whitespace-nowrap">Menunggu Persetujuan</span>;
+      case 'Disetujui':
+        return <span className="px-4 py-1.5 bg-[#81C784] text-white rounded-full text-[11px] font-bold whitespace-nowrap">Disetujui</span>;
+      case 'Ditolak':
+        return <span className="px-4 py-1.5 bg-red-600 text-white rounded-full text-[11px] font-bold whitespace-nowrap">Ditolak</span>;
+      default:
+        return null;
+    }
   };
 
   return (
@@ -77,46 +95,51 @@ const ProgramCSRList: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-225">
             <thead>
-              <tr className="bg-[#DCECE0] text-[#3A4D3F] text-[11px] uppercase tracking-wider font-bold border-b border-gray-200">
-                <th className="px-6 py-4 whitespace-nowrap">Rencana Kemitraan</th>
-                <th className="px-6 py-4 whitespace-nowrap">KTH Pengusul</th>
-                <th className="px-6 py-4 whitespace-nowrap">Lokasi</th>
-                <th className="px-6 py-4 whitespace-nowrap text-right">Anggaran</th>
+              <tr className="bg-[#DCECE0] text-[#3A4D3F] text-[11px] uppercase tracking-wider font-bold">
+                <th className="px-6 py-4 whitespace-nowrap">ID</th>
+                <th className="px-6 py-4 whitespace-nowrap">Nama Program</th>
+                <th className="px-6 py-4 whitespace-nowrap">KTH</th>
+                <th className="px-6 py-4 whitespace-nowrap">Anggaran Diajukan</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">Status</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {filteredData.length > 0 ? (
-                filteredData.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-bold text-gray-800">{item.rencanaKemitraan}</span>
-                        <span className="text-xs text-gray-500">{item.id}</span>
-                      </div>
+                filteredData.map((item, index) => (
+                  <tr key={index} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-6 py-4 text-sm font-semibold text-gray-800 whitespace-nowrap">
+                      {item.id}
                     </td>
-                    <td className="px-6 py-4 text-sm font-semibold text-[#185325] whitespace-nowrap">
-                      {item.kthPengusul}
+                    <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
+                      {item.namaProgram}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
-                      {item.lokasi}
+                      {item.kth}
                     </td>
-                    <td className="px-6 py-4 text-sm font-bold text-gray-800 text-right whitespace-nowrap">
+                    <td className="px-6 py-4 text-sm font-bold text-[#185325] whitespace-nowrap">
                       {formatRupiah(item.anggaran)}
                     </td>
                     <td className="px-6 py-4 text-center whitespace-nowrap">
-                      <span className="px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap bg-[#F2C94C]">
-                        {item.status}
-                      </span>
+                      {renderStatusBadge(item.status)}
                     </td>
-                    <td className="px-6 py-4 flex justify-center whitespace-nowrap">
-                      <button 
-                        onClick={() => navigate(`/admin/staff/rehabilitasi/program-csr/verifikasi/${item.id}`)}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-white border border-[#185325] text-[#185325] hover:bg-[#f0f9f3] text-xs font-bold rounded-full transition-colors active:scale-95 shadow-sm"
-                      >
-                        Periksa Berkas <HiOutlineArrowRight className="w-4 h-4" strokeWidth={2} />
-                      </button>
+                    <td className="px-6 py-4 flex justify-center items-center whitespace-nowrap h-full min-h-16">
+                      {item.status === 'Menunggu Persetujuan' ? (
+                        <button 
+                          onClick={() => navigate(`/admin/staff/rehabilitasi/program-csr/verifikasi/${item.id}`)}
+                          className="flex items-center gap-1.5 px-5 py-2 bg-[#185325] hover:bg-[#123d1c] text-white text-xs font-bold rounded-full transition-colors active:scale-95 shadow-sm cursor-pointer"
+                        >
+                          Tinjau Berkas <HiOutlineArrowRight className="w-4 h-4 stroke-2" />
+                        </button>
+                      ) : (
+                        <button 
+                          title="Lihat Detail"
+                          onClick={() => navigate(`/admin/staff/rehabilitasi/program-csr/detail/${item.id}`)}
+                          className="p-1.5 text-gray-700 hover:text-[#185325] hover:bg-gray-200 border border-gray-400 rounded-full transition-colors cursor-pointer"
+                        >
+                          <HiOutlineEye className="w-4 h-4 stroke-2" />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -129,7 +152,7 @@ const ProgramCSRList: React.FC = () => {
                       </div>
                       <p className="text-lg font-bold text-gray-800 mb-1">Tidak ada Data!</p>
                       <p className="text-sm max-w-md mx-auto">
-                        Seluruh berkas usulan kemitraan swasta (CSR) telah diverifikasi oleh Staff.
+                        Belum ada berkas usulan kemitraan swasta (CSR) yang diajukan.
                       </p>
                     </div>
                   </td>
@@ -139,7 +162,6 @@ const ProgramCSRList: React.FC = () => {
           </table>
         </div>
       </div>
-
     </div>
   );
 };

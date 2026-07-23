@@ -24,7 +24,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
 
   const basePath = ROLE_BASE_PATHS[userRole] || "/admin/staff";
 
-  const { single, accordion } = useMemo(() => 
+  // ✅ Ambil dari config, sekarang bentuknya Array tunggal
+  const menus = useMemo(() => 
     getSidebarMenus(basePath, userRole, user), 
   [basePath, userRole, user]);
 
@@ -64,23 +65,28 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
         </div>
 
         <nav className="flex-1 px-4 space-y-2 overflow-y-auto pb-4 custom-scrollbar">
-          {single.map((item) => (
-            <SingleMenu 
-              key={item.name} 
-              item={item} 
-              setIsOpen={setIsOpen} 
-            />
-          ))}
-          
-          {accordion.map((menu) => (
-            <AccordionMenu 
-              key={menu.id} 
-              menu={menu} 
-              openMenu={openMenu} 
-              toggleMenu={toggleMenu} 
-              setIsOpen={setIsOpen} 
-            />
-          ))}
+          {menus.map((menu, index) => {
+            if (menu.items) {
+              return (
+                <AccordionMenu 
+                  key={menu.id || `acc-${index}`} 
+                  menu={menu} 
+                  openMenu={openMenu} 
+                  toggleMenu={toggleMenu} 
+                  setIsOpen={setIsOpen} 
+                />
+              );
+            } 
+            
+            return (
+              <SingleMenu 
+                key={menu.name || `single-${index}`} 
+                item={menu} 
+                setIsOpen={setIsOpen} 
+              />
+            );
+          })}
+
         </nav>
       </aside>
     </>

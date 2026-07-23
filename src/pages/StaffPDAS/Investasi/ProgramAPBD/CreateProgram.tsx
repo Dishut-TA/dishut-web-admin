@@ -22,7 +22,7 @@ const CreateProgramAPBD: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col gap-4 w-full max-w-5xl mx-auto pb-12">
+    <div className="flex flex-col gap-4 w-full mx-auto pb-12">
       <button 
         onClick={() => navigate(-1)}
         className="flex items-center gap-2 text-sm font-bold text-gray-600 hover:text-gray-900 self-start transition-colors"
@@ -34,10 +34,10 @@ const CreateProgramAPBD: React.FC = () => {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 mt-2">
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-2">
-             <h1 className="text-2xl font-bold text-gray-800">Desain & Rancang Program APBD Baru</h1>
+             <h1 className="text-2xl font-bold text-gray-800">Rancang Program APBD Baru</h1>
           </div>
           <p className="text-sm text-gray-600">
-            Rancang program reboisasi APBD dan kunci data koordinat satelit dari sistem sensor prioritas kritis (Modul CPI).
+            Rancang program rehabilitasi APBD berdasarkan lahan prioritas di Jawa Barat.
           </p>
         </div>
 
@@ -48,13 +48,13 @@ const CreateProgramAPBD: React.FC = () => {
               
               <div>
                 <label className="block text-sm font-bold text-gray-800 mb-2">
-                  Lokasi Lahan Prioritas (Dari Modul Data CPI) <span className="text-red-500">*</span>
+                  Lokasi Lahan Prioritas <span className="text-red-500">*</span>
                 </label>
                 <select 
                   required
                   value={lokasi}
                   onChange={(e) => setLokasi(e.target.value)}
-                  className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#185325]/20 focus:border-[#185325] transition-all cursor-pointer shadow-sm"
+                  className="w-full bg-white border border-gray-300 rounded-full px-4 py-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#185325]/20 focus:border-[#185325] transition-all cursor-pointer shadow-sm"
                 >
                   <option value="" disabled>-- Pilih Lokasi Prioritas --</option>
                   <option value="Hulu Citarum">Hulu Citarum (Skor CPI: 0.85)</option>
@@ -65,7 +65,7 @@ const CreateProgramAPBD: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-bold text-gray-800 mb-2">
-                  Nama Program Kerja <span className="text-red-500">*</span>
+                  Nama Program <span className="text-red-500">*</span>
                 </label>
                 <input 
                   type="text" 
@@ -73,7 +73,7 @@ const CreateProgramAPBD: React.FC = () => {
                   value={namaProgram}
                   onChange={(e) => setNamaProgram(e.target.value)}
                   placeholder="Contoh: Rehabilitasi Lahan Kritis Citarum"
-                  className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#185325]/20 focus:border-[#185325] transition-all shadow-sm"
+                  className="w-full bg-white border border-gray-300 rounded-full px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#185325]/20 focus:border-[#185325] transition-all shadow-sm"
                 />
               </div>
 
@@ -88,7 +88,7 @@ const CreateProgramAPBD: React.FC = () => {
                     value={anggaran}
                     onChange={(e) => setAnggaran(e.target.value)}
                     placeholder="Contoh: 120000000"
-                    className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#185325]/20 focus:border-[#185325] transition-all shadow-sm appearance-none"
+                    className="w-full bg-white border border-gray-300 rounded-full px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#185325]/20 focus:border-[#185325] transition-all shadow-sm appearance-none"
                   />
                 </div>
                 <div>
@@ -101,7 +101,7 @@ const CreateProgramAPBD: React.FC = () => {
                     value={luas}
                     onChange={(e) => setLuas(e.target.value)}
                     placeholder="Contoh: 15"
-                    className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#185325]/20 focus:border-[#185325] transition-all shadow-sm appearance-none"
+                    className="w-full bg-white border border-gray-300 rounded-full px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#185325]/20 focus:border-[#185325] transition-all shadow-sm appearance-none"
                   />
                 </div>
               </div>
@@ -114,7 +114,7 @@ const CreateProgramAPBD: React.FC = () => {
                 <label className="block text-sm font-bold text-gray-800 mb-2">
                   Kelompok Tani Hutan (KTH) Pelaksana (Auto-Generated)
                 </label>
-                <div className="bg-[#dcece0] border border-[#C8E0CD] rounded-xl p-4 flex gap-3 shadow-sm">
+                <div className="bg-[#dcece0] border border-[#C8E0CD] rounded-4xl p-4 flex gap-3 shadow-sm">
                    <div className="pt-0.5">
                      <HiOutlineUserGroup className="w-5 h-5 text-[#185325]" />
                    </div>
@@ -140,7 +140,7 @@ const CreateProgramAPBD: React.FC = () => {
                     value={deskripsi}
                     onChange={(e) => setDeskripsi(e.target.value)}
                     placeholder="Masukkan rincian arahan kerja, jenis tanaman / pohon pelindung yang wajib ditanam, serta jangka waktu persiapan persemaian bibit unggul"
-                    className="w-full bg-white border-2 border-[#185325] rounded-xl px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#185325]/20 transition-all resize-none shadow-sm"
+                    className="w-full bg-white border-2 border-[#185325] rounded-4xl px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#185325]/20 transition-all resize-none shadow-sm"
                   ></textarea>
                   <div className="absolute -bottom-6 right-1 text-xs font-bold text-[#185325]">
                     {deskripsi.length}/{MAX_DESC_LENGTH}

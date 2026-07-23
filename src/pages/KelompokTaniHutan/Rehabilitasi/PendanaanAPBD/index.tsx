@@ -1,25 +1,30 @@
 import React, { useState } from 'react';
 import { HiOutlineMagnifyingGlass, HiOutlineEye } from 'react-icons/hi2';
+import { useNavigate } from 'react-router-dom';
 
 const PendanaanAPBD: React.FC = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
 
   const mockData = [
     { 
-        id: '#PROP-APBD-001', 
-        judul: 'Reboisasi Hulu Sungai DAS', 
+        id: 'APBD-001', 
+        judul: 'Reboisasi Hulu Sungai DAS',
+        lokasi: 'Desa Sukamulya', 
         alokasi: 'Rp300.000.000', 
-        status: 'Belum Mulai' 
+        status: 'Meunuggu Konfirmasi' 
     },
     { 
-        id: '#PROP-APBD-002', 
-        judul: 'Reboisasi Hulu Sungai DAS', 
+        id: 'APBD-002', 
+        judul: 'Reboisasi Hulu Sungai DAS',
+        lokasi: 'Desa Sukamulya', 
         alokasi: 'Rp300.000.000', 
         status: 'Berjalan' 
     },
     { 
-        id: '#PROP-APBD-003', 
-        judul: 'Reboisasi Hulu Sungai DAS', 
+        id: 'APBD-003', 
+        judul: 'Reboisasi Hulu Sungai DAS',
+        lokasi: 'Desa Sukamulya', 
         alokasi: 'Rp300.000.000', 
         status: 'Selesai' 
     },
@@ -53,8 +58,9 @@ const PendanaanAPBD: React.FC = () => {
             <thead className="bg-[#DCECE0] text-[#3A4D3F] text-xs font-bold uppercase tracking-wider">
               <tr>
                 <th className="px-6 py-4">ID</th>
-                <th className="px-6 py-4">Judul Program</th>
-                <th className="px-6 py-4">Total Alokasi</th>
+                <th className="px-6 py-4">Nama Program</th>
+                <th className="px-6 py-4">Lokasi</th>
+                <th className="px-6 py-4">Anggaran</th>
                 <th className="px-6 py-4 text-center">Status</th>
                 <th className="px-6 py-4 text-center">Aksi</th>
               </tr>
@@ -64,11 +70,11 @@ const PendanaanAPBD: React.FC = () => {
                 <tr key={index} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-5 font-bold text-gray-800 text-sm">{item.id}</td>
                   <td className="px-6 py-5 text-sm text-gray-700">{item.judul}</td>
+                  <td className="px-6 py-5 text-sm text-gray-700">{item.lokasi}</td>
                   <td className="px-6 py-5 text-sm font-bold text-[#185325]">{item.alokasi}</td>
-                  
                   <td className="px-6 py-5 text-center">
                     <span className={`px-4 py-1.5 rounded-full text-xs font-bold ${
-                      item.status === 'Belum Mulai' ? 'bg-gray-200 text-gray-700' : 
+                      item.status === 'Meunuggu Konfirmasi' ? 'bg-gray-200 text-gray-700' : 
                       item.status === 'Berjalan' ? 'bg-orange-200 text-orange-800' : 
                       'bg-green-300 text-green-800'
                     }`}>
@@ -77,8 +83,8 @@ const PendanaanAPBD: React.FC = () => {
                   </td>
                   
                   <td className="px-6 py-5 flex justify-center items-center h-full">
-                    {item.status === 'Belum Mulai' ? (
-                      <button className="bg-[#185325] hover:bg-[#123d1c] text-white px-5 py-2 rounded-full text-xs font-bold transition-colors">
+                    {item.status === 'Meunuggu Konfirmasi' ? (
+                      <button onClick={() => navigate(`/admin/kth/rehabilitasi/pendanaan-apbd/detail/${item.id}`)} className="bg-[#185325] hover:bg-[#123d1c] text-white px-5 py-2 rounded-full text-xs font-bold transition-colors">
                         Konfirmasi
                       </button>
                     ) : (

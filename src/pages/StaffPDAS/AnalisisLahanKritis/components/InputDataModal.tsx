@@ -1,17 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { HiXMark } from 'react-icons/hi2';
-import { uploadDataGIS } from '@/services/gisService'; 
-import { ToastError, ToastLoading, ToastSuccess } from '@/utils/toastHelper';
+import React, { useEffect, useState } from "react";
+import { HiXMark } from "react-icons/hi2";
+import { uploadDataGIS } from "@/services/gisService";
+import { ToastError, ToastLoading, ToastSuccess } from "@/utils/toastHelper";
 
 interface InputDataModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: (data: any) => void; 
+  onSuccess?: (data: any) => void;
 }
 
-const InputDataModal: React.FC<InputDataModalProps> = ({ isOpen, onClose, onSuccess }) => {
+const InputDataModal: React.FC<InputDataModalProps> = ({
+  isOpen,
+  onClose,
+  onSuccess,
+}) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [namaProject, setNamaProject] = useState('');
+  const [namaProject, setNamaProject] = useState("");
   const [files, setFiles] = useState<Record<string, File | null>>({
     das: null,
     dem: null,
@@ -21,49 +25,70 @@ const InputDataModal: React.FC<InputDataModalProps> = ({ isOpen, onClose, onSucc
   });
 
   useEffect(() => {
-    document.body.style.overflow = isOpen ? 'hidden' : 'unset';
-    return () => { document.body.style.overflow = 'unset'; };
+    document.body.style.overflow = isOpen ? "hidden" : "unset";
+    return () => {
+      document.body.style.overflow = "unset";
+    };
   }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) {
-      setNamaProject('');
-      setFiles({ das: null, dem: null, tutupan_lahan: null, curah_hujan: null, jenis_tanah: null });
+      setNamaProject("");
+      setFiles({
+        das: null,
+        dem: null,
+        tutupan_lahan: null,
+        curah_hujan: null,
+        jenis_tanah: null,
+      });
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldId: string) => {
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    fieldId: string,
+  ) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFiles(prev => ({ ...prev, [fieldId]: e.target.files![0] }));
+      setFiles((prev) => ({ ...prev, [fieldId]: e.target.files![0] }));
     }
   };
 
   const formFields = [
-    { id: 'das', label: 'Input Data Daerah Aliran Sungai (DAS)' }, 
-    { id: 'dem', label: 'Input Data Elevation Model (DEM)' },
-    { id: 'tutupan_lahan', label: 'Input Data Tutupan Lahan' },
-    { id: 'curah_hujan', label: 'Input Data Curah Hujan' },
-    { id: 'jenis_tanah', label: 'Input Data Jenis Tanah' }, 
+    { id: "das", label: "Input Data Daerah Aliran Sungai (DAS)" },
+    { id: "dem", label: "Input Data Elevation Model (DEM)" },
+    { id: "tutupan_lahan", label: "Input Data Tutupan Lahan" },
+    { id: "curah_hujan", label: "Input Data Curah Hujan" },
+    { id: "jenis_tanah", label: "Input Data Jenis Tanah" },
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!namaProject.trim()) {
       return ToastError("Nama Project tidak boleh kosong!");
     }
 
     setIsLoading(true);
-    const loadingId = ToastLoading("Sedang mengunggah dan menganalisis data GIS...");
+    const loadingId = ToastLoading(
+      "Sedang mengunggah dan menganalisis data GIS...",
+    );
 
     try {
       const formData = new FormData();
-      formData.append('nama_project', namaProject);
-      formData.append('target_resolution', '5000');
-      formData.append('save_intermediate', 'true');
-      formData.append('ahp_matrix', JSON.stringify({ bobot_dem: 0.4 }));
+      formData.append("nama_project", namaProject);
+      formData.append("target_resolution", "5000");
+      formData.append("save_intermediate", "0");
+      // formData.append('ahp_matrix', JSON.stringify({ bobot_dem: 0.4 }));
+      formData.append(
+        "ahp_matrix",
+        JSON.stringify([
+          [1, 2, 3],
+          [0.5, 1, 2],
+          [0.3, 0.5, 1],
+        ]),
+      );
 
       Object.entries(files).forEach(([key, file]) => {
         if (file) {
@@ -72,12 +97,11 @@ const InputDataModal: React.FC<InputDataModalProps> = ({ isOpen, onClose, onSucc
       });
 
       const response = await uploadDataGIS(formData);
-      console.log("data terkirim: ", response)
+      console.log("data terkirim: ", response);
 
       ToastSuccess("Data berhasil diunggah dan dianalisis!", loadingId);
-      if (onSuccess) onSuccess(response); 
+      if (onSuccess) onSuccess(response);
       onClose();
-
     } catch (error: any) {
       ToastError(error.message || "Gagal mengunggah data", loadingId);
     } finally {
@@ -87,15 +111,15 @@ const InputDataModal: React.FC<InputDataModalProps> = ({ isOpen, onClose, onSucc
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-      <div 
+      <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
-        onClick={onClose} 
+        onClick={onClose}
       ></div>
 
       <div className="relative bg-white rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
         <div className="flex-none flex items-center justify-between p-6 border-b border-gray-100">
           <h2 className="text-xl font-bold text-gray-800">Upload Data GIS</h2>
-          <button 
+          <button
             onClick={onClose}
             className="p-2 text-gray-500 cursor-pointer hover:text-gray-800 hover:bg-gray-100 rounded-full transition-colors"
           >
@@ -106,11 +130,14 @@ const InputDataModal: React.FC<InputDataModalProps> = ({ isOpen, onClose, onSucc
         <div className="p-6 md:p-8 overflow-y-auto custom-scrollbar flex-1">
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <div className="flex flex-col gap-2">
-              <label htmlFor="nama_project" className="text-sm font-semibold text-gray-800">
+              <label
+                htmlFor="nama_project"
+                className="text-sm font-semibold text-gray-800"
+              >
                 Nama Project <span className="text-red-500">*</span>
               </label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 id="nama_project"
                 required
                 value={namaProject}
@@ -122,11 +149,14 @@ const InputDataModal: React.FC<InputDataModalProps> = ({ isOpen, onClose, onSucc
 
             {formFields.map((field) => (
               <div key={field.id} className="flex flex-col gap-2">
-                <label htmlFor={field.id} className="text-sm font-semibold text-gray-800">
+                <label
+                  htmlFor={field.id}
+                  className="text-sm font-semibold text-gray-800"
+                >
                   {field.label}
                 </label>
-                <input 
-                  type="file" 
+                <input
+                  type="file"
                   id={field.id}
                   onChange={(e) => handleFileChange(e, field.id)}
                   className="w-full text-sm text-gray-600 
@@ -141,10 +171,10 @@ const InputDataModal: React.FC<InputDataModalProps> = ({ isOpen, onClose, onSucc
               </div>
             ))}
 
-            <button 
+            <button
               type="submit"
               disabled={isLoading}
-              className={`mt-4 w-full flex items-center justify-center bg-[#185325] text-white font-semibold rounded-full py-3.5 transition-colors shadow-sm ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#113d1b] cursor-pointer'}`}
+              className={`mt-4 w-full flex items-center justify-center bg-[#185325] text-white font-semibold rounded-full py-3.5 transition-colors shadow-sm ${isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-[#113d1b] cursor-pointer"}`}
             >
               {isLoading ? "Mengunggah..." : "Mulai Analisis"}
             </button>
