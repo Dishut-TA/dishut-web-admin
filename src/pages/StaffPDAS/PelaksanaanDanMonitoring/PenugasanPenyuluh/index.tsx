@@ -44,9 +44,6 @@ const PenugasanPenyuluh: React.FC = () => {
       <div className="flex flex-col lg:flex-row justify-between gap-4 mt-2">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 w-full lg:w-auto flex-1">
           <select className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-[#185325] bg-white cursor-pointer">
-            <option>Semua Penyuluh</option>
-          </select>
-          <select className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-[#185325] bg-white cursor-pointer">
             <option>Semua Wilayah PDAS</option>
           </select>
           <select className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-[#185325] bg-white cursor-pointer">
@@ -99,7 +96,7 @@ const PenugasanPenyuluh: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 flex justify-center">
                     <button 
-                      onClick={() => navigate(`/admin/staff/monitoring/penugasan-penyuluh/detail/${item.id}`)}
+                      onClick={() => navigate(`/admin/staff/monitoring/penugasan-pelaksanaan/detail/${item.id}`)}
                       className="p-2 text-gray-400 hover:text-[#185325] hover:bg-[#DCECE0] rounded-xl transition-all"
                       title="Lihat Detail"
                     >

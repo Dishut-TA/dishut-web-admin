@@ -10,11 +10,10 @@ import {
   HiOutlineUserGroup
 } from 'react-icons/hi2';
 import DashboardStatCard from './components/DashboardStatCard';
-import FilterWilayah from './components/FilterWilayah';
+import FilterPeriode from './components/FilterPeriode'; 
 import SebaranKegiatanChart from './components/SebaranKegiatanChart';
 import DetailAgregatTable from './components/DetailAgregatTabel';
 import KinerjaPenyuluhTable from './components/KinerjaPenyuluhTable';
-import RiwayatMonitoringTimeline from './components/RiwayatMonitoringTimeline';
 import { PiPlant } from 'react-icons/pi';
 
 const DashboardMonitoring: React.FC = () => {
@@ -134,7 +133,7 @@ const DashboardMonitoring: React.FC = () => {
 
       <hr className="border-gray-200 my-2" />
 
-      <FilterWilayah />
+      <FilterPeriode />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <SebaranKegiatanChart />
@@ -142,8 +141,6 @@ const DashboardMonitoring: React.FC = () => {
       </div>
 
       <KinerjaPenyuluhTable />
-      <RiwayatMonitoringTimeline />
-
     </div>
   );
 }

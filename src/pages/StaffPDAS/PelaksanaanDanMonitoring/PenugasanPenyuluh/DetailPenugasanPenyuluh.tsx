@@ -31,7 +31,7 @@ const mockAssignments = [
   { 
     id: 'TGS-002', 
     kategori: 'Validasi Lokasi', 
-    program: 'Penghijauan Hulu Cimanuk (CSR)', 
+    program: 'Penghijauan Hulu Cimanuk (CSR)', // Ini akan diabaikan oleh UI dan diganti "-"
     lokasi: 'Kec. Cikajang, Kab. Garut', 
     periode: '10 Apr - 15 Apr 2025', 
     tanggal: '16 Apr 2025', 
@@ -50,14 +50,29 @@ const mockAssignments = [
 
 const DetailPenugasanPenyuluh: React.FC = () => {
   const navigate = useNavigate();
-//   const { id } = useParams(); // Mengambil ID dari URL parameter jika diperlukan untuk fetch API
 
-  const getStatusStyle = (status: string) => {
+const getStatusStyle = (status: string) => {
     switch (status) {
-      case 'Berjalan': return 'bg-yellow-100 text-yellow-800 border border-yellow-200';
-      case 'Selesai': return 'bg-green-100 text-green-800 border border-green-200';
-      case 'Bermasalah': return 'bg-red-100 text-red-800 border border-red-200';
-      default: return 'bg-gray-100 text-gray-800 border border-gray-200';
+      // Status Umum
+      case 'Berjalan': 
+      case 'Proses Validasi':
+        return 'bg-blue-50 text-blue-700 border border-blue-200';
+      
+      case 'Menunggu Survei':
+        return 'bg-gray-100 text-gray-700 border border-gray-200';
+
+      // Status Hasil Positif
+      case 'Selesai': 
+      case 'Valid (Layak)':
+        return 'bg-green-100 text-green-800 border border-green-200';
+      
+      // Status Hasil Negatif
+      case 'Bermasalah': 
+      case 'Tidak Valid (Tidak Layak)':
+        return 'bg-red-50 text-red-700 border border-red-200';
+        
+      default: 
+        return 'bg-gray-100 text-gray-800 border border-gray-200';
     }
   };
 
@@ -75,7 +90,7 @@ const DetailPenugasanPenyuluh: React.FC = () => {
       <div className="flex flex-col items-start gap-4">
         <button 
           onClick={() => navigate(-1)} 
-          className="flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-[#185325] transition-colors bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm"
+          className="flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-[#185325] transition-colors bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm cursor-pointer"
         >
           <HiArrowLeft className="w-4 h-4" strokeWidth={2.5} /> Kembali
         </button>
@@ -147,7 +162,15 @@ const DetailPenugasanPenyuluh: React.FC = () => {
                         {item.kategori}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm font-bold text-gray-800">{item.program}</td>
+                    
+                    <td className="px-6 py-4 text-sm font-bold text-gray-800">
+                      {item.kategori === 'Validasi Lokasi' ? (
+                        <span className="text-black font-semibold">-</span>
+                      ) : (
+                        item.program
+                      )}
+                    </td>
+                    
                     <td className="px-6 py-4 text-sm font-medium text-gray-600">{item.lokasi}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{item.periode}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{item.tanggal}</td>

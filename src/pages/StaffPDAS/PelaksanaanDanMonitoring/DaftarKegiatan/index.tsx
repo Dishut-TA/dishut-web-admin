@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { HiOutlinePlus, HiOutlineMagnifyingGlass } from 'react-icons/hi2';
-import InputKegiatanModal from './components/RencanaProgramModal';
+import { HiOutlineMagnifyingGlass } from 'react-icons/hi2';
 import ActivityTable from './components/ActivityTable';
+
+export type ActivityStatus = 'Menunggu Verifikasi' | 'Siap Monitoring' | 'Berjalan' | 'Selesai' | 'Bermasalah';
 
 export interface Activity {
   id: number;
@@ -11,58 +12,57 @@ export interface Activity {
   time: string;
   progress: number;
   author: string;
-  status: 'Berjalan' | 'Selesai' | 'Bermasalah';
+  status: ActivityStatus;
 }
 
 const DaftarKegiatan: React.FC = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
   const dummyData: Activity[] = [
     {
       id: 1,
+      title: 'Rehabilitasi Lahan Kritis Citarum',
+      location: 'Hulu Citarum, Kabupaten Bandung',
+      date: '15/3/2026',
+      time: '09.00 WIB',
+      progress: 0,
+      author: 'KTH Rimba',
+      status: 'Menunggu Verifikasi'
+    },
+    {
+      id: 2,
       title: 'Penanaman Mangrove Pesisir',
       location: 'Pantai Pondok Bali, Subang',
-      date: '15/3/2024',
+      date: '15/3/2026',
       time: '09.00 WIB',
       progress: 75,
       author: 'Bpk Daffa Mahendra',
       status: 'Berjalan'
     },
     {
-      id: 2,
+      id: 3,
       title: 'Pemeliharaan Pohon Pelindung',
       location: 'Hutan Kota, Bandung',
-      date: '20/4/2024',
+      date: '20/4/2026',
       time: '10.00 WIB',
       progress: 100,
       author: 'Bpk Daffa Mahendra',
       status: 'Selesai'
     },
     {
-      id: 3,
-      title: 'Rehabilitasi Lahan Kritis',
-      location: 'Gunung Puntang, Kabupaten Bandung',
-      date: '05/5/2024',
-      time: '08.30 WIB',
-      progress: 40,
-      author: 'Ibu Rina Marlina',
-      status: 'Bermasalah'
-    },
-    {
       id: 4,
       title: 'Penanaman Bibit Mahoni',
       location: 'Lembang, Bandung Barat',
-      date: '10/6/2024',
+      date: '10/6/2026',
       time: '09.00 WIB',
-      progress: 100,
-      author: 'Bpk Daffa Mahendra',
-      status: 'Selesai'
+      progress: 0,
+      author: 'KTH Maju Jaya',
+      status: 'Siap Monitoring'
     },
   ];
 
-  const filters = ['All', 'Berjalan', 'Selesai', 'Bermasalah'];
+  const filters = ['All', 'Menunggu Verifikasi', 'Siap Monitoring', 'Berjalan', 'Selesai', 'Bermasalah'];
 
   const filteredData = useMemo(() => {
     return dummyData.filter((kegiatan) => {
@@ -75,9 +75,9 @@ const DaftarKegiatan: React.FC = () => {
   }, [activeFilter, searchQuery]);
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8">
+    <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8 px-4 sm:px-0">
       
-      <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4 mt-2">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">
             Daftar Kegiatan Program Rehabilitasi
@@ -86,14 +86,6 @@ const DaftarKegiatan: React.FC = () => {
             Kelola dan monitor detail seluruh kegiatan lapangan.
           </p>
         </div>
-        
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="bg-[#185325] hover:bg-[#123d1c] text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2 shadow-sm whitespace-nowrap active:scale-95"
-        >
-          <HiOutlinePlus className="w-5 h-5" strokeWidth={2.5} />
-          Input Kegiatan
-        </button>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 md:p-4 flex flex-col xl:flex-row gap-4 justify-between items-center w-full">
@@ -125,13 +117,7 @@ const DaftarKegiatan: React.FC = () => {
         </div>
       </div>
 
-      <ActivityTable 
-        data={filteredData} />
-
-      <InputKegiatanModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-      />
+      <ActivityTable data={filteredData} />
 
     </div>
   );
