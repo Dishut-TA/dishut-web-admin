@@ -208,11 +208,11 @@ function App() {
 
                   {/* Monitoring */}
                   <Route path="monitoring/dashboard" element={<DashboardMonitoring />} />
-                  <Route path="monitoring/penugasan-penyuluh" element={<PenugasanPenyuluh />} />
-                  <Route path="monitoring/penugasan-penyuluh/detail/:id" element={<DetailPenugasanPenyuluh />} />
-                  <Route path="monitoring/hasil-validasi-penyuluh/" element={<HasilValidasiPenyuluh />} />
-                  <Route path="monitoring/hasil-validasi-penyuluh/detail/:id" element={<DetailHasilValidasi />} />
-                  <Route path="monitoring/hasil-validasi-penyuluh/proses/:id" element={<ProsesValidasiPenyuluh />} />
+                  <Route path="monitoring/penugasan-pelaksanaan" element={<PenugasanPenyuluh />} />
+                  <Route path="monitoring/penugasan-pelaksanaan/detail/:id" element={<DetailPenugasanPenyuluh />} />
+                  <Route path="monitoring/hasil-validasi-lokasi/" element={<HasilValidasiPenyuluh />} />
+                  <Route path="monitoring/hasil-validasi-lokasi/detail/:id" element={<DetailHasilValidasi />} />
+                  <Route path="monitoring/hasil-validasi-lokasi/proses/:id" element={<ProsesValidasiPenyuluh />} />
                   <Route path="monitoring/kegiatan" element={<DaftarKegiatan />} />
                   <Route path="monitoring/kegiatan/detail/:id" element={<DetailKegiatan />} />
                   <Route path="monitoring/verifikasi" element={<VerifikasiMonitoring />} />

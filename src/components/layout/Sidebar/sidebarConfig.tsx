@@ -41,11 +41,11 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
         title: 'Pelaksanaan dan Monitoring Program',
         icon: <HiOutlineComputerDesktop className="w-5 h-5" />,
         items: [
-            { name: 'Dashboard Pelaksanaan dan Monitoring', path: `${basePath}/monitoring/dashboard` },
-            { name: 'Daftar Kegiatan Program Rehabilitasi', path: `${basePath}/monitoring/kegiatan` },
-            { name: 'Penugasan Penyuluh', path: `${basePath}/monitoring/penugasan-penyuluh` },
-            { name: 'Hasil Validasi Penyuluh', path: `${basePath}/monitoring/hasil-validasi-penyuluh` },
-            { name: 'Verifikasi Monitoring', path: `${basePath}/monitoring/verifikasi` },
+            { name: 'Dashboard', path: `${basePath}/monitoring/dashboard` },
+            { name: 'Penugasan Pelaksanaan Rehabilitasi', path: `${basePath}/monitoring/penugasan-pelaksanaan` },
+            { name: 'Pelaksanaan Kegiatan Rehabilitasi', path: `${basePath}/monitoring/kegiatan` },
+            { name: 'Hasil Validasi Lokasi', path: `${basePath}/monitoring/hasil-validasi-lokasi` },
+            { name: 'Verifikasi Pelaksanaan dan Monitoring', path: `${basePath}/monitoring/verifikasi` },
         ],
     };
 

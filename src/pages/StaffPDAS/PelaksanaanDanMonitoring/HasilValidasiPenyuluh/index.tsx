@@ -43,7 +43,7 @@ const HasilValidasiPenyuluh: React.FC = () => {
             <div>
               <label className="block text-xs font-bold text-gray-600 mb-1.5">Penyuluh</label>
               <select className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm outline-none focus:border-[#185325] bg-white">
-                <option>Semua Penyuluh</option>
+                <option>Semua CDK</option>
               </select>
             </div>
             <div>
@@ -100,13 +100,13 @@ const HasilValidasiPenyuluh: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 flex justify-center gap-2">
                     <button 
-                      onClick={() => navigate(`/admin/staff/monitoring/hasil-validasi-penyuluh/detail/${item.id}`)}
+                      onClick={() => navigate(`/admin/staff/monitoring/hasil-validasi-lokasi/detail/${item.id}`)}
                       className="px-4 py-1.5 bg-white border border-[#185325] text-[#185325] hover:bg-[#f0f9f3] text-xs font-bold rounded-lg transition-colors"
                     >
                       Detail
                     </button>
                     <button 
-                      onClick={() => navigate(`/admin/staff/monitoring/hasil-validasi-penyuluh/proses/${item.id}`)}
+                      onClick={() => navigate(`/admin/staff/monitoring/hasil-validasi-lokasi/proses/${item.id}`)}
                       className="px-4 py-1.5 bg-[#185325] hover:bg-[#123d1c] text-white text-xs font-bold rounded-lg transition-colors shadow-sm"
                     >
                       Validasi
