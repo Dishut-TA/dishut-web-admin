@@ -8,20 +8,20 @@ import {
 interface UsulanCSR {
   id: string;
   namaProgram: string;
-  kthPengusul: string;
+  kth: string;
   lokasi: string;
   anggaran: number;
-  status: 'Menunggu Validasi' | 'Direkomendasikan' | 'Ditolak';
+  status: 'Menunggu Persetujuan' | 'Direkomendasikan' | 'Ditolak';
 }
 
 const mockData: UsulanCSR[] = [
   {
     id: 'CSR-001',
     namaProgram: 'Rehabilitasi Lahan Subang',
-    kthPengusul: 'KTH Rimba',
+    kth: 'KTH Rimba',
     lokasi: 'Desa Sukamulya',
     anggaran: 80000000,
-    status: 'Menunggu Validasi'
+    status: 'Menunggu Persetujuan'
   }
 ];
 
@@ -35,7 +35,7 @@ const DaftarUsulanCSR: React.FC = () => {
 
   const filteredData = mockData.filter(item => 
     item.namaProgram.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.kthPengusul.toLowerCase().includes(searchQuery.toLowerCase())
+    item.kth.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -64,12 +64,12 @@ const DaftarUsulanCSR: React.FC = () => {
           <table className="w-full text-left border-collapse min-w-225">
             <thead className="bg-[#DCECE0] text-[#3A4D3F] text-[11px] uppercase tracking-wider font-bold">
               <tr>
-                <th className="px-6 py-4 whitespace-nowrap">Rencana Kemitraan</th>
-                <th className="px-6 py-4 whitespace-nowrap">KTH Pengusul</th>
-                <th className="px-6 py-4 whitespace-nowrap">Lokasi</th>
-                <th className="px-6 py-4 whitespace-nowrap">Anggaran</th>
-                <th className="px-6 py-4 whitespace-nowrap text-center">Status</th>
-                <th className="px-6 py-4 whitespace-nowrap text-center">Aksi</th>
+                <th className="px-6 py-4 whitespace-nowrap">ID</th>
+                <th className="px-6 py-4 whitespace-nowrap">NAMA PROGRAM</th>
+                <th className="px-6 py-4 whitespace-nowrap">KTH</th>
+                <th className="px-6 py-4 whitespace-nowrap">ANGGARAKAN DIAJUKAN</th>
+                <th className="px-6 py-4 whitespace-nowrap text-center">STATUS</th>
+                <th className="px-6 py-4 whitespace-nowrap text-center">AKSI</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -78,15 +78,16 @@ const DaftarUsulanCSR: React.FC = () => {
                   <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
+                        <span className="text-sm font-bold text-gray-800">{item.id}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col">
                         <span className="text-sm font-bold text-gray-800">{item.namaProgram}</span>
-                        <span className="text-xs text-gray-400 mt-0.5">{item.id}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm font-bold text-gray-700 whitespace-nowrap">
-                      {item.kthPengusul}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                      {item.lokasi}
+                      {item.kth}
                     </td>
                     <td className="px-6 py-4 text-sm font-bold text-gray-800 whitespace-nowrap">
                       {formatRupiah(item.anggaran)}

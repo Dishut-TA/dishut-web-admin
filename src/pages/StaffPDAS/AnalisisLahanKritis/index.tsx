@@ -4,7 +4,7 @@ import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css'; 
 import InputDataModal from './components/InputDataModal';
 
-const API_URL = import.meta.env.VITE_API_MASTER_URL || "http://localhost:8000/api";
+const API_URL = import.meta.env.VITE_API_MASTER_URL || "http://127.0.0.1:8000/api";
 
 const AnalisisLahanKritis = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -23,14 +23,12 @@ const AnalisisLahanKritis = () => {
         setIsLoadingData(true);
 
         try {
-            // 1. FETCH DATA TABEL (ZONAL STATISTICS)
             const tableRes = await fetch(`${API_URL}/projects/${projectId}/table`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const tableJson = await tableRes.json();
             setTableData(tableJson.data || []);
 
-            // 2. FETCH DATA MAP (GEOJSON)
             const mapRes = await fetch(`${API_URL}/projects/${projectId}/map`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -133,7 +131,6 @@ const AnalisisLahanKritis = () => {
                     )}
                 </div>
 
-                {/* LEGEND */}
                 {geoData && (
                     <div className="flex items-center gap-6 mt-4 justify-center md:justify-start">
                         <div className="flex items-center gap-2 text-sm text-gray-600">

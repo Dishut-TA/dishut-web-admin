@@ -1,94 +1,102 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HiOutlineChevronLeft, HiOutlineCheckCircle, HiOutlineXCircle } from 'react-icons/hi2';
+import { HiOutlineChevronLeft, HiOutlineCheckCircle, HiOutlinePencil } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 
 const DetailVerifikasiDanaCSR: React.FC = () => {
   const navigate = useNavigate();
-//   const { id } = useParams(); buat nanti pas udah integrasi sama BE
+  const [catatan, setCatatan] = useState('');
 
-  // Mock data untuk detail
+  // Mock data untuk detail disesuaikan dengan gambar
   const detailData = {
-    kthPengusul: 'KTH Rimba',
-    mitraCSR: 'PT Bank Jabar Banten',
-    proyek: 'Rehabilitasi Citarum',
-    tahapan: 'Tahap 1',
+    namaProgram: 'Rehabilitasi Citarum',
+    lokasi: 'Bandung Barat',
+    tahap: 'Tahap 1',
+    danaDisalurkan: 'Rp 100.000.000',
+    totalRealisasi: 'Rp 25.000.000',
     rincianAnggaran: [
-      { kategori: 'Pengadaan Bibit', nominal: 'Rp 10.000.000' }
+      { kegiatan: 'Pembersihan Lahan', tanggal: '01/01/2024', nominal: 'Rp. 8.000.000', bukti: 'Lihat' }
     ],
-    summary: {
-      totalPengeluaran: 'Rp 10.000.000',
-      sisaSaldo: 'Rp 90.000.000',
-      dokumenBukti: 'KwitansiTahap1.pdf',
-      totalBibit: '150 Pohon'
-    },
-    catatanStaff: '"Berkas administrasi dan bukti kuitansi fisik telah diperiksa dan dinyatakan sesuai dengan target penanaman lapangan."'
   };
 
-  const handleTolak = () => {
-    toast.error('Berkas ditolak dan dikembalikan ke KTH.');
+  const handleRevisi = () => {
+    if (!catatan) {
+      toast.error('Harap isi catatan verifikasi sebelum meminta revisi.');
+      return;
+    }
+    toast.error('Berkas dikembalikan untuk direvisi.');
     navigate(-1);
   };
 
-  const handleSetuju = () => {
-    toast.success('Rekomendasi pencairan dana berhasil diterbitkan!');
+  const handleVerifikasi = () => {
+    toast.success('Laporan dana berhasil diverifikasi!');
     navigate(-1);
   };
+
+  // Komponen Helper untuk baris Informasi Program
+  const InfoRow = ({ label, value }: { label: string, value: string }) => (
+    <div className="grid grid-cols-[160px_20px_1fr] md:grid-cols-[200px_20px_1fr] mb-4 text-sm">
+      <span className="text-gray-500">{label}</span>
+      <span className="text-gray-500">:</span>
+      <span className="font-bold text-gray-800">{value}</span>
+    </div>
+  );
 
   return (
-    <div className="flex flex-col gap-6 mx-auto pb-12">
+    <div className="flex flex-col gap-6 w-full mx-auto pb-12">
       
       <button 
         onClick={() => navigate(-1)} 
-        className="flex items-center gap-2 text-sm font-bold text-gray-700 hover:text-[#185325] self-start transition-colors"
+        className="flex items-center gap-2 text-sm font-bold text-gray-800 hover:text-[#185325] self-start transition-colors cursor-pointer"
       >
-        <HiOutlineChevronLeft className="w-4 h-4" strokeWidth={2.5} /> Kembali
+        <HiOutlineChevronLeft className="w-4 h-4 stroke-2" /> Kembali
       </button>
 
-      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 md:p-10">
-        <div className="mb-8 border-b border-gray-100 pb-6">
-          <span className="inline-block px-3 py-1 bg-[#DCECE0] text-[#185325] text-xs font-bold rounded-md mb-3">
-            Verifikasi Laporan Keuangan
-          </span>
+      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-10">
+        <div className="mb-10">
           <h1 className="text-2xl font-bold text-gray-800">
-            Detail Penggunaan Dana CSR
+            Detail Verifikasi
           </h1>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12 mb-10 pb-8 border-b border-gray-100">
-          <div>
-            <p className="text-sm text-gray-500 mb-1">Kelompok Tani Hutan Pengusul</p>
-            <p className="text-sm font-bold text-gray-800">{detailData.kthPengusul}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 mb-1">Nama Mitra CSR Pendana</p>
-            <p className="text-sm font-bold text-gray-800">{detailData.mitraCSR}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 mb-1">Proyek Rehabilitasi</p>
-            <p className="text-sm font-bold text-gray-800">{detailData.proyek}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 mb-1">Tahapan Laporan</p>
-            <p className="text-sm font-bold text-gray-800">{detailData.tahapan}</p>
-          </div>
+        {/* Informasi Program */}
+        <div className="mb-10">
+          <h3 className="font-bold text-gray-800 mb-6 border-b border-gray-100 pb-3 text-base">
+            Informasi Program
+          </h3>
+          <InfoRow label="Nama Program" value={detailData.namaProgram} />
+          <InfoRow label="Lokasi" value={detailData.lokasi} />
+          <InfoRow label="Tahap" value={detailData.tahap} />
+          <InfoRow label="Dana Disalurkan" value={detailData.danaDisalurkan} />
+          <InfoRow label="Total Realisasi" value={detailData.totalRealisasi} />
         </div>
 
+        {/* Rincian Penggunaan Dana */}
         <div className="mb-10">
-          <h3 className="font-bold text-gray-800 mb-4 text-base">Rincian Anggaran yang Dilaporkan KTH</h3>
-          <div className="overflow-hidden border border-gray-200 rounded-xl max-w-xl">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-[#eff2ef] text-gray-600 font-semibold">
+          <h3 className="font-bold text-gray-800 mb-4 border-b border-gray-100 pb-3 text-base">
+            Rincian Penggunaan Dana
+          </h3>
+          <div className="overflow-x-auto w-full">
+            <table className="w-full text-left text-sm mb-4">
+              <thead className="border-y border-gray-200 text-gray-600 uppercase text-xs tracking-wider">
                 <tr>
-                  <th className="px-5 py-3">Kategori Pengeluaran</th>
-                  <th className="px-5 py-3 text-right">Nominal Realisasi Lapangan</th>
+                  <th className="py-4 font-semibold px-2">KEGIATAN</th>
+                  <th className="py-4 font-semibold">TANGGAL</th>
+                  <th className="py-4 font-semibold">NOMINAL</th>
+                  <th className="py-4 font-semibold">BUKTI TRANSAKSI</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-100 border-b border-gray-200">
                 {detailData.rincianAnggaran.map((item, idx) => (
-                  <tr key={idx} className="bg-white">
-                    <td className="px-5 py-4 text-gray-800">{item.kategori}</td>
-                    <td className="px-5 py-4 text-right font-bold text-gray-800">{item.nominal}</td>
+                  <tr key={idx} className="hover:bg-gray-50 transition-colors">
+                    <td className="py-4 px-2 text-gray-800 font-bold">{item.kegiatan}</td>
+                    <td className="py-4 text-gray-600">{item.tanggal}</td>
+                    <td className="py-4 text-gray-600">{item.nominal}</td>
+                    <td className="py-4">
+                      <button className="text-gray-600 underline hover:text-[#185325] transition-colors cursor-pointer">
+                        {item.bukti}
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -96,48 +104,39 @@ const DetailVerifikasiDanaCSR: React.FC = () => {
           </div>
         </div>
 
-        <div className="mb-10 pb-8 border-b border-gray-100 space-y-3">
-          <div className="flex items-center text-sm">
-            <span className="w-56 text-gray-500">Total Pengeluaran Tahap 1</span>
-            <span className="font-bold text-gray-800">: {detailData.summary.totalPengeluaran}</span>
-          </div>
-          <div className="flex items-center text-sm">
-            <span className="w-56 text-gray-500">Sisa Saldo Dana CSR</span>
-            <span className="font-bold text-gray-800">: {detailData.summary.sisaSaldo}</span>
-          </div>
-          <div className="flex items-center text-sm">
-            <span className="w-56 text-gray-500">Dokumen Bukti Pendukung</span>
-            <span className="font-bold underline text-gray-800 cursor-pointer hover:text-[#185325]">
-              : {detailData.summary.dokumenBukti}
-            </span>
-          </div>
-          <div className="flex items-center text-sm">
-            <span className="w-56 text-gray-500">Total Bibit Tertanam</span>
-            <span className="font-bold text-gray-800">: {detailData.summary.totalBibit}</span>
-          </div>
-        </div>
-
         {/* Catatan Verifikasi */}
-        <div className="mb-12 text-sm flex items-start gap-2">
-          <span className="w-48 text-gray-500 shrink-0">Catatan Verifikasi Staff</span>
-          <span className="text-gray-800 italic flex-1">
-            : {detailData.catatanStaff}
-          </span>
+        <div className="mb-8">
+          <h3 className="font-bold text-gray-800 mb-3 text-sm">
+            Catatan Verifikasi
+          </h3>
+          <div className="relative">
+            <textarea
+              value={catatan}
+              onChange={(e) => setCatatan(e.target.value)}
+              placeholder="Contoh: Sangat direkomendasikan karena .."
+              maxLength={100}
+              className="w-full h-24 p-4 border border-gray-400 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-[#185325] focus:border-[#185325] resize-none text-gray-700 bg-gray-50/30"
+            />
+            <div className="absolute -bottom-6 right-2 text-[10px] text-gray-400 font-medium">
+              {catatan.length}/100
+            </div>
+          </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-end gap-4 mt-8">
+        {/* Tombol Aksi */}
+        <div className="flex flex-col sm:flex-row items-center justify-end gap-4 mt-12">
           <button 
-            onClick={handleTolak}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-2.5 bg-gray-50 border border-gray-200 text-gray-500 text-sm font-bold rounded-full hover:bg-gray-100 transition-colors"
+            onClick={handleRevisi}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-10 py-3 bg-white border border-gray-300 text-gray-600 text-sm font-bold rounded-full hover:bg-gray-50 transition-colors cursor-pointer"
           >
-            <HiOutlineXCircle className="w-5 h-5" /> Tolak / Kembalikan
+            <HiOutlinePencil className="w-4 h-4" /> Revisi
           </button>
           
           <button 
-            onClick={handleSetuju}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-2.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors shadow-sm"
+            onClick={handleVerifikasi}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-10 py-3 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors shadow-sm cursor-pointer"
           >
-            <HiOutlineCheckCircle className="w-5 h-5" /> Setuju & Teruskan
+            <HiOutlineCheckCircle className="w-5 h-5" /> Verifikasi
           </button>
         </div>
 

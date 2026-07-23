@@ -8,20 +8,20 @@ import {
 interface UsulanAPBD {
   id: string;
   namaProgram: string;
-  kthPengusul: string;
+  kthPenerima: string;
   lokasi: string;
   anggaran: number;
-  status: 'Menunggu Validasi' | 'Disetujui' | 'Ditolak';
+  status: 'Menunggu Persetujuan' | 'Disetujui' | 'Ditolak';
 }
 
 const mockData: UsulanAPBD[] = [
   {
-    id: 'PROP-APBD-4814',
+    id: 'APBD-4814',
     namaProgram: 'Rehabilitasi Lahan Subang',
-    kthPengusul: 'KTH Rimba',
+    kthPenerima: 'KTH Rimba',
     lokasi: 'Desa Sukamulya',
     anggaran: 120000000,
-    status: 'Menunggu Validasi'
+    status: 'Menunggu Persetujuan'
   }
 ];
 
@@ -35,7 +35,7 @@ const DaftarUsulanAPBD: React.FC = () => {
 
   const filteredData = mockData.filter(item => 
     item.namaProgram.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.kthPengusul.toLowerCase().includes(searchQuery.toLowerCase())
+    item.kthPenerima.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -64,9 +64,10 @@ const DaftarUsulanAPBD: React.FC = () => {
           <table className="w-full text-left border-collapse min-w-225">
             <thead className="bg-[#DCECE0] text-[#3A4D3F] text-[11px] uppercase tracking-wider font-bold">
               <tr>
-                <th className="px-6 py-4 whitespace-nowrap">Rencana Kemitraan</th>
-                <th className="px-6 py-4 whitespace-nowrap">KTH Pengusul</th>
-                <th className="px-6 py-4 whitespace-nowrap">Lokasi</th>
+                <th className="px-6 py-4 whitespace-nowrap">ID</th>
+                <th className="px-6 py-4 whitespace-nowrap">NAMA PROGRAM</th>
+                <th className="px-6 py-4 whitespace-nowrap">KTH PENERIMA</th>
+                <th className="px-6 py-4 whitespace-nowrap">LOKASI</th>
                 <th className="px-6 py-4 whitespace-nowrap">Anggaran</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">Status</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">Aksi</th>
@@ -78,12 +79,16 @@ const DaftarUsulanAPBD: React.FC = () => {
                   <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
+                        <span className="text-sm font-bold text-gray-800">{item.id}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col">
                         <span className="text-sm font-bold text-gray-800">{item.namaProgram}</span>
-                        <span className="text-xs text-gray-400 mt-0.5">{item.id}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm font-bold text-gray-700 whitespace-nowrap">
-                      {item.kthPengusul}
+                      {item.kthPenerima}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                       {item.lokasi}

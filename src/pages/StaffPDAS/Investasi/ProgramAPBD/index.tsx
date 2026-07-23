@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { 
   HiOutlinePlus, 
   HiOutlineEye, 
-  HiOutlinePencil, 
-  HiOutlineTrash,
+  // HiOutlinePencil, 
+  // HiOutlineTrash,
   HiOutlineXCircle
 } from 'react-icons/hi2';
 
-type StatusProgram = 'Draft' | 'Menunggu Persetujuan' | 'Disetujui' | 'Ditolak';
+type StatusProgram = 'Draft' | 'Menunggu Verifikasi' | 'Disetujui' | 'Ditolak';
 
 interface ProgramAPBD {
   id: string;
@@ -17,9 +17,9 @@ interface ProgramAPBD {
   anggaran: number;
   luasLahan: number;
   status: StatusProgram;
+  kth: string;
 }
 
-// --- MOCK DATA ---
 const mockData: ProgramAPBD[] = [
   {
     id: 'PRG-001',
@@ -27,7 +27,8 @@ const mockData: ProgramAPBD[] = [
     lokasi: 'Hulu Citarum - Blok 1',
     anggaran: 120000000,
     luasLahan: 15,
-    status: 'Menunggu Persetujuan'
+    status: 'Menunggu Verifikasi',
+    kth: 'KTH Keren Sedunia'
   },
   {
     id: 'PRG-002',
@@ -35,7 +36,17 @@ const mockData: ProgramAPBD[] = [
     lokasi: 'DAS Cisadane Hilir',
     anggaran: 85000000,
     luasLahan: 8,
-    status: 'Disetujui'
+    status: 'Disetujui',
+    kth: 'KTH Keren Sedunia'
+  },
+  {
+    id: 'PRG-003',
+    nama: 'Pemulihan Ekosistem Cisadane',
+    lokasi: 'DAS Cisadane Hilir',
+    anggaran: 85000000,
+    luasLahan: 8,
+    status: 'Ditolak',
+    kth: 'KTH Keren Sedunia'
   }
 ];
 
@@ -52,8 +63,8 @@ const ProgramAPBDList: React.FC = () => {
     switch (status) {
       case 'Disetujui': 
         return <span className={`${baseStyle} bg-[#2E7D32] text-white`}>Disetujui</span>;
-      case 'Menunggu Persetujuan': 
-        return <span className={`${baseStyle} bg-[#F2C94C] text-gray-800`}>Menunggu Persetujuan</span>;
+      case 'Menunggu Verifikasi': 
+        return <span className={`${baseStyle} bg-[#F2C94C] text-gray-800`}>Menunggu Verifikasi</span>;
       case 'Ditolak': 
         return <span className={`${baseStyle} bg-red-100 text-red-600`}>Ditolak</span>;
       case 'Draft': 
@@ -91,10 +102,11 @@ const ProgramAPBDList: React.FC = () => {
           <table className="w-full text-left border-collapse min-w-200">
             <thead>
               <tr className="bg-[#DCECE0] text-[#3A4D3F] text-[11px] uppercase tracking-wider font-bold">
-                <th className="px-6 py-4 whitespace-nowrap">Nama Program Kerja</th>
-                <th className="px-6 py-4 whitespace-nowrap">Lokasi Prioritas</th>
-                <th className="px-6 py-4 whitespace-nowrap text-right">Anggaran</th>
-                <th className="px-6 py-4 whitespace-nowrap text-center">Target (Ha)</th>
+                <th className="px-6 py-4 whitespace-nowrap">ID</th>
+                <th className="px-6 py-4 whitespace-nowrap">Nama Program</th>
+                <th className="px-6 py-4 whitespace-nowrap">KTH Penerima</th>
+                <th className="px-6 py-4 whitespace-nowrap text-center">Lokasi</th>
+                <th className="px-6 py-4 whitespace-nowrap text-center">Anggaran</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">Status</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">Aksi</th>
               </tr>
@@ -105,28 +117,32 @@ const ProgramAPBDList: React.FC = () => {
                   <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
+                        <span className="text-sm font-semibold text-gray-800">{item.id}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col">
                         <span className="text-sm font-semibold text-gray-800">{item.nama}</span>
-                        <span className="text-xs text-gray-500">{item.id}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
+                      {item.kth}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-bold text-gray-800 text-center whitespace-nowrap">
                       {item.lokasi}
                     </td>
-                    <td className="px-6 py-4 text-sm font-bold text-gray-800 text-right whitespace-nowrap">
-                      {formatRupiah(item.anggaran)}
-                    </td>
                     <td className="px-6 py-4 text-sm font-bold text-[#2E7D32] text-center whitespace-nowrap">
-                      {item.luasLahan} Ha
+                      {formatRupiah(item.anggaran)} 
                     </td>
                     <td className="px-6 py-4 text-center whitespace-nowrap">
                       {getStatusBadge(item.status)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center justify-center gap-2">
-                        <button title="Lihat Detail" className="p-1.5 text-gray-400 hover:text-[#2E7D32] transition-colors">
+                        <button onClick={() => navigate(`/admin/staff/rehabilitasi/program-apbd/detail/${item.id}`)} title="Lihat Detail" className="p-1.5 text-gray-400 hover:text-[#2E7D32] transition-colors">
                           <HiOutlineEye className="w-5 h-5" />
                         </button>
-                        {item.status !== 'Disetujui' && (
+                        {/* {item.status !== 'Disetujui' && (
                           <>
                             <button title="Edit" className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors">
                               <HiOutlinePencil className="w-5 h-5" />
@@ -135,7 +151,7 @@ const ProgramAPBDList: React.FC = () => {
                               <HiOutlineTrash className="w-5 h-5" />
                             </button>
                           </>
-                        )}
+                        )} */}
                       </div>
                     </td>
                   </tr>

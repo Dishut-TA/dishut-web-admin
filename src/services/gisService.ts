@@ -8,7 +8,8 @@ export const uploadDataGIS = async (formData: FormData) => {
     const response = await fetch(`${API_URL}/projects/upload`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json',
       },
       body: formData,
     });
@@ -16,13 +17,19 @@ export const uploadDataGIS = async (formData: FormData) => {
     const responseText = await response.text();
 
     if (responseText.trim().startsWith('<')) {
-      throw new Error('Gagal terhubung ke API: Server mengembalikan halaman HTML.');
+      throw new Error('Gagal terhubung ke API: Server mengembalikan halaman HTML. Cek endpoint atau parameter payload.');
     }
 
     const responseData = JSON.parse(responseText);
 
     if (!response.ok) {
-      throw new Error(responseData?.message || 'Terjadi kesalahan saat mengunggah data.');
+      let errorMessage = responseData?.message || 'Terjadi kesalahan saat mengunggah data.';
+      if (responseData.errors) {
+        const errorDetails = Object.values(responseData.errors).flat().join(', ');
+        errorMessage = `${errorMessage} Detail: ${errorDetails}`;
+      }
+
+      throw new Error(errorMessage);
     }
 
     return responseData;

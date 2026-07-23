@@ -2,12 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
   HiOutlineArrowLeft, 
-  HiOutlineUserGroup, 
   HiOutlineUser, 
-  HiOutlinePhone, 
   HiOutlineMapPin, 
   HiOutlineDocumentText, 
-  HiOutlineBanknotes, 
   HiOutlineCheckCircle
 } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
@@ -62,56 +59,74 @@ const VerifikasiBerkasCSR: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-800">Detail Dokumen KTH</h1>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-6 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-y-8 gap-x-6 pb-8 border-b border-gray-100">
           <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Kelompok Tani Hutan Pengusul</span>
-            <div className="flex items-center gap-2 text-gray-800 font-bold">
-              <HiOutlineUserGroup className="w-5 h-5 text-[#185325]" />
+            <span className="text-xs font-medium text-gray-500">Kelompok Tani Hutan Pengusul</span>
+            <div className="flex items-center gap-2 font-bold text-gray-800 text-sm">
+              <HiOutlineUser className="w-4 h-4 text-gray-400" />
               KTH Rimba
             </div>
           </div>
-
           <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Nama Ketua KTH</span>
-            <div className="flex items-center gap-2 text-gray-800 font-bold">
-              <HiOutlineUser className="w-5 h-5 text-[#185325]" />
+            <span className="text-xs font-medium text-gray-500">Nama Ketua KTH</span>
+            <div className="flex items-center gap-2 font-bold text-gray-800 text-sm">
+              <HiOutlineUser className="w-4 h-4 text-gray-400" />
               Adam Malik
             </div>
           </div>
-
           <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Kontak WhatsApp</span>
-            <div className="flex items-center gap-2 text-gray-800 font-bold">
-              <HiOutlinePhone className="w-5 h-5 text-[#185325]" />
-              08123456789
+            <span className="text-xs font-medium text-gray-500">File Proposal</span>
+            <div className="flex items-center gap-2 font-bold text-gray-800 text-sm italic">
+              proposal_csr.pdf
+            </div>
+          </div>
+
+          {/* Baris 2 */}
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium text-gray-500">Lokasi Lahan Kegiatan</span>
+            <div className="flex items-center gap-2 font-bold text-gray-800 text-sm">
+              <HiOutlineMapPin className="w-4 h-4 text-[#185325]" />
+              Desa Sukamulya, Subang Jawa Barat
+            </div>
+          </div>
+          
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium text-gray-500">Nama Program</span>
+            <div className="font-bold text-gray-800 text-sm">
+              Rehabilitasi Lahan Subang
+            </div>
+          </div>
+          
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium text-gray-500">Alokasi Anggaran Diajukan</span>
+            <div className="font-bold text-gray-800 text-sm">
+              Rp 80.000.000
+            </div>
+          </div>
+
+          {/* Baris 3 */}
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium text-gray-500">Luas</span>
+            <div className="flex items-center gap-2 font-bold text-gray-800 text-sm">
+              120 Ha
+            </div>
+          </div>
+          
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium text-gray-500">Jenis Pohon</span>
+            <div className="font-bold text-gray-800 text-sm">
+              Mahoni
             </div>
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Lokasi Lahan Kegiatan</span>
-            <div className="flex items-start gap-2 text-gray-800 font-bold">
-              <HiOutlineMapPin className="w-5 h-5 text-[#185325] shrink-0 mt-0.5" />
-              <span>Desa Sukamulya, Subang Jawa Barat</span>
+            <span className="text-xs font-medium text-gray-500">Jumlah Bibit</span>
+            <div className="font-bold text-gray-800 text-sm">
+              200 Bibit
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Rencana Kemitraan</span>
-            <div className="flex items-start gap-2 text-gray-800 font-bold">
-              <HiOutlineDocumentText className="w-5 h-5 text-[#185325] shrink-0 mt-0.5" />
-              <span>Rehabilitasi Lahan Subang</span>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Alokasi Anggaran Diajukan</span>
-            <div className="flex items-start gap-2 text-gray-800 font-bold">
-              <HiOutlineBanknotes className="w-5 h-5 text-[#185325] shrink-0 mt-0.5" />
-              <span>Rp 80.000.000</span>
-            </div>
-          </div>
         </div>
-
         <form className="grid grid-cols-1 lg:grid-cols-2 gap-8 border-t border-gray-100 pt-8">
           <div>
             <label className="flex items-center gap-2 text-sm font-bold text-[#185325] mb-2">

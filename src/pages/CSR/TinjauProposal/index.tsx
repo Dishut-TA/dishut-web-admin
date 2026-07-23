@@ -8,7 +8,7 @@ import {
 interface ProposalCSR {
   id: string;
   rencanaKemitraan: string;
-  kthPengusul: string;
+  kth: string;
   lokasi: string;
   anggaran: number;
 }
@@ -20,7 +20,7 @@ const TinjauProposal: React.FC = () => {
     {
       id: 'CSR-001',
       rencanaKemitraan: 'Rehabilitasi Lahan Subang',
-      kthPengusul: 'KTH Rimba',
+      kth: 'KTH Rimba',
       lokasi: 'Desa Sukamulya',
       anggaran: 80000000,
     }
@@ -50,11 +50,11 @@ const TinjauProposal: React.FC = () => {
           <table className="w-full text-left border-collapse min-w-225">
             <thead className="bg-[#DCECE0] text-[#3A4D3F] text-xs uppercase tracking-wider font-bold">
               <tr>
-                <th className="px-6 py-4 rounded-tl-xl whitespace-nowrap">Rencana Kemitraan</th>
-                <th className="px-6 py-4 whitespace-nowrap">KTH Pengusul</th>
-                <th className="px-6 py-4 whitespace-nowrap">Lokasi</th>
-                <th className="px-6 py-4 whitespace-nowrap">Anggaran</th>
-                <th className="px-6 py-4 rounded-tr-xl whitespace-nowrap text-center">Aksi</th>
+                <th className="px-6 py-4 rounded-tl-xl whitespace-nowrap">ID</th>
+                <th className="px-6 py-4 whitespace-nowrap">NAMA PROGRAM</th>
+                <th className="px-6 py-4 whitespace-nowrap">KTH</th>
+                <th className="px-6 py-4 whitespace-nowrap">ANGGARAN DIAJUKAN</th>
+                <th className="px-6 py-4 rounded-tr-xl whitespace-nowrap text-center">AKSI</th>
               </tr>
             </thead>
             
@@ -63,15 +63,16 @@ const TinjauProposal: React.FC = () => {
                 <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
+                      <span className="text-sm font-bold text-gray-800">{item.id}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col">
                       <span className="text-sm font-bold text-gray-800">{item.rencanaKemitraan}</span>
-                      <span className="text-xs text-gray-500 mt-0.5">{item.id}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm font-bold text-gray-700 whitespace-nowrap">
-                    {item.kthPengusul}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                    {item.lokasi}
+                    {item.kth}
                   </td>
                   <td className="px-6 py-4 text-sm font-bold text-gray-800 whitespace-nowrap">
                     {formatRupiah(item.anggaran)}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   HiOutlineChevronLeft,
@@ -12,10 +12,9 @@ import toast from 'react-hot-toast';
 const VerifikasiAPBD: React.FC = () => {
   const navigate = useNavigate();
 //   const { id } = useParams(); // Nantinya bakal ambil ID dari URL parameter
-  const [catatan, setCatatan] = useState('');
 
   const detailData = {
-    kthPengusul: 'KTH Rimba',
+    kthPenerima: 'KTH Rimba',
     ketuaKTH: 'Adam Malik',
     kontakWhatsapp: '08123456789',
     lokasi: 'Desa Sukamulya, Subang Jawa Barat',
@@ -28,17 +27,8 @@ const VerifikasiAPBD: React.FC = () => {
     navigate(-1);
   };
 
-  const handleReject = () => {
-    if (!catatan) {
-      toast.error('Harap isi catatan disposisi sebelum mengembalikan ke Staff.');
-      return;
-    }
-    toast.success('Berkas dikembalikan ke Staff untuk direvisi.');
-    navigate(-1);
-  };
-
   return (
-    <div className="flex flex-col gap-6 w-full max-w-4xl mx-auto pb-12">
+    <div className="flex flex-col gap-6 w-full mx-auto pb-12">
       <button 
         onClick={() => navigate(-1)}
         className="flex items-center gap-2 text-sm font-bold text-gray-700 hover:text-[#185325] self-start transition-colors"
@@ -50,17 +40,17 @@ const VerifikasiAPBD: React.FC = () => {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 md:p-10 flex flex-col">
         <div className="mb-8">
           <span className="inline-block px-3 py-1 bg-[#DCECE0] text-[#185325] text-xs font-bold rounded-md mb-3">
-            Otorisasi APBD
+            Lembar Sahkan APBD
           </span>
           <h1 className="text-2xl font-bold text-gray-800">Lembar Sahkan APBD</h1>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-y-8 gap-x-6 pb-8 border-b border-gray-100">
           <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-gray-500">Kelompok Tani Hutan Pengusul</span>
+            <span className="text-xs font-medium text-gray-500">Kelompok Tani Hutan</span>
             <div className="flex items-center gap-2 font-bold text-gray-800 text-sm">
               <HiOutlineUser className="w-4 h-4 text-gray-400" />
-              {detailData.kthPengusul}
+              {detailData.kthPenerima}
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
@@ -87,13 +77,13 @@ const VerifikasiAPBD: React.FC = () => {
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-gray-500">Rencana Kegiatan</span>
+            <span className="text-xs font-medium text-gray-500">Nama Program</span>
             <div className="font-bold text-gray-800 text-sm">
               {detailData.rencanaKegiatan}
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-gray-500">Alokasi Anggaran Diajukan</span>
+            <span className="text-xs font-medium text-gray-500">Anggaran APBD</span>
             <div className="font-bold text-gray-800 text-sm">
               {detailData.anggaran}
             </div>
@@ -102,25 +92,15 @@ const VerifikasiAPBD: React.FC = () => {
 
         <div className="pt-8 flex-1">
           <label className="block text-sm font-bold text-gray-800 mb-3">
-            Catatan Disposisi Kepala Dinas <span className="text-red-500">*</span>
+            Deskripsi Rencana Kegiatan
           </label>
           <div className="relative">
-            <textarea
-              value={catatan}
-              onChange={(e) => setCatatan(e.target.value)}
-              placeholder="Contoh: Sangat direkomendasikan karena ..."
-              maxLength={300}
-              className="w-full h-32 p-4 border border-gray-400 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-[#185325] focus:border-[#185325] resize-none"
-            />
-            <div className="absolute bottom-3 right-4 text-[10px] text-gray-400 font-medium">
-              {catatan.length}/300
-            </div>
+            <p>Lorem ipsum dolor sit amet consectetur. Sed arcu elementum eu feugiat mattis posuere. Tempus quis consequat in amet. Commodo dignissim sed tellus mi. Rhoncus lectus habitant leo urna et tortor nunc velit accumsan. Adipiscing sed turpis sit aliquet dictum iaculis posuere a.</p>
           </div>
         </div>
 
         <div className="pt-8 mt-auto flex flex-col-reverse sm:flex-row justify-end items-center gap-4">
           <button 
-            onClick={handleReject}
             className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-white border border-gray-300 text-gray-600 text-sm font-bold rounded-full hover:bg-gray-50 transition-colors"
           >
             <HiOutlineXMark className="w-4 h-4" /> Kembalikan ke Staff
