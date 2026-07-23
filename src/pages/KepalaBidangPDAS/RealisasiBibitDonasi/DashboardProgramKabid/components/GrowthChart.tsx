@@ -10,17 +10,17 @@ import {
 } from 'recharts';
 
 const chartData = [
-  { name: 'Jan', lahan: 15 },
-  { name: 'Feb', lahan: 35 },
-  { name: 'Mar', lahan: 50 },
-  { name: 'Apr', lahan: 65 },
-  { name: 'Mei', lahan: 85 },
+  { name: 'Jan', bibit: 150 },
+  { name: 'Feb', bibit: 350 },
+  { name: 'Mar', bibit: 500 },
+  { name: 'Apr', bibit: 850 },
+  { name: 'Mei', bibit: 1250 },
 ];
 
 const GrowthChart: React.FC = () => {
   return (
     <div className="bg-white p-6 rounded-2xl border border-emerald-100 shadow-sm">
-      <h3 className="text-sm font-bold text-slate-800 mb-6">Pertumbuhan Lahan Hijau (Hektar)</h3>
+      <h3 className="text-sm font-bold text-slate-800 mb-6">Pertumbuhan Bibit Terealisasi</h3>
       <div className="w-full h-48 md:h-64">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
@@ -42,7 +42,7 @@ const GrowthChart: React.FC = () => {
             />
             <Line
               type="monotone"
-              dataKey="lahan"
+              dataKey="bibit"
               stroke="#009262"
               strokeWidth={4}
               dot={{ r: 5, fill: "white", stroke: "#009262", strokeWidth: 3 }}

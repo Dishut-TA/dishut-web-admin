@@ -1,7 +1,6 @@
 import React from 'react';
 import SummaryCard from './components/SummaryCard'; 
 import GrowthChart from './components/GrowthChart'; 
-import RecentReportsTable from './components/RecentReportTable';
 
 const DashboardProgramKabid: React.FC = () => {
   return (
@@ -12,27 +11,21 @@ const DashboardProgramKabid: React.FC = () => {
         <p className="text-sm md:text-base text-slate-500">Ringkasan performa dan laporan realisasi penghijauan.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+      {/* Grid diubah menjadi 2 kolom agar dua card tampil proporsional dan penuh */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         <SummaryCard 
-          title="Total Dana CSR/Donasi" 
+          title="Total Donasi Diterima" 
           value="Rp 10.375.000" 
           subtext="+15% dari bulan lalu" 
         />
         <SummaryCard 
-          title="Bibit Terealisasi" 
-          value="50" 
+          title="Total Bibit Terealisasi" 
+          value="1.250" 
           subtext="Pohon Ditanam" 
-        />
-        <SummaryCard 
-          title="Lahan Menghijau" 
-          value="85 Ha" 
-          subtext="Total di 5 Kabupaten" 
         />
       </div>
 
       <GrowthChart />
-
-      <RecentReportsTable />
 
     </div>
   );

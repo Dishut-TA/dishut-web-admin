@@ -37,6 +37,10 @@ const getStatusBadge = (status: string) => {
     case "menunggu verifikasi":
     case "pending":
       return <span className={`${baseStyle} bg-[#F2C94C] text-gray-800`}>Menunggu Verifikasi</span>;
+    // TAMBAHAN STATUS DITOLAK
+    case "ditolak":
+    case "rejected":
+      return <span className={`${baseStyle} bg-red-100 text-red-700`}>Ditolak</span>;
     default:
       return <span className={`${baseStyle} bg-gray-100 text-gray-600`}>{status}</span>;
   }
