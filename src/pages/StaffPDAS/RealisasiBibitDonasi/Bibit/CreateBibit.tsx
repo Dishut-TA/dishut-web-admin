@@ -14,10 +14,30 @@ const CreateBibit: React.FC = () => {
   const [namaBibit, setNamaBibit] = useState('');
   const [kategori, setKategori] = useState('Tanaman Kehutanan');
   const [sertifikasi, setSertifikasi] = useState('');
+  const [tinggiBibit, setTinggiBibit] = useState('30-60 cm');
   
   // State Tunggal (Fixed)
   const [stokAwal, setStokAwal] = useState('');
   const [harga, setHarga] = useState('');
+
+  // Logika Cascading Dropdown Tinggi Bibit
+  const getTinggiOptions = (kat: string) => {
+    if (kat === 'MPTS / Buah') {
+      return ['70–100 cm', '> 100 cm'];
+    }
+    return ['30–60 cm', '61–100 cm', '> 100 cm'];
+  };
+
+  // Mengubah opsi Tinggi Bibit otomatis saat Kategori berubah
+  const handleKategoriChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newKategori = e.target.value;
+    setKategori(newKategori);
+    
+    const validOptions = getTinggiOptions(newKategori);
+    if (!validOptions.includes(tinggiBibit)) {
+      setTinggiBibit(validOptions[0]); // Reset ke opsi pertama yang valid
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,9 +50,17 @@ const CreateBibit: React.FC = () => {
     setIsLoading(true);
     const loadingToast = toast.loading('Menyimpan data master bibit...');
 
+    // Parsing String Tinggi Bibit ke angka min_height & max_height
+    let min_height = 0;
+    let max_height = 0;
+    if (tinggiBibit === '30-60 cm') { min_height = 30; max_height = 60; }
+    else if (tinggiBibit === '61-100 cm') { min_height = 61; max_height = 100; }
+    else if (tinggiBibit === '70-100 cm') { min_height = 70; max_height = 100; }
+    else if (tinggiBibit === '> 100 cm') { min_height = 101; max_height = 0; }
+
     try {
       const bibitPayload: BibitPayload = {
-        kode: `S-${Math.floor(Math.random() * 10000)}`, 
+        kode: `BBT-${Math.floor(1000 + Math.random() * 9000)}`, 
         nama: namaBibit,
         jenis: "Kayu",
         kategori: kategori,
@@ -49,11 +77,10 @@ const CreateBibit: React.FC = () => {
 
       toast.loading('Menyimpan stok dan harga...', { id: loadingToast });
 
-      // Hanya membuat SATU spesifikasi (Harga & Stok Fixed)
       await createSeedSpecificationAPI({
         seed_id: newBibitId,
-        min_height: 0, // Dikosongkan/0 karena instruksi fokus ke nominal tunggal tanpa rentang
-        max_height: 0, 
+        min_height: min_height, 
+        max_height: max_height, 
         stock: Number(stokAwal),
         price: Number(harga)
       });
@@ -79,7 +106,7 @@ const CreateBibit: React.FC = () => {
         </button>
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Tambah Master Bibit Baru</h1>
-          <p className="text-sm text-gray-500">Definisikan informasi dasar, stok, dan harga per unit bibit.</p>
+          <p className="text-sm text-gray-500">Definisikan informasi dasar, ukuran, stok, dan harga per unit bibit.</p>
         </div>
       </div>
 
@@ -102,7 +129,7 @@ const CreateBibit: React.FC = () => {
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">Kategori Bibit <span className="text-red-500">*</span></label>
                   <select 
-                    value={kategori} onChange={e => setKategori(e.target.value)}
+                    value={kategori} onChange={handleKategoriChange}
                     className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#185325]/20 focus:border-[#185325] transition-all cursor-pointer"
                   >
                     <option value="Tanaman Kehutanan">Tanaman Kehutanan (Kayu)</option>
@@ -123,11 +150,23 @@ const CreateBibit: React.FC = () => {
 
             <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100 space-y-6">
               <div>
-                <h3 className="text-sm font-bold text-[#185325] uppercase tracking-wider">Manajemen Harga & Stok</h3>
-                <p className="text-xs text-gray-500 mt-1">Sesuai ketentuan, harga bersifat fixed (pasti) per 1 unit/batang bibit.</p>
+                <h3 className="text-sm font-bold text-[#185325] uppercase tracking-wider">Manajemen Ukuran, Harga & Stok</h3>
+                <p className="text-xs text-gray-500 mt-1">Satu varian ukuran (tinggi bibit) merepresentasikan satu SKU/Kode unik.</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="w-full">
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Tinggi Bibit <span className="text-red-500">*</span></label>
+                  <select 
+                    value={tinggiBibit} onChange={e => setTinggiBibit(e.target.value)}
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-sm font-bold text-[#185325] focus:outline-none focus:ring-2 focus:ring-[#185325]/20 focus:border-[#185325] transition-all cursor-pointer"
+                  >
+                    {getTinggiOptions(kategori).map(opt => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
+                </div>
+
                 <div className="w-full">
                   <label className="block text-sm font-bold text-gray-700 mb-2">Stok Awal (Batang) <span className="text-red-500">*</span></label>
                   <input 
@@ -137,14 +176,14 @@ const CreateBibit: React.FC = () => {
                 </div>
 
                 <div className="w-full relative">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Harga Per Batang (Rp) <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Harga Per Batang <span className="text-red-500">*</span></label>
                   <div className="relative">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
                       <HiOutlineCurrencyDollar className="w-5 h-5" />
                     </div>
                     <input 
                       type="number" required value={harga} onChange={e => setHarga(e.target.value)}
-                      placeholder="Contoh: 15000" className="w-full pl-12 pr-4 py-3 bg-white border border-gray-300 rounded-xl text-sm font-bold text-[#185325] focus:outline-none focus:ring-2 focus:ring-[#185325]/20 focus:border-[#185325] transition-all"
+                      placeholder="15000" className="w-full pl-12 pr-4 py-3 bg-white border border-gray-300 rounded-xl text-sm font-bold text-[#185325] focus:outline-none focus:ring-2 focus:ring-[#185325]/20 focus:border-[#185325] transition-all"
                     />
                   </div>
                 </div>

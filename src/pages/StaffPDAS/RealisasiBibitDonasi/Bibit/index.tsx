@@ -4,6 +4,7 @@ import {
   HiOutlineMagnifyingGlass,
   HiOutlinePlus,
   HiOutlineEye,
+  HiOutlineFunnel
 } from "react-icons/hi2";
 import toast from "react-hot-toast";
 import {
@@ -13,6 +14,7 @@ import {
 } from "@/services/bibit.service";
 
 interface MappedBibitData extends BibitResponseData {
+  tinggiFormat: string;
   hargaFormat: string;
   totalStok: number;
 }
@@ -20,6 +22,7 @@ interface MappedBibitData extends BibitResponseData {
 const IndexBibit: React.FC = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const [filterTinggi, setFilterTinggi] = useState("Semua");
   const [bibitData, setBibitData] = useState<MappedBibitData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -47,15 +50,23 @@ const IndexBibit: React.FC = () => {
       const specs = spekRes.payload;
 
       const mergedData: MappedBibitData[] = bibits.map((bibit) => {
-        // Ambil spesifikasi yang sesuai dengan bibit ini
         const relatedSpecs = specs.filter((spec) => spec.seed_id === bibit.id);
         const spec = relatedSpecs.length > 0 ? relatedSpecs[0] : null;
 
+        // Memformat tinggi bibit kembali ke string untuk ditampilkan
+        let tinggiText = "Belum diatur";
+        if (spec) {
+          if (spec.max_height === 0 || spec.min_height > 100) {
+            tinggiText = "> 100 cm";
+          } else {
+            tinggiText = `${spec.min_height}–${spec.max_height} cm`;
+          }
+        }
+
         return {
           ...bibit,
-          // Ambil harga pasti (tunggal)
+          tinggiFormat: tinggiText,
           hargaFormat: spec ? formatRupiah(Number(spec.price)) : "Belum diatur",
-          // Ambil stok
           totalStok: spec ? Number(spec.stock) : 0,
         };
       });
@@ -68,15 +79,16 @@ const IndexBibit: React.FC = () => {
     }
   };
 
-  const filteredData = bibitData.filter(
-    (item) =>
-      item.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.kode.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const filteredData = bibitData.filter((item) => {
+    const matchesSearch = item.nama.toLowerCase().includes(searchTerm.toLowerCase()) || item.kode.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesTinggi = filterTinggi === "Semua" || item.tinggiFormat === filterTinggi;
+    
+    return matchesSearch && matchesTinggi;
+  });
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">
             Manajemen Data Bibit & Harga
@@ -85,22 +97,41 @@ const IndexBibit: React.FC = () => {
             Kelola master data dan pantau ketersediaan stok bibit tanaman.
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative w-full sm:w-64">
+        
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative w-full sm:w-56">
             <HiOutlineMagnifyingGlass className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
               type="text"
-              placeholder="Cari bibit atau kode bibit..."
+              placeholder="Cari SKU / nama bibit..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-[#009262] focus:border-[#009262] outline-none shadow-sm transition-all"
             />
           </div>
+
+          <div className="relative w-full sm:w-40">
+            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+               <HiOutlineFunnel className="w-4 h-4" />
+            </div>
+            <select
+              value={filterTinggi}
+              onChange={(e) => setFilterTinggi(e.target.value)}
+              className="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-[#009262] focus:border-[#009262] outline-none shadow-sm transition-all cursor-pointer appearance-none"
+            >
+              <option value="Semua">Semua Tinggi</option>
+              <option value="30-60 cm">30-60 cm</option>
+              <option value="61-100 cm">61-100 cm</option>
+              <option value="70-100 cm">70-100 cm</option>
+              <option value="> 100 cm">&gt; 100 cm</option>
+            </select>
+          </div>
+
           <button
             onClick={() => navigate("/admin/staff/donasi/bibit/create")}
-            className="bg-primary text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-[#123d1c] hover:shadow-lg hover:-translate-y-0.5 transition-all"
+            className="bg-primary text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-[#123d1c] hover:shadow-lg hover:-translate-y-0.5 transition-all w-full sm:w-auto"
           >
-            <HiOutlinePlus className="w-4 h-4" strokeWidth={2.5} /> Tambah Bibit
+            <HiOutlinePlus className="w-4 h-4" strokeWidth={2.5} /> Tambah Bibit Baru
           </button>
         </div>
       </div>
@@ -110,10 +141,11 @@ const IndexBibit: React.FC = () => {
           <table className="w-full text-left whitespace-nowrap">
             <thead className="bg-[#DCECE0]/50 text-[#3A4D3F] text-xs uppercase tracking-wider font-bold border-b border-gray-100">
               <tr>
-                <th className="px-6 py-4">Kode</th>
+                <th className="px-6 py-4">Kode (SKU)</th>
                 <th className="px-6 py-4">Nama Spesies / Bibit</th>
+                <th className="px-6 py-4">Tinggi Bibit</th>
                 <th className="px-6 py-4">Kategori</th>
-                <th className="px-6 py-4">Stok Bibit</th>
+                <th className="px-6 py-4">Stok Saat Ini</th>
                 <th className="px-6 py-4">Harga Satuan</th>
                 <th className="px-6 py-4 text-center">Aksi</th>
               </tr>
@@ -121,11 +153,11 @@ const IndexBibit: React.FC = () => {
             <tbody className="divide-y divide-gray-50">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center">
+                  <td colSpan={7} className="px-6 py-12 text-center">
                     <div className="flex flex-col items-center justify-center gap-3">
                       <span className="w-8 h-8 border-4 border-gray-200 border-t-[#185325] rounded-full animate-spin"></span>
                       <p className="text-sm font-bold text-gray-500">
-                        Memuat data bibit dan harga...
+                        Memuat data varian bibit...
                       </p>
                     </div>
                   </td>
@@ -147,6 +179,12 @@ const IndexBibit: React.FC = () => {
                         {item.deskripsi}
                       </div>
                     </td>
+                    
+                    {/* KOLOM TINGGI BIBIT */}
+                    <td className="px-6 py-4 text-sm font-bold text-gray-700">
+                      {item.tinggiFormat}
+                    </td>
+
                     <td className="px-6 py-4">
                       <span
                         className={`px-3 py-1 rounded-full text-[10px] font-bold ${
@@ -159,12 +197,10 @@ const IndexBibit: React.FC = () => {
                       </span>
                     </td>
                     
-                    {/* KOLOM STOK BARU */}
                     <td className="px-6 py-4 text-sm font-bold text-gray-800">
                       {item.totalStok} Batang
                     </td>
 
-                    {/* HARGA FIXED */}
                     <td className="px-6 py-4 text-sm font-bold text-[#185325]">
                       {item.hargaFormat}
                     </td>
@@ -186,7 +222,7 @@ const IndexBibit: React.FC = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center">
+                  <td colSpan={7} className="px-6 py-12 text-center">
                     <p className="text-sm font-bold text-gray-500">
                       Tidak ada data bibit yang ditemukan.
                     </p>
