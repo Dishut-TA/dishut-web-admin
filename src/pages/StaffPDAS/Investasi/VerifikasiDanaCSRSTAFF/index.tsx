@@ -25,7 +25,7 @@ const mockData: DataVerifikasi[] = [
     status: 'Menunggu Verifikasi'
   },
   {
-    id: 'CSR-001',
+    id: 'CSR-002',
     namaProgram: 'Rehabilitasi Citarum',
     tahap: 'Tahap 1',
     sumberDana: 'CSR',
@@ -44,7 +44,7 @@ const mockData: DataVerifikasi[] = [
   }
 ];
 
-const VerifikasiDanaCSR: React.FC = () => {
+const VerifikasiLaporanDanaSTAFF: React.FC = () => {
   const navigate = useNavigate();
   const [data] = useState<DataVerifikasi[]>(mockData);
   const [searchTerm, setSearchTerm] = useState('');
@@ -74,7 +74,7 @@ const VerifikasiDanaCSR: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">
-            Verifikasi Dana
+            Verifikasi Laporan Dana
           </h1>
         </div>
 
@@ -136,7 +136,7 @@ const VerifikasiDanaCSR: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 flex justify-center whitespace-nowrap">
                     <button 
-                      onClick={() => navigate(`/admin/staff/rehabilitasi/verifikasi-dana-csr/detail/${item.id}`)}
+                      onClick={() => navigate(`/admin/staff/rehabilitasi/verifikasi-dana/detail/${item.id}`)}
                       className="p-1.5 text-gray-600 hover:text-[#185325] border border-transparent hover:border-[#185325] rounded-full transition-all cursor-pointer"
                     >
                       <HiOutlineEye className="w-5 h-5" />
@@ -152,4 +152,4 @@ const VerifikasiDanaCSR: React.FC = () => {
   );
 };
 
-export default VerifikasiDanaCSR;
+export default VerifikasiLaporanDanaSTAFF;

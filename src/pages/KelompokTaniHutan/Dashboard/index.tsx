@@ -51,16 +51,16 @@ const STAT_CARDS: StatCardData[] = [
 
 const MOCK_PROGRAMS: ProgramData[] = [
   {
-    id: '#PROP-4502',
+    id: '#INV-001',
     judulUsaha: 'Pengadaan Ekowisata Kebun Stroberi',
     skema: 'Investasi',
-    status: 'Aktif / Dipublikasikan'
+    status: 'Aktif'
   },
   {
-    id: 'PROP-APBD-4814',
+    id: 'CSR-001',
     judulUsaha: 'Rehabilitasi Lahan Kritis Hulu DAS Cimanuk',
     skema: 'CSR',
-    status: 'Disetujui CSR'
+    status: 'Disetujui'
   }
 ];
 
@@ -113,7 +113,7 @@ const DashboardKTH: React.FC = () => {
           <thead className="bg-[#DCECE0] text-[#3A4D3F] text-[11px] uppercase tracking-wider font-bold">
             <tr>
               <th className="px-6 py-4 whitespace-nowrap">ID</th>
-              <th className="px-6 py-4 whitespace-nowrap">Judul Usaha</th>
+              <th className="px-6 py-4 whitespace-nowrap">Nama Program</th>
               <th className="px-6 py-4 whitespace-nowrap">Skema</th>
               <th className="px-6 py-4 whitespace-nowrap text-center">Status</th>
             </tr>

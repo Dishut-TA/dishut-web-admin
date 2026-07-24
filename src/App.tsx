@@ -10,7 +10,6 @@ import DashboardKTH from "./pages/KelompokTaniHutan/Dashboard";
 import DashboardCSR from "./pages/CSR/DashboardCSR";
 import TinjauProposal from "./pages/CSR/TinjauProposal";
 import DetailTinjauProposal from "./pages/CSR/TinjauProposal/DetailTinjauProposal";
-import RiwayatProposal from "./pages/CSR/RiwayatProposal";
 import MonitoringProyek from "./pages/CSR/MonitoringProyek";
 import DashboardStaffBUPM from "./pages/StaffBUPM/Dashboard";
 import DataInvestasi from "./pages/StaffBUPM/DataInvestasi";
@@ -45,8 +44,8 @@ import BiayaPemasukanIndex from "./pages/KelompokTaniHutan/InvestasiKTH/LaporanI
 import BiayaPemasukanCreate from "./pages/KelompokTaniHutan/InvestasiKTH/LaporanInvestasi/LaporanBiayaPemasukan/CreateBiayaPemasukan";
 import DetailVerifikasiDanaCSRKABID from "./pages/KepalaBidangPDAS/VerifikasiDanaCSR/DetailVerifikasiDanaCSRKKABID";
 import VerifikasiDanaCSRKABID from "./pages/KepalaBidangPDAS/VerifikasiDanaCSR";
-import VerifikasiDanaCSR from "./pages/StaffPDAS/Investasi/VerifikasiDanaCSRSTAFF";
-import DetailVerifikasiDanaCSR from "./pages/StaffPDAS/Investasi/VerifikasiDanaCSRSTAFF/DetailVerifikasiDanaCSR";
+// import VerifikasiDanaCSR from "./pages/StaffPDAS/Investasi/VerifikasiDanaCSRSTAFF";
+// import DetailVerifikasiDanaCSR from "./pages/StaffPDAS/Investasi/VerifikasiDanaCSRSTAFF/DetailVerifikasiLaporanDanaSTAFF";
 import LaporanKeuanganIndex from "./pages/CSR/LaporanKeuanganCSR";
 import DetailLaporanKeuangan from "./pages/CSR/LaporanKeuanganCSR/DetailLaporanKeuanganCSR";
 import LaporanDanaIndex from "./pages/KelompokTaniHutan/Rehabilitasi/LaporanDana";
@@ -103,6 +102,11 @@ import LaporanDanaIndexKABID from "./pages/KepalaBidangPDAS/LaporanDana";
 import PendanaanProgram from "./pages/CSR/TinjauProposal/PembayaranProgramPendanaan/PendanaanProgram";
 import RiwayatRehabilitasiSTAFF from "./pages/StaffPDAS/Investasi/RiwayatRehabilitasi";
 import DetailRiwayatRehabilitasiSTAFF from "./pages/StaffPDAS/Investasi/RiwayatRehabilitasi/DetailRiwayatRehabilitasi";
+import VerifikasiLaporanDanaSTAFF from "./pages/StaffPDAS/Investasi/VerifikasiDanaCSRSTAFF";
+import DetailVerifikasiLaporanDanaSTAFF from "./pages/StaffPDAS/Investasi/VerifikasiDanaCSRSTAFF/DetailVerifikasiLaporanDanaSTAFF";
+import LaporanDanaIndexSTAFF from "./pages/StaffPDAS/Investasi/LaporanDana";
+import DetailRiwayatPendanaan from "./pages/CSR/RiwayatPendanaan/DetailRiwayatPendanaan";
+import RiwayatPendanaan from "./pages/CSR/RiwayatPendanaan";
 const Login = lazy(() => import("./pages/Authentication/Login"));
 const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -200,9 +204,10 @@ function App() {
                   <Route path="rehabilitasi/program-apbd/create" element={<CreateProgramAPBD />} />
                   <Route path="rehabilitasi/program-apbd/detail/:id" element={<DetailProgramAPBD />} />
                   <Route path="rehabilitasi/program-csr" element={<ProgramCSRList />} />
-                  <Route path="rehabilitasi/program-csr/verifikasi/:id" element={<VerifikasiBerkasCSR />} />
-                  <Route path="rehabilitasi/verifikasi-dana-csr" element={<VerifikasiDanaCSR />} />
-                  <Route path="rehabilitasi/verifikasi-dana-csr/detail/:id" element={<DetailVerifikasiDanaCSR />} />
+                  <Route path="rehabilitasi/program-csr/detail/:id" element={<VerifikasiBerkasCSR />} />
+                  <Route path="rehabilitasi/verifikasi-dana" element={<VerifikasiLaporanDanaSTAFF />} />
+                  <Route path="rehabilitasi/verifikasi-dana/detail/:id" element={<DetailVerifikasiLaporanDanaSTAFF />} />
+                  <Route path="rehabilitasi/laporan-dana" element={<LaporanDanaIndexSTAFF />} />
                   <Route path="rehabilitasi/riwayat-rehabilitasi" element={<RiwayatRehabilitasiSTAFF />} />
                   <Route path="rehabilitasi/riwayat-rehabilitasi/detail/:id" element={<DetailRiwayatRehabilitasiSTAFF />} />
 
@@ -295,6 +300,7 @@ function App() {
                   <Route path="rehabilitasi/update-progres" element={<UpdateProgres />} />
                   <Route path="rehabilitasi/laporan-dana" element={<LaporanDanaIndex />} />
                   <Route path="rehabilitasi/laporan-dana/create" element={<CreateLaporanDana />} />
+                  <Route path="rehabilitasi/laporan-dana/edit/:id" element={<CreateLaporanDana />} />
                   <Route path="rehabilitasi/laporan-dana/detail/:id" element={<DetailLaporanDana />} />
                   <Route path="investasi/data" element={<DataInvestasiKTH />} />
                   <Route path="investasi/data/create" element={<CreateInvestasi />} />
@@ -328,7 +334,8 @@ function App() {
                   <Route path="tinjau-proposal" element={<TinjauProposal />} />
                   <Route path="tinjau-proposal/detail/:id" element={<DetailTinjauProposal />} />
                   <Route path="pendanaan/:id" element={<PendanaanProgram />} />
-                  <Route path="riwayat-proposal" element={<RiwayatProposal />} />
+                  <Route path="riwayat-pendanaan" element={<RiwayatPendanaan />} />
+                  <Route path="riwayat-pendanaan/detail/:id" element={<DetailRiwayatPendanaan />} />
                   <Route path="monitoring-proyek" element={<MonitoringProyek />} />
                   <Route path="laporan-keuangan" element={<LaporanKeuanganIndex />} />
                   <Route path="laporan-keuangan/detail/:id" element={<DetailLaporanKeuangan />} />

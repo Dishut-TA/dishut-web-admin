@@ -22,14 +22,14 @@ const mockData: CSRProposal[] = [
     status: 'Menunggu Persetujuan'
   },
   {
-    id: 'CSR-001', // ID dibuat sama sesuai gambar
+    id: 'CSR-002', 
     namaProgram: 'Reboisasi Hulu Sungai DAS',
     kth: 'KTH Rimba',
     anggaran: 300000000,
     status: 'Disetujui'
   },
   {
-    id: 'CSR-001', // ID dibuat sama sesuai gambar
+    id: 'CSR-003', 
     namaProgram: 'Reboisasi Hulu Sungai DAS',
     kth: 'KTH Rimba',
     anggaran: 300000000,
@@ -47,7 +47,6 @@ const ProgramCSRList: React.FC = () => {
     item.kth.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Format ke "Rp300.000.000" (Tanpa spasi sesuai gambar)
   const formatRupiah = (angka: number) => {
     return 'Rp' + angka.toLocaleString('id-ID');
   };
@@ -126,7 +125,7 @@ const ProgramCSRList: React.FC = () => {
                     <td className="px-6 py-4 flex justify-center items-center whitespace-nowrap h-full min-h-16">
                       {item.status === 'Menunggu Persetujuan' ? (
                         <button 
-                          onClick={() => navigate(`/admin/staff/rehabilitasi/program-csr/verifikasi/${item.id}`)}
+                          onClick={() => navigate(`/admin/staff/rehabilitasi/program-csr/detail/${item.id}`)}
                           className="flex items-center gap-1.5 px-5 py-2 bg-[#185325] hover:bg-[#123d1c] text-white text-xs font-bold rounded-full transition-colors active:scale-95 shadow-sm cursor-pointer"
                         >
                           Tinjau Berkas <HiOutlineArrowRight className="w-4 h-4 stroke-2" />

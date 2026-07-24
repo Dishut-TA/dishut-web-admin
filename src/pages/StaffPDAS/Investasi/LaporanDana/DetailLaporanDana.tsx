@@ -1,11 +1,13 @@
 import React, { useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { HiOutlineChevronLeft, HiOutlinePencilSquare } from 'react-icons/hi2';
+import { HiOutlineChevronLeft } from 'react-icons/hi2';
 
-const DetailLaporanDana: React.FC = () => {
+const DetailLaporanDanaSTAFF: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
+  // MOCK DATA DINAMIS (Berdasarkan ID dari file index)
+  // 0 = Menunggu Verifikasi, 1 = Revisi, 2 = Terverifikasi (Hanya untuk keperluan testing UI)
   const data = useMemo(() => {
     let currentStatus = 'Terverifikasi';
     if (id === '0') currentStatus = 'Menunggu Verifikasi';
@@ -47,24 +49,13 @@ const DetailLaporanDana: React.FC = () => {
   );
 
   return (
-  <div className="flex flex-col gap-6 w-full mx-auto pb-12 px-4 sm:px-0">
-      <div className="flex items-center justify-between">
-        <button 
-          onClick={() => navigate(-1)} 
-          className="flex items-center gap-1.5 text-sm font-bold text-gray-800 hover:text-[#185325] transition-colors cursor-pointer"
-        >
-          <HiOutlineChevronLeft className="w-4 h-4 stroke-2" /> Kembali
-        </button>
-
-        {data.status === 'Revisi' && (
-          <button 
-            onClick={() => navigate(`/admin/kth/rehabilitasi/laporan-dana/edit/${id}`)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-yellow-100 text-yellow-800 hover:bg-yellow-200 text-sm font-bold rounded-full transition-colors cursor-pointer"
-          >
-            <HiOutlinePencilSquare className="w-5 h-5" /> Revisi Laporan
-          </button>
-        )}
-      </div>
+    <div className="flex flex-col gap-6 w-full max-w-5xl mx-auto pb-12 px-4 sm:px-0">
+      <button 
+        onClick={() => navigate(-1)} 
+        className="flex items-center gap-1.5 text-sm font-bold text-gray-800 hover:text-[#185325] transition-colors self-start cursor-pointer"
+      >
+        <HiOutlineChevronLeft className="w-4 h-4 stroke-2" /> Kembali
+      </button>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10">
         <h1 className="text-xl md:text-2xl font-bold text-gray-800 mb-8">Halaman Detail</h1>
@@ -133,4 +124,4 @@ const DetailLaporanDana: React.FC = () => {
   );
 };
 
-export default DetailLaporanDana;
+export default DetailLaporanDanaSTAFF;

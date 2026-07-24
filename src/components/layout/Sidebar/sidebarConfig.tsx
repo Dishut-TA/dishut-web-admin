@@ -66,9 +66,10 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
         {
             id: 'rehabilitasi', title: 'Rehabilitasi', icon: <HiOutlineBookmark className="w-5 h-5" />,
             items: [
-                { name: 'Program APBD', path: `${basePath}/rehabilitasi/program-apbd` },
-                { name: 'Validasi CSR', path: `${basePath}/rehabilitasi/program-csr` },
-                { name: 'Verifikasi Dana CSR', path: `${basePath}/rehabilitasi/verifikasi-dana-csr` },
+                { name: 'Daftar Program APBD', path: `${basePath}/rehabilitasi/program-apbd` },
+                { name: 'Program CSR', path: `${basePath}/rehabilitasi/program-csr` },
+                { name: 'Verifikasi Laporan Dana', path: `${basePath}/rehabilitasi/verifikasi-dana` },
+                { name: 'Laporan Dana', path: `${basePath}/rehabilitasi/laporan-dana` },
                 { name: 'Riwayat Rehabilitasi', path: `${basePath}/rehabilitasi/riwayat-rehabilitasi` },
             ],
         },
@@ -123,7 +124,7 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
     const csrMenus = [
         dashboard,
         { name: 'Tinjau Proposal', path: `${basePath}/tinjau-proposal`, icon: <HiOutlineDocumentText className="w-5 h-5" /> },
-        { name: 'Riwayat Proposal', path: `${basePath}/riwayat-proposal`, icon: <HiOutlineClock className="w-5 h-5" /> },
+        { name: 'Riwayat Pendanaan', path: `${basePath}/riwayat-pendanaan`, icon: <HiOutlineClock className="w-5 h-5" /> },
         { name: 'Monitoring Proyek', path: `${basePath}/monitoring-proyek`, icon: <HiOutlineChartPie className="w-5 h-5" /> },
         { name: 'Laporan Keuangan', path: `${basePath}/laporan-keuangan`, icon: <HiOutlineChartPie className="w-5 h-5" /> },
     ];

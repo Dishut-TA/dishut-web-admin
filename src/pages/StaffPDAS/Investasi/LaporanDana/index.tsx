@@ -18,7 +18,7 @@ const mockData: LaporanDanaData[] = [
   { id: 'APBD-001', namaProgram: 'Rehabilitasi Citarum', tahap: 'Tahap 1', sumberDana: 'APBD', danaDisalurkan: 100000000, danaDirealisasikan: 20000000, status: 'Terverifikasi' },
 ];
 
-const LaporanDanaIndexKABID: React.FC = () => {
+const LaporanDanaIndexSTAFF: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [data] = useState<LaporanDanaData[]>(mockData);
 
@@ -95,4 +95,4 @@ const LaporanDanaIndexKABID: React.FC = () => {
   );
 };
 
-export default LaporanDanaIndexKABID;
+export default LaporanDanaIndexSTAFF;
