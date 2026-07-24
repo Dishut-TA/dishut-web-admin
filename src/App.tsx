@@ -192,6 +192,7 @@ function App() {
                   <Route path="donasi/bibit" element={<IndexBibit />} />
                   <Route path="donasi/bibit/create" element={<CreateBibit />} />
                   <Route path="donasi/bibit/detail/:id" element={<DetailBibit />} />
+                  <Route path="donasi/bibit/edit/:id" element={<CreateBibit />} />
                   <Route path="donasi/dashboard" element={<DashboardProgramStaff />} />
                   <Route path="donasi/program" element={<ProgramDonasiStaff />} />
                   <Route path="donasi/program/create" element={<CreateProgram />} />
