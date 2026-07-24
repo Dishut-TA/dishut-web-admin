@@ -77,6 +77,32 @@ export const createBibitAPI = async (payload: BibitPayload) => {
   }
 };
 
+export const updateBibitAPI = async (id: string | number, payload: BibitPayload) => {
+  try {
+    const token = localStorage.getItem('token'); 
+    
+    const response = await fetch(`${API_URL}/bibits/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` })
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Terjadi kesalahan saat memperbarui data bibit.');
+    }
+
+    return data;
+  } catch (error: any) {
+    throw new Error(error.message || 'Gagal terhubung ke server.');
+  }
+};
+
 export const createSeedSpecificationAPI = async (payload: SeedSpecificationPayload) => {
   try {
     const token = localStorage.getItem('token'); 
@@ -141,5 +167,29 @@ export const getSeedSpecificationsAPI = async (): Promise<GetSeedSpecsResponse> 
     return data;
   } catch (error: any) {
     throw new Error(error.message || 'Gagal mengambil data spesifikasi.');
+  }
+};
+
+export const getBibitByIdAPI = async (id: string | number) => {
+  try {
+    const token = localStorage.getItem('token');
+    
+    const response = await fetch(`${API_URL}/bibits/${id}/detail`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` })
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Gagal mengambil detail master bibit.');
+    }
+
+    return data;
+  } catch (error: any) {
+    throw new Error(error.message || 'Gagal terhubung ke server.');
   }
 };

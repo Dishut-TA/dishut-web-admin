@@ -54,6 +54,32 @@ export const createDonationProgramAPI = async (payload: DonationProgramPayload) 
   }
 };
 
+export const updateDonationProgramAPI = async (id: string | number, payload: any) => {
+  try {
+    const token = localStorage.getItem('token'); 
+    
+    const response = await fetch(`${import.meta.env.VITE_API_MASTER_URL}/donation-programs/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` })
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Terjadi kesalahan saat memperbarui status program.');
+    }
+
+    return data;
+  } catch (error: any) {
+    throw new Error(error.message || 'Gagal terhubung ke server.');
+  }
+};
+
 export const getDonationProgramsAPI = async (): Promise<GetDonationProgramsResponse> => {
   try {
     const token = localStorage.getItem('token');

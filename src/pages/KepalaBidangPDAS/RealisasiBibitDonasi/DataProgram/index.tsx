@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   HiOutlineMagnifyingGlass, 
   HiOutlineEye, 
@@ -6,77 +6,147 @@ import {
   HiOutlineArrowDownTray 
 } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
-import type { ProgramData, StatusProgram } from '@/utils/interface';
 import VerifikasiProgramModal from './components/VerifikasiProgramModal';
 import ExportLaporanModal from './components/ExportLaporanModal';
 import DetailProgramModal from '@/pages/StaffPDAS/RealisasiBibitDonasi/ProgramDonasi/components/DetailProgramModal';
+import { getDonationProgramsAPI, updateDonationProgramAPI } from '@/services/program-donasi.service';
 
-const mockDataProgram: ProgramData[] = [
-  { 
-    id: '1', 
-    nama: 'Penghijauan Hulu Citarum', 
-    lokasi: 'Kab. Bandung', 
-    jenisBibit: [
-      { nama: 'Mahoni', jumlah: 5000, terealisasi: 0 },
-      { nama: 'Sengon', jumlah: 3500, terealisasi: 0 }
-    ],
-    terkumpul: '8.500', 
-    status: 'Aktif',
-    totalTerealisasi: '0'
-  },
-  { 
-    id: '4', 
-    nama: 'Penanaman Mangrove Pesisir Utara', 
-    lokasi: 'Kab. Bekasi', 
-    jenisBibit: [
-      { nama: 'Mangrove', jumlah: 2000, terealisasi: 0 }
-    ],
-    terkumpul: '0', 
-    status: 'Menunggu Verifikasi',
-    totalTerealisasi: '0'
-  }
-];
+export interface ProgramDataExtended {
+  id: string;
+  nama: string;
+  lokasi: string;
+  terkumpul: string;
+  totalTerealisasi: string;
+  status: string;
+  jenisBibit: any[];
+  
+  raw_analysis_result_id: any;
+  raw_kth_id: number;
+  raw_seed_specification_id: any;
+  raw_total_seeds_collected: number;
+  raw_total_seeds_realized: number;
+}
 
-const getStatusBadge = (status: StatusProgram) => {
+const getStatusBadge = (status: string) => {
   const baseStyle = "px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap";
-  switch (status) {
-    case 'Aktif': return <span className={`${baseStyle} bg-[#2E7D32] text-white`}>Aktif</span>;
-    case 'Selesai': return <span className={`${baseStyle} bg-gray-200 text-gray-600`}>Selesai</span>;
-    case 'Menunggu Verifikasi': return <span className={`${baseStyle} bg-[#F2C94C] text-gray-800`}>Menunggu Verifikasi</span>;
-    default: return null;
+  switch (status.toLowerCase()) {
+    case 'aktif': 
+      return <span className={`${baseStyle} bg-[#2E7D32] text-white`}>Aktif</span>;
+    case 'selesai': 
+      return <span className={`${baseStyle} bg-gray-200 text-gray-600`}>Selesai</span>;
+    case 'menunggu verifikasi': 
+    case 'pending':
+      return <span className={`${baseStyle} bg-[#F2C94C] text-gray-800`}>Menunggu Verifikasi</span>;
+    case 'ditolak':
+    case 'rejected':
+      return <span className={`${baseStyle} bg-red-100 text-red-700`}>Ditolak</span>;
+    default: 
+      return <span className={`${baseStyle} bg-gray-100 text-gray-600`}>{status}</span>;
   }
 };
 
 const KabidProgramDonasi: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedProgram, setSelectedProgram] = useState<ProgramData | null>(null);
+  const [programsData, setProgramsData] = useState<ProgramDataExtended[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [selectedProgram, setSelectedProgram] = useState<ProgramDataExtended | null>(null);
   const [isVerifModalOpen, setIsVerifModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
-  const filteredData = mockDataProgram.filter(program => 
+  useEffect(() => {
+    fetchPrograms();
+  }, []);
+
+  const fetchPrograms = async () => {
+    setIsLoading(true);
+    try {
+      const response = await getDonationProgramsAPI();
+      
+      const mappedData: ProgramDataExtended[] = response.payload.map((item: any) => {
+        const mappedBibit = item.jenis_bibit && item.jenis_bibit.length > 0 
+          ? item.jenis_bibit.map((bibit: any) => ({
+              nama: bibit.name || `Spek ID: ${bibit.id}`
+            }))
+          : [];
+
+        return {
+          id: item.id.toString(),
+          nama: item.name,
+          lokasi: item.location,
+          terkumpul: item.total_seeds_collected.toLocaleString('id-ID'),
+          totalTerealisasi: item.total_seeds_realized.toLocaleString('id-ID'),
+          status: item.status,
+          jenisBibit: mappedBibit,
+
+          raw_analysis_result_id: item.analysis_result_id,
+          raw_kth_id: item.kth_id,
+          raw_seed_specification_id: item.seed_specification_id,
+          raw_total_seeds_collected: item.total_seeds_collected,
+          raw_total_seeds_realized: item.total_seeds_realized
+        };
+      });
+
+      setProgramsData(mappedData);
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const filteredData = programsData.filter(program => 
     program.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
     program.lokasi.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleOpenVerifikasi = (program: ProgramData) => {
+  const handleOpenVerifikasi = (program: ProgramDataExtended) => {
     setSelectedProgram(program);
     setIsVerifModalOpen(true);
   };
 
-  const handleOpenDetail = (program: ProgramData) => {
+  const handleOpenDetail = (program: ProgramDataExtended) => {
     setSelectedProgram(program);
     setIsDetailModalOpen(true);
   };
 
-  const handleSetuju = () => {
-    toast.success('Program berhasil disetujui!');
-    setIsVerifModalOpen(false);
+  const updateProgramStatus = async (id: string, newStatus: string) => {
+    const targetProgram = programsData.find(p => p.id === id);
+    if (!targetProgram) return;
+
+    const loadingToast = toast.loading('Memproses verifikasi...');
+
+    try {
+      const payload = {
+        analysis_result_id: targetProgram.raw_analysis_result_id,
+        kth_id: targetProgram.raw_kth_id,
+        seed_specification_id: targetProgram.raw_seed_specification_id,
+        name: targetProgram.nama,
+        location: targetProgram.lokasi,
+        total_seeds_collected: targetProgram.raw_total_seeds_collected,
+        total_seeds_realized: targetProgram.raw_total_seeds_realized,
+        status: newStatus 
+      };
+
+      await updateDonationProgramAPI(id, payload);
+
+      toast.success(`Program berhasil ${newStatus === 'Aktif' ? 'disetujui' : 'ditolak'}!`, { id: loadingToast });
+      
+      setIsVerifModalOpen(false);
+      fetchPrograms();
+
+    } catch (error: any) {
+      toast.error(error.message, { id: loadingToast });
+    }
   };
 
-  const handleTolak = () => {
-    toast.error('Pengajuan program ditolak.');
-    setIsVerifModalOpen(false);
+  const handleSetuju = (id: string) => {
+    updateProgramStatus(id, "Aktif");
+  };
+
+  const handleTolak = (id: string) => {
+    updateProgramStatus(id, "Ditolak");
   };
 
   return (
@@ -125,7 +195,16 @@ const KabidProgramDonasi: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filteredData.length > 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center">
+                    <div className="flex flex-col items-center justify-center gap-3">
+                      <span className="w-8 h-8 border-4 border-gray-200 border-t-[#185325] rounded-full animate-spin"></span>
+                      <p className="text-sm font-bold text-gray-500">Memuat data program donasi...</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredData.length > 0 ? (
                 filteredData.map((program) => (
                   <tr key={program.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4 text-sm font-medium text-gray-700 whitespace-nowrap">{program.nama}</td>
@@ -133,14 +212,18 @@ const KabidProgramDonasi: React.FC = () => {
                     
                     <td className="px-6 py-4 max-w-62.5">
                       <div className="flex flex-wrap gap-1.5">
-                        {program.jenisBibit.map((bibit: any, index: number) => (
-                          <span 
-                            key={index} 
-                            className="px-2 py-1 bg-white border border-gray-200 text-gray-600 rounded-md text-[11px] font-medium whitespace-nowrap shadow-sm"
-                          >
-                            {bibit.nama}
-                          </span>
-                        ))}
+                        {program.jenisBibit && program.jenisBibit.length > 0 ? (
+                          program.jenisBibit.map((bibit: any, index: number) => (
+                            <span 
+                              key={index} 
+                              className="px-2 py-1 bg-white border border-gray-200 text-gray-600 rounded-md text-[11px] font-medium whitespace-nowrap shadow-sm"
+                            >
+                              {bibit.nama}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-sm text-gray-400 italic">Belum ditentukan.</span>
+                        )}
                       </div>
                     </td>
 
@@ -148,7 +231,6 @@ const KabidProgramDonasi: React.FC = () => {
                       {program.terkumpul}
                     </td>
                     
-                    {/* TAMBAHAN KOLOM: TEREALISASI */}
                     <td className="px-6 py-4 text-sm font-bold text-[#185325] text-center whitespace-nowrap">
                       {program.totalTerealisasi}
                     </td>
@@ -192,7 +274,7 @@ const KabidProgramDonasi: React.FC = () => {
       <VerifikasiProgramModal 
         isOpen={isVerifModalOpen} 
         onClose={() => setIsVerifModalOpen(false)} 
-        program={selectedProgram}
+        program={selectedProgram as any}
         onSetuju={handleSetuju}
         onTolak={handleTolak}
       />
@@ -200,7 +282,7 @@ const KabidProgramDonasi: React.FC = () => {
       <DetailProgramModal 
         isOpen={isDetailModalOpen} 
         onClose={() => setIsDetailModalOpen(false)} 
-        program={selectedProgram}
+        program={selectedProgram as any}
       />
 
       <ExportLaporanModal 

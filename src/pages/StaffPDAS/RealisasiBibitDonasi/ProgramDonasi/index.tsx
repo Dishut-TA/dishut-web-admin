@@ -58,27 +58,30 @@ const ProgramDonasi: React.FC = () => {
     fetchPrograms();
   }, []);
 
-  const fetchPrograms = async () => {
+const fetchPrograms = async () => {
     setIsLoading(true);
     try {
       const response = await getDonationProgramsAPI();
       
-      const mappedData: MappedProgramData[] = response.payload.map((item) => ({
-        id: item.id.toString(),
-        nama: item.name,
-        lokasi: item.location,
-        terkumpul: item.total_seeds_collected.toLocaleString('id-ID'),
-        totalTerealisasi: item.total_seeds_realized.toLocaleString('id-ID'),
-        status: item.status,
-        // Placeholder UI: Karena Backend belum mengirimkan data relasi jenis bibit
-        jenisBibit: [
-          { 
-            nama: `ID Spek: ${item.seed_specification_id}`, 
-            jumlah: 0, 
-            terealisasi: 0 
-          }
-        ]
-      }));
+      const mappedData: MappedProgramData[] = response.payload.map((item: any) => {
+        const mappedBibit = item.jenis_bibit && item.jenis_bibit.length > 0 
+          ? item.jenis_bibit.map((bibit: any) => ({
+              nama: bibit.nama || `Spek ID: ${bibit.id}`,
+              jumlah: bibit.jumlah || 0,
+              terealisasi: bibit.terealisasi || 0
+            }))
+          : []; // Jika kosong dari backend, biarkan kosong agar merender "Belum ditentukan" di UI
+
+        return {
+          id: item.id.toString(),
+          nama: item.name,
+          lokasi: item.location,
+          terkumpul: item.total_seeds_collected.toLocaleString('id-ID'),
+          totalTerealisasi: item.total_seeds_realized.toLocaleString('id-ID'),
+          status: item.status,
+          jenisBibit: mappedBibit
+        };
+      });
 
       setProgramsData(mappedData);
     } catch (error: any) {
