@@ -12,21 +12,21 @@ const PendanaanAPBD: React.FC = () => {
         judul: 'Reboisasi Hulu Sungai DAS',
         lokasi: 'Desa Sukamulya', 
         alokasi: 'Rp300.000.000', 
-        status: 'Meunuggu Konfirmasi' 
+        status: 'Menunggu Konfirmasi' 
     },
     { 
         id: 'APBD-002', 
         judul: 'Reboisasi Hulu Sungai DAS',
         lokasi: 'Desa Sukamulya', 
         alokasi: 'Rp300.000.000', 
-        status: 'Berjalan' 
+        status: 'Menunggu Konfirmasi' 
     },
     { 
         id: 'APBD-003', 
         judul: 'Reboisasi Hulu Sungai DAS',
         lokasi: 'Desa Sukamulya', 
         alokasi: 'Rp300.000.000', 
-        status: 'Selesai' 
+        status: 'Menunggu Konfirmasi' 
     },
   ];
 
@@ -74,7 +74,7 @@ const PendanaanAPBD: React.FC = () => {
                   <td className="px-6 py-5 text-sm font-bold text-[#185325]">{item.alokasi}</td>
                   <td className="px-6 py-5 text-center">
                     <span className={`px-4 py-1.5 rounded-full text-xs font-bold ${
-                      item.status === 'Meunuggu Konfirmasi' ? 'bg-gray-200 text-gray-700' : 
+                      item.status === 'Menunggu Konfirmasi' ? 'bg-gray-200 text-gray-700' : 
                       item.status === 'Berjalan' ? 'bg-orange-200 text-orange-800' : 
                       'bg-green-300 text-green-800'
                     }`}>
@@ -83,7 +83,7 @@ const PendanaanAPBD: React.FC = () => {
                   </td>
                   
                   <td className="px-6 py-5 flex justify-center items-center h-full">
-                    {item.status === 'Meunuggu Konfirmasi' ? (
+                    {item.status === 'Menunggu Konfirmasi' ? (
                       <button onClick={() => navigate(`/admin/kth/rehabilitasi/pendanaan-apbd/detail/${item.id}`)} className="bg-[#185325] hover:bg-[#123d1c] text-white px-5 py-2 rounded-full text-xs font-bold transition-colors">
                         Konfirmasi
                       </button>

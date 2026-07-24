@@ -4,9 +4,9 @@ import {
   HiOutlineChevronLeft,
   HiOutlineUser,
   HiOutlineMapPin,
-  HiOutlinePencil,
   HiOutlineCheckCircle,
 } from 'react-icons/hi2';
+import { HiOutlineX } from 'react-icons/hi';
 
 const VerifikasiCSR: React.FC = () => {
   const navigate = useNavigate();
@@ -35,9 +35,9 @@ const VerifikasiCSR: React.FC = () => {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 md:p-10 flex flex-col">
         <div className="mb-8">
           <span className="inline-block px-3 py-1 bg-[#DCECE0] text-[#185325] text-xs font-bold rounded-md mb-3">
-            Validasi CSR
+            CSR-001
           </span>
-          <h1 className="text-2xl font-bold text-gray-800">Lembar Rekomendasi CSR</h1>
+          <h1 className="text-2xl font-bold text-gray-800">Lembar Validasi CSR</h1>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-y-8 gap-x-6 pb-8 border-b border-gray-100">
@@ -130,9 +130,10 @@ const VerifikasiCSR: React.FC = () => {
           <button 
             className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-2.5 bg-white border border-gray-300 text-gray-600 text-sm font-bold rounded-full hover:bg-gray-50 transition-colors"
           >
-            <HiOutlinePencil className="w-4 h-4" /> Tolak / Minta Revisi
+            <HiOutlineX className="w-4 h-4" /> Tolak
           </button>
           <button 
+          onClick={() => navigate('/admin/kabid/rehabilitasi/riwayat-rehabilitasi')}
             className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-2.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors shadow-sm"
           >
             <HiOutlineCheckCircle className="w-5 h-5" /> Rekomendasikan ke Mitra CSR

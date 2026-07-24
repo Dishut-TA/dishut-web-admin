@@ -22,7 +22,7 @@ interface ProgramAPBD {
 
 const mockData: ProgramAPBD[] = [
   {
-    id: 'PRG-001',
+    id: 'APBD-001',
     nama: 'Rehabilitasi Lahan Kritis Citarum',
     lokasi: 'Hulu Citarum - Blok 1',
     anggaran: 120000000,
@@ -31,7 +31,7 @@ const mockData: ProgramAPBD[] = [
     kth: 'KTH Keren Sedunia'
   },
   {
-    id: 'PRG-002',
+    id: 'APBD-002',
     nama: 'Pemulihan Ekosistem Cisadane',
     lokasi: 'DAS Cisadane Hilir',
     anggaran: 85000000,
@@ -40,7 +40,7 @@ const mockData: ProgramAPBD[] = [
     kth: 'KTH Keren Sedunia'
   },
   {
-    id: 'PRG-003',
+    id: 'APBD-003',
     nama: 'Pemulihan Ekosistem Cisadane',
     lokasi: 'DAS Cisadane Hilir',
     anggaran: 85000000,
