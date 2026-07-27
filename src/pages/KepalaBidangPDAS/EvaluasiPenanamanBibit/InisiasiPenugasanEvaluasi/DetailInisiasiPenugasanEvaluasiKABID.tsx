@@ -18,6 +18,8 @@ const DetailInisiasiPenugasan: React.FC = () => {
     program: 'Rehabilitasi DAS A.N SKK Migas - PT Pertamina EP',
     lokasi: 'Kec. Kasokandel, Kab. Majalengka',
     periode: 'Tahun 2026 (Tahap Akhir)',
+    tanggal_awal: '26 Feb 2026', 
+    tanggal_akhir: '26 Feb 2027', 
     luas: '17 Hektar',
     filePdf: 'Surat_Tugas_Pertamina.pdf',
     tim: [
@@ -74,6 +76,14 @@ const DetailInisiasiPenugasan: React.FC = () => {
               <button className="text-sm font-bold text-blue-600 hover:text-blue-800 underline flex items-center gap-1">
                 <HiOutlineDocumentArrowDown className="w-4 h-4" /> {detailData.filePdf}
               </button>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 font-medium mb-1">Periode Evaluasi Mulai</p>
+              <p className="text-sm font-bold text-gray-800">{detailData.tanggal_awal}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 font-medium mb-1">Periode Evaluasi Selesai</p>
+              <p className="text-sm font-bold text-gray-800">{detailData.tanggal_akhir}</p>
             </div>
           </div>
         </div>

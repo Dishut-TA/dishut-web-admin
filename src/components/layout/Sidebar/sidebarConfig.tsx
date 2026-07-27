@@ -42,7 +42,7 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
         icon: <HiOutlineComputerDesktop className="w-5 h-5" />,
         items: [
             { name: 'Dashboard', path: `${basePath}/monitoring/dashboard` },
-            { name: 'Penugasan Pelaksanaan Rehabilitasi', path: `${basePath}/monitoring/penugasan-pelaksanaan` },
+            { name: 'Penugasan Penyuluh', path: `${basePath}/monitoring/penugasan-penyuluh` },
             { name: 'Pelaksanaan Kegiatan Rehabilitasi', path: `${basePath}/monitoring/kegiatan` },
             { name: 'Hasil Validasi Lokasi', path: `${basePath}/monitoring/hasil-validasi-lokasi` },
             { name: 'Verifikasi Pelaksanaan dan Monitoring', path: `${basePath}/monitoring/verifikasi` },

@@ -107,6 +107,9 @@ import DetailVerifikasiLaporanDanaSTAFF from "./pages/StaffPDAS/Investasi/Verifi
 import LaporanDanaIndexSTAFF from "./pages/StaffPDAS/Investasi/LaporanDana";
 import DetailRiwayatPendanaan from "./pages/CSR/RiwayatPendanaan/DetailRiwayatPendanaan";
 import RiwayatPendanaan from "./pages/CSR/RiwayatPendanaan";
+import DetailProgres from "./pages/StaffPDAS/PelaksanaanDanMonitoring/PenugasanPenyuluh/DetailProgres";
+import DetailHasilValidasiPenugasan from "./pages/StaffPDAS/PelaksanaanDanMonitoring/PenugasanPenyuluh/DetailHasilValidasiPenugasan";
+import DetailVerifikasiPelaksanaan from "./pages/StaffPDAS/PelaksanaanDanMonitoring/VerifikasiMonitoring/components/DetailVerifikasiPelaksanaan";
 const Login = lazy(() => import("./pages/Authentication/Login"));
 const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -214,14 +217,17 @@ function App() {
 
                   {/* Monitoring */}
                   <Route path="monitoring/dashboard" element={<DashboardMonitoring />} />
-                  <Route path="monitoring/penugasan-pelaksanaan" element={<PenugasanPenyuluh />} />
-                  <Route path="monitoring/penugasan-pelaksanaan/detail/:id" element={<DetailPenugasanPenyuluh />} />
+                  <Route path="monitoring/penugasan-penyuluh" element={<PenugasanPenyuluh />} />
+                  <Route path="monitoring/penugasan-penyuluh/progres/:id" element={<DetailProgres />} />
+                  <Route path="monitoring/penugasan-penyuluh/detail/:id" element={<DetailHasilValidasiPenugasan />} />
+                  <Route path="monitoring/penugasan-penyuluh/detail/:id" element={<DetailPenugasanPenyuluh />} />
                   <Route path="monitoring/hasil-validasi-lokasi/" element={<HasilValidasiPenyuluh />} />
                   <Route path="monitoring/hasil-validasi-lokasi/detail/:id" element={<DetailHasilValidasi />} />
                   <Route path="monitoring/hasil-validasi-lokasi/proses/:id" element={<ProsesValidasiPenyuluh />} />
                   <Route path="monitoring/kegiatan" element={<DaftarKegiatan />} />
                   <Route path="monitoring/kegiatan/detail/:id" element={<DetailKegiatan />} />
                   <Route path="monitoring/verifikasi" element={<VerifikasiMonitoring />} />
+                  <Route path="monitoring/verifikasi/detail/:id" element={<DetailVerifikasiPelaksanaan />} />
                   <Route path="monitoring/rekap" element={<RekapMonitoring />} />
 
                   {/* Evaluasi */}

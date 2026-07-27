@@ -156,7 +156,7 @@ const CreateProgram: React.FC = () => {
         location: lokasiLahan,
         total_seeds_collected: 0,
         total_seeds_realized: 0,
-        status: "Active",
+        status: "Menunggu Verifikasi",
         // start_date: tanggalMulai, // Aktifkan field ini jika backend sudah menerimanya
         // end_date: tanggalSelesai, // Aktifkan field ini jika backend sudah menerimanya
       };
