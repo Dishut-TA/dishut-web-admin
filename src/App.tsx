@@ -110,6 +110,13 @@ import RiwayatPendanaan from "./pages/CSR/RiwayatPendanaan";
 import DetailProgres from "./pages/StaffPDAS/PelaksanaanDanMonitoring/PenugasanPenyuluh/DetailProgres";
 import DetailHasilValidasiPenugasan from "./pages/StaffPDAS/PelaksanaanDanMonitoring/PenugasanPenyuluh/DetailHasilValidasiPenugasan";
 import DetailVerifikasiPelaksanaan from "./pages/StaffPDAS/PelaksanaanDanMonitoring/VerifikasiMonitoring/components/DetailVerifikasiPelaksanaan";
+import MonitoringProgram from "./pages/StaffPDAS/PelaksanaanDanMonitoring/MonitoringProgram";
+import ProgresMonitoring from "./pages/StaffPDAS/PelaksanaanDanMonitoring/MonitoringProgram/ProgresMonitoring";
+import DetailTitikMonitoring from "./pages/StaffPDAS/PelaksanaanDanMonitoring/MonitoringProgram/DetailTitikMonitoring";
+import TinjauHasilMonitoring from "./pages/StaffPDAS/PelaksanaanDanMonitoring/MonitoringProgram/TinjauHasilMonitoring";
+import TindakLanjutMonitoring from "./pages/StaffPDAS/PelaksanaanDanMonitoring/MonitoringProgram/TindakLanjutMonitoring";
+import HasilMonitoringSelesai from "./pages/StaffPDAS/PelaksanaanDanMonitoring/MonitoringProgram/HasilMonitoringSelesai";
+import DetailPenugasanMonitoring from "./pages/StaffPDAS/PelaksanaanDanMonitoring/MonitoringProgram/DetailPenugasanMonitoring";
 const Login = lazy(() => import("./pages/Authentication/Login"));
 const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -221,6 +228,13 @@ function App() {
                   <Route path="monitoring/penugasan-penyuluh/progres/:id" element={<DetailProgres />} />
                   <Route path="monitoring/penugasan-penyuluh/detail/:id" element={<DetailHasilValidasiPenugasan />} />
                   <Route path="monitoring/penugasan-penyuluh/detail/:id" element={<DetailPenugasanPenyuluh />} />
+                  <Route path="monitoring/monitoring-program" element={<MonitoringProgram />} />
+                  <Route path="monitoring/monitoring-program/penugasan/:id" element={<DetailPenugasanMonitoring />} />
+                  <Route path="monitoring/monitoring-program/progres/:id" element={<ProgresMonitoring />} />
+                  <Route path="monitoring/monitoring-program/progres/:id/titik/:titikId" element={<DetailTitikMonitoring />} />
+                  <Route path="monitoring/monitoring-program/tinjau/:id" element={<TinjauHasilMonitoring />} />
+                  <Route path="monitoring/monitoring-program/tindak-lanjut/:id" element={<TindakLanjutMonitoring />} />
+                  <Route path="monitoring/monitoring-program/hasil/:id" element={<HasilMonitoringSelesai />} />
                   <Route path="monitoring/hasil-validasi-lokasi/" element={<HasilValidasiPenyuluh />} />
                   <Route path="monitoring/hasil-validasi-lokasi/detail/:id" element={<DetailHasilValidasi />} />
                   <Route path="monitoring/hasil-validasi-lokasi/proses/:id" element={<ProsesValidasiPenyuluh />} />
