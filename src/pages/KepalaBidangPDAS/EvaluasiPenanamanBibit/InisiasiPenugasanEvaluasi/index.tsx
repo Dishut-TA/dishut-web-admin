@@ -10,16 +10,20 @@ const InisiasiPenugasanKABID: React.FC = () => {
     {
       id: 'ST-001',
       proyek: 'Rehabilitasi DAS A.N SKK Migas - PT Pertamina EP',
+      jenis_program: 'CSR',
       lokasi: 'Kec. Kasokandel, Kab. Majalengka',
       luas: 17,
-      status: 'TELAH DITUGASKAN',
+      status_program: 'Monitoring Selesai',
+      status_surat: 'TELAH DITUGASKAN',
     },
     {
       id: 'ST-002',
       proyek: 'Rehabilitasi Lahan Kompensasi PT. Jawa Satu Power',
+      jenis_program: 'APBD',
       lokasi: 'Desa Sudalarang, Kab. Garut',
       luas: 29.78,
-      status: 'TELAH DITUGASKAN',
+      status_program: 'Monitoring Selesai',
+      status_surat: 'TELAH DITUGASKAN',
     }
   ];
 
@@ -57,7 +61,9 @@ const InisiasiPenugasanKABID: React.FC = () => {
             <thead className="bg-[#DCECE0] text-[#3A4D3F] text-xs uppercase tracking-wider font-bold">
               <tr>
                 <th className="px-6 py-4">Nama Proyek & Lokasi</th>
+                <th className="px-6 py-4">Jenis Program</th>
                 <th className="px-6 py-4 text-center">Luas (Ha)</th>
+                <th className="px-6 py-4 text-center">Status Program</th>
                 <th className="px-6 py-4 text-center">Status Surat Tugas</th>
                 <th className="px-6 py-4 text-center">Aksi</th>
               </tr>
@@ -69,10 +75,16 @@ const InisiasiPenugasanKABID: React.FC = () => {
                     <div className="font-bold text-gray-800">{item.proyek}</div>
                     <div className="text-xs text-gray-500 mt-1">{item.lokasi}</div>
                   </td>
+                  <td className="px-6 py-5 text-left text-sm font-semibold text-gray-700">{item.jenis_program}</td>
                   <td className="px-6 py-5 text-center text-sm font-semibold text-gray-700">{item.luas}</td>
                   <td className="px-6 py-5 text-center">
                     <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#DCECE0] text-[#185325]">
-                      {item.status}
+                      {item.status_program}
+                    </span>
+                  </td>
+                  <td className="px-6 py-5 text-center">
+                    <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#DCECE0] text-[#185325]">
+                      {item.status_surat}
                     </span>
                   </td>
                   <td className="px-6 py-5 flex justify-center">

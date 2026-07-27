@@ -1,10 +1,10 @@
 import React from 'react';
 import { HiOutlineEye } from 'react-icons/hi2';
-import { type Report } from '../data';
+import { type Report } from '../data'; 
 
 interface TableProps {
   reports: Report[];
-  onViewDetail: (report: Report) => void;
+  onViewDetail: (id: string | number) => void;
 }
 
 const MonitoringTable: React.FC<TableProps> = ({ reports, onViewDetail }) => {
@@ -40,8 +40,8 @@ const MonitoringTable: React.FC<TableProps> = ({ reports, onViewDetail }) => {
                 </td>
                 <td className="px-4 md:px-6 py-4 text-center">
                   <button 
-                    onClick={() => onViewDetail(report)}
-                    className="p-2 text-gray-400 rounded-lg hover:text-primary hover:bg-[#D5F0DE] hover:border-transparent transition-all cursor-pointer mx-auto flex items-center justify-center"
+                    onClick={() => onViewDetail(report.id)}
+                    className="p-2 text-gray-400 rounded-lg hover:text-[#185325] hover:bg-[#DCECE0] hover:border-transparent transition-all cursor-pointer mx-auto flex items-center justify-center"
                     title="Lihat Detail"
                   >
                     <HiOutlineEye className="w-5 h-5" />

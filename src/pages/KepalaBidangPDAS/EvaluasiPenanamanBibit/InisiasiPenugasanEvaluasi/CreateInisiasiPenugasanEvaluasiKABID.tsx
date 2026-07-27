@@ -63,9 +63,23 @@ const CreateInisiasiPenugasan: React.FC = () => {
                   <option>Rehabilitasi DAS SKK Migas PT Pertamina EP - Kab. Majalengka</option>
                 </select>
               </div>
-              <div className="md:col-span-2">
+              <div>
                 <label className="block text-xs font-bold text-gray-700 mb-1.5">Periode Evaluasi <span className="text-red-500">*</span></label>
                 <input required type="text" placeholder="Contoh: Tahun 2026 (Tahap Penilaian Akhir)" className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-1 focus:ring-[#185325] focus:border-[#185325]" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1.5">Jenis Program <span className="text-red-500">*</span></label>
+                <input required type="text" placeholder="Contoh: APBD" className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-1 focus:ring-[#185325] focus:border-[#185325]" />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1.5">Periode Evaluasi Mulai <span className="text-red-500">*</span></label>
+                <input required type="date" className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-1 focus:ring-[#185325] focus:border-[#185325]" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1.5">Periode Evaluasi Selesai <span className="text-red-500">*</span></label>
+                <input required type="date" className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-1 focus:ring-[#185325] focus:border-[#185325]" />
               </div>
             </div>
           </div>

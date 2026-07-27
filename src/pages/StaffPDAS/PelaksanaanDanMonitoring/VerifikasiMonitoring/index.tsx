@@ -1,20 +1,13 @@
-import { useState } from 'react';
-import { type Report, mockReports } from './data';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { mockReports } from './data';
 import MonitoringTable from './components/MonitoringTable';
-import DetailMonitoringModal from './components/DetailMonitoringModal';
 
-const VerifikasiMonitoring = () => {
-  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+const VerifikasiMonitoring: React.FC = () => {
+  const navigate = useNavigate();
 
-  const handleOpenDetail = (report: Report) => {
-    setSelectedReport(report);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setTimeout(() => setSelectedReport(null), 200);
+  const handleOpenDetail = (id: string | number) => {
+    navigate(`/admin/staff/monitoring/verifikasi/detail/${id}`);
   };
 
   return (
@@ -30,19 +23,10 @@ const VerifikasiMonitoring = () => {
         </div>
       </div>
 
-      {/* Komponen Tabel Utama */}
       <MonitoringTable 
         reports={mockReports} 
         onViewDetail={handleOpenDetail} 
       />
-
-      {/* Komponen Modal Interaktif */}
-      <DetailMonitoringModal 
-        isOpen={isModalOpen} 
-        onClose={handleCloseModal} 
-        report={selectedReport} 
-      />
-
     </div>
   );
 };
