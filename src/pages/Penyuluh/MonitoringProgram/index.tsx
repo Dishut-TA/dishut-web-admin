@@ -4,7 +4,6 @@ import {
   HiOutlineMagnifyingGlass,
   HiOutlineCalendar,
   HiOutlineArrowPath,
-  HiEllipsisVertical,
   HiOutlineClock,
   HiOutlineCheckCircle,
   HiOutlineExclamationTriangle,
@@ -67,7 +66,7 @@ const getStatusStyles = (status: StatusMonitoring) => {
 const Header = () => (
   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-1.5">Monitoring Program</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-1.5">Monitoring Program Rehabilitasi</h1>
       <p className="text-sm text-gray-500">Pantau dan kelola kegiatan rehabilitasi yang telah selesai dan siap untuk dimonitoring.</p>
     </div>
     <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-50 shadow-sm transition-colors">
@@ -143,6 +142,14 @@ const FiltersAndTabs = () => (
   </div>
 );
 
+const ActionButton = () => {
+  return (
+    <button className="px-3 py-1.5 text-[11px] font-bold rounded-md border border-emerald-500 text-emerald-600 hover:bg-emerald-50 transition-colors shadow-sm">
+      Lihat Detail
+    </button>
+  );
+};
+
 const DataTable = ({ navigate }: { navigate: any }) => (
   <div className="overflow-x-auto">
     <table className="w-full text-left text-sm text-gray-600 whitespace-nowrap">
@@ -175,12 +182,9 @@ const DataTable = ({ navigate }: { navigate: any }) => (
                 <span className={`px-2.5 py-1 text-[10px] font-bold rounded-md ${style?.badge}`}>{item.status}</span>
               </td>
               <td className="px-4 py-4">
-                <div className="flex items-center gap-2 justify-end">
-                  <button onClick={() => navigate(`/admin/penyuluh/monitoring-lanjutan/form/${item.id}?mode=input`)} className={`px-3 py-1.5 text-[11px] font-bold border bg-white rounded-md transition-colors ${style?.btn}`}>
-                    {style?.action}
-                  </button>
-                  <button className="text-gray-400 hover:text-gray-700"><HiEllipsisVertical className="w-5 h-5" /></button>
-                </div>
+                <div onClick={() => navigate(`/admin/penyuluh/monitoring-program/detail/${item.id}`)} className="cursor-pointer inline-block">
+          <ActionButton />
+        </div>
               </td>
             </tr>
           );
@@ -301,7 +305,7 @@ const RightSidebar = () => (
 // ==========================================
 // 4. MAIN PAGE
 // ==========================================
-const MonitoringLanjutanIndex: React.FC = () => {
+const MonitoringProgramRehabilitasi: React.FC = () => {
   const navigate = useNavigate();
 
   return (
@@ -344,4 +348,4 @@ const MonitoringLanjutanIndex: React.FC = () => {
   );
 };
 
-export default MonitoringLanjutanIndex;
+export default MonitoringProgramRehabilitasi;

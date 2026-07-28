@@ -117,6 +117,10 @@ import TinjauHasilMonitoring from "./pages/StaffPDAS/PelaksanaanDanMonitoring/Mo
 import TindakLanjutMonitoring from "./pages/StaffPDAS/PelaksanaanDanMonitoring/MonitoringProgram/TindakLanjutMonitoring";
 import HasilMonitoringSelesai from "./pages/StaffPDAS/PelaksanaanDanMonitoring/MonitoringProgram/HasilMonitoringSelesai";
 import DetailPenugasanMonitoring from "./pages/StaffPDAS/PelaksanaanDanMonitoring/MonitoringProgram/DetailPenugasanMonitoring";
+import DetailValidasi from "./pages/Penyuluh/ValidasiLokasi/DetailValidasi";
+import MulaiKegiatan from "./pages/Penyuluh/PelaksanaanPenanaman/MulaiKegiatan";
+import MonitoringProgramRehabilitasi from "./pages/Penyuluh/MonitoringProgram";
+import DetailMonitoringProgram from "./pages/Penyuluh/MonitoringProgram/DetailMonitoringProgram";
 const Login = lazy(() => import("./pages/Authentication/Login"));
 const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -398,8 +402,12 @@ function App() {
                   <Route path="dashboard" element={<DashboardPenyuluh />} />
                   <Route path="validasi-lokasi" element={<ValidasiLokasi />} />
                   <Route path="validasi-lokasi/create/:id" element={<CreateValidasi />} />
+                  <Route path="validasi-lokasi/detail/:id" element={<DetailValidasi />} />
                   <Route path="pelaksanaan-penanaman" element={<PelaksanaanPenanamanIndex />} />
                   <Route path="pelaksanaan-penanaman/create/:id" element={<InputProgresPage />} />
+                  <Route path="pelaksanaan-penanaman/mulai/:id" element={<MulaiKegiatan />} />
+                  <Route path="monitoring-program" element={<MonitoringProgramRehabilitasi />} />
+                  <Route path="monitoring-program/detail/:id" element={<DetailMonitoringProgram />} />
                   <Route path="monitoring-lanjutan" element={<MonitoringLanjutanIndex />} />
                   <Route path="monitoring-lanjutan/form/:id" element={<FormMonitoringPage />} />
                 </Route>
