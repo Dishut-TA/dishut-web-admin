@@ -121,6 +121,11 @@ import DetailValidasi from "./pages/Penyuluh/ValidasiLokasi/DetailValidasi";
 import MulaiKegiatan from "./pages/Penyuluh/PelaksanaanPenanaman/MulaiKegiatan";
 import MonitoringProgramRehabilitasi from "./pages/Penyuluh/MonitoringProgram";
 import DetailMonitoringProgram from "./pages/Penyuluh/MonitoringProgram/DetailMonitoringProgram";
+import PelaporanList from "./pages/StaffPDAS/PelaksanaanDanMonitoring/Pelaporan";
+import DetailPelaporanAPBD from "./pages/StaffPDAS/PelaksanaanDanMonitoring/Pelaporan/DetailPelaporanAPBD";
+import DetailPelaporanDonasi from "./pages/StaffPDAS/PelaksanaanDanMonitoring/Pelaporan/DetailPelaporanDonasi";
+import MasterPenyuluh from "./pages/StaffPDAS/PelaksanaanDanMonitoring/MasterPenyuluh";
+import DetailPenyuluh from "./pages/StaffPDAS/PelaksanaanDanMonitoring/MasterPenyuluh/DetailPenyuluh";
 const Login = lazy(() => import("./pages/Authentication/Login"));
 const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -239,6 +244,11 @@ function App() {
                   <Route path="monitoring/monitoring-program/tinjau/:id" element={<TinjauHasilMonitoring />} />
                   <Route path="monitoring/monitoring-program/tindak-lanjut/:id" element={<TindakLanjutMonitoring />} />
                   <Route path="monitoring/monitoring-program/hasil/:id" element={<HasilMonitoringSelesai />} />
+                  <Route path="monitoring/pelaporan" element={<PelaporanList />} />
+                  <Route path="monitoring/pelaporan/apbd/:id" element={<DetailPelaporanAPBD />} />
+                  <Route path="monitoring/pelaporan/donasi/:id" element={<DetailPelaporanDonasi />} />
+                  <Route path="monitoring/master-penyuluh" element={<MasterPenyuluh />} />
+                  <Route path="monitoring/master-penyuluh/:id" element={<DetailPenyuluh />} />
                   <Route path="monitoring/hasil-validasi-lokasi/" element={<HasilValidasiPenyuluh />} />
                   <Route path="monitoring/hasil-validasi-lokasi/detail/:id" element={<DetailHasilValidasi />} />
                   <Route path="monitoring/hasil-validasi-lokasi/proses/:id" element={<ProsesValidasiPenyuluh />} />

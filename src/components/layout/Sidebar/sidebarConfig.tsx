@@ -45,6 +45,8 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
             { name: 'Penugasan Penyuluh', path: `${basePath}/monitoring/penugasan-penyuluh` },
             { name: 'Monitoring Program', path: `${basePath}/monitoring/monitoring-program` },
             { name: 'Pelaksanaan Kegiatan Rehabilitasi', path: `${basePath}/monitoring/kegiatan` },
+            { name: 'Pelaporan', path: `${basePath}/monitoring/pelaporan` },
+            { name: 'Master Penyuluh', path: `${basePath}/monitoring/master-penyuluh` },
             { name: 'Hasil Validasi Lokasi', path: `${basePath}/monitoring/hasil-validasi-lokasi` },
             { name: 'Verifikasi Pelaksanaan dan Monitoring', path: `${basePath}/monitoring/verifikasi` },
         ],
