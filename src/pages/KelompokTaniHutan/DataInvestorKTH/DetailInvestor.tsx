@@ -1,140 +1,97 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  HiOutlineChevronLeft,
-  HiOutlineUser,
-  HiOutlineEnvelope,
-  HiOutlinePhone,
-  HiOutlineBanknotes,
-  HiOutlineChartPie,
-  HiOutlineBriefcase,
-  HiOutlineCalendarDays,
-  HiOutlineDocumentText
-} from 'react-icons/hi2';
+import { HiOutlineChevronLeft } from 'react-icons/hi2';
+
+// --- MOCK DATA ---
+const detailData = {
+  nama: 'Raisha Nabila',
+  email: 'raisha@gmail.com',
+  noTelepon: '081234567894',
+  namaProyek: 'Ekowisata Kebun Stroberi',
+  nilaiInvestasi: 'Rp 50.000.000',
+  tanggalBergabung: '24 Agustus 2026',
+  status: 'Aktif'
+};
+
+const riwayatKeuntungan = [
+  { id: 1, periode: 'Jan - Juni 2025', nominal: 'Rp 8.500.000', status: 'Dibayar ✓' },
+  { id: 2, periode: 'Juli - Des 2025', nominal: 'Rp 9.200.000', status: 'Dibayar ✓' },
+  { id: 3, periode: 'Jan - Jun 2026', nominal: 'Rp 8.000.000', status: 'Menunggu' },
+];
+
+// --- HELPER COMPONENT ---
+// Membantu merapikan layout baris informasi dengan titik dua (:) sejajar
+const InfoRow = ({ label, value, valueColor = "text-gray-800" }: { label: string, value: string, valueColor?: string }) => (
+  <div className="grid grid-cols-[160px_20px_1fr] items-start text-sm">
+    <span className="text-gray-500">{label}</span>
+    <span className="text-gray-500">:</span>
+    <span className={`font-bold ${valueColor}`}>{value}</span>
+  </div>
+);
 
 const DetailInvestorKTH: React.FC = () => {
   const navigate = useNavigate();
 
-  // --- MOCK DATA ---
-  const detailData = {
-    nama: 'Rakha Nabila',
-    email: 'rakha@gmail.com',
-    noTelepon: '0812328212111',
-    namaInvestasi: 'Pembangunan Ekowisata Kebun Stroberi',
-    jumlahInvestasi: 'Rp. 250.000.000',
-    persentase: '40%',
-    tanggalMulai: '27 Desember 2025',
-    dokumen: 'DokumenPerjanjianRakha.pdf'
-  };
-
   return (
-    <div className="flex flex-col gap-6 w-full mx-auto pb-12">
+    <div className="flex flex-col w-full mx-auto pb-12 animate-in fade-in duration-300">
       <button 
         onClick={() => navigate(-1)} 
-        className="flex items-center gap-2 text-sm font-bold text-[#185325] hover:underline self-start"
+        className="flex items-center gap-2 text-sm font-bold text-primary hover:underline self-start mb-6"
       >
-        <HiOutlineChevronLeft className="w-4 h-4" strokeWidth={2.5} /> Kembali
+        <HiOutlineChevronLeft className="w-4 h-4 stroke-2" /> Kembali
       </button>
 
-      <div className="bg-white/70 backdrop-blur-md rounded-3xl p-8 md:p-10 shadow-sm border border-white/60">
-        <div className="flex items-center gap-4 mb-10 pb-6 border-b border-gray-200/60">
-          <div className="w-14 h-14 bg-[#DCECE0] rounded-full flex items-center justify-center shrink-0">
-            <HiOutlineUser className="w-7 h-7 text-[#185325]" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800 tracking-tight">Detail Investor</h1>
-            <p className="text-sm text-gray-500 font-medium mt-1">
-              Rincian profil dan portofolio investasi pengguna.
-            </p>
+      <div className="bg-white rounded-2xl p-8 md:p-12 shadow-sm border border-gray-100 flex flex-col gap-10">
+        
+        <h1 className="text-2xl font-bold text-gray-800 tracking-tight">Detail Data Investor</h1>
+
+        <div className="flex flex-col gap-4">
+          <h2 className="text-base font-bold text-gray-800">Informasi Investor</h2>
+          <div className="flex flex-col gap-3">
+            <InfoRow label="Nama Investor" value={detailData.nama} />
+            <InfoRow label="Email" value={detailData.email} />
+            <InfoRow label="No Telepon" value={detailData.noTelepon} />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
-          <div>
-            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-5">
-              Informasi Personal
-            </h2>
-            <div className="space-y-6">
-              <div className="flex gap-4">
-                <HiOutlineUser className="w-5 h-5 text-gray-400 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Nama Investor</p>
-                  <p className="text-sm font-bold text-gray-800">{detailData.nama}</p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <HiOutlineEnvelope className="w-5 h-5 text-gray-400 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Email</p>
-                  <p className="text-sm font-bold text-gray-800">{detailData.email}</p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <HiOutlinePhone className="w-5 h-5 text-gray-400 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">No Telepon</p>
-                  <p className="text-sm font-bold text-gray-800">{detailData.noTelepon}</p>
-                </div>
-              </div>
-            </div>
+        <div className="flex flex-col gap-4">
+          <h2 className="text-base font-bold text-gray-800">Informasi Investasi</h2>
+          <div className="flex flex-col gap-3">
+            <InfoRow label="Nama Proyek" value={detailData.namaProyek} />
+            <InfoRow label="Nilai Investasi" value={detailData.nilaiInvestasi} />
+            <InfoRow label="Tanggal Bergabung" value={detailData.tanggalBergabung} />
+            <InfoRow label="Status" value={detailData.status} valueColor="text-emerald-600" />
           </div>
-
-          <div>
-            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-5">
-              Rincian Investasi
-            </h2>
-            <div className="space-y-6">
-              <div className="flex gap-4">
-                <HiOutlineBriefcase className="w-5 h-5 text-[#185325] shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Nama Investasi</p>
-                  <p className="text-sm font-bold text-gray-800">{detailData.namaInvestasi}</p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <HiOutlineBanknotes className="w-5 h-5 text-[#185325] shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Jumlah Investasi</p>
-                  <p className="text-sm font-bold text-gray-800">{detailData.jumlahInvestasi}</p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <HiOutlineChartPie className="w-5 h-5 text-[#185325] shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Persentase Keuntungan</p>
-                  <p className="text-sm font-bold text-gray-800">{detailData.persentase}</p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <HiOutlineCalendarDays className="w-5 h-5 text-[#185325] shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Tanggal Mulai Investasi</p>
-                  <p className="text-sm font-bold text-gray-800">{detailData.tanggalMulai}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
         </div>
 
-        <div className="mt-10 pt-8 border-t border-gray-200/60">
-          <div className="bg-[#f8fbf9] p-4 md:p-5 rounded-2xl border border-[#DCECE0] flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="p-2.5 bg-white rounded-xl shadow-sm">
-                <HiOutlineDocumentText className="w-6 h-6 text-[#185325]" />
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Dokumen Perjanjian</p>
-                <p className="text-sm font-bold text-[#185325] hover:underline cursor-pointer transition-all">
-                  {detailData.dokumen}
-                </p>
-              </div>
-            </div>
+        <div className="flex flex-col gap-4 mt-2">
+          <h2 className="text-base font-bold text-gray-800">Riwayat Pembagian Keuntungan</h2>
+          
+          <div className="overflow-x-auto max-w-2xl">
+            <table className="w-full text-left text-sm whitespace-nowrap border-collapse">
+              <thead>
+                <tr className="border-b-2 border-primary">
+                  <th className="py-3 px-2 font-bold text-primary">Periode</th>
+                  <th className="py-3 px-2 font-bold text-primary">Nominal</th>
+                  <th className="py-3 px-2 font-bold text-primary">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {riwayatKeuntungan.map((item) => (
+                  <tr key={item.id} className="border-b border-primary/40 hover:bg-gray-50/50">
+                    <td className="py-4 px-2 font-medium text-gray-800">{item.periode}</td>
+                    <td className="py-4 px-2 font-bold text-gray-800">{item.nominal}</td>
+                    <td className="py-4 px-2 font-medium text-gray-800">
+                      {item.status}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 
       </div>
-
     </div>
   );
 };

@@ -138,6 +138,7 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
         { name: 'Data Investasi', path: `${basePath}/data-investasi`, icon: <HiOutlineBanknotes className="w-5 h-5" /> },
         { name: 'Data Investor', path: `${basePath}/data-investor`, icon: <HiOutlineUsers className="w-5 h-5" /> },
         { name: 'Laporan Proyek', path: `${basePath}/laporan-proyek`, icon: <HiOutlineDocumentChartBar className="w-5 h-5" /> },
+        { name: 'Laporan Keuangan', path: `${basePath}/laporan-keuangan`, icon: <HiOutlineDocumentChartBar className="w-5 h-5" /> },
     ];
 
     // PENYULUH
@@ -168,16 +169,16 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
                 { name: 'Data Investasi', path: `${basePath}/investasi/data` },
                 { name: 'Persetujuan Investor', path: `${basePath}/investasi/persetujuan` },
                 { name: 'Data Investor', path: `${basePath}/investasi/investor` },
-                { name: 'Laporan Proyek', path: `${basePath}/investasi/laporan-proyek` },
             ],
         },
         {
             id: 'laporan-investasi-kth', title: 'Laporan Investasi', icon: <HiOutlineChartPie className="w-5 h-5" />,
             items: [
-                { name: 'Laporan Usaha', path: `${basePath}/laporan-investasi/usaha` },
+                // { name: 'Laporan Usaha', path: `${basePath}/laporan-investasi/usaha` },
+                { name: 'Laporan Proyek', path: `${basePath}/laporan-investasi/laporan-proyek` },
                 { name: 'Laporan Keuangan', path: `${basePath}/laporan-investasi/keuangan` },
-                { name: 'Biaya Pengeluaran', path: `${basePath}/laporan-investasi/pengeluaran` },
-                { name: 'Biaya Pemasukan', path: `${basePath}/laporan-investasi/pemasukan` },
+                // { name: 'Biaya Pengeluaran', path: `${basePath}/laporan-investasi/pengeluaran` },
+                // { name: 'Biaya Pemasukan', path: `${basePath}/laporan-investasi/pemasukan` },
             ],
         },
         { name: 'Saldo Keuntungan', path: `${basePath}/saldo/keuntungan`, icon: <HiOutlineWallet className='w-5 h-5'/> }

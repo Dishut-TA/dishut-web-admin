@@ -7,7 +7,6 @@ import {
   HiOutlineCheckCircle,
   HiOutlineBriefcase,
   HiOutlineUserMinus,
-  HiOutlineDocumentArrowDown,
   HiOutlinePlus,
   HiEllipsisVertical,
   HiOutlineEye
@@ -43,9 +42,6 @@ const MasterPenyuluh: React.FC = () => {
           <p className="text-sm text-gray-500 font-medium">Kelola data penyuluh yang digunakan dalam penugasan dan pelaksanaan program.</p>
         </div>
         <div className="flex items-center gap-3 w-full md:w-auto shrink-0">
-          <button className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-bold text-emerald-700 hover:bg-emerald-50 transition-colors shadow-sm">
-            <HiOutlineDocumentArrowDown className="w-4 h-4" /> Import Excel
-          </button>
           <button onClick={() => setIsModalOpen(true)} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-[#185325] hover:bg-[#123d1c] text-white rounded-lg text-sm font-bold shadow-sm transition-colors">
             <HiOutlinePlus className="w-4 h-4" /> Tambah Penyuluh
           </button>

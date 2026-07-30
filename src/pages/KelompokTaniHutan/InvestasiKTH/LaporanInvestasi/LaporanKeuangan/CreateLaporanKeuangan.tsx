@@ -1,192 +1,154 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HiOutlineChevronLeft, HiPlus, HiXMark } from 'react-icons/hi2';
+import { HiOutlineChevronLeft, HiPlus, HiOutlineCloud, HiOutlineCalendarDays } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 
 const CreateLaporanKeuangan = () => {
     const navigate = useNavigate();
-    const [showModal, setShowModal] = useState(false);
     const [isAgreed, setIsAgreed] = useState(false);
-    const [formData, setFormData] = useState({
-        investasiId: '',
-        pendapatan: '',
-        pengeluaran: '',
-        keuntungan: '',
-        kerugian: ''
-    });
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        setShowModal(true);
-    };
-
-    const handleConfirmSubmit = () => {
-        setShowModal(false);
-        // Simulasi integrasi API
-        toast.success("Laporan keuangan berhasil dibuat");
+        if (!isAgreed) return;
+        toast.success("Laporan keuangan berhasil dibuat dan dikirim!");
         navigate(-1);
     };
 
     return (
-        <div className="flex flex-col gap-6 w-full max-w-2xl mx-auto pb-12">
-            <button 
-                onClick={() => navigate(-1)} 
-                className="flex items-center gap-2 text-sm font-bold text-[#185325] self-start hover:underline"
-            >
-                <HiOutlineChevronLeft className="stroke-2" /> Kembali
-            </button>
-            <div className="p-8 md:p-12">
-                <h1 className="text-xl font-bold text-center text-gray-800 mb-10">Buat Laporan Keuangan</h1>
+        <div className="flex flex-col gap-6 w-full max-w-3xl mx-auto pb-20 animate-in fade-in duration-300">
+            <div className="flex flex-col gap-4">
+                <button 
+                    onClick={() => navigate(-1)} 
+                    className="flex items-center gap-2 text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors w-fit"
+                >
+                    <HiOutlineChevronLeft className="w-4 h-4 stroke-2" /> Kembali
+                </button>
+                <h1 className="text-2xl font-bold text-center text-gray-800 mb-4">Buat Laporan Keuangan</h1>
+            </div>
 
-                <form className="space-y-6" onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="p-6 md:p-10 flex flex-col gap-8">
+                <div className="flex flex-col gap-5">
                     <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-2 ml-1">Investasi</label>
-                        <select
-                            name="investasiId"
-                            value={formData.investasiId}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-5 py-3.5 border border-gray-300 rounded-full text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#185325]/20 focus:border-[#185325] bg-white cursor-pointer appearance-none shadow-sm"
-                        >
-                            <option value="" disabled>Pilih investasi</option>
-                            <option value="1">Investasi Ekowisata Kebun Stroberi</option>
-                            <option value="2">Investasi Wisata Dieng</option>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">Nama Proyek</label>
+                        <select className="w-full px-4 py-3 border border-gray-300 rounded-full text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#185325] focus:border-[#185325] bg-white cursor-pointer shadow-sm">
+                            <option value="">Pilih proyek</option>
+                            <option value="1">Ekowisata Kebun Stroberi</option>
                         </select>
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-2 ml-1">Biaya Pendapatan</label>
-                        <div className="relative flex items-center border border-gray-300 rounded-full overflow-hidden focus-within:ring-2 focus-within:ring-[#185325]/20 focus-within:border-[#185325] transition-all shadow-sm">
-                            <span className="pl-5 pr-2 text-sm font-bold text-gray-600 bg-gray-50/50 py-3.5">Rp.</span>
-                            <input
-                                type="number"
-                                name="pendapatan"
-                                placeholder="0"
-                                value={formData.pendapatan}
-                                onChange={handleInputChange}
-                                className="w-full px-2 py-3.5 text-sm outline-none bg-transparent"
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-2 ml-1">Biaya Pengeluaran</label>
-                        <div className="relative flex items-center border border-gray-300 rounded-full overflow-hidden focus-within:ring-2 focus-within:ring-[#185325]/20 focus-within:border-[#185325] transition-all shadow-sm">
-                            <span className="pl-5 pr-2 text-sm font-bold text-gray-600 bg-gray-50/50 py-3.5">Rp.</span>
-                            <input
-                                type="number"
-                                name="pengeluaran"
-                                placeholder="0"
-                                value={formData.pengeluaran}
-                                onChange={handleInputChange}
-                                className="w-full px-2 py-3.5 text-sm outline-none bg-transparent"
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-2 ml-1">Keuntungan</label>
-                        <input
-                            type="number"
-                            name="keuntungan"
-                            placeholder="0"
-                            value={formData.keuntungan}
-                            onChange={handleInputChange}
-                            className="w-full px-6 py-3.5 border border-gray-300 rounded-full text-sm outline-none focus:ring-2 focus:ring-[#185325]/20 focus:border-[#185325] shadow-sm"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-2 ml-1">Kerugian</label>
-                        <div className="relative flex items-center border border-gray-300 rounded-full overflow-hidden focus-within:ring-2 focus-within:ring-[#185325]/20 focus-within:border-[#185325] transition-all shadow-sm">
-                            <span className="pl-5 pr-2 text-sm font-bold text-gray-600 bg-gray-50/50 py-3.5">Rp.</span>
-                            <input
-                                type="number"
-                                name="kerugian"
-                                placeholder="0"
-                                value={formData.kerugian}
-                                onChange={handleInputChange}
-                                className="w-full px-2 py-3.5 text-sm outline-none bg-transparent"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="pt-6">
-                        <label className="flex items-start gap-3 cursor-pointer group mb-6">
-                            <div className="relative flex items-center justify-center shrink-0 mt-0.5">
-                                <input
-                                    type="checkbox"
-                                    className="peer appearance-none w-5 h-5 border-2 border-gray-300 rounded checked:bg-[#185325] checked:border-[#185325] transition-colors cursor-pointer"
-                                    checked={isAgreed}
-                                    onChange={(e) => setIsAgreed(e.target.checked)}
-                                />
-                                <svg className="absolute w-3.5 h-3.5 text-white pointer-events-none opacity-0 peer-checked:opacity-100" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                </svg>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">Periode</label>
+                        <div className="flex items-center gap-3">
+                            <div className="relative flex-1">
+                                <input type="text" placeholder="Januari 2026" className="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring-1 focus:ring-[#185325] shadow-sm" />
+                                <HiOutlineCalendarDays className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                             </div>
-                            <span className="text-[11px] sm:text-xs text-gray-600 leading-relaxed">
-                                Dengan ini saya menyatakan bahwa laporan keuangan ini dibuat dengan sebenar-benarnya tanpa ada paksaan dari pihak manapun.
-                            </span>
-                        </label>
-
-                        <button
-                            type="submit"
-                            disabled={!isAgreed}
-                            className={`flex items-center justify-center gap-2 w-full py-4 text-white text-sm font-bold rounded-full transition-all duration-300 shadow-lg ${
-                                isAgreed
-                                    ? 'bg-[#185325] hover:bg-[#123d1c] active:scale-95'
-                                    : 'bg-[#9CA3AF] cursor-not-allowed'
-                            }`}
-                        >
-                            Buat Laporan Keuangan <HiPlus className="w-5 h-5 stroke-2" />
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            {showModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4 transition-opacity animate-in fade-in duration-300">
-                    <div className="relative w-full max-w-lg rounded-4xl bg-[#F8FAF8] p-8 shadow-2xl animate-in zoom-in-95 duration-300">
-                        <button
-                            onClick={() => setShowModal(false)}
-                            className="absolute right-6 top-6 flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-200/50 transition-colors"
-                        >
-                            <HiXMark className="w-6 h-6 text-gray-500" />
-                        </button>
-
-                        <div className="text-center">
-                            <h2 className="mb-4 text-xl font-bold text-[#185325]">
-                                Buat Laporan Keuangan
-                            </h2>
-
-                            <p className="mb-10 text-sm leading-relaxed text-gray-600 px-2">
-                                Pastikan bahwa data yang telah Anda inputkan sudah benar dan sesuai. Karena laporan yang telah dibuat tidak dapat diubah kembali.
-                            </p>
-
-                            <div className="flex flex-col sm:flex-row gap-3">
-                                <button
-                                    onClick={() => setShowModal(false)}
-                                    className="flex-1 rounded-full border border-gray-300 bg-white py-3.5 text-sm font-bold text-gray-700 transition hover:bg-gray-50 active:scale-95"
-                                >
-                                    Periksa Kembali
-                                </button>
-
-                                <button
-                                    onClick={handleConfirmSubmit}
-                                    className="flex-1 rounded-full bg-[#185325] py-3.5 text-sm font-bold text-white transition hover:bg-[#15461f] shadow-md active:scale-95"
-                                >
-                                    Buat Laporan
-                                </button>
+                            <span className="text-gray-400 font-bold">-</span>
+                            <div className="relative flex-1">
+                                <input type="text" placeholder="Juni 2026" className="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring-1 focus:ring-[#185325] shadow-sm" />
+                                <HiOutlineCalendarDays className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                             </div>
                         </div>
                     </div>
                 </div>
-            )}
+
+                <div className="flex flex-col gap-4">
+                    <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+                        <h2 className="text-sm font-bold text-gray-800">Transaksi Pendapatan</h2>
+                    </div>
+                    <button type="button" className="w-fit flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full hover:bg-emerald-100 transition-colors">
+                        <HiPlus className="w-3.5 h-3.5" /> Tambah
+                    </button>
+                    <div className="overflow-x-auto mt-2">
+                        <table className="w-full text-left text-sm whitespace-nowrap">
+                            <thead className="text-gray-500 font-bold border-b-2 border-gray-200">
+                                <tr>
+                                    <th className="py-3 pr-4">Tanggal</th>
+                                    <th className="py-3 px-4">Keterangan</th>
+                                    <th className="py-3 px-4">Nominal</th>
+                                    <th className="py-3 pl-4 text-center">Dokumen</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100 text-gray-700 font-medium">
+                                <tr>
+                                    <td className="py-3 pr-4">01/01/2024</td>
+                                    <td className="py-3 px-4">Tiket Masuk</td>
+                                    <td className="py-3 px-4">Rp. 25.000.000</td>
+                                    <td className="py-3 pl-4 text-center">
+                                        <button type="button" className="p-1.5 text-gray-500 hover:text-blue-600 rounded transition-colors"><HiOutlineCloud className="w-5 h-5"/></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div className="flex flex-col gap-4 mt-2">
+                    <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+                        <h2 className="text-sm font-bold text-gray-800">Transaksi Pengeluaran</h2>
+                    </div>
+                    <button type="button" className="w-fit flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full hover:bg-emerald-100 transition-colors">
+                        <HiPlus className="w-3.5 h-3.5" /> Tambah
+                    </button>
+                    <div className="overflow-x-auto mt-2">
+                        <table className="w-full text-left text-sm whitespace-nowrap">
+                            <thead className="text-gray-500 font-bold border-b-2 border-gray-200">
+                                <tr>
+                                    <th className="py-3 pr-4">Tanggal</th>
+                                    <th className="py-3 px-4">Keterangan</th>
+                                    <th className="py-3 px-4">Nominal</th>
+                                    <th className="py-3 pl-4 text-center">Dokumen</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100 text-gray-700 font-medium">
+                                <tr>
+                                    <td className="py-3 pr-4">01/01/2024</td>
+                                    <td className="py-3 px-4">Perawatan</td>
+                                    <td className="py-3 px-4">Rp. 25.000.000</td>
+                                    <td className="py-3 pl-4 text-center">
+                                        <button type="button" className="p-1.5 text-gray-500 hover:text-blue-600 rounded transition-colors"><HiOutlineCloud className="w-5 h-5"/></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div className="bg-[#EBF8F1] border border-[#C6EBD6] rounded-2xl p-6 mt-4 flex flex-col gap-2 shadow-sm text-sm font-bold text-gray-800">
+                    <div className="grid grid-cols-[150px_10px_1fr] items-center"><span>Total Pendapatan</span><span>:</span><span>Rp 25.000.000</span></div>
+                    <div className="grid grid-cols-[150px_10px_1fr] items-center"><span>Total Pengeluaran</span><span>:</span><span>Rp 10.000.000</span></div>
+                    <div className="grid grid-cols-[150px_10px_1fr] items-center mt-2 mb-2"><span>Laba Bersih</span><span>:</span><span>Rp 15.000.000</span></div>
+                    
+                    <div className="grid grid-cols-[150px_10px_1fr] items-center"><span>Hak KTH 60%</span><span>:</span><span>Rp 9.000.000</span></div>
+                    <div className="grid grid-cols-[150px_10px_1fr] items-center"><span>Hak Investor 40%</span><span>:</span><span>Rp 6.000.000</span></div>
+                </div>
+
+                <label className="flex items-start gap-3 cursor-pointer group mt-2">
+                    <input
+                        type="checkbox"
+                        className="mt-1 appearance-none w-5 h-5 border-2 border-emerald-600 rounded bg-white checked:bg-emerald-600 checked:border-emerald-600 transition-colors cursor-pointer shrink-0 relative flex items-center justify-center after:content-[''] after:absolute after:hidden checked:after:block after:w-1.5 after:h-2.5 after:border-white after:border-r-2 after:border-b-2 after:rotate-45 after:mb-0.5"
+                        checked={isAgreed}
+                        onChange={(e) => setIsAgreed(e.target.checked)}
+                    />
+                    <span className="text-sm font-bold text-gray-700 leading-relaxed">
+                        Dengan ini saya menyatakan bahwa laporan dibuat dengan sebenar-benarnya
+                    </span>
+                </label>
+
+                <div className="pt-4 border-t border-gray-100 flex justify-end">
+                    <button
+                        type="submit"
+                        disabled={!isAgreed}
+                        className={`px-8 py-3 w-full text-white text-sm font-bold rounded-full transition-all shadow-sm ${
+                            isAgreed
+                                ? 'bg-[#185325] hover:bg-[#123d1c] cursor-pointer'
+                                : 'bg-gray-300 cursor-not-allowed text-gray-500'
+                        }`}
+                    >
+                        Buat Laporan Keuangan
+                    </button>
+                </div>
+            </form>
         </div>
     );
 };

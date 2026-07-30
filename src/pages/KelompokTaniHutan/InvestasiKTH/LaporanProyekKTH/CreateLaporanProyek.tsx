@@ -31,12 +31,12 @@ const CreateLaporanProyek: React.FC = () => {
       <div className="p-8 md:p-10">
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1.5">Investasi</label>
+            <label className="block text-xs font-bold text-gray-700 mb-1.5">Nama Proyek</label>
             <select 
               defaultValue=""
               className="w-full px-4 py-3 border border-gray-300 rounded-full text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#185325] focus:border-[#185325] bg-white cursor-pointer appearance-none"
             >
-              <option value="" disabled>Pilih investasi</option>
+              <option value="" disabled>Pilih proyek</option>
               <option value="1">Investasi Ekowisata Kebun Stroberi</option>
               <option value="2">Investasi Wisata Dieng</option>
             </select>

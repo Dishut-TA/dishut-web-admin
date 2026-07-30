@@ -55,7 +55,7 @@ const DataInvestorIndexKABIDBUPM: React.FC = () => {
             <thead className="bg-[#DCECE0] text-[#3A4D3F] text-xs uppercase tracking-wider font-bold">
               <tr>
                 <th className="px-6 py-4 whitespace-nowrap text-center w-16">No</th>
-                <th className="px-6 py-4 whitespace-nowrap">Investasi</th>
+                <th className="px-6 py-4 whitespace-nowrap">Nama Investasi</th>
                 <th className="px-6 py-4 whitespace-nowrap">Nama Investor</th>
                 <th className="px-6 py-4 whitespace-nowrap">Jumlah Investasi</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">Action</th>
@@ -80,7 +80,7 @@ const DataInvestorIndexKABIDBUPM: React.FC = () => {
                   <td className="px-6 py-4 flex justify-center whitespace-nowrap">
                     <button 
                       title="Lihat Detail"
-                      onClick={() => navigate(`/admin/staff/bupm/data-investor/detail/${item.id}`)}
+                      onClick={() => navigate(`/admin/kabid/bupm/data-investor/detail/${item.id}`)}
                       className="p-1.5 text-gray-500 hover:text-[#185325] hover:bg-[#DCECE0] rounded-full transition-colors"
                     >
                       <HiOutlineEye className="w-5 h-5" />
