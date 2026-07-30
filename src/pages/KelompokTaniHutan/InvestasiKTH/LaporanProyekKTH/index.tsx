@@ -53,7 +53,7 @@ const LaporanProyekIndexKTH: React.FC = () => {
         
         <div className="flex items-center gap-3">
           <button 
-            onClick={() => navigate('/admin/kth/investasi/laporan-proyek/create')}
+            onClick={() => navigate('/admin/kth/laporan-investasi/laporan-proyek/create')}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-lg transition-colors shadow-sm active:scale-95"
           >
             Buat Laporan Proyek <HiOutlinePlus className="w-4 h-4" strokeWidth={2.5} />
@@ -72,7 +72,7 @@ const LaporanProyekIndexKTH: React.FC = () => {
               <tr>
                 <th className="px-6 py-4 whitespace-nowrap text-center w-16">No</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center w-32">Tanggal</th>
-                <th className="px-6 py-4 whitespace-nowrap">Investasi</th>
+                <th className="px-6 py-4 whitespace-nowrap">Nama Proyek</th>
                 <th className="px-6 py-4 whitespace-nowrap">Milestone</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center w-24">Action</th>
               </tr>
@@ -96,7 +96,7 @@ const LaporanProyekIndexKTH: React.FC = () => {
                   <td className="px-6 py-4 flex justify-center whitespace-nowrap">
                     <button 
                       title="Lihat Detail"
-                      onClick={() => navigate(`/admin/staff/bupm/laporan-proyek/detail/${item.id}`)}
+                      onClick={() => navigate(`/admin/kth/laporan-investasi/laporan-proyek/detail/${item.id}`)}
                       className="p-1.5 text-gray-500 hover:text-[#185325] hover:bg-[#DCECE0] rounded-full transition-colors"
                     >
                       <HiOutlineEye className="w-5 h-5" />

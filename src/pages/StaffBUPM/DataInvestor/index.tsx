@@ -55,7 +55,7 @@ const DataInvestorIndex: React.FC = () => {
             <thead className="bg-[#DCECE0] text-[#3A4D3F] text-xs uppercase tracking-wider font-bold">
               <tr>
                 <th className="px-6 py-4 whitespace-nowrap text-center w-16">No</th>
-                <th className="px-6 py-4 whitespace-nowrap">Investasi</th>
+                <th className="px-6 py-4 whitespace-nowrap">Nama Investasi</th>
                 <th className="px-6 py-4 whitespace-nowrap">Nama Investor</th>
                 <th className="px-6 py-4 whitespace-nowrap">Jumlah Investasi</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">Action</th>

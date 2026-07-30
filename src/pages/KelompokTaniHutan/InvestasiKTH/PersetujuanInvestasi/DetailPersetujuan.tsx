@@ -91,8 +91,6 @@ const DetailPersetujuan: React.FC = () => {
           <div className="text-sm space-y-3">
             <div className="flex"><span className="w-56 shrink-0 text-gray-500">Dokumen Perjanjian Investasi</span> <span className="w-4 shrink-0">:</span> <span className="font-bold underline text-gray-800 hover:text-[#185325] cursor-pointer">PerjanjianInvestor.pdf</span></div>
             <div className="flex"><span className="w-56 shrink-0 text-gray-500">Dokumen Rencana Bisnis</span> <span className="w-4 shrink-0">:</span> <span className="font-bold underline text-gray-800 hover:text-[#185325] cursor-pointer">RencanaProyekPembangunanEkowisata.pdf</span></div>
-            <div className="flex"><span className="w-56 shrink-0 text-gray-500">Dokumen Proyeksi Keuangan</span> <span className="w-4 shrink-0">:</span> <span className="font-bold underline text-gray-800 hover:text-[#185325] cursor-pointer">ProyeksiKeuanganEkowisata.pdf</span></div>
-            <div className="flex"><span className="w-56 shrink-0 text-gray-500">Dokumen Hukum dan Perizinan</span> <span className="w-4 shrink-0">:</span> <span className="font-bold underline text-gray-800 hover:text-[#185325] cursor-pointer">HukumDanPerizinanInvestasi.pdf</span></div>
             <div className="flex"><span className="w-56 shrink-0 text-gray-500">Template Perjanjian Investor</span> <span className="w-4 shrink-0">:</span> <span className="font-bold underline text-gray-800 hover:text-[#185325] cursor-pointer">DokumenPerjanjian.pdf</span></div>
           </div>
         </div>

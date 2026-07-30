@@ -126,6 +126,14 @@ import DetailPelaporanAPBD from "./pages/StaffPDAS/PelaksanaanDanMonitoring/Pela
 import DetailPelaporanDonasi from "./pages/StaffPDAS/PelaksanaanDanMonitoring/Pelaporan/DetailPelaporanDonasi";
 import MasterPenyuluh from "./pages/StaffPDAS/PelaksanaanDanMonitoring/MasterPenyuluh";
 import DetailPenyuluh from "./pages/StaffPDAS/PelaksanaanDanMonitoring/MasterPenyuluh/DetailPenyuluh";
+import DetailLaporanKeuanganKTH from "./pages/KelompokTaniHutan/InvestasiKTH/LaporanInvestasi/LaporanKeuangan/DetailLaporanKeuanganKTH";
+import DetailLaporanProyekKTH from "./pages/KelompokTaniHutan/InvestasiKTH/LaporanProyekKTH/DetailLaporanProyek";
+import DetailLaporanProyekStaffBUPM from "./pages/StaffBUPM/LaporanProyek/DetailLaporanProyekStaffBUPM";
+import LaporanKeuanganStaffBUPM from "./pages/StaffBUPM/LaporanKeuanganStaffBUPM";
+import DetailLaporanKeuanganStaffBUPM from "./pages/StaffBUPM/LaporanKeuanganStaffBUPM/DetailLaporanKeuanganStaffBUPM";
+import DetailLaporanProyekKABIDBUPM from "./pages/KepalaBidangBUPM/LaporanProyek/DetailLaporanProyekKABIDBUPM";
+import LaporanKeuanganKABIDBUPM from "./pages/KepalaBidangBUPM/LaporanKeuangan";
+import DetailLaporanKeuanganKABIDBUPM from "./pages/KepalaBidangBUPM/LaporanKeuangan/DetailLaporanKeuanganKABIDBUPM";
 const Login = lazy(() => import("./pages/Authentication/Login"));
 const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -344,12 +352,14 @@ function App() {
                   <Route path="investasi/persetujuan/detail/:id" element={<DetailPersetujuan />} />
                   <Route path="investasi/investor" element={<DataInvestorIndexKTH />} />
                   <Route path="investasi/investor/detail/:id" element={<DetailInvestorKTH />} />
-                  <Route path="investasi/laporan-proyek" element={<LaporanProyekIndexKTH />} />
-                  <Route path="investasi/laporan-proyek/create" element={<CreateLaporanProyek />} />
+                  <Route path="laporan-investasi/laporan-proyek" element={<LaporanProyekIndexKTH />} />
+                  <Route path="laporan-investasi/laporan-proyek/create" element={<CreateLaporanProyek />} />
+                  <Route path="laporan-investasi/laporan-proyek/detail/:id" element={<DetailLaporanProyekKTH />} />
                   <Route path="laporan-investasi/usaha" element={<LaporanUsaha />} />
                   <Route path="laporan-investasi/usaha/create" element={<CreateLaporanUsaha />} />
                   <Route path="laporan-investasi/keuangan" element={<LaporanKeuangan />} />
                   <Route path="laporan-investasi/keuangan/create" element={<CreateLaporanKeuangan />} />
+                  <Route path="laporan-investasi/keuangan/detail/:id" element={<DetailLaporanKeuanganKTH />} />
                   <Route path="laporan-investasi/pengeluaran" element={<BiayaPengeluaranIndex />} />
                   <Route path="laporan-investasi/pengeluaran/create" element={<CreateLaporanBiayaPengeluaran />} />
                   <Route path="laporan-investasi/pemasukan" element={<BiayaPemasukanIndex />} />
@@ -388,6 +398,9 @@ function App() {
                   <Route path="data-investor" element={<DataInvestorIndex />} />
                   <Route path="data-investor/detail/:id" element={<DetailInvestor />} />
                   <Route path="laporan-proyek" element={<LaporanProyekIndex />} />
+                  <Route path="laporan-proyek/detail/:id" element={<DetailLaporanProyekStaffBUPM />} />
+                  <Route path="laporan-keuangan" element={<LaporanKeuanganStaffBUPM />} />
+                  <Route path="laporan-keuangan/detail/:id" element={<DetailLaporanKeuanganStaffBUPM />} />
                 </Route>
               </Route>
 
@@ -402,6 +415,9 @@ function App() {
                   <Route path="data-investor" element={<DataInvestorIndexKABIDBUPM />} />
                   <Route path="data-investor/detail/:id" element={<DetailInvestorKABIDBUPM />} />
                   <Route path="laporan-proyek" element={<LaporanProyekIndexKABIDBUPM />} />
+                  <Route path="laporan-proyek/detail/:id" element={<DetailLaporanProyekKABIDBUPM />} />
+                  <Route path="laporan-keuangan" element={<LaporanKeuanganKABIDBUPM />} />
+                  <Route path="laporan-keuangan/detail/:id" element={<DetailLaporanKeuanganKABIDBUPM />} />
                 </Route>
               </Route>
 

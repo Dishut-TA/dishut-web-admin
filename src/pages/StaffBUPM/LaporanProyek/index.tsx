@@ -72,7 +72,7 @@ const LaporanProyekIndex: React.FC = () => {
               <tr>
                 <th className="px-6 py-4 whitespace-nowrap text-center w-16">No</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center w-32">Tanggal</th>
-                <th className="px-6 py-4 whitespace-nowrap">Investasi</th>
+                <th className="px-6 py-4 whitespace-nowrap">Nama Investasi</th>
                 <th className="px-6 py-4 whitespace-nowrap">Milestone</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center w-24">Action</th>
               </tr>

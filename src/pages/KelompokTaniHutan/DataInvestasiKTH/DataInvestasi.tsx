@@ -48,7 +48,7 @@ const DataInvestasiKTH: React.FC = () => {
     <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 className="text-2xl font-bold text-gray-800">
-          Investasi
+          Data Investasi
         </h1>
         
         <div className="flex items-center gap-3">
@@ -71,7 +71,7 @@ const DataInvestasiKTH: React.FC = () => {
             <thead className="bg-[#DCECE0] text-[#3A4D3F] text-xs uppercase tracking-wider font-bold">
               <tr>
                 <th className="px-6 py-4 whitespace-nowrap text-center w-16">No</th>
-                <th className="px-6 py-4 whitespace-nowrap">Nama</th>
+                <th className="px-6 py-4 whitespace-nowrap">Nama Proyek</th>
                 <th className="px-6 py-4 whitespace-nowrap">Target</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">Tenggat Waktu</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">Status</th>

@@ -72,7 +72,7 @@ const LaporanProyekIndexKABIDBUPM: React.FC = () => {
               <tr>
                 <th className="px-6 py-4 whitespace-nowrap text-center w-16">No</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center w-32">Tanggal</th>
-                <th className="px-6 py-4 whitespace-nowrap">Investasi</th>
+                <th className="px-6 py-4 whitespace-nowrap">Nama Investasi</th>
                 <th className="px-6 py-4 whitespace-nowrap">Milestone</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center w-24">Action</th>
               </tr>
@@ -96,7 +96,7 @@ const LaporanProyekIndexKABIDBUPM: React.FC = () => {
                   <td className="px-6 py-4 flex justify-center whitespace-nowrap">
                     <button 
                       title="Lihat Detail"
-                      onClick={() => navigate(`/admin/staff/bupm/laporan-proyek/detail/${item.id}`)}
+                      onClick={() => navigate(`/admin/kabid/bupm/laporan-proyek/detail/${item.id}`)}
                       className="p-1.5 text-gray-500 hover:text-[#185325] hover:bg-[#DCECE0] rounded-full transition-colors"
                     >
                       <HiOutlineEye className="w-5 h-5" />

@@ -9,9 +9,7 @@ interface StepProps {
 }
 
 const docsList = [
-  'Dokumen Perjanjian Investasi', 'Dokumen Anggaran Dasar Perusahaan',
-  'Dokumen Rencana Bisnis', 'Dokumen Proyeksi Keuangan',
-  'Dokumen Hukum dan Perizinan', 'Template Perjanjian Investor'
+  'Dokumen Perjanjian Investasi', 'Dokumen Rencana Bisnis', 'Template Perjanjian Investor'
 ];
 
 const Step3: React.FC<StepProps> = ({ onNext }) => {
