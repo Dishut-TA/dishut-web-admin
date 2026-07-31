@@ -135,6 +135,15 @@ const DetailRiwayatPendanaan: React.FC = () => {
           </p>
         </div>
 
+        <div className="pt-8 pb-8">
+          <h3 className="text-sm md:text-base font-medium text-gray-600 mb-3">
+            Pilihan Intervensi
+          </h3>
+          <p className="text-sm text-gray-400 leading-relaxed text-justify">
+            Agroforestry
+          </p>
+        </div>
+
         <div className="flex items-center gap-3 pt-2">
           <span className="text-sm md:text-base font-medium text-gray-800">Status :</span>
           {detailData.status === 'Selesai' ? (

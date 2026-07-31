@@ -8,7 +8,7 @@ import {
   HiOutlineXCircle
 } from 'react-icons/hi2';
 
-type StatusProgram = 'Draft' | 'Menunggu Verifikasi' | 'Disetujui' | 'Ditolak';
+type StatusProgram = 'Draft' | 'Menunggu Persetujuan' | 'Disetujui' | 'Ditolak';
 
 interface ProgramAPBD {
   id: string;
@@ -27,7 +27,7 @@ const mockData: ProgramAPBD[] = [
     lokasi: 'Hulu Citarum - Blok 1',
     anggaran: 120000000,
     luasLahan: 15,
-    status: 'Menunggu Verifikasi',
+    status: 'Menunggu Persetujuan',
     kth: 'KTH Keren Sedunia'
   },
   {
@@ -63,8 +63,8 @@ const ProgramAPBDList: React.FC = () => {
     switch (status) {
       case 'Disetujui': 
         return <span className={`${baseStyle} bg-[#2E7D32] text-white`}>Disetujui</span>;
-      case 'Menunggu Verifikasi': 
-        return <span className={`${baseStyle} bg-[#F2C94C] text-gray-800`}>Menunggu Verifikasi</span>;
+      case 'Menunggu Persetujuan': 
+        return <span className={`${baseStyle} bg-[#F2C94C] text-gray-800`}>Menunggu Persetujuan</span>;
       case 'Ditolak': 
         return <span className={`${baseStyle} bg-red-100 text-red-600`}>Ditolak</span>;
       case 'Draft': 

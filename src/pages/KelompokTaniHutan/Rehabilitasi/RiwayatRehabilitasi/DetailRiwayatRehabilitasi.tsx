@@ -20,6 +20,7 @@ const DetailRiwayatRehabilitasi: React.FC = () => {
       nama: 'Rehabilitasi Citarum',
       lokasi: 'Bandung Barat',
       kth: 'KTH Rimba',
+      pilihan_intervensi: 'Agroforestry',
       sumberDana: isBerjalan ? 'APBD' : 'CSR',
       mitra: isBerjalan ? 'Dinas Kehutanan Jabar' : 'PT. Alfamart',
       luasLahan: '120 Ha',
@@ -71,6 +72,7 @@ const DetailRiwayatRehabilitasi: React.FC = () => {
           <InfoRow label="Nama Program" value={data.nama} />
           <InfoRow label="Lokasi" value={data.lokasi} />
           {data.status === 'Selesai' && <InfoRow label="KTH" value={data.kth} />}
+          <InfoRow label="Pilihan Intervensi" value={data.pilihan_intervensi} />
           <InfoRow label="Sumber Dana" value={data.sumberDana} />
           <InfoRow label="Mitra" value={data.mitra} />
           <InfoRow label="Luas Lahan" value={data.luasLahan} />

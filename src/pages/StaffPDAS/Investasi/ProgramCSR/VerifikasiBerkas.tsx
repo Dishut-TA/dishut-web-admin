@@ -4,9 +4,12 @@ import {
   HiOutlineArrowLeft, 
   HiOutlineUser, 
   HiOutlineMapPin, 
-  HiOutlineDocumentText, 
   HiOutlineCheckCircle,
-  HiOutlineXCircle
+  HiOutlineXCircle,
+  HiOutlineBuildingOffice,
+  HiOutlineClipboardDocumentCheck,
+  HiCheck,
+  HiXMark
 } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 
@@ -15,48 +18,75 @@ const mockDatabase = [
     id: 'CSR-001',
     kth: 'KTH Rimba',
     ketua: 'Adam Malik',
-    file: 'proposal_csr_1.pdf',
+    file: 'proposal_csr.pdf',
     lokasi: 'Desa Sukamulya, Subang Jawa Barat',
     namaProgram: 'Rehabilitasi Lahan Subang',
     anggaran: 'Rp 80.000.000',
     luas: '120 Ha',
     jenisPohon: 'Mahoni',
     jumlahBibit: '200 Bibit',
-    status: 'Menunggu Persetujuan'
+    status: 'Menunggu Persetujuan',
   },
   {
-    id: 'CSR-002',
+    id: 'CSR-002', // Simulasi Disetujui
     kth: 'KTH Rimba',
     ketua: 'Adam Malik',
-    file: 'proposal_csr_2.pdf',
+    file: 'proposal_csr.pdf',
     lokasi: 'Desa Sukamulya, Subang Jawa Barat',
     namaProgram: 'Rehabilitasi Lahan Subang',
     anggaran: 'Rp 80.000.000',
     luas: '120 Ha',
     jenisPohon: 'Mahoni',
     jumlahBibit: '200 Bibit',
-    status: 'Disetujui'
+    status: 'Disetujui',
+    catatanStaff: 'Lorem ipsum dolor sit amet consectetur. Faucibus faucibus urna nulla amet at nascetur. Enim aliquam sed nibh bibendum. Pulvinar nec risus et vulputate consequat tortor. Quisque tristique in dapibus laoreet eu augue. Maecenas quam eget habitant non. Lobortis lobortis dui phasellus sodales consectetur faucibus mauris eros odio. Diam tortor massa et venenatis ornare tristique nulla.',
+    rekomendasiMitra: 'PT. Alfamart',
+    rekomendasiIntervensi: 'Agroforesty'
   },
   {
     id: 'CSR-003',
     kth: 'KTH Rimba',
     ketua: 'Adam Malik',
-    file: 'proposal_csr_3.pdf',
+    file: 'proposal_csr.pdf',
     lokasi: 'Desa Sukamulya, Subang Jawa Barat',
     namaProgram: 'Rehabilitasi Lahan Subang',
     anggaran: 'Rp 80.000.000',
     luas: '120 Ha',
     jenisPohon: 'Mahoni',
     jumlahBibit: '200 Bibit',
-    status: 'Ditolak'
+    status: 'Ditolak',
+    catatanStaff: 'Lorem ipsum dolor sit amet consectetur. Faucibus faucibus urna nulla amet at nascetur. Enim aliquam sed nibh bibendum. Pulvinar nec risus et vulputate consequat tortor. Quisque tristique in dapibus laoreet eu augue. Maecenas quam eget habitant non. Lobortis lobortis dui phasellus sodales consectetur faucibus mauris eros odio. Diam tortor massa et venenatis ornare tristique nulla.',
   }
 ];
+
+const InfoItem = ({ 
+  label, 
+  value, 
+  icon, 
+  iconColor = "text-gray-400",
+  isItalic = false 
+}: { 
+  label: string, 
+  value: string, 
+  icon?: React.ReactNode, 
+  iconColor?: string,
+  isItalic?: boolean 
+}) => (
+  <div className="flex flex-col gap-1.5">
+    <span className="text-xs font-medium text-gray-500">{label}</span>
+    <div className={`flex items-center gap-2 text-sm text-gray-800 ${isItalic ? 'italic hover:text-[#185325] hover:underline cursor-pointer font-medium' : 'font-bold'}`}>
+      {icon && <span className={iconColor}>{icon}</span>}
+      {value}
+    </div>
+  </div>
+);
 
 const VerifikasiBerkasCSR: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams(); 
 
   const [rekomendasiMitra, setRekomendasiMitra] = useState('');
+  const [rekomendasiIntervensi, setRekomendasiIntervensi] = useState('');
   const [catatan, setCatatan] = useState('');
   const MAX_NOTES_LENGTH = 100;
 
@@ -67,8 +97,8 @@ const VerifikasiBerkasCSR: React.FC = () => {
   const handleSubmit = (e: React.FormEvent, isApproved: boolean) => {
     e.preventDefault();
     
-    if (isApproved && !rekomendasiMitra) {
-      toast.error('Silakan pilih Rekomendasi Mitra CSR terlebih dahulu.');
+    if (isApproved && (!rekomendasiMitra || !rekomendasiIntervensi)) {
+      toast.error('Silakan lengkapi form rekomendasi terlebih dahulu.');
       return;
     }
 
@@ -87,123 +117,89 @@ const VerifikasiBerkasCSR: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col gap-4 w-full mx-auto pb-12 px-4 sm:px-0">
+    <div className="flex flex-col w-full max-w-5xl mx-auto pb-12 animate-in fade-in duration-300">
       <button 
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-sm font-bold text-gray-600 hover:text-gray-900 self-start transition-colors cursor-pointer"
+        className="flex items-center gap-2 text-sm font-bold text-[#185325] hover:underline self-start transition-colors cursor-pointer mb-6"
       >
-        <HiOutlineArrowLeft className="w-4 h-4" strokeWidth={2.5} />
-        Kembali
+        <HiOutlineArrowLeft className="w-4 h-4 stroke-2" /> Kembali
       </button>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 mt-2">
-        <div className="mb-8 border-b border-gray-100 pb-6">
-          <span className="inline-block px-3 py-1 bg-[#DCECE0] text-[#185325] text-xs font-bold rounded mb-3">
+      {/* Main Card */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 md:p-12">
+        
+        {/* Header Verifikasi */}
+        <div className="mb-10 border-b border-gray-100 pb-6">
+          <span className="inline-block px-3 py-1.5 bg-[#EBF8F1] text-[#185325] text-[10px] font-bold rounded-md mb-3 border border-[#C6EBD6]">
             {detailData.id}
           </span>
           <h1 className="text-2xl font-bold text-gray-800">Lembar Verifikasi CSR</h1>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-y-8 gap-x-6 pb-8 border-b border-gray-100">
-          <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-gray-500">Kelompok Tani Hutan Pengusul</span>
-            <div className="flex items-center gap-2 font-bold text-gray-800 text-sm">
-              <HiOutlineUser className="w-4 h-4 text-gray-400" />
-              {detailData.kth}
-            </div>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-gray-500">Nama Ketua KTH</span>
-            <div className="flex items-center gap-2 font-bold text-gray-800 text-sm">
-              <HiOutlineUser className="w-4 h-4 text-gray-400" />
-              {detailData.ketua}
-            </div>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-gray-500">File Proposal</span>
-            <div className="flex items-center gap-2 font-bold text-gray-800 text-sm italic cursor-pointer hover:text-[#185325] underline">
-              {detailData.file}
-            </div>
-          </div>
+        {/* Informasi Atas */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-y-10 gap-x-8 pb-10 border-b border-gray-100">
+          <InfoItem label="Kelompok Tani Hutan Pengusul" value={detailData.kth} icon={<HiOutlineUser className="w-4 h-4" />} iconColor="text-[#185325]" />
+          <InfoItem label="Nama Ketua KTH" value={detailData.ketua} icon={<HiOutlineUser className="w-4 h-4" />} />
+          <InfoItem label="File Proposal" value={detailData.file} isItalic />
 
-          <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-gray-500">Lokasi Lahan Kegiatan</span>
-            <div className="flex items-center gap-2 font-bold text-gray-800 text-sm">
-              <HiOutlineMapPin className="w-4 h-4 text-[#185325]" />
-              {detailData.lokasi}
-            </div>
-          </div>
-          
-          <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-gray-500">Nama Program</span>
-            <div className="font-bold text-gray-800 text-sm">
-              {detailData.namaProgram}
-            </div>
-          </div>
-          
-          <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-gray-500">Alokasi Anggaran Diajukan</span>
-            <div className="font-bold text-gray-800 text-sm">
-              {detailData.anggaran}
-            </div>
-          </div>
+          <InfoItem label="Lokasi Lahan Kegiatan" value={detailData.lokasi} icon={<HiOutlineMapPin className="w-4 h-4" />} iconColor="text-[#185325]" />
+          <InfoItem label="Nama Program" value={detailData.namaProgram} />
+          <InfoItem label="Alokasi Anggaran Diajukan" value={detailData.anggaran} />
 
-          <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-gray-500">Luas</span>
-            <div className="flex items-center gap-2 font-bold text-gray-800 text-sm">
-              {detailData.luas}
-            </div>
-          </div>
-          
-          <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-gray-500">Jenis Pohon</span>
-            <div className="font-bold text-gray-800 text-sm">
-              {detailData.jenisPohon}
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-gray-500">Jumlah Bibit</span>
-            <div className="font-bold text-gray-800 text-sm">
-              {detailData.jumlahBibit}
-            </div>
-          </div>
+          <InfoItem label="Luas Lahan" value={detailData.luas} />
+          <InfoItem label="Jenis Pohon" value={detailData.jenisPohon} />
+          <InfoItem label="Jumlah Bibit" value={detailData.jumlahBibit} />
         </div>
 
+        {/* Deskripsi Kegiatan */}
         <div className="pt-8 pb-8">
-          <h3 className="text-sm font-bold text-gray-800 mb-2">
-            Rencana Kegiatan Rehabilitasi
-          </h3>
+          <h3 className="text-sm font-bold text-gray-800 mb-2">Rencana Kegiatan Rehabilitasi</h3>
           <p className="text-sm text-gray-500 leading-relaxed text-justify">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Eum saepe rerum eos magnam odio similique maiores veritatis deserunt laboriosam architecto.
+            Lorem ipsum dolor sit amet consectetur. Faucibus faucibus urna nulla amet at nascetur. Enim aliquam sed nibh bibendum. Pulvinar nec risus et vulputate consequat tortor. Quisque tristique in dapibus laoreet eu augue. Maecenas quam eget habitant non. Lobortis lobortis dui phasellus sodales consectetur faucibus mauris eros odio. Diam tortor massa et venenatis ornare tristique nulla.
           </p>
         </div>
 
-        {/* LOGIKA OTOMATIS TAMPILAN BERDASARKAN STATUS */}
-        {detailData.status === 'Menunggu Persetujuan' ? (
-          <form className="grid grid-cols-1 lg:grid-cols-2 gap-8 border-t border-gray-100 pt-8 animate-in fade-in duration-300">
-            <div>
-              <label className="flex items-center gap-2 text-sm font-bold text-[#185325] mb-2">
-                <HiOutlineDocumentText className="w-5 h-5" /> Rekomendasikan Mitra CSR <span className="text-red-500">*</span>
-              </label>
-              <select 
-                value={rekomendasiMitra}
-                onChange={(e) => setRekomendasiMitra(e.target.value)}
-                className="w-full bg-white border border-gray-300 rounded-full px-4 py-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#185325]/20 focus:border-[#185325] transition-all cursor-pointer shadow-sm mb-2"
-              >
-                <option value="" disabled>-- Pilih Rekomendasi Mitra --</option>
-                <option value="PT_A">PT Pertamina (Persero)</option>
-                <option value="PT_B">Bank BJB</option>
-                <option value="PT_C">PT Telkom Indonesia</option>
-              </select>
-              <p className="text-[11px] text-gray-400">
-                Tunjuk korporasi swasta yang paling selaras dengan bidang usulan penanaman KTH ini.
-              </p>
+        {/* LOGIKA TAMPILAN BERDASARKAN STATUS */}
+        
+        {/* === TAMPILAN 1: MENUNGGU PERSETUJUAN (FORM) === */}
+        {detailData.status === 'Menunggu Persetujuan' && (
+          <form className="animate-in fade-in duration-300 border-t border-gray-100 pt-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+              <div>
+                <label className="flex items-center gap-2 text-sm font-bold text-[#185325] mb-2">
+                  <HiOutlineBuildingOffice className="w-5 h-5" /> Rekomendasikan Mitra CSR
+                </label>
+                <select 
+                  value={rekomendasiMitra}
+                  onChange={(e) => setRekomendasiMitra(e.target.value)}
+                  className="w-full bg-white border border-gray-300 rounded-full px-4 py-3 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#185325] focus:border-[#185325] transition-all cursor-pointer shadow-sm appearance-none"
+                >
+                  <option value="" disabled>-- Pilih Rekomendasi Mitra --</option>
+                  <option value="PT_A">PT Pertamina (Persero)</option>
+                  <option value="PT_B">Bank BJB</option>
+                  <option value="PT_C">PT Telkom Indonesia</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="flex items-center gap-2 text-sm font-bold text-[#185325] mb-2">
+                  <HiOutlineClipboardDocumentCheck className="w-5 h-5" /> Rekomendasi Intervensi
+                </label>
+                <select 
+                  value={rekomendasiIntervensi}
+                  onChange={(e) => setRekomendasiIntervensi(e.target.value)}
+                  className="w-full bg-white border border-gray-300 rounded-full px-4 py-3 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#185325] focus:border-[#185325] transition-all cursor-pointer shadow-sm appearance-none"
+                >
+                  <option value="" disabled>-- Pilih Rekomendasi Intervensi --</option>
+                  <option value="Agroforesty">Agroforesty</option>
+                  <option value="Silvopastura">Silvopastura</option>
+                </select>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-bold text-[#185325] mb-2">
-                Tulis Catatan / Verifikasi Lapangan <span className="text-red-500">*</span>
+            <div className="mb-8">
+              <label className="block text-sm font-bold text-gray-800 mb-2">
+                Catatan Staff PDAS
               </label>
               <div className="relative">
                 <textarea 
@@ -212,39 +208,64 @@ const VerifikasiBerkasCSR: React.FC = () => {
                   value={catatan}
                   onChange={(e) => setCatatan(e.target.value)}
                   placeholder="Ketik persetujuan administrasi atau rincian perbaikan jika dokumen ditolak..."
-                  className="w-full bg-white border border-gray-300 rounded-3xl px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#185325]/20 focus:border-[#185325] transition-all resize-none shadow-sm"
+                  className="w-full bg-white border border-gray-300 rounded-3xl px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#185325] focus:border-[#185325] transition-all resize-none shadow-sm"
                 ></textarea>
-                <div className="absolute -bottom-6 right-1 text-[11px] font-bold text-gray-400">
+                <div className="absolute -bottom-6 right-2 text-[10px] font-bold text-gray-400">
                   {catatan.length}/{MAX_NOTES_LENGTH}
                 </div>
               </div>
             </div>
 
-            <div className="lg:col-span-2 flex flex-col sm:flex-row items-center justify-end gap-3 mt-4">
+            <div className="flex flex-col sm:flex-row items-center justify-end gap-4 mt-6">
               <button 
                 type="button"
                 onClick={(e) => handleSubmit(e, false)}
-                className="w-full sm:w-auto px-8 py-3 bg-white border border-gray-300 text-gray-600 text-sm font-bold rounded-full hover:bg-gray-50 transition-colors active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full sm:w-auto px-8 py-3.5 bg-white border border-gray-300 text-gray-600 text-sm font-bold rounded-full hover:bg-gray-50 transition-colors active:scale-95 flex items-center justify-center gap-2"
               >
                 <HiOutlineXCircle className="w-5 h-5" /> Tolak / Minta Revisi
               </button>
               <button 
                 type="button"
                 onClick={(e) => handleSubmit(e, true)}
-                className="w-full sm:w-auto px-8 py-3 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors active:scale-95 shadow-md shadow-[#185325]/20 flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full sm:w-auto px-8 py-3.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors active:scale-95 shadow-md flex items-center justify-center gap-2"
               >
                 <HiOutlineCheckCircle className="w-5 h-5" /> Setuju & Teruskan
               </button>
             </div>
           </form>
-        ) : (
-          <div className="flex items-center gap-4 border-t border-gray-100 pt-8 animate-in fade-in duration-300">
-            <span className="font-bold text-gray-800 text-base">Status :</span>
-            <span className={`font-bold text-base ${
-              detailData.status === 'Disetujui' ? 'text-[#185325]' : 'text-red-600'
-            }`}>
-              {detailData.status}
-            </span>
+        )}
+
+        {/* === TAMPILAN 2 & 3: DISETUJUI / DITOLAK (READ ONLY) === */}
+        {detailData.status !== 'Menunggu Persetujuan' && (
+          <div className="flex flex-col gap-6 animate-in fade-in duration-300 border-t border-gray-100 pt-8">
+            
+            <div className="flex flex-col gap-2">
+              <h4 className="text-sm font-bold text-gray-800">Catatan Staff PDAS</h4>
+              <p className="text-sm text-gray-500 text-justify leading-relaxed">{detailData.catatanStaff}</p>
+            </div>
+
+            {/* Field Tambahan Khusus Disetujui */}
+            {detailData.status === 'Disetujui' && (
+              <>
+                <div className="flex flex-col gap-1.5">
+                  <h4 className="text-sm font-bold text-gray-800">Rekomendasi Mitra CSR</h4>
+                  <p className="text-sm text-gray-600">{detailData.rekomendasiMitra}</p>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <h4 className="text-sm font-bold text-gray-800">Rekomendasi Intervensi</h4>
+                  <p className="text-sm text-gray-600">{detailData.rekomendasiIntervensi}</p>
+                </div>
+              </>
+            )}
+
+            <div className="flex items-center gap-3 mt-4">
+              <span className="text-sm font-bold text-gray-800">Status :</span>
+              <div className={`flex items-center gap-1.5 text-sm font-bold ${detailData.status === 'Disetujui' ? 'text-[#185325]' : 'text-red-600'}`}>
+                {detailData.status} 
+                {detailData.status === 'Disetujui' ? <HiCheck className="w-4 h-4 stroke-2" /> : <HiXMark className="w-4 h-4 stroke-2" />}
+              </div>
+            </div>
+
           </div>
         )}
 
