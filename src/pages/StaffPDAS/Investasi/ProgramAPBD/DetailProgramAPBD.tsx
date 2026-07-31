@@ -19,6 +19,7 @@ const DetailProgramAPBD: React.FC = () => {
     lokasi: 'Desa Sukamulya, Subang Jawa Barat',
     namaProgram: 'Rehabilitasi Lahan Subang',
     anggaran: 'Rp 80.000.000',
+    pilihan_intervensi: 'Agroforestry',
     deskripsi: 'Lorem ipsum dolor sit amet consectetur. Sed arcu elementum eu feugiat mattis posuere. Tempus quis consequat in amet. Commodo dignissim sed tellus mi. Rhoncus lectus habitant leo urna et tortor nunc velit accumsan. Adipiscing sed turpis sit aliquet dictum iaculis posuere a.'
   };
 
@@ -91,6 +92,13 @@ const DetailProgramAPBD: React.FC = () => {
               {data.anggaran}
             </div>
           </div>
+          
+          <div>
+            <p className="text-sm text-gray-500 mb-2">Pilihan Intervensi</p>
+            <div className="text-base font-bold text-gray-800">
+              {data.pilihan_intervensi}
+            </div>
+          </div>
         </div>
 
         <hr className="border-gray-100 mb-8" />
@@ -102,6 +110,14 @@ const DetailProgramAPBD: React.FC = () => {
           <p className="text-sm text-gray-600 leading-relaxed text-justify">
             {data.deskripsi}
           </p>
+        </div>
+
+        <hr className="border-gray-100 mb-8" />
+
+        <div className="mb-8">
+          <h3 className="text-base font-bold text-gray-800 mb-3">
+            Status: <span className='italic'>Menunggu Persetujuan</span>
+          </h3>
         </div>
 
         <hr className="border-gray-100" />

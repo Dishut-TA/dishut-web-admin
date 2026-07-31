@@ -19,7 +19,8 @@ const VerifikasiAPBD: React.FC = () => {
     kontakWhatsapp: '08123456789',
     lokasi: 'Desa Sukamulya, Subang Jawa Barat',
     rencanaKegiatan: 'Rehabilitasi Lahan Subang',
-    anggaran: 'Rp 120.000.000'
+    anggaran: 'Rp 120.000.000',
+    pilihan_intervensi: 'Agroforestry'
   };
 
   const handleApprove = () => {
@@ -83,6 +84,12 @@ const VerifikasiAPBD: React.FC = () => {
             <span className="text-xs font-medium text-gray-500">Anggaran APBD</span>
             <div className="font-bold text-gray-800 text-sm">
               {detailData.anggaran}
+            </div>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium text-gray-500">Pilihan Intervensi</span>
+            <div className="font-bold text-gray-800 text-sm">
+              {detailData.pilihan_intervensi}
             </div>
           </div>
         </div>

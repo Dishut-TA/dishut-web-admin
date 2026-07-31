@@ -144,6 +144,15 @@ const DetailTinjauProposal: React.FC = () => {
           </p>
         </div>
 
+        <div className="pt-8 pb-8 border-b border-gray-100">
+          <h3 className="text-sm font-bold text-gray-800 mb-2">
+            Pilihan Intervensi
+          </h3>
+          <p className="text-sm text-gray-500 leading-relaxed text-justify">
+            Agroforestry
+          </p>
+        </div>
+
         <div className="pt-8 grid grid-cols-1 md:grid-cols-1 gap-8 flex-1">
           <div>
             <h1 className="text-sm font-bold text-gray-800 mb-2">

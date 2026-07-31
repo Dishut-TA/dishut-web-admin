@@ -124,6 +124,11 @@ const VerifikasiCSR: React.FC = () => {
             <h1 className='font-semibold'>Rekomendasi Mitra CSR</h1>
             <p className='mt-4 text-slate-500'>PT. Indomaret</p>
           </div>
+
+          <div>
+            <h1 className='font-semibold'>Rekomendasi Intervensi</h1>
+            <p className='mt-4 text-slate-500'>Agroforestry</p>
+          </div>
         </div>
 
         <div className="pt-8 mt-auto flex flex-col-reverse sm:flex-row justify-end items-center gap-4">

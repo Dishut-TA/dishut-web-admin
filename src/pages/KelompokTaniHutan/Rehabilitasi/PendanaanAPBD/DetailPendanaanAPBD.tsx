@@ -17,6 +17,7 @@ const DetailPendanaanAPBD: React.FC = () => {
   const data = {
     id: id || 'APBD-001',
     kth: 'KTH Rimba',
+    pilihan_intervensi: 'Agroforestry',
     ketuaKth: 'Adam Malik',
     targetLuas: '120 Ha',
     lokasi: 'Desa Sukamulya, Subang Jawa Barat',
@@ -102,6 +103,13 @@ const DetailPendanaanAPBD: React.FC = () => {
             <p className="text-sm text-gray-500 mb-2">Anggaran APBD</p>
             <div className="text-base font-bold text-gray-800">
               {data.anggaran}
+            </div>
+          </div>
+          
+          <div>
+            <p className="text-sm text-gray-500 mb-2">Pilihan Intervensi</p>
+            <div className="text-base font-bold text-gray-800">
+              {data.pilihan_intervensi}
             </div>
           </div>
         </div>
