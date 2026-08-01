@@ -116,7 +116,7 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
             id: 'evaluasi', title: 'Evaluasi Penanaman Bibit', icon: <HiOutlineGlobeAlt className="w-5 h-5" />,
             items: [
                 { name: 'Penugasan Evaluasi', path: `${basePath}/evaluasi/penugasan` },
-                { name: 'Validasi Data Evaluasi', path: `${basePath}/evaluasi/validasi-evaluasi` },
+               // { name: 'Validasi Data Evaluasi', path: `${basePath}/evaluasi/validasi-evaluasi` },
                 { name: 'Laporan Evaluasi', path: `${basePath}/evaluasi/laporan` },
             ],
         },
