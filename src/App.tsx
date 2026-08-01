@@ -134,6 +134,10 @@ import DetailLaporanKeuanganStaffBUPM from "./pages/StaffBUPM/LaporanKeuanganSta
 import DetailLaporanProyekKABIDBUPM from "./pages/KepalaBidangBUPM/LaporanProyek/DetailLaporanProyekKABIDBUPM";
 import LaporanKeuanganKABIDBUPM from "./pages/KepalaBidangBUPM/LaporanKeuangan";
 import DetailLaporanKeuanganKABIDBUPM from "./pages/KepalaBidangBUPM/LaporanKeuangan/DetailLaporanKeuanganKABIDBUPM";
+import DetailLaporanEvaluasiStaff from "./pages/StaffPDAS/EvaluasiPenanamanBibit/LaporanEvaluasiStaffPDAS/DetailLaporanEvaluasiStaff";
+import DetailLaporanEvaluasiKABID from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/LaporanEvaluasi/DetailLaporanEvaluasiKABID";
+import PenugasanEvaluasiStaff from "./pages/StaffPDAS/EvaluasiPenanamanBibit/Penugasan/PenugasanEvaluasiStaff";
+import DetailPenugasanEvaluasiStaff from "./pages/StaffPDAS/EvaluasiPenanamanBibit/Penugasan/DetailPenugasanEvaluasiStaff";
 const Login = lazy(() => import("./pages/Authentication/Login"));
 const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -269,14 +273,17 @@ function App() {
                   {/* Evaluasi */}
                   <Route path="evaluasi/dashboard" element={<DashboardEvaluasi />} />
                   <Route path="evaluasi/data" element={<DataEvaluasiIndex />} />
+                  <Route path="evaluasi/penugasan" element={<PenugasanEvaluasiStaff />} />
+                  <Route path="evaluasi/penugasan/detail/:id" element={<DetailPenugasanEvaluasiStaff />} />
                   <Route path="evaluasi/hasil" element={<PerhitunganHasilEvaluasiStaff />} />
                   <Route path="evaluasi/hasil/detail/:id" element={<DetailPerhitunganHasilEvaluasiStaff />} />
                   <Route path="evaluasi/data/create/:id" element={<InputEvaluasi />} />
                   <Route path="evaluasi/laporan" element={<LaporanEvaluasiStaffPDAS />} />
                   <Route path="evaluasi/laporan/create/:id" element={<CreateLaporanEvaluasiStaffPDAS />} />
+                  <Route path="evaluasi/laporan/detail/:id" element={<DetailLaporanEvaluasiStaff />} />
                   <Route path="evaluasi/laporan-individu" element={<DraftLaporanIndividu />} />
-                  <Route path="evaluasi/penugasan" element={<PenugasanEvaluasiSTAFFPDAS />} />
-                  <Route path="evaluasi/penugasan/create/:id" element={<CreatePenugasanEvaluasiStaffPDAS />} />
+                  <Route path="evaluasi/penugasan-evaluasi" element={<PenugasanEvaluasiSTAFFPDAS />} />
+                  <Route path="evaluasi/penugasan-evaluasi/create/:id" element={<CreatePenugasanEvaluasiStaffPDAS />} />
                   <Route path="evaluasi/tugas-masuk" element={<StaffTugasEvaluasi />} />
                 </Route>
               </Route>
@@ -310,7 +317,8 @@ function App() {
                   <Route path="evaluasi/validasi-evaluasi/detail/:id" element={<DetailEvaluasiDataEvaluasiKABID />} />
                   <Route path="evaluasi/validasi-evaluasi/detail/:id" element={<DetailEvaluasiDataEvaluasiKABID />} />
                   <Route path="evaluasi/laporan" element={<LaporanEvaluasiKABID />} />
-                  <Route path="evaluasi/laporan/create/:id" element={<PengesahanLaporanEvaluasiKabid />} />
+                  <Route path="evaluasi/laporan/pengesahan/:id" element={<PengesahanLaporanEvaluasiKabid />} />
+                  <Route path="evaluasi/laporan/detail/:id" element={<DetailLaporanEvaluasiKABID />} />
 
                   {/* blm fixx */}
                   {/* <Route path="evaluasi/laporan" element={<PengesahanLaporanKABID />} />
