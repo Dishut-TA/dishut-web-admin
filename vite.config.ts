@@ -12,7 +12,8 @@ export default defineConfig({
   VitePWA({
     registerType: 'autoUpdate',
     workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}']
+      maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+      globPatterns: ['**/*.{js,css,html,ico,png,svg}']
     },
     manifest: {
       name: 'Admin Rehabilitasi Hutan',
@@ -33,4 +34,18 @@ export default defineConfig({
         ]
     }
   })],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('leaflet') || id.includes('pdfjs-dist')) {
+              return 'vendor-heavy';
+            }
+            return 'vendor';
+          }
+        }
+      }
+    }
+  }
 })
