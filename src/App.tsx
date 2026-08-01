@@ -138,6 +138,9 @@ import DetailLaporanEvaluasiStaff from "./pages/StaffPDAS/EvaluasiPenanamanBibit
 import DetailLaporanEvaluasiKABID from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/LaporanEvaluasi/DetailLaporanEvaluasiKABID";
 import PenugasanEvaluasiStaff from "./pages/StaffPDAS/EvaluasiPenanamanBibit/Penugasan/PenugasanEvaluasiStaff";
 import DetailPenugasanEvaluasiStaff from "./pages/StaffPDAS/EvaluasiPenanamanBibit/Penugasan/DetailPenugasanEvaluasiStaff";
+import DashboardCPISTAFF from "./pages/StaffPDAS/AnalisisLahanKritis/DashboardCPISTAFF";
+import DataKTH from "./pages/StaffPDAS/AnalisisLahanKritis/DataKTH";
+import DataZonasi from "./pages/StaffPDAS/AnalisisLahanKritis/DataZonasi";
 const Login = lazy(() => import("./pages/Authentication/Login"));
 const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -152,7 +155,7 @@ const VerifikasiBerkasCSR = lazy(() => import("./pages/StaffPDAS/Investasi/Progr
 // const MonitoringRiwayatList = lazy(() => import("./pages/StaffPDAS/Investasi/MonitoringRiwayat"));
 // const CreateEvaluasi = lazy(() => import("./pages/StaffPDAS/EvaluasiPenanamanBibit/DataEvaluasi/CreateEvaluasi"));
 const StaffTugasEvaluasi = lazy(() => import("./pages/StaffPDAS/EvaluasiPenanamanBibit/TugasMasuk"));
-const AnalisisLahanKritis = lazy(() => import("./pages/StaffPDAS/AnalisisLahanKritis"));
+const AnalisisLahanKritis = lazy(() => import("./pages/StaffPDAS/AnalisisLahanKritis/AnalisisCPI"));
 const DashboardMonitoring = lazy(() => import("./pages/StaffPDAS/PelaksanaanDanMonitoring/DashboardMonitoring"));
 const DaftarKegiatan = lazy(() => import("./pages/StaffPDAS/PelaksanaanDanMonitoring/DaftarKegiatan"));
 const VerifikasiMonitoring = lazy(() => import("./pages/StaffPDAS/PelaksanaanDanMonitoring/VerifikasiMonitoring"));
@@ -217,7 +220,10 @@ function App() {
                   <Route path="dashboard" element={<DashboardStaffPDAS />} />
 
                   {/* CPI */}
-                  <Route path="analisis-cpi" element={<AnalisisLahanKritis />} />
+                  <Route path="analisis-cpi/dashboard" element={<DashboardCPISTAFF />} />
+                  <Route path="analisis-cpi/peta" element={<AnalisisLahanKritis />} />
+                  <Route path="analisis-cpi/zonasi" element={<DataZonasi />} />
+                  <Route path="analisis-cpi/kth" element={<DataKTH />} />
 
                   {/* Donasi */}
                   <Route path="donasi/bibit" element={<IndexBibit />} />
