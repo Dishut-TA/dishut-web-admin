@@ -83,9 +83,9 @@ import IndexBibit from "./pages/StaffPDAS/RealisasiBibitDonasi/Bibit";
 import CreateBibit from "./pages/StaffPDAS/RealisasiBibitDonasi/Bibit/CreateBibit";
 import DetailBibit from "./pages/StaffPDAS/RealisasiBibitDonasi/Bibit/DetailBibit";
 import PenugasanPenyuluh from "./pages/StaffPDAS/PelaksanaanDanMonitoring/PenugasanPenyuluh";
-import HasilValidasiPenyuluh from "./pages/StaffPDAS/PelaksanaanDanMonitoring/HasilValidasiPenyuluh";
-import DetailHasilValidasi from "./pages/StaffPDAS/PelaksanaanDanMonitoring/HasilValidasiPenyuluh/DetailHasilValidasi";
-import ProsesValidasiPenyuluh from "./pages/StaffPDAS/PelaksanaanDanMonitoring/HasilValidasiPenyuluh/ProsesHasilValidasiPenyuluh";
+import HasilValidasiPenyuluh from "./pages/KepalaBidangPDAS/AnalisisLahanKritis/HasilValidasiPenyuluh";
+import DetailHasilValidasi from "./pages/KepalaBidangPDAS/AnalisisLahanKritis/HasilValidasiPenyuluh/DetailHasilValidasi";
+import ProsesValidasiPenyuluh from "./pages/KepalaBidangPDAS/AnalisisLahanKritis/HasilValidasiPenyuluh/ProsesHasilValidasiPenyuluh";
 import DetailPenugasanPenyuluh from "./pages/StaffPDAS/PelaksanaanDanMonitoring/PenugasanPenyuluh/DetailPenugasanPenyuluh";
 import DetailKegiatan from "./pages/StaffPDAS/PelaksanaanDanMonitoring/DaftarKegiatan/DetailKegiatan";
 import SaldoKeuntungan from "./pages/KelompokTaniHutan/SaldoKeuntungan";
@@ -141,6 +141,9 @@ import DetailPenugasanEvaluasiStaff from "./pages/StaffPDAS/EvaluasiPenanamanBib
 import DashboardCPISTAFF from "./pages/StaffPDAS/AnalisisLahanKritis/DashboardCPISTAFF";
 import DataKTH from "./pages/StaffPDAS/AnalisisLahanKritis/DataKTH";
 import DataZonasi from "./pages/StaffPDAS/AnalisisLahanKritis/DataZonasi";
+import DashboardCPIKABID from "./pages/KepalaBidangPDAS/AnalisisLahanKritis/DashboardCPIKABID";
+import DetailCPIKABID from "./pages/KepalaBidangPDAS/AnalisisLahanKritis/DashboardCPIKABID/DetailCPIKABID";
+import HasilValidasiLokasi from "./pages/KepalaBidangPDAS/AnalisisLahanKritis/HasilValidasiPenyuluh";
 const Login = lazy(() => import("./pages/Authentication/Login"));
 const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -300,7 +303,11 @@ function App() {
                   <Route index element={<Navigate to="dashboard" replace />} />
                   <Route path="dashboard" element={<DashboardKabid />} />
 
-                  <Route path="analisis-cpi" element={<AnalisisLahanKritis />} />
+                  <Route path="analisis-cpi/dashboard" element={<DashboardCPIKABID />} />
+                  <Route path="analisis-cpi/dashboard/detail/:id" element={<DetailCPIKABID />} />
+                  <Route path="analisis-cpi/hasil-validasi-lokasi" element={<HasilValidasiLokasi />} />
+                  <Route path="analisis-cpi/hasil-validasi-lokasi/detail/:id" element={<DetailHasilValidasi />} />
+                  <Route path="analisis-cpi/hasil-validasi-lokasi/proses/:id" element={<ProsesValidasiPenyuluh />} />
 
                   <Route path="donasi/dashboard" element={<DashhboardProgramKabid />} />
                   <Route path="donasi/program" element={<DataProgramKabid />} />

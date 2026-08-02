@@ -1,8 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HiOutlineMagnifyingGlass } from 'react-icons/hi2';
 
-const HasilValidasiPenyuluh: React.FC = () => {
+const HasilValidasiLokasi: React.FC = () => {
   const navigate = useNavigate();
 
   const mockData = [
@@ -27,48 +26,8 @@ const HasilValidasiPenyuluh: React.FC = () => {
   return (
     <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-800">Daftar Hasil Validasi Penyuluh</h1>
+        <h1 className="text-2xl font-bold text-gray-800">Hasil Validasi Lokasi</h1>
         <p className="text-sm text-gray-500 mt-1">Kelola dan tinjau hasil verifikasi lapangan dari para penyuluh.</p>
-      </div>
-
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-        <div className="flex flex-col lg:flex-row justify-between gap-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full lg:w-2/3">
-            <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1.5">Sumber Lokasi</label>
-              <select className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm outline-none focus:border-[#185325] bg-white">
-                <option>Semua Sumber</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1.5">Penyuluh</label>
-              <select className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm outline-none focus:border-[#185325] bg-white">
-                <option>Semua CDK</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1.5">Status</label>
-              <select className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm outline-none focus:border-[#185325] bg-white">
-                <option>Semua Status</option>
-              </select>
-            </div>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row items-end gap-3 w-full lg:w-1/3">
-            <div className="relative w-full">
-              <HiOutlineMagnifyingGlass className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input type="text" placeholder="Cari nama lokasi..." className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl text-sm outline-none focus:border-[#185325]" />
-            </div>
-            <div className="flex gap-2 w-full sm:w-auto">
-              <button className="px-5 py-2.5 bg-white border border-gray-300 text-gray-700 text-sm font-bold rounded-xl hover:bg-gray-50 flex items-center gap-2">
-                Reset
-              </button>
-              <button className="px-6 py-2.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-xl transition-all shadow-sm">
-                Filter
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -100,13 +59,13 @@ const HasilValidasiPenyuluh: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 flex justify-center gap-2">
                     <button 
-                      onClick={() => navigate(`/admin/staff/monitoring/hasil-validasi-lokasi/detail/${item.id}`)}
+                      onClick={() => navigate(`/admin/kabid/analisis-cpi/hasil-validasi-lokasi/detail/${item.id}`)}
                       className="px-4 py-1.5 bg-white border border-[#185325] text-[#185325] hover:bg-[#f0f9f3] text-xs font-bold rounded-lg transition-colors"
                     >
                       Detail
                     </button>
                     <button 
-                      onClick={() => navigate(`/admin/staff/monitoring/hasil-validasi-lokasi/proses/${item.id}`)}
+                      onClick={() => navigate(`/admin/kabid/analisis-cpi/hasil-validasi-lokasi/proses/${item.id}`)}
                       className="px-4 py-1.5 bg-[#185325] hover:bg-[#123d1c] text-white text-xs font-bold rounded-lg transition-colors shadow-sm"
                     >
                       Validasi
@@ -122,4 +81,4 @@ const HasilValidasiPenyuluh: React.FC = () => {
   );
 };
 
-export default HasilValidasiPenyuluh;
+export default HasilValidasiLokasi;

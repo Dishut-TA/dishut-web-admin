@@ -98,9 +98,7 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
             id: 'cpi', title: 'Analisis CPI', icon: <HiOutlineChartBar className="w-5 h-5" />,
             items: [
                 { name: 'Dashboard CPI', path: `${basePath}/analisis-cpi/dashboard` },
-                { name: 'Data Peta', path: `${basePath}/analisis-cpi/peta` },
-                { name: 'Data Zonasi', path: `${basePath}/analisis-cpi/zonasi` },
-                { name: 'Data KTH', path: `${basePath}/analisis-cpi/kth` },
+                { name: 'Hasil Validasi Lokasi', path: `${basePath}/analisis-cpi/hasil-validasi-lokasi` },
             ],
         },
         {
