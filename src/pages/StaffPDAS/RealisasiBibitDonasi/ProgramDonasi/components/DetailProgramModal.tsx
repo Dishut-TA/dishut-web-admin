@@ -122,7 +122,7 @@ const DetailProgramModal: React.FC<DetailProgramModalProps> = ({
         {/* Footer Rangkuman */}
         <div className="flex-none bg-[#f0f9f3] p-6 border-t border-[#C8E0CD] flex flex-col md:flex-row justify-between items-center gap-4">
            <div className="flex flex-col text-center md:text-left">
-             <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Terkumpul (Target)</span>
+             <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Terkumpul</span>
              <span className="text-lg font-bold text-gray-700">{program.terkumpul} Bibit</span>
            </div>
            
