@@ -19,6 +19,12 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
         icon: <HiOutlineHome className="w-5 h-5" />
     };
 
+    const masterBibit = {
+        name: 'Master Bibit',
+        path: `${basePath}/master/master-bibit`,
+        icon: <HiOutlineHome className="w-5 h-5" />
+    };
+
     const menuManajemenAkun = {
         id: 'manajemen-akun',
         title: 'Manajemen Akun',
@@ -49,6 +55,7 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
     // Staff PDAS (Contoh penerapan array tunggal)
     const staffMenus = [
         dashboard,
+        masterBibit,
         {
             id: 'cpi', title: 'Analisis CPI', icon: <HiOutlineChartBar className="w-5 h-5" />,
             items: [

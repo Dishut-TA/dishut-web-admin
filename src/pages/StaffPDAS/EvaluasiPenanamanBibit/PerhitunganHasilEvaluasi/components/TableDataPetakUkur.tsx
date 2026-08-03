@@ -21,14 +21,14 @@ const TableDataPetakUkur: React.FC<TableDataPetakUkurProps> = ({
 }) => {
   return (
     <div className="mb-8 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider flex items-center gap-2">
           <HiOutlineDocumentText className="w-5 h-5 text-[#185325]" />
-          {mockStatus === 'HASIL TERVALIDASI' ? 'Lampiran Data Petak Ukur' : '1. Data Dasar & Realisasi Lapangan'}
+          {mockStatus === 'HASIL TERVALIDASI' ? 'Lampiran Data Lapangan' : '1. Data Dasar & Realisasi Lapangan'}
         </h3>
         {!hasCalculated && (
-          <span className="text-xs font-semibold text-orange-600 bg-orange-50 border border-orange-200 px-3 py-1 rounded-full flex items-center gap-1">
-            <HiOutlinePencilSquare className="w-4 h-4" /> Sesuaikan data realisasi jika terdapat perubahan faktual.
+          <span className="text-[11px] font-semibold text-orange-600 bg-orange-50 border border-orange-200 px-3 py-1.5 rounded-full flex items-center gap-1.5">
+            <HiOutlinePencilSquare className="w-4 h-4 shrink-0" /> Sesuaikan data realisasi jika terdapat perubahan faktual.
           </span>
         )}
       </div>
@@ -37,7 +37,7 @@ const TableDataPetakUkur: React.FC<TableDataPetakUkurProps> = ({
         <table className="w-full text-sm text-left whitespace-nowrap">
           <thead className="bg-[#DCECE0] text-[#3A4D3F] font-bold border-b border-gray-200">
             <tr>
-              <th className="px-4 py-3">Petak Ukur</th>
+              <th className="px-4 py-3">Periode</th>
               <th className="px-4 py-3 text-center">Rencana <br/><span className="text-[10px] font-normal text-gray-400">Read-only</span></th>
               <th className="px-4 py-3 text-center text-[#185325]">Realisasi</th>
               <th className="px-4 py-3 text-center border-x border-gray-200">% Tumbuh</th>
@@ -46,16 +46,22 @@ const TableDataPetakUkur: React.FC<TableDataPetakUkurProps> = ({
               <th className="px-4 py-3 text-[#185325]">Titik Koordinat</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-gray-100 bg-white">
             {dataPetakUkur.map((item, idx) => {
               const persen = hitungPersenPerPU(item.rencana, item.tumbuh);
               const isLulus = parseFloat(persen) >= 75;
               
               return (
-                <tr key={idx} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-bold text-gray-700">{item.pu}</td>
+                <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[#185325] font-bold uppercase">
+                        {item.periode}
+                      </span>
+                    </div>
+                  </td>
                   
-                  <td className="px-4 py-3 text-center bg-gray-50 text-gray-500 font-semibold border-r border-gray-100">
+                  <td className="px-4 py-3 text-center bg-gray-50/50 text-gray-500 font-semibold border-r border-gray-100">
                     {item.rencana}
                   </td>
                   

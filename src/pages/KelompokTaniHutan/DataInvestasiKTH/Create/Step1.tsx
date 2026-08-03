@@ -1,5 +1,5 @@
 import React from 'react';
-import { HiOutlineCloud, HiOutlineCalendarDays } from 'react-icons/hi2';
+import { HiOutlineCloud, HiOutlineCalendarDays, HiOutlineArrowRight } from 'react-icons/hi2';
 import type { InvestasiFormState } from './index';
 
 interface StepProps {
@@ -43,8 +43,8 @@ const Step1: React.FC<StepProps> = ({ data, updateData, onNext }) => {
         <textarea name="deskripsi" placeholder="Tulis keterangan wisata" value={data.deskripsi} onChange={handleChange} className="w-full p-4 h-28 text-sm border border-gray-300 rounded-4xl focus:ring-1 focus:ring-[#185325] outline-none resize-none" />
       </div>
 
-      <button onClick={onNext} className="w-full py-3.5 mt-4 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors">
-        Selanjutnya &gt;
+      <button onClick={onNext} className="w-full flex items-center justify-center gap-2 py-3.5 mt-4 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors">
+        Selanjutnya <HiOutlineArrowRight className="w-4 h-4 stroke-2" />
       </button>
     </div>
   );

@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { HiOutlineChevronDown, HiOutlineChevronUp } from 'react-icons/hi2';
+import { HiOutlineChevronDown, HiOutlineChevronUp, HiOutlineArrowLeft, HiCheck } from 'react-icons/hi2';
 import type { InvestasiFormState } from './index';
 
 interface StepProps {
   data: InvestasiFormState;
   onNext: () => void;
+  onPrev?: () => void;
 }
 
-const Step4: React.FC<StepProps> = ({ data, onNext }) => {
+const Step4: React.FC<StepProps> = ({ data, onNext, onPrev }) => {
   const [showAllMilestones, setShowAllMilestones] = useState(false);
   const displayedMilestones = showAllMilestones ? data.milestones : data.milestones.slice(0, 2);
   const hasMoreMilestones = data.milestones.length > 2;
@@ -25,6 +26,8 @@ const Step4: React.FC<StepProps> = ({ data, onNext }) => {
 
   return (
     <div className="animate-in fade-in duration-300">
+      {/* ... BAGIAN PREVIEW DATA TETAP SAMA ... */}
+      
       <div className="flex flex-col md:flex-row gap-6 mb-8">
         <div className="w-full md:w-56 h-36 bg-gray-200 rounded-xl shrink-0 flex items-center justify-center text-gray-400 text-xs overflow-hidden">
           <img src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=800&auto=format&fit=crop" alt="Cover" className="w-full h-full object-cover" />
@@ -98,9 +101,14 @@ const Step4: React.FC<StepProps> = ({ data, onNext }) => {
         </div>
       </div>
 
-      <button onClick={onNext} className="w-full py-3.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors shadow-sm">
-        Selanjutnya &gt;
-      </button>
+      <div className="flex gap-4 mt-6">
+        <button onClick={onPrev} className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-white border border-[#185325] text-[#185325] hover:bg-gray-50 text-sm font-bold rounded-full transition-colors">
+          <HiOutlineArrowLeft className="w-4 h-4 stroke-2" /> Kembali
+        </button>
+        <button onClick={onNext} className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors shadow-sm">
+          Simpan & Selesai <HiCheck className="w-5 h-5 stroke-2" />
+        </button>
+      </div>
 
     </div>
   );

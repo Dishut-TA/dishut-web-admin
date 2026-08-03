@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HiOutlineMagnifyingGlass, HiOutlineEye } from 'react-icons/hi2';
+import { HiOutlineMagnifyingGlass, HiOutlineEye, HiOutlineMapPin } from 'react-icons/hi2';
 
 const PerhitunganHasilEvaluasiStaff: React.FC = () => {
   const navigate = useNavigate();
@@ -11,7 +11,7 @@ const PerhitunganHasilEvaluasiStaff: React.FC = () => {
       id: 'EVAL-001',
       proyek: 'Rehabilitasi Lahan Kompensasi PT. Jawa Satu Power',
       noSurat: 'ST.76/TKTRH/DAS.04/2026',
-      lokasi: 'Kab. Garut',
+      lokasi: 'Hutan Lindung Desa Sudalarang, Kab. Garut',
       periode: 'Pemeliharaan II (P2)',
       peran: 'Ketua Tim',
       status: 'SIAP DIHITUNG',
@@ -20,7 +20,16 @@ const PerhitunganHasilEvaluasiStaff: React.FC = () => {
       id: 'EVAL-002',
       proyek: 'Rehabilitasi DAS PT Pertamina EP',
       noSurat: 'ST.12/TKTRH/DAS.04/2026',
-      lokasi: 'Kab. Bogor',
+      lokasi: 'Desa Karangsong, Kab. Indramayu',
+      periode: 'Pemeliharaan I (P1)', 
+      peran: 'Anggota',
+      status: 'HASIL TERVALIDASI',
+    },
+    {
+      id: 'EVAL-003',
+      proyek: 'Rehabilitasi DAS PT Pertamina EP',
+      noSurat: 'ST.09/TKTRH/DAS.04/2025',
+      lokasi: 'Desa Karangsong, Kab. Indramayu',
       periode: 'Penanaman Awal (P0)', 
       peran: 'Anggota',
       status: 'HASIL TERVALIDASI',
@@ -34,71 +43,89 @@ const PerhitunganHasilEvaluasiStaff: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8 animate-in fade-in duration-300">
+      
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Perhitungan Hasil Evaluasi</h1>
-          <p className="text-sm text-gray-500 mt-1">Lakukan perhitungan persentase tumbuh dan tinjau visualisasi peta.</p>
+          <p className="text-sm text-gray-500 mt-1">Pilih penugasan periode tertentu untuk menghitung persentase tumbuh tanaman.</p>
         </div>
         <div className="relative w-full md:w-80">
           <HiOutlineMagnifyingGlass className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input 
             type="text" 
-            placeholder="Cari program atau periode..." 
+            placeholder="Cari program atau periode (P1, P2)..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-[#185325] outline-none shadow-sm" 
+            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-1 focus:ring-[#185325] focus:border-[#185325] outline-none shadow-sm transition-all" 
           />
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mt-2">
         <div className="overflow-x-auto w-full">
-          <table className="w-full text-left border-collapse min-w-225">
-            <thead className="bg-[#DCECE0] text-[#3A4D3F] text-xs uppercase tracking-wider font-bold">
+          <table className="w-full text-left whitespace-nowrap">
+            <thead className="bg-[#DCECE0] text-[#3A4D3F] text-xs uppercase tracking-wider font-bold border-b border-gray-200">
               <tr>
                 <th className="px-6 py-4">Nama Program & No. Surat</th>
-                <th className="px-6 py-4">Lokasi & Periode</th>
-                <th className="px-6 py-4 text-center">Peran Anda</th>
-                <th className="px-6 py-4 text-center">Status Dataset</th>
+                <th className="px-6 py-4">Target Periode</th>
+                <th className="px-6 py-4">Lokasi Lahan</th>
+                <th className="px-6 py-4 text-center">Status Evaluasi</th>
                 <th className="px-6 py-4 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filteredData.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-5">
-                    <div className="font-bold text-gray-800">{item.proyek}</div>
-                    <div className="text-xs font-semibold text-[#185325] mt-1">{item.noSurat}</div>
+              {filteredData.length > 0 ? filteredData.map((item) => (
+                <tr key={item.id} className="hover:bg-gray-50/80 transition-colors group">
+                  <td className="px-6 py-4">
+                    <div className="font-bold text-gray-800 mb-1">{item.proyek}</div>
+                    <div className="text-xs font-semibold text-gray-500">{item.noSurat}</div>
                   </td>
-                  <td className="px-6 py-5">
-                    <div className="text-sm font-semibold text-gray-600">{item.lokasi}</div>
-                    <div className="text-xs font-bold text-[#185325] bg-[#EBF8F1] border border-[#C6EBD6] px-2 py-0.5 rounded-full inline-block mt-1">
-                      {item.periode}
+                  
+                  <td className="px-6 py-4">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#EBF8F1] border border-[#C6EBD6] text-[#185325]">
+                      <span className="text-xs font-bold">{item.periode}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-5 text-center text-sm font-semibold text-gray-600">{item.peran}</td>
-                  <td className="px-6 py-5 text-center">
+                  
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-gray-600">
+                      <HiOutlineMapPin className="w-4 h-4 text-gray-400 shrink-0" />
+                      <span className="truncate max-w-50">{item.lokasi}</span>
+                    </div>
+                  </td>
+                  
+                  <td className="px-6 py-4 text-center">
                     <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                      item.status === 'SIAP DIHITUNG' ? 'bg-[#FEF3C7] text-yellow-800 border border-yellow-200' : 'bg-emerald-50 text-[#185325] border border-emerald-200'
+                      item.status === 'SIAP DIHITUNG' 
+                        ? 'bg-[#FEF3C7] text-yellow-800 border border-yellow-200' 
+                        : 'bg-emerald-50 text-[#185325] border border-emerald-200'
                     }`}>
                       {item.status}
                     </span>
                   </td>
-                  <td className="px-6 py-5 flex justify-center">
+                  
+                  <td className="px-6 py-4 flex justify-center">
                     <button 
                       onClick={() => navigate(`/admin/staff/evaluasi/hasil/detail/${item.id}`)}
-                      title="Lihat Detail & Hitung"
-                      className="p-2.5 text-gray-500 hover:text-[#185325] transition-colors border border-transparent"
+                      className="flex items-center gap-2 px-2 py-2 text-xs font-bold text-white bg-primary border border-[#185325] hover:bg-[#103a19] rounded-full transition-all shadow-sm active:scale-95"
                     >
-                      <HiOutlineEye className="w-5 h-5" />
+                      <HiOutlineEye className="w-4 h-4 stroke-2" />
+                      {item.status === 'SIAP DIHITUNG' ? 'Mulai Hitung' : ''}
                     </button>
                   </td>
                 </tr>
-              ))}
+              )) : (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                    Tidak ada penugasan evaluasi ditemukan.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
+
     </div>
   );
 };
