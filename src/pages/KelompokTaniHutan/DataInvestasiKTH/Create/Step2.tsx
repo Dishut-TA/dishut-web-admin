@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { HiOutlinePencil, HiOutlineTrash, HiOutlineChevronUp, HiOutlinePlus, HiXMark, HiOutlineCalendarDays } from 'react-icons/hi2';
+import { HiOutlinePencil, HiOutlineTrash, HiOutlineChevronUp, HiOutlinePlus, HiXMark, HiOutlineCalendarDays, HiOutlineArrowLeft, HiOutlineArrowRight } from 'react-icons/hi2';
 import type { InvestasiFormState } from './index';
 
 interface StepProps {
   data: InvestasiFormState;
   updateData: React.Dispatch<React.SetStateAction<InvestasiFormState>>;
   onNext: () => void;
+  onPrev: () => void;
 }
 
-const Step2: React.FC<StepProps> = ({ data, updateData, onNext }) => {
+const Step2: React.FC<StepProps> = ({ data, updateData, onNext, onPrev }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newMilestone, setNewMilestone] = useState({ nama: '', batas: '', deskripsi: '' });
 
@@ -54,9 +55,14 @@ const Step2: React.FC<StepProps> = ({ data, updateData, onNext }) => {
         Tambah Milestone <HiOutlinePlus className="w-4 h-4" strokeWidth={2.5} />
       </button>
 
-      <button onClick={onNext} className="w-full py-3.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors">
-        Selanjutnya &gt;
-      </button>
+      <div className="flex gap-4 mt-6">
+        <button onClick={onPrev} className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-white border border-[#185325] text-[#185325] hover:bg-gray-50 text-sm font-bold rounded-full transition-colors">
+          <HiOutlineArrowLeft className="w-4 h-4 stroke-2" /> Kembali
+        </button>
+        <button onClick={onNext} className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors shadow-sm">
+          Selanjutnya <HiOutlineArrowRight className="w-4 h-4 stroke-2" />
+        </button>
+      </div>
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">

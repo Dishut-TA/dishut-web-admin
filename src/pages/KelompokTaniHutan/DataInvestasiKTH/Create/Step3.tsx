@@ -1,18 +1,19 @@
 import React from 'react';
-import { HiOutlineCloud } from 'react-icons/hi2';
+import { HiOutlineCloud, HiOutlineArrowRight, HiOutlineArrowLeft } from 'react-icons/hi2';
 import type { InvestasiFormState } from './index';
 
 interface StepProps {
   data: InvestasiFormState;
   updateData: React.Dispatch<React.SetStateAction<InvestasiFormState>>;
   onNext: () => void;
+  onPrev?: () => void;
 }
 
 const docsList = [
   'Dokumen Perjanjian Investasi', 'Dokumen Rencana Bisnis', 'Template Perjanjian Investor'
 ];
 
-const Step3: React.FC<StepProps> = ({ onNext }) => {
+const Step3: React.FC<StepProps> = ({ onNext, onPrev }) => {
   return (
     <div className="space-y-4 animate-in fade-in duration-300">
       {docsList.map((doc) => (
@@ -26,9 +27,14 @@ const Step3: React.FC<StepProps> = ({ onNext }) => {
         </div>
       ))}
 
-      <button onClick={onNext} className="w-full py-3.5 mt-6 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors">
-        Selanjutnya &gt;
-      </button>
+      <div className="flex gap-4 mt-6">
+        <button onClick={onPrev} className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-white border border-[#185325] text-[#185325] hover:bg-gray-50 text-sm font-bold rounded-full transition-colors">
+          <HiOutlineArrowLeft className="w-4 h-4 stroke-2" /> Kembali
+        </button>
+        <button onClick={onNext} className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors shadow-sm">
+          Selanjutnya <HiOutlineArrowRight className="w-4 h-4 stroke-2" />
+        </button>
+      </div>
     </div>
   );
 };

@@ -29,7 +29,7 @@ const CreateInvestasi: React.FC = () => {
     });
 
     const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, 4));
-    // const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
+    const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1)); 
 
     return (
         <div className="flex flex-col w-full mx-auto pb-12">
@@ -66,9 +66,9 @@ const CreateInvestasi: React.FC = () => {
             </div>
 
             {currentStep === 1 && <Step1 data={formData} updateData={setFormData} onNext={nextStep} />}
-            {currentStep === 2 && <Step2 data={formData} updateData={setFormData} onNext={nextStep} />}
-            {currentStep === 3 && <Step3 data={formData} updateData={setFormData} onNext={nextStep} />}
-            {currentStep === 4 && <Step4 data={formData} onNext={() => alert('Investasi Berhasil Dibuat!')} />}
+            {currentStep === 2 && <Step2 data={formData} updateData={setFormData} onNext={nextStep} onPrev={prevStep} />}
+            {currentStep === 3 && <Step3 data={formData} updateData={setFormData} onNext={nextStep} onPrev={prevStep} />}
+            {currentStep === 4 && <Step4 data={formData} onNext={() => alert('Investasi Berhasil Dibuat!')} onPrev={prevStep} />}
         </div>
     );
 };

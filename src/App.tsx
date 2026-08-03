@@ -144,6 +144,7 @@ import DataZonasi from "./pages/StaffPDAS/AnalisisLahanKritis/DataZonasi";
 import DashboardCPIKABID from "./pages/KepalaBidangPDAS/AnalisisLahanKritis/DashboardCPIKABID";
 import DetailCPIKABID from "./pages/KepalaBidangPDAS/AnalisisLahanKritis/DashboardCPIKABID/DetailCPIKABID";
 import HasilValidasiLokasi from "./pages/KepalaBidangPDAS/AnalisisLahanKritis/HasilValidasiPenyuluh";
+import MasterBibit from "./pages/StaffPDAS/DataMaster/MasterBibit";
 const Login = lazy(() => import("./pages/Authentication/Login"));
 const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -221,6 +222,9 @@ function App() {
                 <Route path="staff">
                   <Route index element={<Navigate to="dashboard" replace />} />
                   <Route path="dashboard" element={<DashboardStaffPDAS />} />
+                  
+                  {/* DATA MASTER */}
+                  <Route path="master/master-bibit" element={<MasterBibit />} />
 
                   {/* CPI */}
                   <Route path="analisis-cpi/dashboard" element={<DashboardCPISTAFF />} />
