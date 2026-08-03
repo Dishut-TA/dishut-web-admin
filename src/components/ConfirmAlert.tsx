@@ -59,21 +59,21 @@ const ConfirmAlert: React.FC<ConfirmAlertProps> = ({
               )}
             </motion.div>
 
-            <h2 className="text-xl font-extrabold text-slate-800 mb-2">{title}</h2>
+            <h2 className="text-xl font-bold text-slate-800 mb-2">{title}</h2>
             <p className="text-sm text-slate-500 mb-8 leading-relaxed">{message}</p>
 
             <div className="flex gap-3 w-full">
               <button
                 onClick={onCancel}
                 disabled={isLoading}
-                className="flex-1 py-3 text-sm font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-all active:scale-95 disabled:opacity-50"
+                className="flex-1 py-3 text-sm font-bold text-slate-600 bg-slate-100 rounded-full hover:bg-slate-200 transition-all active:scale-95 disabled:opacity-50"
               >
                 {cancelText}
               </button>
               <button
                 onClick={onConfirm}
                 disabled={isLoading}
-                className={`flex-1 py-3 text-sm font-bold text-white rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100 flex justify-center items-center ${
+                className={`flex-1 py-3 text-sm font-bold text-white rounded-full transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100 flex justify-center items-center ${
                   isDanger 
                     ? 'bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/30' 
                     : 'bg-[#185325] hover:bg-[#123d1c] shadow-lg shadow-[#185325]/30'
