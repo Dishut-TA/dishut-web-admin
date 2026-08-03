@@ -9,6 +9,7 @@ import {
 } from 'react-icons/hi2';
 import { ROLES } from '@/utils/roles';
 import { canManageAccounts } from '@/utils/rbac';
+import { PiPlant } from 'react-icons/pi';
 
 export const getSidebarMenus = (basePath: string, userRole: string, user: any) => {
 
@@ -22,7 +23,7 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
     const masterBibit = {
         name: 'Master Bibit',
         path: `${basePath}/master/master-bibit`,
-        icon: <HiOutlineHome className="w-5 h-5" />
+        icon: <PiPlant className="w-5 h-5" />
     };
 
     const menuManajemenAkun = {

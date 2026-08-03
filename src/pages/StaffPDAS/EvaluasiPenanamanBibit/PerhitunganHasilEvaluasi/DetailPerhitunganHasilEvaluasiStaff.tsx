@@ -60,7 +60,6 @@ const DetailPerhitunganHasilEvaluasiStaff: React.FC = () => {
     return ((tumbuh / rencana) * 100).toFixed(2);
   };
 
-  // KALKULASI BERDASARKAN RUMUS PERMEN LHK
   const handleHitungDanMuatPeta = () => {
     setIsCalculating(true);
     const loading = toast.loading('Mengkalkulasi persentase tumbuh (Sesuai Permen LHK)...');
@@ -137,13 +136,18 @@ const DetailPerhitunganHasilEvaluasiStaff: React.FC = () => {
                 disabled={isCalculating} 
                 className="px-8 py-3.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors shadow-md flex items-center gap-2 disabled:opacity-75"
               >
-                {isCalculating ? 'Memproses Data Sesuai Aturan...' : 'Simpan, Hitung & Lihat Peta WebGIS'}
+                {isCalculating ? 'Memproses Data Sesuai Aturan...' : 'Simpan, Hitung & Peta WebGIS'}
               </button>
             </div>
           </>
         ) : (
           <>
-            <DashboardHasilDanPeta mockStatus={mockStatus} hasilIntegrasi={hasilIntegrasi} />
+            {/* PROPS DITAMBAHKAN DI SINI */}
+            <DashboardHasilDanPeta 
+              mockStatus={mockStatus} 
+              hasilIntegrasi={hasilIntegrasi} 
+              dataPetakUkur={dataPetakUkur} 
+            />
             
             <TableDataPetakUkur 
               mockStatus={mockStatus} hasCalculated={hasCalculated} dataPetakUkur={dataPetakUkur}
