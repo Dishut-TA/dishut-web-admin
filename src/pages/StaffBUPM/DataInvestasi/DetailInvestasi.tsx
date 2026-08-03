@@ -35,8 +35,6 @@ const DetailInvestasi: React.FC = () => {
     dokumen: [
       { label: 'Dokumen Perjanjian Investasi', file: 'PerjanjianInvestor.pdf' },
       { label: 'Dokumen Rencana Bisnis', file: 'RencanaProyekPembangunanEkowisata.pdf' },
-      { label: 'Dokumen Proyeksi Keuangan', file: 'ProyeksiKeuanganEkowisata.pdf' },
-      { label: 'Dokumen Hukum dan Perizinan', file: 'HukumDanPerizinanInvestasi.pdf' },
       { label: 'Template Perjanjian Investor', file: 'DokumenPerjanjian.pdf' },
     ]
   };
@@ -124,7 +122,7 @@ const DetailInvestasi: React.FC = () => {
               onClick={() => setShowApprovalModal(true)}
               className="flex-1 py-3.5 bg-[#185325] hover:bg-[#123d1c] text-white font-bold rounded-full transition-colors shadow-sm"
             >
-              Setujui Investasi Baru
+              Konfirmasi Investasi Baru
             </button>
           </div>
         )}

@@ -35,8 +35,6 @@ const DetailInvestasiKABIDBUPM: React.FC = () => {
     dokumen: [
       { label: 'Dokumen Perjanjian Investasi', file: 'PerjanjianInvestor.pdf' },
       { label: 'Dokumen Rencana Bisnis', file: 'RencanaProyekPembangunanEkowisata.pdf' },
-      { label: 'Dokumen Proyeksi Keuangan', file: 'ProyeksiKeuanganEkowisata.pdf' },
-      { label: 'Dokumen Hukum dan Perizinan', file: 'HukumDanPerizinanInvestasi.pdf' },
       { label: 'Template Perjanjian Investor', file: 'DokumenPerjanjian.pdf' },
     ]
   };
