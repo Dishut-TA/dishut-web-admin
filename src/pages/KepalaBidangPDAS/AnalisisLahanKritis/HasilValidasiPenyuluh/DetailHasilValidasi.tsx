@@ -1,9 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HiOutlineArrowLeft, HiOutlineInformationCircle, HiOutlineDocumentText, HiOutlineClipboardDocumentCheck } from 'react-icons/hi2';
+import { HiOutlineArrowLeft, HiOutlineInformationCircle, HiOutlineDocumentText, HiOutlineClipboardDocumentCheck, HiOutlineXMark, HiOutlineCheck, HiOutlineShieldCheck } from 'react-icons/hi2';
+import toast from 'react-hot-toast';
 
 const DetailHasilValidasi: React.FC = () => {
   const navigate = useNavigate();
+
+    const handleAction = (action: string) => {
+    toast.success(`Berhasil! Tindakan: ${action}`);
+    navigate(-1);
+  };
 
   return (
     <div className="w-full max-w-6xl mx-auto pb-12">
@@ -101,6 +107,34 @@ const DetailHasilValidasi: React.FC = () => {
 
         </div>
       </div>
+            <div className="bg-white mt-6 rounded-2xl p-5 md:px-8 md:py-6 border border-gray-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
+              <div className="flex items-start gap-4 text-left w-full md:w-auto">
+                <div className="p-2.5 bg-blue-50 text-blue-600 rounded-full hidden sm:block">
+                  <HiOutlineShieldCheck className="w-6 h-6 stroke-2" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-gray-800">Keputusan Validasi</h3>
+                  <p className="text-xs text-gray-500 mt-1 max-w-sm">
+                    Pastikan Anda telah memeriksa kesesuaian data lapangan secara menyeluruh sebelum mengambil keputusan.
+                  </p>
+                </div>
+              </div>
+      
+              <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto shrink-0">
+                <button 
+                  onClick={() => handleAction('Validasi Tidak Layak')}
+                  className="flex items-center justify-center gap-2 px-6 py-2.5 border-2 border-red-100 text-red-600 hover:bg-red-50 hover:border-red-200 font-bold text-sm rounded-full transition-all active:scale-95 whitespace-nowrap"
+                >
+                  <HiOutlineXMark className="w-4 h-4 stroke-2" /> Validasi Tidak Layak
+                </button>
+                <button 
+                  onClick={() => handleAction('Validasi Sebagai Layak')}
+                  className="flex items-center justify-center gap-2 px-8 py-2.5 bg-[#185325] hover:bg-[#123d1c] text-white font-bold text-sm rounded-full shadow-md transition-all active:scale-95 hover:shadow-lg hover:-translate-y-0.5 whitespace-nowrap"
+                >
+                  <HiOutlineCheck className="w-5 h-5 stroke-2" /> Validasi Layak
+                </button>
+              </div>
+            </div>
     </div>
   );
 };

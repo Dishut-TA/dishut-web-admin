@@ -24,12 +24,14 @@ const DetailPerhitunganHasilEvaluasiStaff: React.FC = () => {
     noSurat: 'ST.76/TKTRH/RRPKH/DAS.04.03/B/03/2026',
     namaProyek: 'Rehabilitasi Lahan Kompensasi PT. Jawa Satu Power',
     lokasi: 'Hutan Lindung Desa Sudalarang, Kab. Garut',
-    periode: 'Pemeliharaan II (P2)' 
+    periode: 'Pemeliharaan II (P2)',
+    jenisProgram: 'APBD', // dummy data ini ntar ganti aja kalo mau testing jadi CSR
+    statusPendanaan: 'Dihentikan'
   };
 
   const [dataPetakUkur, setDataPetakUkur] = useState<PetakUkur[]>([
-    { periode: 'P2', pu: 'PU-1', jenisBibit: 'Mahoni (Swietenia macrophylla)', rencana: 110, tumbuh: 108, tinggi: 123.2, koordinat: '-6.21, 106.82', kondisiLahan: 'Baik / Normal' },
-    { periode: 'P2', pu: 'PU-2', jenisBibit: 'Mahoni (Swietenia macrophylla)', rencana: 110, tumbuh: 100, tinggi: 120.5, koordinat: '-6.22, 106.83', kondisiLahan: 'Baik / Normal' },
+    { periode: 'P2', pu: 'PU-1', jenisBibit: 'Mahoni (Swietenia macrophylla)', rencana: 110, tumbuh: 40, tinggi: 123.2, koordinat: '-6.21, 106.82', kondisiLahan: 'Baik / Normal' },
+    { periode: 'P2', pu: 'PU-2', jenisBibit: 'Mahoni (Swietenia macrophylla)', rencana: 110, tumbuh: 40, tinggi: 120.5, koordinat: '-6.22, 106.83', kondisiLahan: 'Baik / Normal' },
     { periode: 'P2', pu: 'PU-3', jenisBibit: 'Pinus (Pinus merkusii)', rencana: 63, tumbuh: 60, tinggi: 115.0, koordinat: '-6.23, 106.84', kondisiLahan: 'Baik / Normal' },
     { periode: 'P2', pu: 'PU-4', jenisBibit: 'Pinus (Pinus merkusii)', rencana: 40, tumbuh: 28, tinggi: 110.0, koordinat: '-6.24, 106.85', kondisiLahan: 'Banyak Gulma' },
   ]);
@@ -38,7 +40,8 @@ const DetailPerhitunganHasilEvaluasiStaff: React.FC = () => {
     persenTumbuhGlobal: mockStatus === 'HASIL TERVALIDASI' ? '91.65' : '0.00',
     skorCPILingkungan: mockStatus === 'HASIL TERVALIDASI' ? '3.45' : '0.00',
     statusEvaluasiLahan: mockStatus === 'HASIL TERVALIDASI' ? 'BERHASIL' : '-',
-    rekomendasiTindakLanjut: mockStatus === 'HASIL TERVALIDASI' ? 'Kondisi tanaman tumbuh sangat baik, lahan ini memerlukan intervensi pemeliharaan ketat.' : ''
+    rekomendasiTindakLanjut: mockStatus === 'HASIL TERVALIDASI' ? 'Kondisi tanaman tumbuh sangat baik.' : '',
+    isPerluTindakLanjut: false
   });
 
   const handleEdit = <K extends keyof PetakUkur>(index: number, field: K, value: PetakUkur[K]) => {
@@ -77,11 +80,31 @@ const DetailPerhitunganHasilEvaluasiStaff: React.FC = () => {
         ? ((totalTumbuh / totalRencana) * 100).toFixed(2) 
         : "0.00";
       
+      let finalStatus = '';
+      let finalRekomendasi = '';
+      let needTindakLanjut = false;
+
+      if (parseFloat(rataRataTumbuh) >= 75) {
+        finalStatus = 'BERHASIL - MEMENUHI KRITERIA';
+        finalRekomendasi = `Kondisi tanaman tumbuh mencapai ${rataRataTumbuh}%. Evaluasi berhasil tanpa perlu penyulaman lanjutan.`;
+      } else {
+        if (infoTugas.jenisProgram === 'CSR' && infoTugas.statusPendanaan === 'Dihentikan') {
+          finalStatus = 'PROGRAM DIHENTIKAN';
+          finalRekomendasi = `Pertumbuhan di bawah standar (${rataRataTumbuh}%), namun pendanaan CSR terdeteksi Dihentikan. Program tidak dapat dilanjutkan ke tahap penyulaman.`;
+          needTindakLanjut = false; 
+        } else {
+          finalStatus = 'PENETAPAN KEGIATAN PENYULAMAN';
+          finalRekomendasi = `Pertumbuhan di bawah standar (${rataRataTumbuh}%). Karena berada di zona dengan Skor CPI Tinggi (3.45), lahan ini wajib mendapatkan penetapan kegiatan penyulaman segera.`;
+          needTindakLanjut = true; 
+        }
+      }
+
       setHasilIntegrasi({
         persenTumbuhGlobal: rataRataTumbuh,
         skorCPILingkungan: '3.45',
-        statusEvaluasiLahan: parseFloat(rataRataTumbuh) >= 75 ? 'BERHASIL - PRIORITAS PEMELIHARAAN TINGGI' : 'TIDAK BERHASIL - BUTUH PENYULAMAN',
-        rekomendasiTindakLanjut: `Kondisi tanaman tumbuh mencapai ${rataRataTumbuh}%. Karena berada di zona dengan Skor CPI Tinggi (3.45), lahan ini memerlukan pemantauan dan intervensi lanjutan.`
+        statusEvaluasiLahan: finalStatus,
+        rekomendasiTindakLanjut: finalRekomendasi,
+        isPerluTindakLanjut: needTindakLanjut
       });
 
       setIsCalculating(false);
@@ -109,18 +132,48 @@ const DetailPerhitunganHasilEvaluasiStaff: React.FC = () => {
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-10">
         
         <div className="border-b border-gray-100 pb-6 mb-8 flex flex-col md:flex-row md:items-start justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-4">
+          <div className="w-full">
+            <div className="flex items-center gap-3 mb-5">
               <h1 className="text-xl md:text-2xl font-bold text-gray-800">Detail Perhitungan Evaluasi</h1>
             </div>
             
-            <div className="bg-[#f8fbf9] border border-[#DCECE0] rounded-xl p-5 text-sm text-gray-700 space-y-2 max-w-3xl relative overflow-hidden">
-              <HiOutlineDocumentText className="absolute -right-4 -bottom-4 w-24 h-24 text-[#185325] opacity-5" />
-              <p><span className="font-semibold text-gray-500 inline-block w-32">Program</span>: <span className="font-bold text-[#185325]">{infoTugas.namaProyek}</span></p>
-              <p><span className="font-semibold text-gray-500 inline-block w-32">No. Penugasan</span>: <span className="font-bold">{infoTugas.noSurat}</span></p>
-              <p><span className="font-semibold text-gray-500 inline-block w-32">Periode</span>: <span className="font-bold text-orange-600">{infoTugas.periode}</span></p>
-              <p><span className="font-semibold text-gray-500 inline-block w-32">Lokasi Lahan</span>: <span className="font-bold">{infoTugas.lokasi}</span></p>
+            <div className="bg-[#f8fbf9] border border-[#DCECE0] rounded-xl p-5 md:p-6 text-sm text-gray-700 relative overflow-hidden">
+              <HiOutlineDocumentText className="absolute -right-4 -bottom-4 w-32 h-32 text-[#185325] opacity-5 pointer-events-none" />
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-4 relative z-10">
+                <div className="flex items-start gap-2">
+                  <span className="font-semibold text-gray-500 w-28 shrink-0">Program</span>
+                  <span className="font-semibold text-gray-500 shrink-0">:</span>
+                  <span className="font-bold text-[#185325]">{infoTugas.namaProyek}</span>
+                </div>
+                
+                <div className="flex items-start gap-2">
+                  <span className="font-semibold text-gray-500 w-28 shrink-0">Jenis Program</span>
+                  <span className="font-semibold text-gray-500 shrink-0">:</span>
+                  <span className="font-bold text-gray-800">{infoTugas.jenisProgram} ({infoTugas.statusPendanaan})</span>
+                </div>
+                
+                <div className="flex items-start gap-2">
+                  <span className="font-semibold text-gray-500 w-28 shrink-0">No. Penugasan</span>
+                  <span className="font-semibold text-gray-500 shrink-0">:</span>
+                  <span className="font-bold text-gray-800">{infoTugas.noSurat}</span>
+                </div>
+                
+                <div className="flex items-start gap-2">
+                  <span className="font-semibold text-gray-500 w-28 shrink-0">Periode</span>
+                  <span className="font-semibold text-gray-500 shrink-0">:</span>
+                  <span className="font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-100/50">{infoTugas.periode}</span>
+                </div>
+                
+                <div className="flex items-start gap-2 lg:col-span-2">
+                  <span className="font-semibold text-gray-500 w-28 shrink-0">Lokasi Lahan</span>
+                  <span className="font-semibold text-gray-500 shrink-0">:</span>
+                  <span className="font-bold text-gray-800">{infoTugas.lokasi}</span>
+                </div>
+              </div>
             </div>
+            {/* END FIX */}
+
           </div>
         </div>
 
@@ -136,13 +189,12 @@ const DetailPerhitunganHasilEvaluasiStaff: React.FC = () => {
                 disabled={isCalculating} 
                 className="px-8 py-3.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors shadow-md flex items-center gap-2 disabled:opacity-75"
               >
-                {isCalculating ? 'Memproses Data Sesuai Aturan...' : 'Simpan, Hitung & Peta WebGIS'}
+                {isCalculating ? 'Memproses Data Sesuai Aturan...' : 'Simpan, Hitung (Permen LHK) & Peta WebGIS'}
               </button>
             </div>
           </>
         ) : (
           <>
-            {/* PROPS DITAMBAHKAN DI SINI */}
             <DashboardHasilDanPeta 
               mockStatus={mockStatus} 
               hasilIntegrasi={hasilIntegrasi} 
@@ -163,15 +215,17 @@ const DetailPerhitunganHasilEvaluasiStaff: React.FC = () => {
                   Edit Data / Kalkulasi Ulang
                 </button>
                 
-                <button 
-                  onClick={() => {
-                    setShowTindakLanjut(true);
-                    setTimeout(() => document.getElementById('section-tindak-lanjut')?.scrollIntoView({ behavior: 'smooth' }), 100);
-                  }}
-                  className="w-full sm:w-auto px-6 py-3.5 bg-orange-50 text-orange-600 border border-orange-200 hover:bg-orange-100 text-sm font-bold rounded-full transition-colors flex items-center justify-center gap-2"
-                >
-                  <HiOutlineExclamationTriangle className="w-5 h-5" /> Buat Arahan Tindak Lanjut
-                </button>
+                {hasilIntegrasi.isPerluTindakLanjut && (
+                  <button 
+                    onClick={() => {
+                      setShowTindakLanjut(true);
+                      setTimeout(() => document.getElementById('section-tindak-lanjut')?.scrollIntoView({ behavior: 'smooth' }), 100);
+                    }}
+                    className="w-full sm:w-auto px-6 py-3.5 bg-orange-50 text-orange-600 border border-orange-200 hover:bg-orange-100 text-sm font-bold rounded-full transition-colors flex items-center justify-center gap-2"
+                  >
+                    <HiOutlineExclamationTriangle className="w-5 h-5" /> Buat Arahan Tindak Lanjut
+                  </button>
+                )}
 
                 <button 
                   onClick={handleSetujuiHasil} 

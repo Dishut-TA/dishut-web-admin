@@ -1,6 +1,5 @@
 import React from 'react';
 import type { CPIDataRow } from '../types';
-import { HiOutlineEye } from 'react-icons/hi2';
 import { useNavigate } from 'react-router-dom';
 
 interface CPITableProps {
@@ -45,8 +44,8 @@ const CPITable: React.FC<CPITableProps> = ({ data }) => {
                 <td className="px-6 py-4 text-center text-[#185325] font-bold">{row.rekomendasi}</td>
                 <td className="px-6 py-4 text-center text-[#185325] font-bold">{row.statusVerifikasi}</td>
                 <td className="px-6 py-4 text-center">
-                  <button onClick={() => navigate(`/admin/kabid/analisis-cpi/dashboard/detail/${row.id}`)} className="p-2 text-gray-500 hover:text-[#185325] hover:bg-[#EBF8F1] rounded-full transition-colors">
-                    <HiOutlineEye className="w-5 h-5" />
+                  <button onClick={() => navigate(`/admin/kabid/analisis-cpi/hasil-validasi-lokasi`)} className="px-4 py-2 text-white font-medium bg-primary hover:text-white hover:bg-[#133021] rounded-full transition-colors">
+                    Validasi
                   </button>
                 </td>
               </tr>
