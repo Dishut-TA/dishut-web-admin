@@ -80,15 +80,8 @@ const InputDataModal: React.FC<InputDataModalProps> = ({
       formData.append("nama_project", namaProject);
       formData.append("target_resolution", "5000");
       formData.append("save_intermediate", "0");
-      // formData.append('ahp_matrix', JSON.stringify({ bobot_dem: 0.4 }));
-      formData.append(
-        "ahp_matrix",
-        JSON.stringify([
-          [1, 2, 3],
-          [0.5, 1, 2],
-          [0.3, 0.5, 1],
-        ]),
-      );
+      // Default AHP Matrix akan menggunakan rules.yaml di backend (4x4 matrix)
+      // formData.append("ahp_matrix", JSON.stringify([...]));
 
       Object.entries(files).forEach(([key, file]) => {
         if (file) {

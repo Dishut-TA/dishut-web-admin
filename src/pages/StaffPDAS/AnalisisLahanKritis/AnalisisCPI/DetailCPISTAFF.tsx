@@ -9,7 +9,7 @@ import {
   HiOutlineBriefcase,
 } from 'react-icons/hi2';
 
-const DetailCPIKABID: React.FC = () => {
+const DetailCPISTAFF: React.FC = () => {
   const navigate = useNavigate();
 
   const detailData = {
@@ -153,4 +153,4 @@ const DetailCPIKABID: React.FC = () => {
   );
 };
 
-export default DetailCPIKABID;
+export default DetailCPISTAFF;
