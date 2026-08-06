@@ -14,6 +14,7 @@ import { getDonationProgramsAPI, updateDonationProgramAPI } from '@/services/pro
 export interface ProgramDataExtended {
   id: string;
   nama: string;
+  deskripsi: string;
   lokasi: string;
   terkumpul: string;
   totalTerealisasi: string;
@@ -67,13 +68,14 @@ const KabidProgramDonasi: React.FC = () => {
       const mappedData: ProgramDataExtended[] = response.payload.map((item: any) => {
         const mappedBibit = item.jenis_bibit && item.jenis_bibit.length > 0 
           ? item.jenis_bibit.map((bibit: any) => ({
-              nama: bibit.name || `Spek ID: ${bibit.id}`
+              nama: bibit.nama || bibit.name || `Spek ID: ${bibit.id}` 
             }))
           : [];
 
         return {
           id: item.id.toString(),
           nama: item.name,
+          deskripsi: item.description || '', 
           lokasi: item.location,
           terkumpul: item.total_seeds_collected.toLocaleString('id-ID'),
           totalTerealisasi: item.total_seeds_realized.toLocaleString('id-ID'),
@@ -112,20 +114,10 @@ const KabidProgramDonasi: React.FC = () => {
   };
 
   const updateProgramStatus = async (id: string, newStatus: string) => {
-    const targetProgram = programsData.find(p => p.id === id);
-    if (!targetProgram) return;
-
     const loadingToast = toast.loading('Memproses verifikasi...');
 
     try {
       const payload = {
-        analysis_result_id: targetProgram.raw_analysis_result_id,
-        kth_id: targetProgram.raw_kth_id,
-        seed_specification_id: targetProgram.raw_seed_specification_id,
-        name: targetProgram.nama,
-        location: targetProgram.lokasi,
-        total_seeds_collected: targetProgram.raw_total_seeds_collected,
-        total_seeds_realized: targetProgram.raw_total_seeds_realized,
         status: newStatus 
       };
 

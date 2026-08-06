@@ -10,10 +10,11 @@ import {
 import toast from 'react-hot-toast';
 import ZoomableImagePreview from './components/ZoomableImagePreview';
 import { getBibitsAPI, getSeedSpecificationsAPI } from '@/services/bibit.service';
-import { createDonationProgramAPI, type DonationProgramPayload } from '@/services/program-donasi.service';
+import { createDonationProgramAPI } from '@/services/program-donasi.service'; 
 
 interface MergedBibitSpec {
   spec_id: number;
+  seed_id: number; 
   bibit_nama: string;
   min_height: number;
   max_height: number;
@@ -29,8 +30,9 @@ const locationKthMap: Record<string, string> = {
 const CreateProgram: React.FC = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);  
+  const [imageFile, setImageFile] = useState<File | null>(null); 
+  const [selectedImage, setSelectedImage] = useState<string | null>(null); 
   const [namaProgram, setNamaProgram] = useState('');
   const [lokasiLahan, setLokasiLahan] = useState('');
   const [kthPelaksana, setKthPelaksana] = useState('');
@@ -40,24 +42,31 @@ const CreateProgram: React.FC = () => {
   const [isFetchingBibit, setIsFetchingBibit] = useState(true);
   const [selectedSpecId, setSelectedSpecId] = useState('');
   const [daftarBibit, setDaftarBibit] = useState<MergedBibitSpec[]>([]);
+  const [deskripsi, setDeskripsi] = useState('');
 
-  useEffect(() => {
+useEffect(() => {
     const fetchMasterData = async () => {
       try {
         const [bibitRes, specRes] = await Promise.all([
           getBibitsAPI(),
           getSeedSpecificationsAPI()
         ]);
-
-        const bibits = bibitRes.payload;
-        const specs = specRes.payload;
+        
+        const bibits = bibitRes.payload || [];
+        const specs = specRes.payload || [];
+        
+        console.log("Data Master Bibit: ", bibits);
+        console.log("Data Spesifikasi: ", specs); 
 
         const mergedData: MergedBibitSpec[] = [];
-        specs.forEach(spec => {
-          const bibit = bibits.find(b => b.id === spec.seed_id);
+        
+        specs.forEach((spec: any) => {
+          const bibit = bibits.find((b: any) => Number(b.id) === Number(spec.seed_id));
+          
           if (bibit) {
             mergedData.push({
               spec_id: spec.id,
+              seed_id: bibit.id, 
               bibit_nama: bibit.nama,
               min_height: spec.min_height,
               max_height: spec.max_height,
@@ -67,8 +76,14 @@ const CreateProgram: React.FC = () => {
         });
 
         setBibitOptions(mergedData);
+        
+        if (mergedData.length === 0 && bibits.length > 0) {
+           toast.error('Spesifikasi (harga/ukuran) untuk bibit belum diatur di database.');
+        }
+
       } catch (error) {
         toast.error('Gagal memuat daftar master bibit & harga.');
+        console.error(error);
       } finally {
         setIsFetchingBibit(false);
       }
@@ -79,12 +94,19 @@ const CreateProgram: React.FC = () => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      const imageUrl = URL.createObjectURL(file);
-      setSelectedImage(imageUrl);
+      
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error("Ukuran gambar maksimal 2MB");
+        return;
+      }
+
+      setImageFile(file); 
+      setSelectedImage(URL.createObjectURL(file));
     }
   };
 
   const clearImage = () => {
+    setImageFile(null);
     setSelectedImage(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -93,11 +115,9 @@ const CreateProgram: React.FC = () => {
     if (fileInputRef.current) fileInputRef.current.click();
   };
 
-  // Handler Auto-fill KTH Berdasarkan Lokasi Lahan
   const handleLocationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const loc = e.target.value;
     setLokasiLahan(loc);
-    // Set KTH secara otomatis dari mapping, atau kosongkan jika tidak ada
     setKthPelaksana(locationKthMap[loc] || '');
   };
 
@@ -146,22 +166,23 @@ const CreateProgram: React.FC = () => {
     const loadingToast = toast.loading('Mengajukan program donasi...');
 
     try {
-      // Backend saat ini menerima seed_specification_id tunggal, kita kirim yang pertama.
-      // Serta kita menyertakan data tambahan jika diperlukan oleh API.
-      const payload: DonationProgramPayload = {
-        analysis_result_id: null,
-        kth_id: 1, // Jika ini butuh dinamis, sesuaikan value KTH yang di-autofill
-        seed_specification_id: daftarBibit[0].spec_id, 
-        name: namaProgram,
-        location: lokasiLahan,
-        total_seeds_collected: 0,
-        total_seeds_realized: 0,
-        status: "Menunggu Verifikasi",
-        // start_date: tanggalMulai, // Aktifkan field ini jika backend sudah menerimanya
-        // end_date: tanggalSelesai, // Aktifkan field ini jika backend sudah menerimanya
-      };
+      const formData = new FormData();
+      
+      formData.append('name', namaProgram);
+      formData.append('location', lokasiLahan);
+      formData.append('description', deskripsi);
+      formData.append('kth_id', '1'); 
+      formData.append('total_seeds_collected', '0');
+      formData.append('total_seeds_realized', '0');
+      if (imageFile) {
+        formData.append('image', imageFile);
+      }
 
-      await createDonationProgramAPI(payload);
+      daftarBibit.forEach(bibit => {
+        formData.append('jenis_bibit[]', bibit.seed_id.toString());
+      });
+
+      await createDonationProgramAPI(formData as any); 
 
       toast.success('Program berhasil diajukan!', { id: loadingToast });
       navigate(-1); 
@@ -260,6 +281,17 @@ const CreateProgram: React.FC = () => {
                 />
               </div>
             </div>
+            <div className="md:col-span-2">
+                <label className="block text-sm font-bold text-slate-800 mb-2">Deskripsi Program <span className="text-red-500">*</span></label>
+                <textarea 
+                  required 
+                  value={deskripsi} 
+                  onChange={e => setDeskripsi(e.target.value)}
+                  placeholder="Ceritakan tujuan dan latar belakang program donasi ini..."
+                  rows={4}
+                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#009262]/20 focus:border-[#009262] transition-all shadow-sm resize-y"
+                />
+              </div>
 
             <div className="pt-4 border-t border-slate-100">
               <div className="mb-4">

@@ -60,7 +60,20 @@ export interface UserProfile {
   foto_profile?: string | null;
 }
 
-export type StatusType = 'Terealisasi' | 'Disalurkan' | 'Terkumpul' | 'Menunggu Verifikasi';
+export interface DetailBibitDana {
+  nama: string;
+  jumlah: number;
+  hargaSatuan: number;
+}
+
+export type StatusType = 
+  | 'Menunggu Verifikasi' 
+  | 'Pending' 
+  | 'Terealisasi' 
+  | 'Disalurkan' 
+  | 'Verified' 
+  | 'Ditolak' 
+  | string;
 
 export interface DetailBibitDana {
   nama: string;
@@ -69,14 +82,70 @@ export interface DetailBibitDana {
 }
 
 export interface DonaturData {
-  idTransaksi: string;
-  idDonasi: string;
-  namaDonatur: string;
-  program: string;
-  jumlahBibit: number; 
-  status: StatusType;
+  id: number;                     
+  idTransaksi: string;            
+  idDonasi: string;               
+  namaDonatur: string;            
+  program: string;                
+  jumlahBibit: number;            
+  status: StatusType;             
   rincianBibit: DetailBibitDana[];
-  tanggalDonasi?: string; 
+  tanggalDonasi?: string;         
+  receipt_path?: string | null;   
+  certificate_path?: string | null; 
+}
+
+export interface SeedSpecificationResponse {
+  id: number;
+  seed_id: number;
+  min_height: number;
+  max_height: number;
+  stock: number;
+  price: string;
+}
+
+export interface SeedResponse {
+  id: number;
+  kode: string;
+  nama: string;
+  jenis: string;
+  kategori: string;
+  deskripsi: string;
+  status: string;
+  specifications?: SeedSpecificationResponse[];
+}
+
+export interface DonorResponse {
+  id: number;
+  donor_name: string;
+  address: string;
+}
+
+export interface DonationProgramResponse {
+  id: number;
+  name: string;
+  location: string;
+  status: string;
+}
+
+export interface DonationItemResponse {
+  id: number;
+  donation_program_id: number;
+  donor_id: number;
+  seed_id: number;
+  seed_quantity: number;
+  seed_status: string;
+  receipt_path: string | null;
+  certificate_path: string | null;
+  created_at: string;
+  updated_at: string;
+  seed?: SeedResponse;
+  donor?: DonorResponse;
+  donation_program?: DonationProgramResponse;
+}
+
+export interface GetDonationsResponse {
+  payload: DonationItemResponse[] | DonationItemResponse;
 }
 
 export type StatusProgram = 'Aktif' | 'Selesai' | 'Menunggu Verifikasi';
