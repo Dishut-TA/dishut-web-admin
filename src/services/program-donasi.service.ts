@@ -5,22 +5,27 @@ export interface DonationProgramPayload {
   kth_id: number;
   seed_specification_id: number;
   name: string;
+  description?: string;
   location: string;
   total_seeds_collected: number;
   total_seeds_realized: number;
   status: string;
+  jenis_bibit?: string[];
 }
 
 export interface DonationProgramResponseData {
   id: number;
   analysis_result_id: number | null;
   kth_id: number;
-  seed_specification_id: number;
+  seed_specification_id: number | null;
   name: string;
+  description: string | null; 
   location: string;
   total_seeds_collected: number;
   total_seeds_realized: number;
   status: string;
+  image_url: string | null;
+  jenis_bibit?: any[];
   created_at: string;
   updated_at: string;
 }
@@ -29,23 +34,23 @@ export interface GetDonationProgramsResponse {
   payload: DonationProgramResponseData[];
 }
 
-export const createDonationProgramAPI = async (payload: DonationProgramPayload) => {
+export const createDonationProgramAPI = async (formData: FormData) => {
   try {
     const token = localStorage.getItem('token');
     
     const response = await fetch(`${API_URL}/donation-programs`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Accept': 'application/json',
         ...(token && { 'Authorization': `Bearer ${token}` })
       },
-      body: JSON.stringify(payload),
+      body: formData, 
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || 'Terjadi kesalahan saat menyimpan program donasi.');
+      throw new Error(data.message || 'Terjadi kesalahan saat membuat program.');
     }
 
     return data;
@@ -58,7 +63,7 @@ export const updateDonationProgramAPI = async (id: string | number, payload: any
   try {
     const token = localStorage.getItem('token'); 
     
-    const response = await fetch(`${import.meta.env.VITE_API_MASTER_URL}/donation-programs/${id}`, {
+    const response = await fetch(`${API_URL}/donation-programs/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

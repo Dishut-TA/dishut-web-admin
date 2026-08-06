@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   HiOutlineExclamationCircle,
   HiOutlineCheckCircle,
@@ -10,84 +10,105 @@ import toast from "react-hot-toast";
 import VerifikasiDonaturModal from "../DataDonatur/components/VerifikasiDonaturModal";
 import StatCard, { type StatData } from "./components/StatCard";
 import type { DonaturData } from "@/utils/interface";
+import { getStaffDonasiDashboardAPI } from "@/services/dashboard.service";
 
-interface VerificationData {
-  id: number;
-  companyName: string;
-  detail: string;
-}
-
-interface ProgressData {
-  id: number;
-  title: string;
-  collected: string;
-  status: "Aktif" | "Selesai" | "Menunggu Verifikasi";
-}
-
-// --- MOCK DATA ---
-const STATS_DATA: StatData[] = [
-  { id: 1, label: "Menunggu Verifikasi", value: 1, icon: HiOutlineExclamationCircle, iconColor: "text-amber-500", bgColor: "bg-amber-50" },
-  { id: 2, label: "Bibit Siap Salur", value: 55, icon: HiOutlineCheckCircle, iconColor: "text-[#2E7D32]", bgColor: "bg-[#DCECE0]/50" },
-  { id: 3, label: "Total Bibit Tertanam", value: 50, icon: HiOutlineGlobeAsiaAustralia, iconColor: "text-[#185325]", bgColor: "bg-[#DCECE0]/80" },
-  { id: 4, label: "Program Aktif", value: 2, icon: HiOutlineMap, iconColor: "text-blue-600", bgColor: "bg-blue-50" },
-];
-
-const VERIFICATION_DATA: VerificationData[] = [
-  { id: 1, companyName: "PT Hijau Bersama", detail: "500 Bibit - Pemulihan Lahan Kritis Cisadane" },
-];
-
-const PROGRESS_DATA: ProgressData[] = [
-  { id: 1, title: "Penghijauan Hulu Citarum", collected: "8.500", status: "Aktif" },
-  { id: 2, title: "Pemulihan Lahan Kritis Cisadane", collected: "2.000", status: "Aktif" },
-  { id: 3, title: "Hutan Kota Ciliwung", collected: "2.000", status: "Selesai" },
-  { id: 4, title: "Penanaman Mangrove Pesisir Utara", collected: "0", status: "Menunggu Verifikasi" },
-];
-
-const StatusBadge = ({ status }: { status: ProgressData["status"] }) => {
-  const styles = {
+const StatusBadge = ({ status }: { status: "Aktif" | "Selesai" | "Menunggu Verifikasi" | string }) => {
+  const styles: Record<string, string> = {
     Aktif: "bg-[#e2f1e6] text-[#185325] border border-[#C8E0CD]",
     Selesai: "bg-gray-100 text-gray-600 border border-gray-200",
     "Menunggu Verifikasi": "bg-amber-50 text-amber-600 border border-amber-200",
   };
   return (
-    <span className={`px-4 py-1.5 text-[11px] font-bold rounded-full whitespace-nowrap shadow-sm ${styles[status]}`}>
+    <span className={`px-4 py-1.5 text-[11px] font-bold rounded-full whitespace-nowrap shadow-sm ${styles[status] || "bg-gray-100 text-gray-600"}`}>
       {status}
     </span>
   );
 };
 
 const DashboardProgram: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState({
+    menunggu_verifikasi: 0,
+    bibit_siap_salur: 0,
+    total_bibit_tertanam: 0,
+    program_aktif: 0,
+  });
+  const [donaturPending, setDonaturPending] = useState<any[]>([]);
+  const [progressProgram, setProgressProgram] = useState<any[]>([]);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDonatur, setSelectedDonatur] = useState<DonaturData | null>(null);
 
-  const handleOpenVerifikasi = (item: VerificationData) => {
-      const detailParts = item.detail.split(" - ");
-      const jumlahBibitString = detailParts[0] ? detailParts[0].replace(/\D/g, "") : "0"; 
-      const jumlahBibitNumber = parseInt(jumlahBibitString, 10); 
-      const programName = detailParts[1] || "-";
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
 
-      setSelectedDonatur({
-        idTransaksi: `TRX-00${item.id}`,
-        idDonasi: `TRX-00${item.id}`,
-        namaDonatur: item.companyName,
-        program: programName,
-        jumlahBibit: jumlahBibitNumber,
-        status: "Menunggu Verifikasi",
-        rincianBibit: [] 
+  const fetchDashboardData = async () => {
+    setIsLoading(true);
+    try {
+      const res = await getStaffDonasiDashboardAPI();
+      setStats({
+        menunggu_verifikasi: res.menunggu_verifikasi,
+        bibit_siap_salur: res.bibit_siap_salur,
+        total_bibit_tertanam: res.total_bibit_tertanam,
+        program_aktif: res.program_aktif,
       });
-      
-      setIsModalOpen(true);
-    };
+      setDonaturPending(res.donatur_butuh_verifikasi || []);
+      setProgressProgram(res.progress_program || []);
+    } catch (error: any) {
+      toast.error(error.message || 'Gagal memuat data dashboard.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOpenVerifikasi = (item: any) => {
+    setSelectedDonatur({
+      id: item.id,
+      idTransaksi: `TRX-${item.id}`,
+      idDonasi: `DNS-${item.id}`,
+      namaDonatur: item.donor?.donor_name || "Hamba Allah",
+      program: item.donation_program?.name || "Program Umum",
+      jumlahBibit: item.seed_quantity || 0,
+      status: "Menunggu Verifikasi",
+      rincianBibit: [
+        {
+          nama: item.seed?.name || "Bibit",
+          jumlah: item.seed_quantity || 0,
+          hargaSatuan: 0,
+        }
+      ]
+    });
+    setIsModalOpen(true);
+  };
 
   const handleTerimaDonatur = () => {
-    toast.success(`Donasi dari ${selectedDonatur?.namaDonatur} berhasil diverifikasi!`);
+    toast.success(`Donasi berhasil diverifikasi!`);
     setIsModalOpen(false);
+    fetchDashboardData(); // Refresh data dashboard
   };
 
   const handleTolakDonatur = () => {
-    toast.error(`Donasi dari ${selectedDonatur?.namaDonatur} ditolak.`);
+    toast.error(`Donasi ditolak.`);
     setIsModalOpen(false);
+    fetchDashboardData(); 
   };
+
+  const STATS_DATA: StatData[] = [
+    { id: 1, label: "Menunggu Verifikasi", value: stats.menunggu_verifikasi, icon: HiOutlineExclamationCircle, iconColor: "text-amber-500", bgColor: "bg-amber-50" },
+    { id: 2, label: "Bibit Siap Salur", value: stats.bibit_siap_salur, icon: HiOutlineCheckCircle, iconColor: "text-[#2E7D32]", bgColor: "bg-[#DCECE0]/50" },
+    { id: 3, label: "Total Bibit Tertanam", value: stats.total_bibit_tertanam, icon: HiOutlineGlobeAsiaAustralia, iconColor: "text-[#185325]", bgColor: "bg-[#DCECE0]/80" },
+    { id: 4, label: "Program Aktif", value: stats.program_aktif, icon: HiOutlineMap, iconColor: "text-blue-600", bgColor: "bg-blue-50" },
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-100 w-full">
+        <span className="w-10 h-10 border-4 border-gray-200 border-t-[#185325] rounded-full animate-spin"></span>
+        <p className="text-sm font-bold text-gray-500 mt-3">Memuat ringkasan dashboard...</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -101,6 +122,7 @@ const DashboardProgram: React.FC = () => {
           </p>
         </div>
 
+        {/* STATISTIC CARDS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {STATS_DATA.map((stat) => (
             <StatCard key={stat.id} data={stat} />
@@ -113,21 +135,23 @@ const DashboardProgram: React.FC = () => {
             <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-[#f0f9f3]">
               <h2 className="font-bold text-gray-800">Donatur Butuh Verifikasi</h2>
               <span className="bg-[#F2C94C] text-gray-800 text-[11px] font-bold px-3 py-1 rounded-full shadow-sm">
-                {VERIFICATION_DATA.length} Baru
+                {donaturPending.length} Baru
               </span>
             </div>
 
             <div className="p-6 flex-1 bg-slate-50/50 min-h-75">
-              {VERIFICATION_DATA.length > 0 ? (
+              {donaturPending.length > 0 ? (
                 <div className="space-y-4">
-                  {VERIFICATION_DATA.map((item) => (
+                  {donaturPending.map((item) => (
                     <div
                       key={item.id}
                       className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-[#185325]/50 transition-colors"
                     >
                       <div>
-                        <h4 className="font-bold text-gray-800">{item.companyName}</h4>
-                        <p className="text-sm text-gray-500 mt-1">{item.detail}</p>
+                        <h4 className="font-bold text-gray-800">{item.donor?.donor_name || "Donatur"}</h4>
+                        <p className="text-sm text-gray-500 mt-1">
+                          {item.seed_quantity} Bibit {item.seed?.name ? `(${item.seed.name})` : ""} - {item.donation_program?.name || "Program"}
+                        </p>
                       </div>
                       
                       <button 
@@ -140,7 +164,7 @@ const DashboardProgram: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                <div className="h-full flex items-center justify-center text-gray-400 text-sm font-medium">
+                <div className="h-full flex items-center justify-center text-gray-400 text-sm font-medium py-12">
                   Tidak ada data verifikasi baru.
                 </div>
               )}
@@ -153,28 +177,34 @@ const DashboardProgram: React.FC = () => {
             </div>
 
             <div className="p-0 overflow-y-auto max-h-100 custom-scrollbar">
-              <ul className="divide-y divide-gray-100">
-                {PROGRESS_DATA.map((progress) => (
-                  <li
-                    key={progress.id}
-                    className="p-6 hover:bg-gray-50/80 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-                  >
-                    <div>
-                      <h4 className="font-bold text-gray-800">{progress.title}</h4>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Total Terkumpul:{" "}
-                        <span className="font-bold text-[#185325]">
-                          {progress.collected}
-                        </span>{" "}
-                        Bibit
-                      </p>
-                    </div>
-                    <div className="shrink-0">
-                      <StatusBadge status={progress.status} />
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              {progressProgram.length > 0 ? (
+                <ul className="divide-y divide-gray-100">
+                  {progressProgram.map((progress) => (
+                    <li
+                      key={progress.id}
+                      className="p-6 hover:bg-gray-50/80 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                    >
+                      <div>
+                        <h4 className="font-bold text-gray-800">{progress.name}</h4>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Total Terkumpul:{" "}
+                          <span className="font-bold text-[#185325]">
+                            {Number(progress.total_seeds_collected).toLocaleString('id-ID')}
+                          </span>{" "}
+                          Bibit
+                        </p>
+                      </div>
+                      <div className="shrink-0">
+                        <StatusBadge status={progress.status} />
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="p-12 text-center text-gray-400 text-sm">
+                  Belum ada data progress program.
+                </div>
+              )}
             </div>
           </div>
 
