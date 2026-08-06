@@ -141,7 +141,7 @@ const IndexBibit: React.FC = () => {
           <table className="w-full text-left whitespace-nowrap">
             <thead className="bg-[#DCECE0]/50 text-[#3A4D3F] text-xs uppercase tracking-wider font-bold border-b border-gray-100">
               <tr>
-                <th className="px-6 py-4">Kode (SKU)</th>
+                <th className="px-6 py-4">Kode Bibit</th>
                 <th className="px-6 py-4">Nama Spesies / Bibit</th>
                 <th className="px-6 py-4">Tinggi Bibit</th>
                 <th className="px-6 py-4">Kategori</th>
