@@ -1,4 +1,6 @@
-const API_URL = import.meta.env.VITE_API_MASTER_URL;
+import axios from "axios";
+
+const API_URL = import.meta.env.VITE_API_EXAMPLE;
 
 export const getDonationsAPI = async () => {
   try {
@@ -22,4 +24,14 @@ export const getDonationsAPI = async () => {
   } catch (error: any) {
     throw new Error(error.message || 'Gagal terhubung ke server.');
   }
+};
+
+export const updateDonationStatusAPI = async (id: number, status: string) => {
+  const token = localStorage.getItem('token');
+  const response = await axios.put(`${API_URL}/donations/${id}`, {
+    seed_status: status 
+  }, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return response.data;
 };

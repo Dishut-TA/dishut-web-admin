@@ -22,6 +22,7 @@ const InputDataModal: React.FC<InputDataModalProps> = ({
     tutupan_lahan: null,
     curah_hujan: null,
     jenis_tanah: null,
+    batas_wilayah: null,
   });
 
   useEffect(() => {
@@ -40,6 +41,7 @@ const InputDataModal: React.FC<InputDataModalProps> = ({
         tutupan_lahan: null,
         curah_hujan: null,
         jenis_tanah: null,
+        batas_wilayah: null
       });
     }
   }, [isOpen]);
@@ -61,6 +63,7 @@ const InputDataModal: React.FC<InputDataModalProps> = ({
     { id: "tutupan_lahan", label: "Input Data Tutupan Lahan" },
     { id: "curah_hujan", label: "Input Data Curah Hujan" },
     { id: "jenis_tanah", label: "Input Data Jenis Tanah" },
+    { id: "batas_wilayah", label: "Input Data Batas Wilayah" },
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {

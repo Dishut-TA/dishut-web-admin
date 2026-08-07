@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import DetailDonaturModal from './components/DetailDonaturModal';
 import VerifikasiDonaturModal from './components/VerifikasiDonaturModal';
 import type { DonaturData, StatusType } from '@/utils/interface';
-import { getDonationsAPI } from '@/services/donasi.service';
+import { getDonationsAPI, updateDonationStatusAPI } from '@/services/donasi.service';
 
 const StatusBadge = ({ status }: { status: StatusType }) => {
   const getStatusStyles = () => {
@@ -14,6 +14,7 @@ const StatusBadge = ({ status }: { status: StatusType }) => {
       case 'Menunggu Verifikasi':
       case 'Pending':
         return 'bg-[#F2C94C] text-gray-800';
+      case 'Terkumpul':
       case 'Terealisasi':
       case 'Disalurkan':
       case 'Verified':
@@ -203,20 +204,32 @@ const DataDonatur = () => {
       />
 
       <VerifikasiDonaturModal 
-        isOpen={selectedVerifDonatur !== null}
-        onClose={() => setSelectedVerifDonatur(null)}
-        donatur={selectedVerifDonatur}
-        onTerima={() => {
-            toast.success("Donasi berhasil diterima!");
-            setSelectedVerifDonatur(null);
-            fetchDonations();
-        }}
-        onTolak={() => {
-             toast.success("Donasi ditolak.");
-             setSelectedVerifDonatur(null);
-             fetchDonations();
-        }}
-      />
+  isOpen={selectedVerifDonatur !== null}
+  onClose={() => setSelectedVerifDonatur(null)}
+  donatur={selectedVerifDonatur}
+  onTerima={async () => {
+    if (!selectedVerifDonatur) return;
+    try {
+      await updateDonationStatusAPI(selectedVerifDonatur.id, 'Terkumpul');
+      toast.success("Donasi berhasil diverifikasi dan berstatus Terkumpul!");
+      setSelectedVerifDonatur(null);
+      fetchDonations(); 
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Gagal memverifikasi donasi.");
+    }
+  }}
+  onTolak={async () => {
+    if (!selectedVerifDonatur) return;
+    try {
+      await updateDonationStatusAPI(selectedVerifDonatur.id, 'Ditolak');
+      toast.success("Donasi ditolak.");
+      setSelectedVerifDonatur(null);
+      fetchDonations(); 
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Gagal menolak donasi.");
+    }
+  }}
+/>
 
     </div>
   );

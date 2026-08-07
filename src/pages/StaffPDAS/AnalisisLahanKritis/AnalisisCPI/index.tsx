@@ -4,17 +4,52 @@ import MapSection from './components/MapSection';
 import CPITable from './components/CPITable';
 import InputDataModal from './components/InputDataModal';
 import DetailVerifikasiModal from './components/DetailVerifikasiModal';
+import HistoryModal from './components/HistoryModal';
 
-const API_URL = import.meta.env.VITE_API_MASTER_URL || "http://127.0.0.1:8000/api";
+const API_URL = "http://127.0.0.1:8000/api";
 
 const AnalisisLahanKritis: React.FC = () => {
   const [isInputModalOpen, setIsInputModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<CPIDataRow | null>(null);
   const [petaFilter, setPetaFilter] = useState('Keseluruhan');
   const [geoData, setGeoData] = useState<any>(null);
   const [tableData, setTableData] = useState<CPIDataRow[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
+
+      const loadHistoryData = async (projectId: number) => {
+        const token = localStorage.getItem("token");
+        if (!projectId || !token) return;
+
+        setIsLoadingData(true);
+
+        try {
+            const tableRes = await fetch(`${API_URL}/projects/${projectId}/table`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const tableJson = await tableRes.json();
+            setTableData(tableJson.data || []);
+
+            const mapRes = await fetch(`${API_URL}/projects/${projectId}/map`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const mapJson = await mapRes.json();
+
+            if (mapJson.type === "FeatureCollection") {
+                setGeoData(mapJson);
+            } else if (mapJson.geojson_url) {
+                const directGeoRes = await fetch(mapJson.geojson_url);
+                const directGeoJson = await directGeoRes.json();
+                setGeoData(directGeoJson);
+            }
+            
+        } catch (error) {
+            console.error("Gagal menarik data hasil analisis dari server:", error);
+        } finally {
+            setIsLoadingData(false);
+        }
+    };
 
   const handleUploadSuccess = async (responseData: any) => {
     const projectId = responseData?.data?.id;
@@ -28,16 +63,15 @@ const AnalisisLahanKritis: React.FC = () => {
       });
       const tableJson = await tableRes.json();
       
-      // Mapping respons API ke interface CPIDataRow
       const mappedTableData: CPIDataRow[] = (tableJson.data || []).map((row: any, idx: number) => ({
-        id: idx,
-        kabupaten: row.kota_kabupaten || row.kabupaten || '-',
+        id: row.zone_id && row.zone_id !== '-' ? row.zone_id : idx, 
+        kabupaten: row.kota_kabupaten || '-',
         kecamatan: row.kecamatan || '-',
-        desa: row.desa_kelurahan || row.desa || '-',
+        desa: row.desa_kelurahan || '-',
         statusKekritisan: row.status_lahan_kritis || '-',
         skorCPI: row.skor_cpi_rata2 ? Number(row.skor_cpi_rata2).toFixed(2) : '-',
         rekomendasi: row.rekomendasi_intervensi || '-',
-        statusKelayakan: idx % 2 === 0 ? '-' : 'Layak', // Mock data kelayakan (sesuaikan dgn API asli nanti)
+        statusKelayakan: idx % 2 === 0 ? '-' : 'Layak',
       }));
       setTableData(mappedTableData);
 
@@ -107,6 +141,11 @@ const AnalisisLahanKritis: React.FC = () => {
         data={selectedRow}
       />
 
+      <HistoryModal
+        isOpen={isHistoryModalOpen}
+        onClose={() => setIsHistoryModalOpen(false)}
+        onSelectProject={loadHistoryData}
+            />
     </div>
   );
 };
