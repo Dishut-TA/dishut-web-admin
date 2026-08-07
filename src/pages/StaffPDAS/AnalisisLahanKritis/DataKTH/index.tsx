@@ -1,14 +1,52 @@
-import React, { useState } from 'react';
-import { HiOutlineMagnifyingGlass, HiOutlinePlus, HiOutlineEye, HiOutlinePencil } from 'react-icons/hi2';
+import React, { useState, useEffect } from 'react';
+import { 
+  HiOutlineMagnifyingGlass, HiOutlinePlus, HiOutlineEye, 
+  HiOutlinePencil, HiOutlineChevronLeft, HiOutlineChevronRight 
+} from 'react-icons/hi2';
+import toast from 'react-hot-toast';
 import ModalInputKTH from './components/ModalInputKTH'; 
+import { getKthsAPI, type KthResponseData } from '@/services/kth.service';
 
 const DataKTH: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [tableData, setTableData] = useState<KthResponseData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 5; 
 
-  const tableData = [
-    { id: 1, cdk: 'CDK WILAYAH V', kabupaten: 'Kab. Bandung', kecamatan: 'Batununggal', desa: 'Pagaden', namaKth: 'KTH Rimba', ketua: 'Asep', jenisUsaha: 'Agro' }
-  ];
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const data = await getKthsAPI();
+      setTableData(data);
+    } catch (error: any) {
+      toast.error(error.message || 'Gagal memuat data KTH');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+  
+  const safeTableData = Array.isArray(tableData) ? tableData : [];
+
+  const filteredData = safeTableData.filter(row => 
+    row?.nama?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    row?.cdk?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    row?.kabupaten_kota?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  const indexOfLastRow = currentPage * rowsPerPage;
+  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+  const currentRows = filteredData.slice(indexOfFirstRow, indexOfLastRow);
+  const totalPages = Math.ceil(filteredData.length / rowsPerPage) || 1;
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-12 animate-in fade-in duration-300">
@@ -51,33 +89,74 @@ const DataKTH: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {tableData.map((row) => (
-                <tr key={row.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-4 py-4 font-semibold text-gray-700">{row.cdk}</td>
-                  <td className="px-4 py-4 text-gray-600">{row.kabupaten}</td>
-                  <td className="px-4 py-4 text-gray-600">{row.kecamatan}</td>
-                  <td className="px-4 py-4 text-gray-600">{row.desa}</td>
-                  <td className="px-4 py-4 font-semibold text-[#185325]">{row.namaKth}</td>
-                  <td className="px-4 py-4 text-gray-600">{row.ketua}</td>
-                  <td className="px-4 py-4 text-gray-600">{row.jenisUsaha}</td>
-                  <td className="px-4 py-4 flex justify-center gap-3">
-                    <button className="text-gray-400 hover:text-[#185325] transition-colors">
-                      <HiOutlineEye className="w-5 h-5" />
-                    </button>
-                    <button className="text-gray-400 hover:text-[#185325] transition-colors">
-                      <HiOutlinePencil className="w-5 h-5" />
-                    </button>
-                  </td>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={8} className="px-4 py-8 text-gray-500 font-medium animate-pulse">Memuat data...</td>
                 </tr>
-              ))}
+              ) : currentRows.length > 0 ? (
+                currentRows.map((row) => (
+                  <tr key={row.id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-4 py-4 font-semibold text-gray-700">{row.cdk}</td>
+                    <td className="px-4 py-4 text-gray-600">{row.kabupaten_kota}</td>
+                    <td className="px-4 py-4 text-gray-600">{row.kecamatan}</td>
+                    <td className="px-4 py-4 text-gray-600">{row.desa_kelurahan}</td>
+                    <td className="px-4 py-4 font-semibold text-[#185325]">{row.nama}</td>
+                    <td className="px-4 py-4 text-gray-600">{row.ketua}</td>
+                    <td className="px-4 py-4 text-gray-600">{row.jenis_usaha}</td>
+                    <td className="px-4 py-4 flex justify-center gap-3">
+                      <button className="text-gray-400 hover:text-[#185325] transition-colors">
+                        <HiOutlineEye className="w-5 h-5" />
+                      </button>
+                      <button className="text-gray-400 hover:text-[#185325] transition-colors">
+                        <HiOutlinePencil className="w-5 h-5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={8} className="px-4 py-8 text-gray-500 font-medium">Tidak ada data KTH.</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
+
+        {!isLoading && filteredData.length > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between p-4 px-6 border-t border-gray-100 bg-gray-50/50 gap-4 text-xs text-gray-600">
+            <div>
+              Menampilkan <span className="font-bold text-gray-800">{indexOfFirstRow + 1}</span> sampai <span className="font-bold text-gray-800">{Math.min(indexOfLastRow, filteredData.length)}</span> dari <span className="font-bold text-gray-800">{filteredData.length}</span> data KTH
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="flex items-center gap-1 p-2 rounded-full border border-gray-300 bg-white hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-bold text-gray-700"
+              >
+                <HiOutlineChevronLeft className="w-4 h-4" />
+              </button>
+
+              <span className="px-3 py-1.5 font-bold text-[#185325] bg-[#EBF8F1] rounded-full border border-[#DCECE0]">
+                {currentPage} / {totalPages}
+              </span>
+
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="flex items-center gap-1 p-2 rounded-full border border-gray-300 bg-white hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-bold text-gray-700"
+              >
+                <HiOutlineChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <ModalInputKTH 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
+        onSuccess={fetchData} 
       />
 
     </div>
