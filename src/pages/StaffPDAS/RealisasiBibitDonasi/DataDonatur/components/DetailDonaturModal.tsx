@@ -99,11 +99,30 @@ const DetailDonaturModal: React.FC<DetailDonaturModalProps> = ({ isOpen, onClose
           {/* Area Bukti */}
           <div>
             <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Bukti Pembayaran</h3>
-            <div className="w-full h-40 bg-slate-50 border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center hover:bg-slate-100 transition-colors cursor-pointer group">
-               <span className="text-gray-400 text-sm font-medium group-hover:text-[#185325] transition-colors">
-                 Lihat Bukti Transfer
-               </span>
-            </div>
+            {donatur.proof_url ? (
+              <a 
+                href={donatur.proof_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-full h-40 bg-slate-50 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center hover:bg-slate-100 transition-colors cursor-pointer group overflow-hidden relative"
+              >
+                {/* Jika ingin langsung menampilkan thumbnail gambarnya */}
+                <img 
+                  src={donatur.proof_url} 
+                  alt="Bukti Transfer" 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <span className="text-white text-xs font-bold px-3 py-1.5 bg-black/60 rounded-lg">
+                    Klik untuk memperbesar
+                  </span>
+                </div>
+              </a>
+            ) : (
+              <div className="w-full h-24 bg-slate-50 border border-gray-200 rounded-xl flex items-center justify-center text-gray-400 text-xs italic">
+                Tidak ada bukti transfer yang diunggah.
+              </div>
+            )}
           </div>
 
         </div>

@@ -93,6 +93,7 @@ export interface DonaturData {
   tanggalDonasi?: string;         
   receipt_path?: string | null;   
   certificate_path?: string | null; 
+  proof_url: string;
 }
 
 export interface SeedSpecificationResponse {

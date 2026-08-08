@@ -77,7 +77,8 @@ const DashboardProgram: React.FC = () => {
           jumlah: item.seed_quantity || 0,
           hargaSatuan: 0,
         }
-      ]
+      ],  
+      proof_url: item.proof_url
     });
     setIsModalOpen(true);
   };

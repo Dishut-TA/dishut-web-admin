@@ -23,3 +23,13 @@ export const getStaffDonasiDashboardAPI = async () => {
     throw new Error(error.message || 'Gagal terhubung ke server.');
   }
 };
+
+export const getKabidDashboardAPI = async () => {
+  const token = localStorage.getItem('token');
+  const response = await fetch(`${API_URL}/dashboard-kabid`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!response.ok) throw new Error("Gagal mengambil data dashboard kabid");
+  const result = await response.json();
+  return result.data;
+};

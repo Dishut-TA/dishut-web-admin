@@ -9,21 +9,17 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-const chartData = [
-  { name: 'Jan', bibit: 150 },
-  { name: 'Feb', bibit: 350 },
-  { name: 'Mar', bibit: 500 },
-  { name: 'Apr', bibit: 850 },
-  { name: 'Mei', bibit: 1250 },
-];
+interface GrowthChartProps {
+  data: any[];
+}
 
-const GrowthChart: React.FC = () => {
+const GrowthChart: React.FC<GrowthChartProps> = ({ data }) => {
   return (
     <div className="bg-white p-6 rounded-2xl border border-emerald-100 shadow-sm">
       <h3 className="text-sm font-bold text-slate-800 mb-6">Pertumbuhan Bibit Terealisasi</h3>
       <div className="w-full h-48 md:h-64">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+          <LineChart data={data} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="5 5" vertical={false} stroke="#f1f5f9" />
             <XAxis 
               dataKey="name" 

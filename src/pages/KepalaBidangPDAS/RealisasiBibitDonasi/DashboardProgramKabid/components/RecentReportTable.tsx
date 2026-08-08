@@ -7,13 +7,11 @@ interface Report {
   author: string;
 }
 
-const reportsData: Report[] = [
-  { id: 1, title: 'Laporan Dampak: Penanaman Ciliwung Tahap 1', date: '15 Mei 2026', author: 'Staff PDAS - Andi' },
-  { id: 2, title: 'Laporan Dampak: Distribusi Bibit Citarum Hulu', date: '14 Mei 2026', author: 'Staff PDAS - Sari' },
-  { id: 3, title: 'Laporan Evaluasi Penghijauan Cisarua', date: '24 Mei 2026', author: 'Staff PDAS - Rani' },
-];
+interface RecentReportsTableProps {
+  reports: Report[];
+}
 
-const RecentReportsTable: React.FC = () => {
+const RecentReportsTable: React.FC<RecentReportsTableProps> = ({ reports }) => {
   return (
     <div className="mt-4">
       <h3 className="text-base font-bold text-gray-800 mb-4">Laporan Terbaru</h3>
@@ -30,7 +28,8 @@ const RecentReportsTable: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {reportsData.map((report) => (
+              {/* 3. Gunakan 'reports' hasil lemparan props, dan pastikan tidak undefined (pakai ?.) */}
+              {reports?.map((report) => (
                 <tr key={report.id} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-6 py-4 text-sm font-semibold text-gray-800">
                     {report.title}
@@ -46,6 +45,13 @@ const RecentReportsTable: React.FC = () => {
                   </td>
                 </tr>
               ))}
+              {(!reports || reports.length === 0) && (
+                <tr>
+                  <td colSpan={4} className="px-6 py-8 text-center text-sm text-gray-500 italic">
+                    Belum ada laporan terbaru.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
