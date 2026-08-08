@@ -42,8 +42,6 @@ const DetailProgramModal: React.FC<DetailProgramModalProps> = ({
   return (
     <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       <div className="w-full max-w-lg bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
-        
-        {/* Header Modal */}
         <div className="flex-none flex items-center justify-between p-6 border-b border-gray-100">
           <h2 className="text-xl font-bold text-gray-800">
             Detail Realisasi Program
@@ -56,9 +54,7 @@ const DetailProgramModal: React.FC<DetailProgramModalProps> = ({
           </button>
         </div>
 
-        {/* Content (Scrollable) */}
         <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 custom-scrollbar">
-          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Nama Program</h3>
@@ -83,6 +79,8 @@ const DetailProgramModal: React.FC<DetailProgramModalProps> = ({
             <div className="flex flex-col gap-3">
               {program.jenisBibit && program.jenisBibit.length > 0 ? (
                 program.jenisBibit.map((bibit, index) => {
+                  const jumlah = Number(bibit.jumlah) || 0;
+                  const terealisasi = Number(bibit.terealisasi) || 0;
                   const persentase = bibit.jumlah > 0 ? Math.round((bibit.terealisasi / bibit.jumlah) * 100) : 0;
                   
                   return (
@@ -93,7 +91,7 @@ const DetailProgramModal: React.FC<DetailProgramModalProps> = ({
                         </span>
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-semibold text-gray-500">
-                            {formatNumber(bibit.terealisasi)} / {formatNumber(bibit.jumlah)}
+                            {formatNumber(terealisasi)} / {formatNumber(jumlah)}
                           </span>
                           <span className="bg-[#e2f1e6] text-[#185325] px-2 py-0.5 rounded text-[11px] font-bold">
                             {persentase}%

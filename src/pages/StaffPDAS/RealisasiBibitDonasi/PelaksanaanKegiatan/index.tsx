@@ -11,7 +11,7 @@ import PreviewBastModal from './components/PreviewBastModal';
 import UploadBastModal from './components/UploadBastModal';
 import RincianDanaModal from './components/RincianDanaModal';
 
-export type StatusKegiatan = 'Terkumpul' | 'Disalurkan' | 'Terealisasi';
+export type StatusKegiatan = 'Pending' | 'Terkumpul' | 'Disalurkan' | 'Terealisasi';
 type ModalType = 'previewBAST' | 'rincian' | 'uploadBAST' | null;
 
 export interface DetailBibitDana {
@@ -35,6 +35,8 @@ export interface KegiatanData {
 
 export const StatusBadge = ({ status }: { status: StatusKegiatan }) => {
   switch (status) {
+    case 'Pending':
+    return 'bg-[#F2C94C] text-gray-800';
     case 'Terealisasi':
       return <span className="px-4 py-1.5 rounded-full text-[11px] font-bold bg-[#e2f1e6] text-[#185325] whitespace-nowrap border border-[#C8E0CD]">Terealisasi</span>;
     case 'Disalurkan':

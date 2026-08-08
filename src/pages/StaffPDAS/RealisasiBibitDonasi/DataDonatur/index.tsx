@@ -46,40 +46,48 @@ const DataDonatur = () => {
   }, []);
 
   const fetchDonations = async () => {
-    setIsLoading(true);
-    try {
-      const response = await getDonationsAPI();
-      console.log(response);
-      
-      const rawData = Array.isArray(response.payload) 
-        ? response.payload 
-        : [response.payload].filter(Boolean);
+  setIsLoading(true);
+  try {
+    const response = await getDonationsAPI();
+    const rawData = response.data || response.payload || [];
+    const arrayData = Array.isArray(rawData) ? rawData : [rawData].filter(Boolean);
 
-      // Di dalam fetchDonations Frontend kamu:
-const mappedData = rawData.map((item: any) => ({
-    id: item.id,
-    idTransaksi: `TRX-${item.donor_id}`, // Gunakan donor_id sebagai penanda transaksi 1 checkout
-    idDonasi: `DNS-${item.id}`,
-    namaDonatur: item.donor?.donor_name || 'Hamba Allah',
-    program: item.donation_program?.name || 'Program Umum',
-    jumlahBibit: item.seed_quantity, // Sudah hasil jumlah total dari backend
-    status: item.seed_status === 'Pending' ? 'Menunggu Verifikasi' : item.seed_status,
-    tanggalDonasi: item.created_at,
-    
-    // Rincian bibit langsung ambil dari API
-    rincianBibit: item.rincian_bibit,
+    // Mapping data agar rincianBibit dan hargaSatuan-nya terbaca dengan benar
+    const mappedData = arrayData.map((item: any) => {
+      // Ambil harga dari spesifikasi bibit (berdasarkan console.log-mu ada di specifications[0].price)
+      const spec = item.seed?.specifications?.[0];
+      const harga = spec ? Number(spec.price) : 0;
 
-    // Simpan ini untuk fungsi tombol verifikasi
-    allDonationIds: item.all_donation_ids 
-}));
+      return {
+        id: item.id,
+        idTransaksi: `TRX-${item.donor_id}`,
+        idDonasi: `DNS-${item.id}`,
+        namaDonatur: item.donor?.donor_name || 'Hamba Allah',
+        program: item.donation_program?.name || 'Program Umum',
+        jumlahBibit: item.seed_quantity || 0,
+        status: item.seed_status === 'Pending' ? 'Menunggu Verifikasi' : (item.seed_status || 'Menunggu Verifikasi'),
+        tanggalDonasi: item.created_at,
+        proof_url: item.proof_url,
+        
+        // 🔥 Wajib merakit rincianBibit di sini agar modal bisa membaca nama dan harganya!
+        rincianBibit: [
+          {
+            nama: item.seed?.nama || item.seed?.name || 'Bibit',
+            jumlah: item.seed_quantity || 0,
+            hargaSatuan: harga // Diambil dari specifications[0].price
+          }
+        ],
+        allDonationIds: [item.id]
+      };
+    });
 
-      setDonationsData(mappedData);
-    } catch (error: any) {
-      toast.error(error.message || 'Gagal memuat data donasi.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    setDonationsData(mappedData);
+  } catch (error: any) {
+    toast.error('Gagal memuat data donasi.');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const filteredData = donationsData.filter(donatur => 
     donatur.idTransaksi.toLowerCase().includes(searchTerm.toLowerCase()) ||

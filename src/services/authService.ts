@@ -1,7 +1,7 @@
 import type { LoginPayload, RegisterPayload, UpdateUserPayload, UserProfile } from "@/utils/interface";
 
 
-const API_URL = import.meta.env.VITE_API_MASTER_URL;
+const API_URL = import.meta.env.VITE_API_BASE_URL;
 const handleApiResponse = async (response: Response) => {
 
   const responseText = await response.text();
