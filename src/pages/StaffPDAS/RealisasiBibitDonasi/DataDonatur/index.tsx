@@ -55,30 +55,23 @@ const DataDonatur = () => {
         ? response.payload 
         : [response.payload].filter(Boolean);
 
-      const mappedData: DonaturData[] = rawData.map((item: any) => {
-        const firstSpec = item.seed?.specifications?.[0];
-        const hargaSatuan = firstSpec ? Number(firstSpec.price) : 0;
+      // Di dalam fetchDonations Frontend kamu:
+const mappedData = rawData.map((item: any) => ({
+    id: item.id,
+    idTransaksi: `TRX-${item.donor_id}`, // Gunakan donor_id sebagai penanda transaksi 1 checkout
+    idDonasi: `DNS-${item.id}`,
+    namaDonatur: item.donor?.donor_name || 'Hamba Allah',
+    program: item.donation_program?.name || 'Program Umum',
+    jumlahBibit: item.seed_quantity, // Sudah hasil jumlah total dari backend
+    status: item.seed_status === 'Pending' ? 'Menunggu Verifikasi' : item.seed_status,
+    tanggalDonasi: item.created_at,
+    
+    // Rincian bibit langsung ambil dari API
+    rincianBibit: item.rincian_bibit,
 
-        return {
-          id: item.id,
-          idTransaksi: `TRX-${item.id}`,
-          idDonasi: `DNS-${item.id}`,
-          namaDonatur: item.donor?.donor_name || 'Hamba Allah',
-          program: item.donation_program?.name || 'Program Umum',
-          jumlahBibit: item.seed_quantity || 0,
-          status: item.seed_status === 'Pending' ? 'Menunggu Verifikasi' : (item.seed_status || 'Menunggu Verifikasi'),
-          tanggalDonasi: item.created_at,
-          receipt_path: item.receipt_path,
-          certificate_path: item.certificate_path,
-          rincianBibit: [
-            {
-              nama: item.seed?.nama || 'Bibit Tanaman',
-              jumlah: item.seed_quantity || 0,
-              hargaSatuan: hargaSatuan
-            }
-          ]
-        };
-      });
+    // Simpan ini untuk fungsi tombol verifikasi
+    allDonationIds: item.all_donation_ids 
+}));
 
       setDonationsData(mappedData);
     } catch (error: any) {
@@ -125,7 +118,7 @@ const DataDonatur = () => {
                 <th className="px-6 py-4 whitespace-nowrap">Program</th>
                 <th className="px-6 py-4 whitespace-nowrap">Jenis Bibit</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">Jumlah (Total)</th>
-                <th className="px-6 py-4 whitespace-nowrap">Status</th>
+                <th className="px-6 py-4 whitespace-nowrap">Status Bibit</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">Aksi (Verifikasi)</th>
               </tr>
             </thead>
