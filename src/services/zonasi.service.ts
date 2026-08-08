@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_EXAMPLE;
+const API_URL = import.meta.env.VITE_API_MASTER_URL;
 
 export interface ZonasiData {
   id: number;

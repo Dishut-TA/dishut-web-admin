@@ -91,7 +91,7 @@ const IndexBibit: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">
-            Manajemen Data Bibit & Harga
+            Manajemen Data Stok Bibit & Harga
           </h1>
           <p className="text-sm text-gray-500 mt-1">
             Kelola master data dan pantau ketersediaan stok bibit tanaman.
@@ -103,7 +103,7 @@ const IndexBibit: React.FC = () => {
             <HiOutlineMagnifyingGlass className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
               type="text"
-              placeholder="Cari SKU / nama bibit..."
+              placeholder="Cari Kode Bibit"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-[#009262] focus:border-[#009262] outline-none shadow-sm transition-all"
@@ -142,10 +142,10 @@ const IndexBibit: React.FC = () => {
             <thead className="bg-[#DCECE0]/50 text-[#3A4D3F] text-xs uppercase tracking-wider font-bold border-b border-gray-100">
               <tr>
                 <th className="px-6 py-4">Kode Bibit</th>
-                <th className="px-6 py-4">Nama Spesies / Bibit</th>
+                <th className="px-6 py-4">Nama Bibit</th>
                 <th className="px-6 py-4">Tinggi Bibit</th>
                 <th className="px-6 py-4">Kategori</th>
-                <th className="px-6 py-4">Stok Saat Ini</th>
+                <th className="px-6 py-4">Stok Bibit</th>
                 <th className="px-6 py-4">Harga Satuan</th>
                 <th className="px-6 py-4 text-center">Aksi</th>
               </tr>

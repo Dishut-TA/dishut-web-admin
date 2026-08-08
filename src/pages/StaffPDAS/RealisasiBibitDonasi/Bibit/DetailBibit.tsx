@@ -104,12 +104,12 @@ const DetailBibit: React.FC = () => {
               }`}>
                 {bibitData.kategori}
               </span>
-              <span className="text-xs font-bold text-gray-400">Kode SKU: {bibitData.kode}</span>
+              <span className="text-xs font-bold text-gray-400">Kode Bibit: {bibitData.kode}</span>
             </div>
             <h2 className="text-3xl font-bold text-[#185325] mb-2">{bibitData.nama}</h2>
             <div className="flex items-center gap-1.5 text-sm font-semibold text-gray-600">
               <HiOutlineCheckBadge className="w-5 h-5 text-blue-500" />
-              Sertifikasi/Keterangan: {bibitData.deskripsi}
+              Sertifikasi Bibit: {bibitData.deskripsi}
             </div>
           </div>
         </div>

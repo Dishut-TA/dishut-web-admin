@@ -1,24 +1,58 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { HiOutlineXMark, HiOutlineCloudArrowUp } from 'react-icons/hi2';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
 interface UploadBastModalProps {
   isOpen: boolean;
   onClose: () => void;
+  donationId: number | null;
 }
 
-const UploadBastModal: React.FC<UploadBastModalProps> = ({ isOpen, onClose }) => {
-  const [fileName, setFileName] = useState<string | null>(null);
+const UploadBastModal: React.FC<UploadBastModalProps> = ({ isOpen, onClose, donationId }) => {
+  const [file, setFile] = useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : 'unset';
-    if (!isOpen) setFileName(null); // Reset saat ditutup
+    if (!isOpen) setFile(null); 
     return () => { document.body.style.overflow = 'unset'; };
   }, [isOpen]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFileName(e.target.files[0].name);
+      setFile(e.target.files[0]);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!file || !donationId) return;
+
+    const formData = new FormData();
+    formData.append('bast_file', file);
+    
+    formData.append('seed_status', 'Disalurkan');
+    formData.append('_method', 'PUT'); 
+
+    setIsLoading(true);
+    const toastId = toast.loading('Mengunggah dokumen BAST...');
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`http://127.0.0.1:8000/api/donations/${donationId}`, formData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        }
+      });
+
+      toast.success('BAST berhasil diunggah dan status diperbarui!', { id: toastId });
+      onClose();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Gagal mengunggah BAST', { id: toastId });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -42,9 +76,9 @@ const UploadBastModal: React.FC<UploadBastModalProps> = ({ isOpen, onClose }) =>
           >
             <HiOutlineCloudArrowUp className="w-10 h-10 text-[#2E7D32] mb-3" />
             <p className="text-sm font-semibold text-[#2E7D32] text-center">
-              {fileName ? fileName : 'Klik di sini untuk upload file PDF/Image'}
+              {file ? file.name : 'Klik di sini untuk upload file PDF/Image'}
             </p>
-            {!fileName && <p className="text-xs text-gray-500 mt-1">Maksimal ukuran file 5MB</p>}
+            {!file && <p className="text-xs text-gray-500 mt-1">Maksimal ukuran file 5MB</p>}
             
             <input 
               type="file" 
@@ -56,12 +90,13 @@ const UploadBastModal: React.FC<UploadBastModalProps> = ({ isOpen, onClose }) =>
           </div>
 
           <button 
-            disabled={!fileName}
+            disabled={!file || isLoading}
+            onClick={handleUpload}
             className={`w-full mt-6 py-3 rounded-xl font-semibold text-sm transition-colors ${
-              fileName ? 'bg-primary hover:bg-[#144a18] text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              file && !isLoading ? 'bg-[#185325] hover:bg-[#144a18] text-white cursor-pointer' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}
           >
-            Simpan Dokumen
+            {isLoading ? 'Menyimpan...' : 'Simpan Dokumen'}
           </button>
         </div>
 

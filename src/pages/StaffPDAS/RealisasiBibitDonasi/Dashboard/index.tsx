@@ -85,7 +85,7 @@ const DashboardProgram: React.FC = () => {
   const handleTerimaDonatur = () => {
     toast.success(`Donasi berhasil diverifikasi!`);
     setIsModalOpen(false);
-    fetchDashboardData(); // Refresh data dashboard
+    fetchDashboardData(); 
   };
 
   const handleTolakDonatur = () => {
@@ -122,7 +122,6 @@ const DashboardProgram: React.FC = () => {
           </p>
         </div>
 
-        {/* STATISTIC CARDS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {STATS_DATA.map((stat) => (
             <StatCard key={stat.id} data={stat} />
