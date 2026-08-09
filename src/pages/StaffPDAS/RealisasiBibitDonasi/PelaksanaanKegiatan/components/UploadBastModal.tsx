@@ -37,10 +37,11 @@ const UploadBastModal: React.FC<UploadBastModalProps> = ({ isOpen, onClose, dona
 
     setIsLoading(true);
     const toastId = toast.loading('Mengunggah dokumen BAST...');
+    const API_URL = import.meta.env.VITE_API_MASTER_URL
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`http://127.0.0.1:8000/api/donations/${donationId}`, formData, {
+      await axios.post(`${API_URL}/api/donations/${donationId}`, formData, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',

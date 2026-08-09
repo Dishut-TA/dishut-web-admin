@@ -1,7 +1,15 @@
-import type { KegiatanData } from '..';
-import { StatusBadge } from '..';
 import React, { useEffect } from 'react';
 import { HiOutlineBanknotes, HiOutlineXMark } from 'react-icons/hi2';
+import StatusBadgeKegiatan from './StatusBadgeKegiatan';
+import type { KegiatanData } from '..';
+
+const formatRupiah = (number: number) => {
+  return new Intl.NumberFormat('id-ID', { 
+    style: 'currency', 
+    currency: 'IDR', 
+    minimumFractionDigits: 0 
+  }).format(number);
+};
 
 interface RincianDanaModalProps {
   isOpen: boolean;
@@ -17,22 +25,24 @@ const RincianDanaModal: React.FC<RincianDanaModalProps> = ({ isOpen, onClose, da
 
   if (!isOpen || !data) return null;
 
-  const formatRupiah = (number: number) => {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);
-  };
-
-  const totalDana = data.rincianBibit.reduce((acc, curr) => acc + (curr.jumlah * curr.hargaSatuan), 0);
+  const totalDana = data.rincianBibit?.reduce((acc, curr) => {
+    const jumlah = Number(curr.jumlah) || 0;
+    const harga = Number(curr.hargaSatuan) || 0;
+    return acc + (jumlah * harga);
+  }, 0) || 0;
 
   return (
     <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       <div className="w-full max-w-lg bg-white rounded-3xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        
         <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
           <div className="flex items-center gap-3">
             <h2 className="text-xl font-bold text-gray-800">Rincian Alokasi Dana</h2>
-            <StatusBadge status={data.status} />
+            <StatusBadgeKegiatan status={data.status} />
           </div>
-          <button onClick={onClose} className="p-2 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer">
+          <button 
+            onClick={onClose} 
+            className="p-2 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+          >
             <HiOutlineXMark className="w-5 h-5" />
           </button>
         </div>
@@ -57,13 +67,16 @@ const RincianDanaModal: React.FC<RincianDanaModalProps> = ({ isOpen, onClose, da
             
             <div className="px-5 py-2">
               <div className="divide-y divide-gray-100">
-                {data.rincianBibit.map((bibit, index) => {
-                  const subTotal = bibit.jumlah * bibit.hargaSatuan;
+                {data.rincianBibit?.map((bibit, index) => {
+                  const jumlah = Number(bibit.jumlah) || 0;
+                  const harga = Number(bibit.hargaSatuan) || 0;
+                  const subTotal = jumlah * harga;
+
                   return (
                     <div key={index} className="py-3 flex justify-between items-center text-sm">
                       <div className="flex flex-col">
                         <span className="font-semibold text-gray-800">Bibit {bibit.nama}</span>
-                        <span className="text-xs text-gray-500">{bibit.jumlah} x {formatRupiah(bibit.hargaSatuan)}</span>
+                        <span className="text-xs text-gray-500">{jumlah} x {formatRupiah(harga)}</span>
                       </div>
                       <span className="font-bold text-gray-700">{formatRupiah(subTotal)}</span>
                     </div>
@@ -86,7 +99,6 @@ const RincianDanaModal: React.FC<RincianDanaModalProps> = ({ isOpen, onClose, da
           </div>
 
         </div>
-
       </div>
     </div>
   );

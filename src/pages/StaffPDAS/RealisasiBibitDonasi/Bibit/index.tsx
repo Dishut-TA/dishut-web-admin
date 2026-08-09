@@ -1,23 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  HiOutlineMagnifyingGlass,
-  HiOutlinePlus,
-  HiOutlineEye,
-  HiOutlineFunnel
-} from "react-icons/hi2";
 import toast from "react-hot-toast";
-import {
-  getBibitsAPI,
-  getSeedSpecificationsAPI,
-  type BibitResponseData,
-} from "@/services/bibit.service";
+import { getBibitsAPI, getSeedSpecificationsAPI, type BibitResponseData } from "@/services/bibit.service";
+import BibitToolbar from "./components/BibitToolbar"; 
+import BibitTable from "./components/BibitTable";
 
-interface MappedBibitData extends BibitResponseData {
+export interface MappedBibitData extends BibitResponseData {
   tinggiFormat: string;
   hargaFormat: string;
   totalStok: number;
 }
+
+const formatRupiah = (angka: number) => 
+  new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(angka);
 
 const IndexBibit: React.FC = () => {
   const navigate = useNavigate();
@@ -27,212 +22,64 @@ const IndexBibit: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [bibitRes, spekRes] = await Promise.all([
+          getBibitsAPI(),
+          getSeedSpecificationsAPI(),
+        ]);
+
+        const mergedData: MappedBibitData[] = bibitRes.payload.map((bibit: BibitResponseData) => {
+          const spec = spekRes.payload.find((s: any) => s.seed_id === bibit.id);
+
+          let tinggiText = "Belum diatur";
+          if (spec) {
+            tinggiText = (spec.max_height === 0 || spec.min_height > 100) 
+              ? "> 100 cm" 
+              : `${spec.min_height}–${spec.max_height} cm`;
+          }
+
+          return {
+            ...bibit,
+            tinggiFormat: tinggiText,
+            hargaFormat: spec ? formatRupiah(Number(spec.price)) : "Belum diatur",
+            totalStok: spec ? Number(spec.stock) : 0,
+          };
+        });
+
+        setBibitData(mergedData);
+      } catch (error: any) {
+        toast.error(error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     fetchData();
   }, []);
 
-  const formatRupiah = (angka: number) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(angka);
-  };
-
-  const fetchData = async () => {
-    setIsLoading(true);
-    try {
-      const [bibitRes, spekRes] = await Promise.all([
-        getBibitsAPI(),
-        getSeedSpecificationsAPI(),
-      ]);
-
-      const bibits = bibitRes.payload;
-      const specs = spekRes.payload;
-
-      const mergedData: MappedBibitData[] = bibits.map((bibit) => {
-        const relatedSpecs = specs.filter((spec) => spec.seed_id === bibit.id);
-        const spec = relatedSpecs.length > 0 ? relatedSpecs[0] : null;
-
-        // Memformat tinggi bibit kembali ke string untuk ditampilkan
-        let tinggiText = "Belum diatur";
-        if (spec) {
-          if (spec.max_height === 0 || spec.min_height > 100) {
-            tinggiText = "> 100 cm";
-          } else {
-            tinggiText = `${spec.min_height}–${spec.max_height} cm`;
-          }
-        }
-
-        return {
-          ...bibit,
-          tinggiFormat: tinggiText,
-          hargaFormat: spec ? formatRupiah(Number(spec.price)) : "Belum diatur",
-          totalStok: spec ? Number(spec.stock) : 0,
-        };
-      });
-
-      setBibitData(mergedData);
-    } catch (error: any) {
-      toast.error(error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const filteredData = bibitData.filter((item) => {
-    const matchesSearch = item.nama.toLowerCase().includes(searchTerm.toLowerCase()) || item.kode.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = item.nama.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          item.kode.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesTinggi = filterTinggi === "Semua" || item.tinggiFormat === filterTinggi;
-    
     return matchesSearch && matchesTinggi;
   });
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">
-            Manajemen Data Stok Bibit & Harga
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Kelola master data dan pantau ketersediaan stok bibit tanaman.
-          </p>
-        </div>
-        
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="relative w-full sm:w-56">
-            <HiOutlineMagnifyingGlass className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Cari Kode Bibit"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-[#009262] focus:border-[#009262] outline-none shadow-sm transition-all"
-            />
-          </div>
+      <BibitToolbar 
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        filterTinggi={filterTinggi}
+        setFilterTinggi={setFilterTinggi}
+        onAddClick={() => navigate("/admin/staff/donasi/bibit/create")}
+      />
 
-          <div className="relative w-full sm:w-40">
-            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-               <HiOutlineFunnel className="w-4 h-4" />
-            </div>
-            <select
-              value={filterTinggi}
-              onChange={(e) => setFilterTinggi(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-[#009262] focus:border-[#009262] outline-none shadow-sm transition-all cursor-pointer appearance-none"
-            >
-              <option value="Semua">Semua Tinggi</option>
-              <option value="30-60 cm">30-60 cm</option>
-              <option value="61-100 cm">61-100 cm</option>
-              <option value="70-100 cm">70-100 cm</option>
-              <option value="> 100 cm">&gt; 100 cm</option>
-            </select>
-          </div>
-
-          <button
-            onClick={() => navigate("/admin/staff/donasi/bibit/create")}
-            className="bg-primary text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-[#123d1c] hover:shadow-lg hover:-translate-y-0.5 transition-all w-full sm:w-auto"
-          >
-            <HiOutlinePlus className="w-4 h-4" strokeWidth={2.5} /> Tambah Bibit Baru
-          </button>
-        </div>
-      </div>
-
-      <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-gray-100 overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-        <div className="overflow-x-auto w-full">
-          <table className="w-full text-left whitespace-nowrap">
-            <thead className="bg-[#DCECE0]/50 text-[#3A4D3F] text-xs uppercase tracking-wider font-bold border-b border-gray-100">
-              <tr>
-                <th className="px-6 py-4">Kode Bibit</th>
-                <th className="px-6 py-4">Nama Bibit</th>
-                <th className="px-6 py-4">Tinggi Bibit</th>
-                <th className="px-6 py-4">Kategori</th>
-                <th className="px-6 py-4">Stok Bibit</th>
-                <th className="px-6 py-4">Harga Satuan</th>
-                <th className="px-6 py-4 text-center">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center">
-                    <div className="flex flex-col items-center justify-center gap-3">
-                      <span className="w-8 h-8 border-4 border-gray-200 border-t-[#185325] rounded-full animate-spin"></span>
-                      <p className="text-sm font-bold text-gray-500">
-                        Memuat data varian bibit...
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-              ) : filteredData.length > 0 ? (
-                filteredData.map((item) => (
-                  <tr
-                    key={item.id}
-                    className="hover:bg-emerald-50/30 transition-colors"
-                  >
-                    <td className="px-6 py-4 text-xs font-bold text-gray-500">
-                      {item.kode}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-bold text-gray-800">
-                        {item.nama}
-                      </div>
-                      <div className="text-[11px] text-gray-500 mt-0.5 max-w-xs truncate">
-                        {item.deskripsi}
-                      </div>
-                    </td>
-                    
-                    {/* KOLOM TINGGI BIBIT */}
-                    <td className="px-6 py-4 text-sm font-bold text-gray-700">
-                      {item.tinggiFormat}
-                    </td>
-
-                    <td className="px-6 py-4">
-                      <span
-                        className={`px-3 py-1 rounded-full text-[10px] font-bold ${
-                          item.kategori.toLowerCase().includes("kehutanan")
-                            ? "bg-emerald-100 text-emerald-800"
-                            : "bg-orange-100 text-orange-800"
-                        }`}
-                      >
-                        {item.kategori}
-                      </span>
-                    </td>
-                    
-                    <td className="px-6 py-4 text-sm font-bold text-gray-800">
-                      {item.totalStok} Batang
-                    </td>
-
-                    <td className="px-6 py-4 text-sm font-bold text-[#185325]">
-                      {item.hargaFormat}
-                    </td>
-
-                    <td className="px-6 py-4 flex justify-center">
-                      <button
-                        onClick={() =>
-                          navigate(
-                            `/admin/staff/donasi/bibit/detail/${item.id}`,
-                          )
-                        }
-                        className="p-2 text-gray-400 hover:text-[#185325] hover:bg-[#DCECE0] rounded-xl transition-all"
-                        title="Lihat Detail"
-                      >
-                        <HiOutlineEye className="w-5 h-5" />
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center">
-                    <p className="text-sm font-bold text-gray-500">
-                      Tidak ada data bibit yang ditemukan.
-                    </p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <BibitTable 
+        data={filteredData} 
+        isLoading={isLoading} 
+        onViewDetail={(id) => navigate(`/admin/staff/donasi/bibit/detail/${id}`)}
+      />
     </div>
   );
 };
