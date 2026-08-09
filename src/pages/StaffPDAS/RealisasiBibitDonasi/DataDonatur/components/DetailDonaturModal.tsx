@@ -68,7 +68,6 @@ const DetailDonaturModal: React.FC<DetailDonaturModalProps> = ({ isOpen, onClose
             <p className="text-sm font-bold text-[#185325]">{donatur.program}</p>
           </div>
 
-          {/* Rincian Transaksi */}
           <div className="border border-gray-200 rounded-2xl overflow-hidden">
             <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
               <h3 className="font-bold text-gray-700 text-xs uppercase tracking-wider">Rincian Pembelian Bibit</h3>
@@ -96,7 +95,6 @@ const DetailDonaturModal: React.FC<DetailDonaturModalProps> = ({ isOpen, onClose
             </div>
           </div>
 
-          {/* Area Bukti */}
           <div>
             <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Bukti Pembayaran</h3>
             {donatur.proof_url ? (
@@ -106,7 +104,6 @@ const DetailDonaturModal: React.FC<DetailDonaturModalProps> = ({ isOpen, onClose
                 rel="noopener noreferrer"
                 className="w-full h-40 bg-slate-50 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center hover:bg-slate-100 transition-colors cursor-pointer group overflow-hidden relative"
               >
-                {/* Jika ingin langsung menampilkan thumbnail gambarnya */}
                 <img 
                   src={donatur.proof_url} 
                   alt="Bukti Transfer" 

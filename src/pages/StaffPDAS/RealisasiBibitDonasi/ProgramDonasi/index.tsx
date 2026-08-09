@@ -48,7 +48,6 @@ const getStatusBadge = (status: string) => {
 
 const ProgramDonasi: React.FC = () => {
   const navigate = useNavigate();
-  
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProgram, setSelectedProgram] = useState<MappedProgramData | null>(null);
   const [programsData, setProgramsData] = useState<MappedProgramData[]>([]);
