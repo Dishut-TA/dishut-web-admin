@@ -1,7 +1,19 @@
 import React from 'react';
 import { HiOutlinePlus, HiOutlineDocumentArrowDown } from 'react-icons/hi2';
-import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
+import { MapContainer, TileLayer, GeoJSON, Marker, Popup } from 'react-leaflet';
+import * as turf from '@turf/turf';
 import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+
+let DefaultIcon = L.icon({
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41]
+});
+L.Marker.prototype.options.icon = DefaultIcon;
 
 interface MapSectionProps {
   geoData: any;
@@ -12,9 +24,54 @@ interface MapSectionProps {
 const MapSection: React.FC<MapSectionProps> = ({ geoData, isLoading, onOpenInputModal }) => {
   const getFeatureStyle = (feature: any) => {
     const status = feature.properties?.status_lahan_kritis?.toLowerCase() || feature.properties?.status?.toLowerCase() || '';
-    if (status.includes('sangat kritis')) return { color: '#EF4444', fillColor: '#ef4444', fillOpacity: 0.9, weight: 1 }; 
-    if (status.includes('kritis')) return { color: '#F59E0B', fillColor: '#facc15', fillOpacity: 0.9, weight: 1 }; 
-    return { color: '#10B981', fillColor: '#4ade80', fillOpacity: 0.9, weight: 1 }; 
+    if (status.includes('sangat kritis')) return { color: '#EF4444', fillColor: '#ef4444', fillOpacity: 0.9, weight: 1 };
+    if (status.includes('kritis')) return { color: '#F59E0B', fillColor: '#facc15', fillOpacity: 0.9, weight: 1 };
+    return { color: '#10B981', fillColor: '#4ade80', fillOpacity: 0.9, weight: 1 };
+  };
+
+  const onEachFeatureHandler = (feature: any, layer: any) => {
+    const props = feature.properties || {};
+    const desa = props.desa_kelurahan || props.desa || 'Desa Tidak Diketahui';
+    const kecamatan = props.kecamatan || '-';
+    const status = props.status_lahan_kritis || props.status || 'Tidak Diketahui';
+    const skorCpi = props.skor_cpi_rata2 || props.cpi || '-';
+    const luas = props.luas_ha || props.luas || '-';
+
+    const statusLower = status.toLowerCase();
+    let badgeStyle = 'bg-green-100 text-green-700 border-green-200';
+    if (statusLower.includes('sangat kritis')) {
+      badgeStyle = 'bg-red-100 text-red-700 border-red-200';
+    } else if (statusLower.includes('kritis')) {
+      badgeStyle = 'bg-yellow-100 text-yellow-700 border-yellow-200';
+    }
+
+    const popupContent = `
+      <div class="font-sans min-w-55 -m-1">
+        <div class="border-b border-gray-100 pb-3 mb-3">
+          <h3 class="font-bold text-gray-800 text-sm mb-1.5 leading-tight">${desa}</h3>
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${badgeStyle}">
+            ${status}
+          </span>
+        </div>
+        
+        <div class="flex flex-col gap-2 text-xs text-gray-600">
+          <div class="flex justify-between items-center">
+            <span class="text-gray-500">Kecamatan</span>
+            <span class="font-semibold text-gray-700">${kecamatan}</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-gray-500">Skor CPI</span>
+            <span class="font-bold text-[#185325] bg-[#185325]/10 px-1.5 py-0.5 rounded">${skorCpi}</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-gray-500">Luas Lahan</span>
+            <span class="font-semibold text-gray-700">${luas} Ha</span>
+          </div>
+        </div>
+      </div>
+    `;
+
+    layer.bindPopup(popupContent);
   };
 
   return (
@@ -44,16 +101,49 @@ const MapSection: React.FC<MapSectionProps> = ({ geoData, isLoading, onOpenInput
               attribution='&copy; OpenStreetMap contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            <GeoJSON 
+
+            <GeoJSON
               key={geoData.projectId || Math.random()}
-              data={geoData} 
+              data={geoData}
               style={getFeatureStyle}
-              onEachFeature={(feature, layer) => {
-                const desa = feature.properties?.desa_kelurahan || feature.properties?.desa || '-';
-                const status = feature.properties?.status_lahan_kritis || feature.properties?.status || '-';
-                layer.bindPopup(`<strong>Desa:</strong> ${desa}<br/><strong>Status:</strong> ${status}`);
-              }}
+              onEachFeature={onEachFeatureHandler}
             />
+
+            {geoData.features?.map((feature: any, index: number) => {
+              try {
+                const centroid = turf.centerOfMass(feature);
+                const [lng, lat] = centroid.geometry.coordinates;
+                const props = feature.properties || {};
+                const desa = props.desa_kelurahan || props.desa || '-';
+                const kth = props.nama_kelompok || 'Belum ada data KTH';
+                const ketua = props.ketua_kelompok || '-';
+                const cdk = props.cdk || '-';
+
+                return (
+                  <Marker key={`marker-${index}`} position={[lat, lng]}>
+                    <Popup>
+                      <div className="font-sans text-xs min-w-48 p-1">
+                        <span className="bg-[#185325]/10 text-[#185325] font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wider mb-1.5 inline-block">
+                          {cdk}
+                        </span>
+                        <strong className="block text-sm text-gray-800 mb-2 pb-1 border-b">Desa {desa}</strong>
+
+                        <div className="mb-2 bg-gray-50 p-1.5 rounded border border-gray-100 text-[11px] text-gray-600 font-mono">
+                          <div>Lat: {lat.toFixed(5)}</div>
+                          <div>Lng: {lng.toFixed(5)}</div>
+                        </div>
+
+                        <div className="mb-1"><span className="text-gray-500">KTH:</span> <span className="font-bold text-[#185325]">{kth}</span></div>
+                        <div><span className="text-gray-500">Ketua:</span> <span className="font-bold text-gray-700">{ketua}</span></div>
+                      </div>
+                    </Popup>
+                  </Marker>
+                );
+              } catch (error) {
+                return null;
+              }
+            })}
+
           </MapContainer>
         ) : (
           <div className="text-sm text-gray-400">Belum ada data spasial</div>

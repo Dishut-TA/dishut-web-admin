@@ -22,7 +22,7 @@ const PengesahanLaporanEvaluasiKabid: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-5xl mx-auto pb-12 animate-in fade-in duration-300">
+    <div className="flex flex-col gap-6 w-full mx-auto pb-12 animate-in fade-in duration-300">
       <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-bold text-gray-700 hover:text-[#185325] self-start">
         <HiOutlineChevronLeft className="w-4 h-4 stroke-2" /> Kembali
       </button>

@@ -63,7 +63,7 @@ const DetailRiwayatRehabilitasi: React.FC = () => {
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10">
         <h1 className="text-xl md:text-2xl font-bold text-gray-800 mb-8">
-          {data.status === 'Selesai' ? 'Laporan Riwayat Rehabilitasi' : 'Halaman Detail'}
+          {data.status === 'Selesai' ? 'Laporan Pendanaan Rehabilitasi' : 'Halaman Detail'}
         </h1>
 
         <div className="mb-8">

@@ -27,30 +27,33 @@ const CPITable: React.FC<CPITableProps> = ({ data, onViewDetail }) => {
           <tbody className="divide-y divide-gray-100">
             {data.length > 0 ? (
               data.map((row, idx) => (
-                <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-4 py-4 font-semibold text-gray-800">{row.kabupaten}</td>
-                  <td className="px-4 py-4 text-gray-600">{row.kecamatan}</td>
-                  <td className="px-4 py-4 text-gray-600">{row.desa}</td>
-                  <td className="px-4 py-4 font-bold">
-                    <span className={
-                      row.statusKekritisan.toLowerCase() === 'sangat kritis' ? 'text-red-500' :
-                      row.statusKekritisan.toLowerCase() === 'kritis' ? 'text-yellow-500' : 'text-green-600'
-                    }>
-                      {row.statusKekritisan}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4 text-gray-800 font-medium">{row.skorCPI}</td>
-                  <td className="px-4 py-4 text-[#185325] font-bold">{row.rekomendasi}</td>
-                  <td className="px-4 py-4 text-gray-600 font-semibold">{row.statusKelayakan}</td>
-                  <td className="px-4 py-4 flex justify-center">
-                    <button 
-                      onClick={() => onViewDetail(row)}
-                      className="p-1.5 text-gray-500 hover:text-[#185325] hover:bg-[#EBF8F1] rounded-full transition-colors active:scale-95 border border-gray-300"
-                    >
-                      <HiOutlineEye className="w-4 h-4 stroke-2" />
-                    </button>
-                  </td>
-                </tr>
+                // Di dalam CPITable.tsx bagian <tr> mapping:
+<tr key={idx} className="hover:bg-gray-50/50 transition-colors">
+  <td className="px-4 py-4 font-semibold text-gray-800">{row.kabupaten}</td>
+  <td className="px-4 py-4 text-gray-600">{row.kecamatan}</td>
+  <td className="px-4 py-4 text-gray-600">{row.desa}</td>
+  <td className="px-4 py-4 font-bold">
+    <span className={
+      row.statusKekritisan.toLowerCase() === 'sangat kritis' ? 'text-red-500' :
+      row.statusKekritisan.toLowerCase() === 'kritis' ? 'text-yellow-500' : 'text-green-600'
+    }>
+      {row.statusKekritisan}
+    </span>
+  </td>
+  <td className="px-4 py-4 text-gray-800 font-medium">{row.skorCPI}</td>
+  <td className="px-4 py-4 text-[#185325] font-bold text-left max-w-xs truncate" title={row.rekomendasi}>
+    {row.rekomendasi}
+  </td>
+  <td className="px-4 py-4 text-gray-600 font-semibold">{row.statusKelayakan}</td>
+  <td className="px-4 py-4 flex justify-center">
+    <button 
+      onClick={() => onViewDetail(row)}
+      className="p-1.5 text-gray-500 hover:text-[#185325] hover:bg-[#EBF8F1] rounded-full transition-colors active:scale-95 border border-gray-300"
+    >
+      <HiOutlineEye className="w-4 h-4 stroke-2" />
+    </button>
+  </td>
+</tr>
               ))
             ) : (
               <tr>

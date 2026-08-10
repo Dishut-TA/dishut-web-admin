@@ -7,6 +7,8 @@ import SelectedBibitList from './components/SelectedBibitList';
 import { getBibitsAPI, getSeedSpecificationsAPI } from '@/services/bibit.service';
 import { createDonationProgramAPI } from '@/services/program-donasi.service'; 
 
+const API_URL = "http://127.0.0.1:8000/api";
+
 interface MergedBibitSpec {
   spec_id: number;
   seed_id: number; 
@@ -16,21 +18,20 @@ interface MergedBibitSpec {
   price: number;
 }
 
-const LOCATION_KTH_MAP: Record<string, string> = {
-  "Blok 1 Kertasari": "KTH Kertasari Makmur",
-  "Blok Cisurupan": "KTH Cisurupan Lestari",
-  "Blue Water Tornado": "KTH Banyu Biru",
-};
-
 const formatRupiah = (angka: number) => 
   new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
 
 const CreateProgram: React.FC = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    namaProgram: '', lokasiLahan: '', kthPelaksana: '',
-    tanggalMulai: '', tanggalSelesai: '', deskripsi: ''
+    namaProgram: '', 
+    lokasiLahan: '', 
+    kthPelaksana: '', 
+    tanggalMulai: '', 
+    tanggalSelesai: '', 
+    deskripsi: ''
   });
+  const [selectedProjectId, setSelectedProjectId] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null); 
   const [daftarBibit, setDaftarBibit] = useState<MergedBibitSpec[]>([]);
   const [bibitOptions, setBibitOptions] = useState<MergedBibitSpec[]>([]);
@@ -38,15 +39,29 @@ const CreateProgram: React.FC = () => {
   const [isFetchingBibit, setIsFetchingBibit] = useState(true);
   const [isLoading, setIsLoading] = useState(false);  
 
+  const [projects, setProjects] = useState<any[]>([]);
+
   useEffect(() => {
-    const fetchMasterData = async () => {
+    const fetchMasterDataAndProjects = async () => {
       try {
-        const [bibitRes, specRes] = await Promise.all([ getBibitsAPI(), getSeedSpecificationsAPI() ]);
-        const bibits = bibitRes.payload || [];
+        const token = localStorage.getItem("token");
+        const headers: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+        const [bibitRes, specRes, projRes] = await Promise.all([ 
+          getBibitsAPI(), 
+          getSeedSpecificationsAPI(),
+          fetch(`${API_URL}/projects?status=completed`, { headers })
+        ]);
+
+        const bibitsData = bibitRes.payload || [];
         const specs = specRes.payload || [];
+        const projJson = await projRes.json();
+        const projList = projJson.payload || projJson.data || [];
+
+        setProjects(projList);
 
         const mergedData = specs.reduce((acc: MergedBibitSpec[], spec: any) => {
-          const bibit = bibits.find((b: any) => Number(b.id) === Number(spec.seed_id));
+          const bibit = bibitsData.find((b: any) => Number(b.id) === Number(spec.seed_id));
           if (bibit) {
             acc.push({
               spec_id: spec.id, seed_id: bibit.id, bibit_nama: bibit.nama,
@@ -57,23 +72,46 @@ const CreateProgram: React.FC = () => {
         }, []);
 
         setBibitOptions(mergedData);
-        if (mergedData.length === 0 && bibits.length > 0) toast.error('Spesifikasi (harga/ukuran) untuk bibit belum diatur di database.');
       } catch (error) {
-        toast.error('Gagal memuat daftar master bibit & harga.');
+        toast.error('Gagal memuat data master atau daftar project.');
       } finally {
         setIsFetchingBibit(false);
       }
     };
-    fetchMasterData();
+    fetchMasterDataAndProjects();
   }, []);
+
+  const handleProjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = e.target.value;
+    setSelectedProjectId(selectedId);
+
+    const foundProject = projects.find(p => String(p.id) === String(selectedId));
+    
+    if (foundProject && foundProject.hasil && foundProject.hasil.pratinjau_tabel) {
+      const firstZone = foundProject.hasil.pratinjau_tabel[0];
+      const namaKth = firstZone?.nama_kelompok || 'Belum ada data KTH terpetakan';
+      const desa = firstZone?.desa_kelurahan || firstZone?.desa || '';
+      const kabupaten = firstZone?.kota_kabupaten || firstZone?.kabupaten || '';
+      const formatLokasiWilayah = desa && kabupaten ? `${desa}, ${kabupaten}, Jawa Barat` : (foundProject.nama_project || '');
+      
+      setForm(prev => ({ 
+        ...prev, 
+        lokasiLahan: formatLokasiWilayah, 
+        namaProgram: foundProject.nama_project ? `Rehabilitasi - ${foundProject.nama_project}` : '',
+        kthPelaksana: namaKth 
+      }));
+    } else {
+      setForm(prev => ({ 
+        ...prev, 
+        lokasiLahan: foundProject?.nama_project || '', 
+        kthPelaksana: 'Data hasil analisis kosong' 
+      }));
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
-    
-    if (name === 'lokasiLahan') {
-      setForm(prev => ({ ...prev, kthPelaksana: LOCATION_KTH_MAP[value] || '' }));
-    }
   };
 
   const handleTambahBibit = () => {
@@ -95,6 +133,7 @@ const CreateProgram: React.FC = () => {
     e.preventDefault();
     if (daftarBibit.length === 0) return toast.error('Silakan pilih minimal satu jenis bibit.');
     if (!form.tanggalMulai || !form.tanggalSelesai) return toast.error('Harap lengkapi periode tanggal program.');
+    if (!form.lokasiLahan) return toast.error('Silakan pilih project lahan kritis terlebih dahulu.');
 
     setIsLoading(true);
     const loadingToast = toast.loading('Mengajukan program donasi...');
@@ -102,7 +141,7 @@ const CreateProgram: React.FC = () => {
     try {
       const formData = new FormData();
       formData.append('name', form.namaProgram);
-      formData.append('location', form.lokasiLahan);
+      formData.append('location', form.lokasiLahan); 
       formData.append('description', form.deskripsi);
       formData.append('kth_id', '1'); 
       formData.append('total_seeds_collected', '0');
@@ -145,18 +184,26 @@ const CreateProgram: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-bold text-slate-800 mb-2">Pilih Lahan Kritis <span className="text-red-500">*</span></label>
-                <select name="lokasiLahan" required value={form.lokasiLahan} onChange={handleInputChange} className="w-full bg-white border border-slate-200 rounded-full px-4 py-3.5 text-slate-800 focus:ring-2 focus:ring-[#009262]/20 focus:border-[#009262] transition-all cursor-pointer shadow-sm">
-                  <option value="" disabled>-- Pilih Area Lahan --</option>
-                  <option value="Blok 1 Kertasari">Blok 1 Kertasari - 15.5 Ha (Proses Tanam)</option>
-                  <option value="Blok Cisurupan">Blok Cisurupan - 8 Ha (Survei)</option>
-                  <option value="Blue Water Tornado">Blue Water Tornado</option>
+                <label className="block text-sm font-bold text-slate-800 mb-2">Pilih Lahan Kritis (Project Analisis) <span className="text-red-500">*</span></label>
+                <select 
+                  name="lokasiLahanSelect" 
+                  required 
+                  value={selectedProjectId} 
+                  onChange={handleProjectChange} 
+                  className="w-full bg-white border border-slate-200 rounded-full px-4 py-3.5 text-slate-800 focus:ring-2 focus:ring-[#009262]/20 focus:border-[#009262] transition-all cursor-pointer shadow-sm"
+                >
+                  <option value="" disabled>-- Pilih Project Analisis --</option>
+                  {projects.map((proj) => (
+                    <option key={proj.id} value={proj.id}>
+                      {proj.nama_project || proj.kode_project} ({proj.status})
+                    </option>
+                  ))}
                 </select>
               </div>
 
               <div>
                 <label className="block text-sm font-bold text-slate-800 mb-2">KTH Terkait (Otomatis)</label>
-                <input type="text" disabled value={form.kthPelaksana} placeholder="Akan terisi otomatis..." className="w-full bg-slate-50 border border-slate-200 rounded-full px-4 py-3.5 text-slate-500 cursor-not-allowed transition-all shadow-sm" />
+                <input type="text" disabled value={form.kthPelaksana} placeholder="Akan terisi otomatis berdasarkan wilayah..." className="w-full bg-slate-50 border border-slate-200 rounded-full px-4 py-3.5 text-slate-500 cursor-not-allowed transition-all shadow-sm" />
               </div>
 
               <div>

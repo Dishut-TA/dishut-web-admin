@@ -73,11 +73,15 @@ const PelaksanaanKegiatan: React.FC = () => {
     try {
       const response = await getDonationsAPI();
 
-      const rawData = response.data.payload || response.data.data || response.data;
-      const list = Array.isArray(rawData) ? rawData : [rawData];
+      const resData = response?.data || response;
+
+      const rawData = resData?.payload || resData?.data || resData;
+
+      const list = Array.isArray(rawData) ? rawData : (rawData ? [rawData] : []);
 
       setKegiatanList(list.map(formatKegiatanData));
     } catch (error) {
+      console.error("Detail Error API:", error); 
       toast.error('Gagal memuat data pelaksanaan kegiatan');
     } finally {
       setIsLoading(false);
