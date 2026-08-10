@@ -1,6 +1,8 @@
 import type { RoleType, PermissionType } from "@/utils/interface";
 
-const API_URL = import.meta.env.VITE_API_MASTER_URL;
+// const API_URL = import.meta.env.VITE_API_MASTER_URL;
+const API_URL = import.meta.env.VITE_API_EXAMPLE;
+
 const handleApiResponse = async (response: Response) => {
   const responseText = await response.text();
   if (responseText.trim().startsWith('<')) {

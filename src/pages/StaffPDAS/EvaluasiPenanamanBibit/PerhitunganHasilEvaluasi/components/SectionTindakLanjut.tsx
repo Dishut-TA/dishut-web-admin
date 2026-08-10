@@ -33,8 +33,7 @@ const SectionTindakLanjut: React.FC<SectionTindakLanjutProps> = ({ dataPetakUkur
               <label className="text-xs font-bold text-gray-700 block mb-2">Jenis Tindak Lanjut <span className="text-red-500">*</span></label>
               <select className="w-full text-xs p-3 border border-gray-300 rounded-xl focus:ring-1 focus:ring-orange-500 focus:outline-none bg-white cursor-pointer">
                 <option>Penyulaman (Replanting)</option>
-                <option>Perawatan Intensif (Pemupukan/Penyiangan)</option>
-                <option>Perbaikan Drainase / Saluran</option>
+                <option>Perawatan</option>
               </select>
             </div>
             <div>

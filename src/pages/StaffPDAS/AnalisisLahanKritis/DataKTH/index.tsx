@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   HiOutlineMagnifyingGlass, HiOutlinePlus, HiOutlineEye, 
   HiOutlinePencil, HiOutlineChevronLeft, HiOutlineChevronRight 
@@ -9,6 +9,8 @@ import { getKthsAPI, type KthResponseData } from '@/services/kth.service';
 
 const DataKTH: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCdk, setSelectedCdk] = useState('');
+  const [selectedKabupaten, setSelectedKabupaten] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tableData, setTableData] = useState<KthResponseData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,15 +35,26 @@ const DataKTH: React.FC = () => {
   
   const safeTableData = Array.isArray(tableData) ? tableData : [];
 
-  const filteredData = safeTableData.filter(row => 
-    row?.nama?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    row?.cdk?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    row?.kabupaten_kota?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const kabupatenOptions = useMemo(() => {
+    const list = safeTableData.map(item => item.kabupaten_kota).filter(Boolean);
+    return Array.from(new Set(list));
+  }, [safeTableData]);
+
+  const filteredData = safeTableData.filter(row => {
+    const matchesSearch = 
+      row?.nama?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row?.cdk?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row?.kabupaten_kota?.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesCdk = selectedCdk ? row?.cdk === selectedCdk : true;
+    const matchesKabupaten = selectedKabupaten ? row?.kabupaten_kota === selectedKabupaten : true;
+
+    return matchesSearch && matchesCdk && matchesKabupaten;
+  });
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, selectedCdk, selectedKabupaten]);
 
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
@@ -50,11 +63,35 @@ const DataKTH: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-12 animate-in fade-in duration-300">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <h1 className="text-xl md:text-2xl font-bold text-gray-800">Data KTH</h1>
         
-        <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-          <div className="relative w-full sm:w-64">
+        <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+          <select
+            value={selectedCdk}
+            onChange={(e) => setSelectedCdk(e.target.value)}
+            className="bg-white border border-gray-300 text-gray-700 text-xs rounded-full px-4 py-2.5 outline-none focus:ring-1 focus:ring-[#185325] focus:border-[#185325] cursor-now-allowed sm:cursor-pointer shadow-sm"
+          >
+            <option value="">Semua CDK</option>
+            <option value="CDK WILAYAH I">CDK WILAYAH I</option>
+            <option value="CDK WILAYAH II">CDK WILAYAH II</option>
+            <option value="CDK WILAYAH III">CDK WILAYAH III</option>
+            <option value="CDK WILAYAH IV">CDK WILAYAH IV</option>
+            <option value="CDK WILAYAH V">CDK WILAYAH V</option>
+          </select>
+
+          <select
+            value={selectedKabupaten}
+            onChange={(e) => setSelectedKabupaten(e.target.value)}
+            className="bg-white border border-gray-300 text-gray-700 text-xs rounded-full px-4 py-2.5 outline-none focus:ring-1 focus:ring-[#185325] focus:border-[#185325] cursor-now-allowed sm:cursor-pointer shadow-sm"
+          >
+            <option value="">Semua Kabupaten/Kota</option>
+            {kabupatenOptions.map((kab, idx) => (
+              <option key={idx} value={kab}>{kab}</option>
+            ))}
+          </select>
+
+          <div className="relative w-full sm:w-56">
             <HiOutlineMagnifyingGlass className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input 
               type="text" 
@@ -64,6 +101,7 @@ const DataKTH: React.FC = () => {
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full text-sm focus:ring-1 focus:ring-[#185325] focus:border-[#185325] outline-none transition-colors shadow-sm" 
             />
           </div>
+
           <button 
             onClick={() => setIsModalOpen(true)}
             className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors shadow-sm active:scale-95 whitespace-nowrap"
@@ -115,7 +153,7 @@ const DataKTH: React.FC = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={8} className="px-4 py-8 text-gray-500 font-medium">Tidak ada data KTH.</td>
+                  <td colSpan={8} className="px-4 py-8 text-gray-500 font-medium">Tidak ada data KTH yang sesuai dengan filter.</td>
                 </tr>
               )}
             </tbody>
