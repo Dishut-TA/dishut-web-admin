@@ -1,6 +1,6 @@
 import React from 'react';
 import { HiOutlineEye } from 'react-icons/hi2';
-import type { MappedBibitData } from '..';
+import type { MappedBibitData } from '../IndexBibit';
 
 interface BibitTableProps {
   data: MappedBibitData[];

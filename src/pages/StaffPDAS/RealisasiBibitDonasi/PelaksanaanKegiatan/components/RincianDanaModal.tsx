@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { HiOutlineBanknotes, HiOutlineXMark } from 'react-icons/hi2';
 import StatusBadgeKegiatan from './StatusBadgeKegiatan';
-import type { KegiatanData } from '..';
+import type { KegiatanData } from '../PelaksanaanKegiatan';
 
 const formatRupiah = (number: number) => {
   return new Intl.NumberFormat('id-ID', { 

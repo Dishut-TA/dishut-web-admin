@@ -1,39 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  HiOutlineCheckCircle, 
-  HiOutlineArrowRight 
-} from 'react-icons/hi2';
-
-interface ProposalCSR {
-  id: string;
-  rencanaKemitraan: string;
-  kth: string;
-  lokasi: string;
-  anggaran: number;
-}
+import { HiOutlineCheckCircle, HiOutlineArrowRight } from 'react-icons/hi2';
+import toast from 'react-hot-toast';
+import { getProgramCsrsAPI } from '@/services/program-csr.service';
 
 const TinjauProposal: React.FC = () => {
   const navigate = useNavigate();
-  
-  const [data] = useState<ProposalCSR[]>([
-    {
-      id: 'CSR-001',
-      rencanaKemitraan: 'Rehabilitasi Lahan Subang',
-      kth: 'KTH Rimba',
-      lokasi: 'Desa Sukamulya',
-      anggaran: 80000000,
-    }
-  ]);
+  const [data, setData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await getProgramCsrsAPI();
+        const filtered = response.filter((item: any) => item.status === 'Mencari Mitra CSR');
+        setData(filtered);
+      } catch (error: any) {
+        toast.error("Gagal memuat daftar proposal rekomendasi.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const formatRupiah = (angka: number) => {
     return new Intl.NumberFormat('id-ID', { 
       style: 'currency', currency: 'IDR', maximumFractionDigits: 0 
-    }).format(angka);
+    }).format(Number(angka || 0));
   };
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8">
+    <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8 animate-in fade-in duration-300">
       <div>
         <div className="flex items-center gap-2 mb-2">
           <h1 className="text-xl font-bold text-gray-800">
@@ -45,16 +43,20 @@ const TinjauProposal: React.FC = () => {
         </p>
       </div>
 
-      {data.length > 0 ? (
+      {isLoading ? (
+        <div className="flex justify-center items-center py-20 text-[#185325] font-bold">
+          <span className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin mr-3 border-[#185325]"></span> Memuat data...
+        </div>
+      ) : data.length > 0 ? (
         <div className="overflow-x-auto w-full mt-2">
-          <table className="w-full text-left border-collapse min-w-225">
+          <table className="w-full text-left border-collapse min-w-225 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <thead className="bg-[#DCECE0] text-[#3A4D3F] text-xs uppercase tracking-wider font-bold">
               <tr>
-                <th className="px-6 py-4 rounded-tl-xl whitespace-nowrap">ID</th>
+                <th className="px-6 py-4 whitespace-nowrap">ID</th>
                 <th className="px-6 py-4 whitespace-nowrap">NAMA PROGRAM</th>
                 <th className="px-6 py-4 whitespace-nowrap">KTH</th>
                 <th className="px-6 py-4 whitespace-nowrap">ANGGARAN DIAJUKAN</th>
-                <th className="px-6 py-4 rounded-tr-xl whitespace-nowrap text-center">AKSI</th>
+                <th className="px-6 py-4 whitespace-nowrap text-center">AKSI</th>
               </tr>
             </thead>
             
@@ -62,17 +64,13 @@ const TinjauProposal: React.FC = () => {
               {data.map((item) => (
                 <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-6 py-4">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold text-gray-800">{item.id}</span>
-                    </div>
+                    <span className="text-sm font-bold text-gray-800">CSR-{item.id}</span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold text-gray-800">{item.rencanaKemitraan}</span>
-                    </div>
+                    <span className="text-sm font-bold text-gray-800">{item.nama_program}</span>
                   </td>
                   <td className="px-6 py-4 text-sm font-bold text-gray-700 whitespace-nowrap">
-                    {item.kth}
+                    {item.kth?.nama || '-'}
                   </td>
                   <td className="px-6 py-4 text-sm font-bold text-gray-800 whitespace-nowrap">
                     {formatRupiah(item.anggaran)}
@@ -80,7 +78,7 @@ const TinjauProposal: React.FC = () => {
                   <td className="px-6 py-4 flex justify-center whitespace-nowrap">
                     <button 
                       onClick={() => navigate(`/admin/csr/tinjau-proposal/detail/${item.id}`)}
-                      className="flex items-center gap-2 px-5 py-2 bg-[#185325] hover:bg-[#123d1c] text-white text-xs font-bold rounded-full transition-colors shadow-sm active:scale-95"
+                      className="flex items-center gap-2 px-5 py-2 bg-[#185325] hover:bg-[#123d1c] text-white text-xs font-bold rounded-full transition-colors shadow-sm active:scale-95 cursor-pointer"
                     >
                       Tinjau Berkas <HiOutlineArrowRight className="w-4 h-4" />
                     </button>
@@ -101,7 +99,7 @@ const TinjauProposal: React.FC = () => {
           </p>
           <button 
             onClick={() => navigate('/admin/csr/dashboard')}
-            className="flex items-center gap-2 bg-[#185325] hover:bg-[#123d1c] text-white px-6 py-2.5 rounded-lg text-sm font-bold transition-colors shadow-sm active:scale-95"
+            className="flex items-center gap-2 bg-[#185325] hover:bg-[#123d1c] text-white px-6 py-2.5 rounded-lg text-sm font-bold transition-colors shadow-sm active:scale-95 cursor-pointer"
           >
             Kembali ke Dashboard <HiOutlineArrowRight className="w-4 h-4" />
           </button>

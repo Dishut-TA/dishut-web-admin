@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { 
   HiOutlineChevronLeft, 
   HiOutlineDocumentDuplicate, 
@@ -6,14 +7,24 @@ import {
   HiCheck
 } from 'react-icons/hi2';
 import { FiChevronDown } from 'react-icons/fi';
+import toast from 'react-hot-toast';
+import { getProgramCsrByIdAPI, updateProgramCsrStatusAPI } from '@/services/program-csr.service';
 
 type PaymentTab = 'QR' | 'VA';
 
 const PendanaanProgram: React.FC = () => {
+  const navigate = useNavigate();
+  const { id } = useParams();
+
   const [step, setStep] = useState<1 | 2>(1);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedBank, setSelectedBank] = useState<string>('');
   const [activeTab, setActiveTab] = useState<PaymentTab>('QR');
+  
+  const [programData, setProgramData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const banks = [
@@ -22,6 +33,23 @@ const PendanaanProgram: React.FC = () => {
     { id: 'bni', name: 'Bank Negara Indonesia (BNI)', code: 'BNI', color: 'bg-orange-500' },
     { id: 'mandiri', name: 'Bank Mandiri', code: 'MDR', color: 'bg-blue-900' },
   ];
+
+  // Ambil data asli dari database berdasarkan ID CSR
+  useEffect(() => {
+    const fetchProgram = async () => {
+      try {
+        if (id) {
+          const res = await getProgramCsrByIdAPI(id);
+          setProgramData(res.data || res.payload || res);
+        }
+      } catch (error: any) {
+        toast.error("Gagal memuat informasi pendanaan program.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProgram();
+  }, [id]);
 
   // Tutup dropdown jika klik di luar area
   useEffect(() => {
@@ -34,14 +62,50 @@ const PendanaanProgram: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ===========================================================================
-  // TAMPILAN LANGKAH 1: PILIH METODE PEMBAYARAN
-  // ===========================================================================
+  const formatRupiah = (angka: any) => {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(angka || 0));
+  };
+
+  const handleSelesaikanPembayaran = async () => {
+    if (!id) return;
+    setIsSubmitting(true);
+    const loadingToast = toast.loading('Memproses status pembayaran...');
+
+    try {
+      // Update status proposal menjadi 'Disetujui' setelah pembayaran selesai
+      await updateProgramCsrStatusAPI(id, { status: 'Disetujui' });
+      
+      toast.success('Pembayaran Berhasil! Status program telah diperbarui.', { id: loadingToast });
+      // Arahkan kembali ke dashboard atau halaman riwayat/list
+      navigate('/admin/csr/tinjau-proposal');
+    } catch (error: any) {
+      toast.error(error.message || 'Gagal memperbarui status pembayaran.', { id: loadingToast });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen text-[#185325] font-bold bg-[#F8F9F8]">
+        <span className="w-6 h-6 border-2 border-[#185325] border-t-transparent rounded-full animate-spin mr-3"></span> 
+        Memuat data pembayaran...
+      </div>
+    );
+  }
+
+  if (!programData) {
+    return <div className="text-center text-gray-500 py-20">Data program pendanaan tidak ditemukan.</div>;
+  }
+
   if (step === 1) {
     return (
-      <div className="min-h-screen bg-[#F8F9F8] pt-10 pb-20 px-5 font-sans">
+      <div className="min-h-screen bg-[#F8F9F8] pt-10 pb-20 px-5 font-sans animate-in fade-in duration-300">
         <div className="max-w-3xl mx-auto">
-          <button className="flex items-center gap-2 text-sm font-bold text-gray-800 hover:text-[#185325] transition-colors mb-10 cursor-pointer">
+          <button 
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-sm font-bold text-gray-800 hover:text-[#185325] transition-colors mb-10 cursor-pointer"
+          >
             <HiOutlineChevronLeft className="w-4 h-4 stroke-2" /> Kembali
           </button>
 
@@ -54,12 +118,12 @@ const PendanaanProgram: React.FC = () => {
               <div className="grid grid-cols-[160px_20px_1fr] md:grid-cols-[200px_20px_1fr] text-lg font-semibold text-[#185325]">
                 <span>Nama Program</span>
                 <span>:</span>
-                <span>Rehabilitasi Lahan Subang</span>
+                <span>{programData.nama_program || '-'}</span>
               </div>
               <div className="grid grid-cols-[160px_20px_1fr] md:grid-cols-[200px_20px_1fr] text-lg font-semibold text-[#185325]">
                 <span>Nominal Pendanaan</span>
                 <span>:</span>
-                <span>Rp 80.000.000</span>
+                <span>{formatRupiah(programData.anggaran)}</span>
               </div>
             </div>
 
@@ -119,7 +183,7 @@ const PendanaanProgram: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9F8] pt-10 pb-20 px-5 font-sans">
+    <div className="min-h-screen bg-[#F8F9F8] pt-10 pb-20 px-5 font-sans animate-in fade-in duration-300">
       <div className="max-w-5xl mx-auto">
         <h1 className="text-2xl md:text-[28px] font-bold text-[#185325] text-center mb-12">
           Pembayaran Program Rehabilitasi
@@ -129,7 +193,7 @@ const PendanaanProgram: React.FC = () => {
           <div>
             <div className="mb-8">
               <h2 className="text-xl font-bold text-[#185325] flex items-center gap-2 mb-3">
-                Order ID <span className="text-[#8D6E63] font-normal text-lg">#91902478hwdo8ahd</span>
+                Order ID <span className="text-[#8D6E63] font-normal text-lg">#CSR-INV-{programData.id}</span>
               </h2>
               <p className="text-sm text-[#185325] mb-4">
                 Selesaikan pembayaran dalam <span className="font-bold">00.15.39</span>
@@ -139,17 +203,17 @@ const PendanaanProgram: React.FC = () => {
               </p>
               <div className="flex items-center gap-3 mt-4">
                 <span className="text-sm text-[#185325]">Total Bayar</span>
-                <span className="text-2xl md:text-3xl font-bold text-[#185325]">Rp. 80.000.000</span>
+                <span className="text-2xl md:text-3xl font-bold text-[#185325]">{formatRupiah(programData.anggaran)}</span>
               </div>
             </div>
 
             <div>
-              <h3 className="text-sm text-[#185325] mb-2">Panduan Pembayaran</h3>
+              <h3 className="text-sm text-[#185325] mb-2 font-bold">Panduan Pembayaran</h3>
               <ol className="list-decimal list-inside text-sm text-[#185325] space-y-1.5">
                 {activeTab === 'QR' ? (
                   <>
                     <li>Buka aplikasi pembayaran QRIS yang mendukung</li>
-                    <li>Unduh atau pindai atau download QRIS di layar kamu</li>
+                    <li>Unduh atau pindai QRIS di layar kamu</li>
                     <li>Konfirmasi pembayaran di aplikasi</li>
                     <li>Pembayaran Berhasil</li>
                   </>
@@ -192,9 +256,8 @@ const PendanaanProgram: React.FC = () => {
                 <>
                   <p className="text-sm text-[#185325] mb-4">Pindai atau Download QR</p>
                   <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-6">
-                    {/* Placeholder QR Code Menggunakan API Publik agar terlihat realistis */}
                     <img 
-                      src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=PembayaranRehabilitasiLahanSubang" 
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=BayarCSR_${programData.id}_${programData.anggaran}`} 
                       alt="QR Code" 
                       className="w-56 h-56 object-contain"
                     />
@@ -202,30 +265,43 @@ const PendanaanProgram: React.FC = () => {
                   <button className="flex items-center justify-center gap-2 w-64 py-3 rounded-full border border-[#185325] text-[#185325] font-semibold text-sm hover:bg-[#185325] hover:text-white transition-colors cursor-pointer">
                     Download QR <HiOutlineCloud className="w-5 h-5" />
                   </button>
+                  <button 
+                    onClick={handleSelesaikanPembayaran}
+                    disabled={isSubmitting}
+                    className="w-full max-w-75 bg-[#185325] hover:bg-[#123d1c] text-white font-bold rounded-full py-3.5 transition-colors cursor-pointer shadow-md active:scale-[0.98] mt-6 disabled:opacity-50"
+                  >
+                    {isSubmitting ? 'Memproses...' : 'Selesai Pembayaran'}
+                  </button>
                 </>
               ) : (
                 <div className="w-full flex flex-col items-center mt-4">
                   <p className="text-sm text-[#185325] mb-3">Virtual Account</p>
                   <div className="flex items-center gap-3 mb-3">
                     <span className="text-2xl font-bold text-[#185325]">
-                      1824718923743183
+                      18247000{programData.id}3183
                     </span>
-                    <button className="text-[#185325] hover:text-gray-600 transition-colors cursor-pointer" title="Salin VA">
+                    <button 
+                      onClick={() => {
+                        navigator.clipboard.writeText(`18247000${programData.id}3183`);
+                        toast.success("Nomor VA disalin ke clipboard!");
+                      }} 
+                      className="text-[#185325] hover:text-gray-600 transition-colors cursor-pointer" 
+                      title="Salin VA"
+                    >
                       <HiOutlineDocumentDuplicate className="w-5 h-5" />
                     </button>
                   </div>
                   <p className="text-[11px] text-[#185325] text-center max-w-62.5 mb-8 leading-relaxed">
-                    Lakukan pembayaran ke no VA diatas sesuai nominal isi saldo yaitu sebesar <span className="font-bold">Rp</span>
+                    Lakukan pembayaran ke no VA diatas sesuai nominal sebesar <span className="font-bold">{formatRupiah(programData.anggaran)}</span>
                   </p>
                   
                   <button 
-                    onClick={() => {
-                      alert("Pembayaran Selesai!");
-                      setStep(1); 
-                    }}
-                    className="w-full max-w-75 bg-[#185325] hover:bg-[#123d1c] text-white font-bold rounded-full py-3.5 transition-colors cursor-pointer shadow-md active:scale-[0.98]"
+                    onClick={handleSelesaikanPembayaran}
+                    disabled={isSubmitting}
+                    className="w-full max-w-75 bg-[#185325] hover:bg-[#123d1c] text-white font-bold rounded-full py-3.5 transition-colors cursor-pointer shadow-md active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
                   >
-                    Selesai
+                    {isSubmitting && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>}
+                    {isSubmitting ? 'Memproses...' : 'Selesai Pembayaran'}
                   </button>
                 </div>
               )}

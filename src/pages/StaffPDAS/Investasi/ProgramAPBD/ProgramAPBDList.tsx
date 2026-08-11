@@ -1,64 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  HiOutlinePlus, 
-  HiOutlineEye, 
-  // HiOutlinePencil, 
-  // HiOutlineTrash,
-  HiOutlineXCircle
-} from 'react-icons/hi2';
-
-type StatusProgram = 'Draft' | 'Menunggu Persetujuan' | 'Disetujui' | 'Ditolak';
-
-interface ProgramAPBD {
-  id: string;
-  nama: string;
-  lokasi: string;
-  anggaran: number;
-  luasLahan: number;
-  status: StatusProgram;
-  kth: string;
-}
-
-const mockData: ProgramAPBD[] = [
-  {
-    id: 'APBD-001',
-    nama: 'Rehabilitasi Lahan Kritis Citarum',
-    lokasi: 'Hulu Citarum - Blok 1',
-    anggaran: 120000000,
-    luasLahan: 15,
-    status: 'Menunggu Persetujuan',
-    kth: 'KTH Keren Sedunia'
-  },
-  {
-    id: 'APBD-002',
-    nama: 'Pemulihan Ekosistem Cisadane',
-    lokasi: 'DAS Cisadane Hilir',
-    anggaran: 85000000,
-    luasLahan: 8,
-    status: 'Disetujui',
-    kth: 'KTH Keren Sedunia'
-  },
-  {
-    id: 'APBD-003',
-    nama: 'Pemulihan Ekosistem Cisadane',
-    lokasi: 'DAS Cisadane Hilir',
-    anggaran: 85000000,
-    luasLahan: 8,
-    status: 'Ditolak',
-    kth: 'KTH Keren Sedunia'
-  }
-];
+import { HiOutlinePlus, HiOutlineEye, HiOutlineXCircle } from 'react-icons/hi2';
+import toast from 'react-hot-toast';
+import { getProgramApbdsAPI } from '@/services/program-apbd.service';
 
 const ProgramAPBDList: React.FC = () => {
   const navigate = useNavigate();
-  const [data] = useState<ProgramAPBD[]>(mockData);
+  const [data, setData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPrograms = async () => {
+      try {
+        const response = await getProgramApbdsAPI();
+        setData(response);
+      } catch (error: any) {
+        toast.error(error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchPrograms();
+  }, []);
 
   const formatRupiah = (angka: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(angka);
   };
 
-  const getStatusBadge = (status: StatusProgram) => {
+  const getStatusBadge = (status: string) => {
     const baseStyle = "px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap";
     switch (status) {
       case 'Disetujui': 
@@ -67,10 +36,10 @@ const ProgramAPBDList: React.FC = () => {
         return <span className={`${baseStyle} bg-[#F2C94C] text-gray-800`}>Menunggu Persetujuan</span>;
       case 'Ditolak': 
         return <span className={`${baseStyle} bg-red-100 text-red-600`}>Ditolak</span>;
-      case 'Draft': 
-        return <span className={`${baseStyle} bg-gray-200 text-gray-600`}>Draft</span>;
+      case 'Selesai': 
+        return <span className={`${baseStyle} bg-gray-200 text-gray-600`}>Selesai</span>;
       default: 
-        return null;
+        return <span className={`${baseStyle} bg-gray-100 text-gray-600`}>{status}</span>;
     }
   };
 
@@ -105,31 +74,27 @@ const ProgramAPBDList: React.FC = () => {
                 <th className="px-6 py-4 whitespace-nowrap">ID</th>
                 <th className="px-6 py-4 whitespace-nowrap">Nama Program</th>
                 <th className="px-6 py-4 whitespace-nowrap">KTH Penerima</th>
-                <th className="px-6 py-4 whitespace-nowrap text-center">Lokasi</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">Anggaran</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">Status</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {data.length > 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500 font-medium">Memuat data...</td>
+                </tr>
+              ) : data.length > 0 ? (
                 data.map((item) => (
                   <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-semibold text-gray-800">{item.id}</span>
-                      </div>
+                      <span className="text-sm font-semibold text-gray-800">APBD-{item.id}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-semibold text-gray-800">{item.nama}</span>
-                      </div>
+                      <span className="text-sm font-semibold text-gray-800">{item.nama_program}</span>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
-                      {item.kth}
-                    </td>
-                    <td className="px-6 py-4 text-sm font-bold text-gray-800 text-center whitespace-nowrap">
-                      {item.lokasi}
+                      {item.kth?.nama || 'Belum ditugaskan'}
                     </td>
                     <td className="px-6 py-4 text-sm font-bold text-[#2E7D32] text-center whitespace-nowrap">
                       {formatRupiah(item.anggaran)} 
@@ -142,16 +107,6 @@ const ProgramAPBDList: React.FC = () => {
                         <button onClick={() => navigate(`/admin/staff/rehabilitasi/program-apbd/detail/${item.id}`)} title="Lihat Detail" className="p-1.5 text-gray-400 hover:text-[#2E7D32] transition-colors">
                           <HiOutlineEye className="w-5 h-5" />
                         </button>
-                        {/* {item.status !== 'Disetujui' && (
-                          <>
-                            <button title="Edit" className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors">
-                              <HiOutlinePencil className="w-5 h-5" />
-                            </button>
-                            <button title="Hapus" className="p-1.5 text-gray-400 hover:text-red-600 transition-colors">
-                              <HiOutlineTrash className="w-5 h-5" />
-                            </button>
-                          </>
-                        )} */}
                       </div>
                     </td>
                   </tr>
@@ -175,7 +130,6 @@ const ProgramAPBDList: React.FC = () => {
           </table>
         </div>
       </div>
-
     </div>
   );
 };
