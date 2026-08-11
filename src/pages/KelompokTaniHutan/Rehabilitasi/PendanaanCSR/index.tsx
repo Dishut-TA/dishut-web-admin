@@ -1,67 +1,117 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HiOutlineMagnifyingGlass, HiOutlinePlus, HiOutlineEye } from 'react-icons/hi2';
+import toast from 'react-hot-toast';
+import { getProgramCsrsAPI } from '@/services/program-csr.service';
 
 const PendanaanCSR: React.FC = () => {
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [data, setData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const mockData = [
-    { id: 'CSR-001', judul: 'Reboisasi Hulu Sungai DAS', anggaran: 'Rp300.000.000', status: 'Menunggu Verifikasi' },
-    { id: 'CSR-002', judul: 'Penghijauan Lahan Kritis', anggaran: 'Rp150.000.000', status: 'Mencari Mitra CSR' },
-    { id: 'CSR-003', judul: 'Pembangunan Kebun Bibit', anggaran: 'Rp500.000.000', status: 'Disetujui' },
-  ];
+  useEffect(() => {
+    const fetchCsr = async () => {
+      try {
+        const response = await getProgramCsrsAPI();
+        setData(response);
+      } catch (error: any) {
+        toast.error("Gagal memuat data pengajuan CSR.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchCsr();
+  }, []);
+
+  const formatRupiah = (angka: number) => {
+    if (!angka) return 'Rp 0';
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(angka));
+  };
+
+  const filteredData = data.filter(item => 
+    item.nama_program?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8">
+    <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8 animate-in fade-in duration-300">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Daftar Pengajuan Pendanaan CSR</h1>
           <p className="text-sm text-gray-500">Daftar usulan program rehabilitasi pendanaan mitra</p>
         </div>
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative w-full sm:w-64">
                 <HiOutlineMagnifyingGlass className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input type="text" placeholder="Cari Proposal.." className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-[#185325] focus:border-[#185325] outline-none" />
+                <input 
+                  type="text" 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Cari Proposal.." 
+                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-[#185325] focus:border-[#185325] outline-none" 
+                />
             </div>
             <button 
                 onClick={() => navigate('/admin/kth/rehabilitasi/pendanaan-csr/create')}
-                className="bg-[#185325] text-white px-5 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-[#113d1b] transition-colors"
+                className="bg-[#185325] text-white px-5 py-2.5 rounded-lg text-sm font-bold flex justify-center items-center gap-2 hover:bg-[#113d1b] transition-colors shadow-sm active:scale-95"
             >
                 <HiOutlinePlus /> Ajukan Pendanaan CSR
             </button>
         </div>
       </div>
 
-      <div className="bg-[#E8F5E9] rounded-xl border border-gray-200 overflow-hidden">
-        <table className="w-full text-left">
-            <thead className="bg-[#DCECE0] text-[#3A4D3F] text-xs uppercase tracking-wider font-bold">
-            <tr>
-              <th className="px-6 py-4">ID</th>
-              <th className="px-6 py-4">Judul Program</th>
-              <th className="px-6 py-4">Anggaran Diajukan</th>
-              <th className="px-6 py-4">Status</th>
-              <th className="px-6 py-4">Aksi</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white">
-            {mockData.map((item) => (
-              <tr key={item.id} className="border-t border-gray-100">
-                <td className="px-6 py-4 font-bold text-sm text-gray-700">{item.id}</td>
-                <td className="px-6 py-4 text-sm text-gray-700">{item.judul}</td>
-                <td className="px-6 py-4 text-sm font-bold text-[#185325]">{item.anggaran}</td>
-                <td className="px-6 py-4">
-                  <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${
-                    item.status === 'Disetujui' ? 'bg-green-100 text-green-700' : 
-                    item.status === 'Mencari Mitra CSR' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-700'
-                  }`}>
-                    {item.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4"><HiOutlineEye className="w-5 h-5 text-gray-500 cursor-pointer" /></td>
+      <div className="bg-[#E8F5E9] rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+        <div className="overflow-x-auto w-full">
+          <table className="w-full text-left">
+              <thead className="bg-[#DCECE0] text-[#3A4D3F] text-xs uppercase tracking-wider font-bold">
+              <tr>
+                <th className="px-6 py-4 whitespace-nowrap">ID</th>
+                <th className="px-6 py-4 whitespace-nowrap">Judul Program</th>
+                <th className="px-6 py-4 whitespace-nowrap">Anggaran Diajukan</th>
+                <th className="px-6 py-4 whitespace-nowrap">Status</th>
+                <th className="px-6 py-4 whitespace-nowrap text-center">Aksi</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-100">
+              {isLoading ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center">
+                    <span className="inline-block w-6 h-6 border-2 border-[#185325] border-t-transparent rounded-full animate-spin"></span>
+                  </td>
+                </tr>
+              ) : filteredData.length > 0 ? (
+                filteredData.map((item) => (
+                  <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 font-bold text-sm text-gray-700">CSR-{item.id}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700">{item.nama_program}</td>
+                    <td className="px-6 py-4 text-sm font-bold text-[#185325]">{formatRupiah(item.anggaran)}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-3 py-1.5 rounded-full text-[10px] font-bold inline-block whitespace-nowrap ${
+                        item.status === 'Disetujui' ? 'bg-green-100 text-green-700' : 
+                        item.status === 'Mencari Mitra CSR' ? 'bg-orange-100 text-orange-700' : 
+                        item.status === 'Ditolak' ? 'bg-red-100 text-red-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {item.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 flex justify-center">
+                      <button onClick={() => navigate(`/admin/kth/rehabilitasi/pendanaan-csr/detail/${item.id}`)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                        <HiOutlineEye className="w-5 h-5 text-gray-500" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                    Tidak ada usulan proposal CSR yang ditemukan.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

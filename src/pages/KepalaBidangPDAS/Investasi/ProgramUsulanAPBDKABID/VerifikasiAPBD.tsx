@@ -1,5 +1,5 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { 
   HiOutlineChevronLeft,
   HiOutlineUser,
@@ -8,28 +8,69 @@ import {
   HiOutlineCheckCircle
 } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
+import { getProgramApbdByIdAPI, updateProgramApbdStatusAPI } from '@/services/program-apbd.service';
 
 const VerifikasiAPBD: React.FC = () => {
   const navigate = useNavigate();
-//   const { id } = useParams(); // Nantinya bakal ambil ID dari URL parameter
+  const { id } = useParams();
+  
+  const [data, setData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const detailData = {
-    kthPenerima: 'KTH Rimba',
-    ketuaKTH: 'Adam Malik',
-    kontakWhatsapp: '08123456789',
-    lokasi: 'Desa Sukamulya, Subang Jawa Barat',
-    rencanaKegiatan: 'Rehabilitasi Lahan Subang',
-    anggaran: 'Rp 120.000.000',
-    pilihan_intervensi: 'Agroforestry'
+  useEffect(() => {
+    const fetchDetail = async () => {
+      try {
+        if (id) {
+          const res = await getProgramApbdByIdAPI(id);
+          
+          setData(res.data || res.payload || res);
+        }
+      } catch (error: any) {
+        toast.error("Gagal memuat detail program.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchDetail();
+  }, [id]);
+
+  const handleUpdateStatus = async (newStatus: 'Disetujui' | 'Ditolak') => {
+    if (!id) return;
+    setIsSubmitting(true);
+    const loadingToast = toast.loading(`Memproses ${newStatus.toLowerCase()} program...`);
+    
+    try {
+      await updateProgramApbdStatusAPI(id, newStatus);
+      toast.success(`Program APBD berhasil ${newStatus.toLowerCase()}!`, { id: loadingToast });
+      navigate(-1);
+    } catch (error: any) {
+      toast.error(error.message || `Gagal ${newStatus.toLowerCase()} program.`, { id: loadingToast });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleApprove = () => {
-    toast.success('Program APBD berhasil disahkan!');
-    navigate(-1);
+  const formatRupiah = (angka: any) => {
+    if (!angka) return 'Rp 0';
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(angka));
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-48 text-[#185325] font-bold">
+        <span className="w-6 h-6 border-2 border-[#185325] border-t-transparent rounded-full animate-spin mr-3"></span> 
+        Memuat detail verifikasi...
+      </div>
+    );
+  }
+
+  if (!data) return <div className="text-center text-gray-500 py-10">Data tidak ditemukan.</div>;
+
+  const isVerified = data.status === 'Disetujui' || data.status === 'Ditolak';
 
   return (
-    <div className="flex flex-col gap-6 w-full mx-auto pb-12">
+    <div className="flex flex-col gap-6 w-full mx-auto pb-12 animate-in fade-in duration-300">
       <button 
         onClick={() => navigate(-1)}
         className="flex items-center gap-2 text-sm font-bold text-gray-700 hover:text-[#185325] self-start transition-colors"
@@ -40,8 +81,12 @@ const VerifikasiAPBD: React.FC = () => {
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 md:p-10 flex flex-col">
         <div className="mb-8">
-          <span className="inline-block px-3 py-1 bg-[#DCECE0] text-[#185325] text-xs font-bold rounded-md mb-3">
-            Lembar Sahkan APBD
+          <span className={`inline-block px-3 py-1 text-xs font-bold rounded-md mb-3 ${
+            data.status === 'Disetujui' ? 'bg-green-100 text-green-700' :
+            data.status === 'Ditolak' ? 'bg-red-100 text-red-700' :
+            'bg-[#DCECE0] text-[#185325]'
+          }`}>
+            Status: {data.status || 'Menunggu Persetujuan'}
           </span>
           <h1 className="text-2xl font-bold text-gray-800">Lembar Sahkan APBD</h1>
         </div>
@@ -51,46 +96,49 @@ const VerifikasiAPBD: React.FC = () => {
             <span className="text-xs font-medium text-gray-500">Kelompok Tani Hutan</span>
             <div className="flex items-center gap-2 font-bold text-gray-800 text-sm">
               <HiOutlineUser className="w-4 h-4 text-gray-400" />
-              {detailData.kthPenerima}
+              {data.kth?.nama || '-'}
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-gray-500">Nama Ketua KTH</span>
             <div className="flex items-center gap-2 font-bold text-gray-800 text-sm">
               <HiOutlineUser className="w-4 h-4 text-gray-400" />
-              {detailData.ketuaKTH}
+              {data.kth?.ketua || '-'}
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-gray-500">Luas Lahan</span>
             <div className="flex items-center gap-2 font-bold text-gray-800 text-sm">
-              120 Ha
+              {data.target_luas_lahan || 0} Ha
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-gray-500">Lokasi Lahan</span>
             <div className="flex items-center gap-2 font-bold text-gray-800 text-sm">
               <HiOutlineMapPin className="w-4 h-4 text-[#185325]" />
-              {detailData.lokasi}
+              {data.kth?.desa_kelurahan ? `${data.kth.desa_kelurahan}, ${data.kth.kabupaten_kota}` : '-'}
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-gray-500">Nama Program</span>
             <div className="font-bold text-gray-800 text-sm">
-              {detailData.rencanaKegiatan}
+              {data.nama_program || '-'}
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-gray-500">Anggaran APBD</span>
             <div className="font-bold text-gray-800 text-sm">
-              {detailData.anggaran}
+              {formatRupiah(data.anggaran)}
             </div>
           </div>
-          <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-gray-500">Pilihan Intervensi</span>
-            <div className="font-bold text-gray-800 text-sm">
-              {detailData.pilihan_intervensi}
-            </div>
+        </div>
+
+        <div className="pt-8 flex-1">
+          <label className="block text-sm font-bold text-gray-800 mb-3">
+            Pilihan Intervensi
+          </label>
+          <div className="relative text-sm text-gray-600 leading-relaxed text-justify">
+            <p>{data.pilihan_intervensi || 'Tidak ada intervensi tersedia.'}</p>
           </div>
         </div>
 
@@ -98,24 +146,29 @@ const VerifikasiAPBD: React.FC = () => {
           <label className="block text-sm font-bold text-gray-800 mb-3">
             Deskripsi Rencana Kegiatan
           </label>
-          <div className="relative">
-            <p>Lorem ipsum dolor sit amet consectetur. Sed arcu elementum eu feugiat mattis posuere. Tempus quis consequat in amet. Commodo dignissim sed tellus mi. Rhoncus lectus habitant leo urna et tortor nunc velit accumsan. Adipiscing sed turpis sit aliquet dictum iaculis posuere a.</p>
+          <div className="relative text-sm text-gray-600 leading-relaxed text-justify">
+            <p>{data.deskripsi_rencana || 'Tidak ada deskripsi tersedia.'}</p>
           </div>
         </div>
 
-        <div className="pt-8 mt-auto flex flex-col-reverse sm:flex-row justify-end items-center gap-4">
-          <button 
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-white border border-gray-300 text-gray-600 text-sm font-bold rounded-full hover:bg-gray-50 transition-colors"
-          >
-            <HiOutlineXMark className="w-4 h-4" /> Tolak
-          </button>
-          <button 
-            onClick={handleApprove}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-2.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors shadow-sm"
-          >
-            <HiOutlineCheckCircle className="w-5 h-5" /> Sahkan Program APBD
-          </button>
-        </div>
+        {!isVerified && (
+          <div className="pt-8 mt-auto flex flex-col-reverse sm:flex-row justify-end items-center gap-4">
+            <button 
+              onClick={() => handleUpdateStatus('Ditolak')}
+              disabled={isSubmitting}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-white border border-red-300 text-red-600 text-sm font-bold rounded-full hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <HiOutlineXMark className="w-4 h-4" /> Tolak
+            </button>
+            <button 
+              onClick={() => handleUpdateStatus('Disetujui')}
+              disabled={isSubmitting}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-2.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <HiOutlineCheckCircle className="w-5 h-5" /> Sahkan Program APBD
+            </button>
+          </div>
+        )}
 
       </div>
     </div>

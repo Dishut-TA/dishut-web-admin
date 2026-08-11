@@ -1,45 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  HiOutlineMagnifyingGlass,
-  HiOutlineArrowRight
-} from 'react-icons/hi2';
-
-interface UsulanCSR {
-  id: string;
-  namaProgram: string;
-  kth: string;
-  lokasi: string;
-  anggaran: number;
-  status: 'Menunggu Persetujuan' | 'Direkomendasikan' | 'Ditolak';
-}
-
-const mockData: UsulanCSR[] = [
-  {
-    id: 'CSR-001',
-    namaProgram: 'Rehabilitasi Lahan Subang',
-    kth: 'KTH Rimba',
-    lokasi: 'Desa Sukamulya',
-    anggaran: 80000000,
-    status: 'Menunggu Persetujuan'
-  }
-];
+import { HiOutlineMagnifyingGlass, HiOutlineArrowRight } from 'react-icons/hi2';
+import toast from 'react-hot-toast';
+import { getProgramCsrsAPI } from '@/services/program-csr.service';
 
 const DaftarUsulanCSR: React.FC = () => {
   const navigate = useNavigate();
+  const [data, setData] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await getProgramCsrsAPI();
+        setData(response);
+      } catch (error: any) {
+        toast.error("Gagal memuat daftar usulan CSR.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const formatRupiah = (angka: number) => {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(angka);
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(angka || 0));
   };
 
-  const filteredData = mockData.filter(item => 
-    item.namaProgram.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.kth.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredData = data.filter(item => 
+    item.nama_program?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.kth?.nama?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8">
+    <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8 animate-in fade-in duration-300">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-bold text-gray-800">
@@ -67,40 +62,44 @@ const DaftarUsulanCSR: React.FC = () => {
                 <th className="px-6 py-4 whitespace-nowrap">ID</th>
                 <th className="px-6 py-4 whitespace-nowrap">NAMA PROGRAM</th>
                 <th className="px-6 py-4 whitespace-nowrap">KTH</th>
-                <th className="px-6 py-4 whitespace-nowrap">ANGGARAKAN DIAJUKAN</th>
+                <th className="px-6 py-4 whitespace-nowrap">ANGGARAN DIAJUKAN</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">STATUS</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">AKSI</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filteredData.length > 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                    <span className="inline-block w-6 h-6 border-2 border-[#185325] border-t-transparent rounded-full animate-spin"></span>
+                  </td>
+                </tr>
+              ) : filteredData.length > 0 ? (
                 filteredData.map((item) => (
                   <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-bold text-gray-800">{item.id}</span>
-                      </div>
+                      <span className="text-sm font-bold text-gray-800">CSR-{item.id}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-bold text-gray-800">{item.namaProgram}</span>
-                      </div>
+                      <span className="text-sm font-bold text-gray-800">{item.nama_program}</span>
                     </td>
                     <td className="px-6 py-4 text-sm font-bold text-gray-700 whitespace-nowrap">
-                      {item.kth}
+                      {item.kth?.nama || '-'}
                     </td>
                     <td className="px-6 py-4 text-sm font-bold text-gray-800 whitespace-nowrap">
                       {formatRupiah(item.anggaran)}
                     </td>
                     <td className="px-6 py-4 text-center whitespace-nowrap">
-                      <span className="inline-block px-4 py-1.5 bg-[#FDE68A] text-yellow-800 rounded-full text-[11px] font-bold">
+                      <span className={`inline-block px-4 py-1.5 rounded-full text-[11px] font-bold ${
+                        item.status === 'Terverifikasi' ? 'bg-[#FDE68A] text-yellow-800' : 'bg-gray-100 text-gray-700'
+                      }`}>
                         {item.status}
                       </span>
                     </td>
                     <td className="px-6 py-4 flex justify-center whitespace-nowrap">
                       <button 
                         onClick={() => navigate(`/admin/kabid/rehabilitasi/validasi-csr/verifikasi/${item.id}`)}
-                        className="flex items-center gap-2 px-4 py-1.5 bg-white border border-[#185325] text-[#185325] hover:bg-[#f0f9f3] text-xs font-bold rounded-full transition-colors"
+                        className="flex items-center gap-2 px-4 py-1.5 bg-white border border-[#185325] text-[#185325] hover:bg-[#f0f9f3] text-xs font-bold rounded-full transition-colors cursor-pointer"
                       >
                         Periksa Berkas <HiOutlineArrowRight className="w-3 h-3" />
                       </button>
@@ -118,7 +117,6 @@ const DaftarUsulanCSR: React.FC = () => {
           </table>
         </div>
       </div>
-
     </div>
   );
 };

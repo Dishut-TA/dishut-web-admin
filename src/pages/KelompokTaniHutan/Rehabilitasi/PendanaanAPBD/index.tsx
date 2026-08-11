@@ -1,37 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { HiOutlineMagnifyingGlass, HiOutlineEye } from 'react-icons/hi2';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { getProgramApbdsAPI } from '@/services/program-apbd.service';
 
 const PendanaanAPBD: React.FC = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [data, setData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const mockData = [
-    { 
-        id: 'APBD-001', 
-        judul: 'Reboisasi Hulu Sungai DAS',
-        lokasi: 'Desa Sukamulya', 
-        alokasi: 'Rp300.000.000', 
-        status: 'Menunggu Konfirmasi' 
-    },
-    { 
-        id: 'APBD-002', 
-        judul: 'Reboisasi Hulu Sungai DAS',
-        lokasi: 'Desa Sukamulya', 
-        alokasi: 'Rp300.000.000', 
-        status: 'Menunggu Konfirmasi' 
-    },
-    { 
-        id: 'APBD-003', 
-        judul: 'Reboisasi Hulu Sungai DAS',
-        lokasi: 'Desa Sukamulya', 
-        alokasi: 'Rp300.000.000', 
-        status: 'Menunggu Konfirmasi' 
-    },
-  ];
+  useEffect(() => {
+    const fetchPenugasan = async () => {
+      try {
+        const response = await getProgramApbdsAPI();
+        
+        // Ubah 'Berjalan' menjadi 'Aktif' sesuai Figma
+        const validPrograms = response.filter((item: any) => 
+          ['Disetujui', 'Aktif', 'Selesai'].includes(item.status)
+        );
+        
+        setData(validPrograms);
+      } catch (error: any) {
+        toast.error("Gagal memuat daftar penugasan.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchPenugasan();
+  }, []);
+
+  const formatRupiah = (angka: number) => {
+    if (!angka) return 'Rp 0';
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(angka));
+  };
+
+  const filteredData = data.filter(item => 
+    item.nama_program?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.kth?.desa_kelurahan?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8 px-4 sm:px-0">
+    <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8 px-4 sm:px-0 animate-in fade-in duration-300">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div className="flex items-start">
           <div>
@@ -66,35 +76,57 @@ const PendanaanAPBD: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {mockData.map((item, index) => (
-                <tr key={index} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-5 font-bold text-gray-800 text-sm">{item.id}</td>
-                  <td className="px-6 py-5 text-sm text-gray-700">{item.judul}</td>
-                  <td className="px-6 py-5 text-sm text-gray-700">{item.lokasi}</td>
-                  <td className="px-6 py-5 text-sm font-bold text-[#185325]">{item.alokasi}</td>
-                  <td className="px-6 py-5 text-center">
-                    <span className={`px-4 py-1.5 rounded-full text-xs font-bold ${
-                      item.status === 'Menunggu Konfirmasi' ? 'bg-gray-200 text-gray-700' : 
-                      item.status === 'Berjalan' ? 'bg-orange-200 text-orange-800' : 
-                      'bg-green-300 text-green-800'
-                    }`}>
-                      {item.status}
-                    </span>
-                  </td>
-                  
-                  <td className="px-6 py-5 flex justify-center items-center h-full">
-                    {item.status === 'Menunggu Konfirmasi' ? (
-                      <button onClick={() => navigate(`/admin/kth/rehabilitasi/pendanaan-apbd/detail/${item.id}`)} className="bg-[#185325] hover:bg-[#123d1c] text-white px-5 py-2 rounded-full text-xs font-bold transition-colors">
-                        Konfirmasi
-                      </button>
-                    ) : (
-                      <button className="text-gray-600 hover:text-[#185325] p-2 rounded-full hover:bg-gray-100 transition-colors">
-                        <HiOutlineEye className="w-5 h-5" />
-                      </button>
-                    )}
+              {isLoading ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center">
+                    <span className="inline-block w-6 h-6 border-2 border-[#185325] border-t-transparent rounded-full animate-spin"></span>
                   </td>
                 </tr>
-              ))}
+              ) : filteredData.length > 0 ? (
+                filteredData.map((item) => (
+                  <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-5 font-bold text-gray-800 text-sm">APBD-{item.id}</td>
+                    <td className="px-6 py-5 text-sm text-gray-700">{item.nama_program}</td>
+                    <td className="px-6 py-5 text-sm text-gray-700">
+                      {item.kth?.desa_kelurahan ? `${item.kth.desa_kelurahan}, ${item.kth.kabupaten_kota}` : '-'}
+                    </td>
+                    <td className="px-6 py-5 text-sm font-bold text-[#185325]">{formatRupiah(item.anggaran)}</td>
+                    <td className="px-6 py-5 text-center">
+                      <span className={`px-4 py-1.5 rounded-full text-xs font-bold ${
+                        item.status === 'Disetujui' ? 'bg-gray-200 text-gray-700' : 
+                        item.status === 'Aktif' ? 'bg-blue-100 text-blue-700 border border-blue-200' : // Warna untuk 'Aktif'
+                        'bg-green-100 text-green-700'
+                      }`}>
+                        {item.status === 'Disetujui' ? 'Menunggu Konfirmasi' : item.status}
+                      </span>
+                    </td>
+                    
+                    <td className="px-6 py-5 flex justify-center items-center h-full">
+                      {item.status === 'Disetujui' ? (
+                        <button 
+                          onClick={() => navigate(`/admin/kth/rehabilitasi/pendanaan-apbd/detail/${item.id}`)} 
+                          className="bg-[#185325] hover:bg-[#123d1c] text-white px-5 py-2 rounded-full text-xs font-bold transition-colors shadow-sm active:scale-95"
+                        >
+                          Konfirmasi
+                        </button>
+                      ) : (
+                        <button 
+                          onClick={() => navigate(`/admin/kth/rehabilitasi/pendanaan-apbd/detail/${item.id}`)}
+                          className="text-gray-600 hover:text-[#185325] p-2 rounded-full hover:bg-gray-100 transition-colors"
+                        >
+                          <HiOutlineEye className="w-5 h-5" />
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                    Belum ada penugasan program APBD untuk Anda.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

@@ -1,76 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HiOutlineMagnifyingGlass, HiOutlineEye, HiOutlineAdjustmentsHorizontal } from 'react-icons/hi2';
-
-type StatusVerifikasi = 'Menunggu Verifikasi' | 'Terverifikasi';
-
-interface DataVerifikasi {
-  id: string;
-  namaProgram: string;
-  tahap: string;
-  sumberDana: string;
-  danaDisalurkan: number;
-  danaDirealisasikan: number;
-  status: StatusVerifikasi;
-}
-
-const mockData: DataVerifikasi[] = [
-  {
-    id: 'CSR-001',
-    namaProgram: 'Rehabilitasi Citarum',
-    tahap: 'Tahap 1',
-    sumberDana: 'CSR',
-    danaDisalurkan: 100000000,
-    danaDirealisasikan: 20000000,
-    status: 'Menunggu Verifikasi'
-  },
-  {
-    id: 'CSR-002',
-    namaProgram: 'Rehabilitasi Citarum',
-    tahap: 'Tahap 1',
-    sumberDana: 'CSR',
-    danaDisalurkan: 100000000,
-    danaDirealisasikan: 20000000,
-    status: 'Terverifikasi'
-  },
-  {
-    id: 'APBD-001',
-    namaProgram: 'Rehabilitasi Citarum',
-    tahap: 'Tahap 1',
-    sumberDana: 'APBD',
-    danaDisalurkan: 100000000,
-    danaDirealisasikan: 20000000,
-    status: 'Terverifikasi'
-  }
-];
+import toast from 'react-hot-toast';
+import { getLaporanDanasAPI } from '@/services/laporan-dana.service';
 
 const VerifikasiLaporanDanaSTAFF: React.FC = () => {
   const navigate = useNavigate();
-  const [data] = useState<DataVerifikasi[]>(mockData);
+  const [data, setData] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filteredData = data.filter(item => 
-    item.namaProgram.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    const fetchLaporan = async () => {
+      try {
+        const response = await getLaporanDanasAPI();
+        setData(response);
+      } catch (error: any) {
+        toast.error("Gagal memuat data verifikasi laporan dana.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchLaporan();
+  }, []);
 
   const formatRupiah = (angka: number) => {
-    return 'Rp ' + angka.toLocaleString('id-ID');
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(angka || 0));
   };
 
-  const renderStatusBadge = (status: StatusVerifikasi) => {
+  const renderStatusBadge = (status: string) => {
     switch (status) {
       case 'Menunggu Verifikasi':
         return <span className="px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap bg-[#FDE68A] text-yellow-800">Menunggu Verifikasi</span>;
       case 'Terverifikasi':
         return <span className="px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap bg-[#DCECE0] text-[#185325]">Terverifikasi</span>;
+      case 'Revisi':
+        return <span className="px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap bg-red-200 text-red-800">Revisi</span>;
       default:
         return <span className="px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap bg-gray-100 text-gray-600">{status}</span>;
     }
   };
 
+  const filteredData = data.filter(item => 
+    item.nama_program?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    String(item.id).toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8">
+    <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8 animate-in fade-in duration-300">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">
@@ -89,7 +66,7 @@ const VerifikasiLaporanDanaSTAFF: React.FC = () => {
               className="w-full pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#185325] transition-all text-sm text-gray-700 shadow-sm"
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-transparent text-gray-700 hover:bg-gray-100 rounded-lg text-sm font-semibold transition-colors border border-gray-300 shadow-sm">
+          <button className="flex items-center gap-2 px-4 py-2 bg-transparent text-gray-700 hover:bg-gray-100 rounded-lg text-sm font-semibold transition-colors border border-gray-300 shadow-sm cursor-pointer">
             <HiOutlineAdjustmentsHorizontal className="w-5 h-5" /> Filter
           </button>
         </div>
@@ -111,39 +88,54 @@ const VerifikasiLaporanDanaSTAFF: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filteredData.map((item, index) => (
-                <tr key={index} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4 text-sm font-bold text-gray-800 whitespace-nowrap">
-                    {item.id}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">
-                    {item.namaProgram}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">
-                    {item.tahap}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">
-                    {item.sumberDana}
-                  </td>
-                  <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
-                    {formatRupiah(item.danaDisalurkan)}
-                  </td>
-                  <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
-                    {formatRupiah(item.danaDirealisasikan)}
-                  </td>
-                  <td className="px-6 py-4 text-center whitespace-nowrap">
-                    {renderStatusBadge(item.status)}
-                  </td>
-                  <td className="px-6 py-4 flex justify-center whitespace-nowrap">
-                    <button 
-                      onClick={() => navigate(`/admin/staff/rehabilitasi/verifikasi-dana/detail/${item.id}`)}
-                      className="p-1.5 text-gray-600 hover:text-[#185325] border border-transparent hover:border-[#185325] rounded-full transition-all cursor-pointer"
-                    >
-                      <HiOutlineEye className="w-5 h-5" />
-                    </button>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
+                    <span className="inline-block w-6 h-6 border-2 border-[#185325] border-t-transparent rounded-full animate-spin"></span>
                   </td>
                 </tr>
-              ))}
+              ) : filteredData.length > 0 ? (
+                filteredData.map((item) => (
+                  <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-6 py-4 text-sm font-bold text-gray-800 whitespace-nowrap">
+                      #{item.sumber_dana}-{item.id}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">
+                      {item.nama_program}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">
+                      {item.tahap}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">
+                      {item.sumber_dana}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
+                      {formatRupiah(item.dana_disalurkan)}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
+                      {formatRupiah(item.dana_direalisasikan)}
+                    </td>
+                    <td className="px-6 py-4 text-center whitespace-nowrap">
+                      {renderStatusBadge(item.status)}
+                    </td>
+                    <td className="px-6 py-4 flex justify-center whitespace-nowrap">
+                      <button 
+                        onClick={() => navigate(`/admin/staff/rehabilitasi/verifikasi-dana/detail/${item.id}`)}
+                        className="p-1.5 text-gray-600 hover:text-[#185325] border border-transparent hover:border-[#185325] rounded-full transition-all cursor-pointer"
+                        title="Tinjau Laporan"
+                      >
+                        <HiOutlineEye className="w-5 h-5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
+                    Tidak ada laporan dana yang perlu diverifikasi.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

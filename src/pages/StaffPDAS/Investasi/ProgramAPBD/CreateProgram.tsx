@@ -1,24 +1,117 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HiOutlineChevronLeft, HiOutlinePlusCircle } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
+import { createProgramApbdAPI } from '@/services/program-apbd.service';
+
+const API_URL = "http://127.0.0.1:8000/api";
 
 const CreateProgramAPBD: React.FC = () => {
   const navigate = useNavigate();
-  const [lokasi, setLokasi] = useState('');
-  const [namaProgram, setNamaProgram] = useState('');
-  const [pilihIntervensi, setPilihIntervensi] = useState('Agroforesty');
-  const [anggaran, setAnggaran] = useState('');
-  const [deskripsi, setDeskripsi] = useState('');
+  const [projects, setProjects] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingProjects, setIsFetchingProjects] = useState(true);
+  const [selectedProjectId, setSelectedProjectId] = useState('');
+  const [lokasiWilayah, setLokasiWilayah] = useState('');
   
+  const [form, setForm] = useState({
+    rekomendasi: '',
+    luasLahan: '',
+    kth_id: '',
+    namaKth: '',
+    ketuaKth: '',
+    namaProgram: '',
+    pilihIntervensi: '',
+    anggaran: '',
+    deskripsi: ''
+  });
+
   const MAX_DESC_LENGTH = 100;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log({ lokasi, namaProgram, pilihIntervensi, anggaran, deskripsi });
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const headers: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+        const res = await fetch(`${API_URL}/projects?status=completed`, { headers });
+        const json = await res.json();
+        
+        const projList = json.payload || json.data || [];
+        setProjects(projList);
+      } catch (error) {
+        toast.error('Gagal memuat daftar project lahan kritis.');
+      } finally {
+        setIsFetchingProjects(false);
+      }
+    };
+    fetchProjects();
+  }, []);
+
+  const handleProjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = e.target.value;
+    setSelectedProjectId(selectedId);
+
+    const foundProject = projects.find(p => String(p.id) === String(selectedId));
     
-    toast.success('Draft Program APBD berhasil dikirim ke Kepala PDAS untuk ditinjau!');
-    navigate(-1);
+    if (foundProject && foundProject.hasil) {
+      const firstZone = foundProject.hasil.pratinjau_tabel?.[0];
+      const geojsonProperties = foundProject.hasil.diagnostik?.geojson_first_properties;
+      const luasLahan = geojsonProperties?.luas_ha || 0;
+      const desa = firstZone?.desa_kelurahan || firstZone?.desa || '';
+      const kabupaten = firstZone?.kota_kabupaten || firstZone?.kabupaten || '';
+      
+      setLokasiWilayah(desa && kabupaten ? `${desa}, ${kabupaten}` : foundProject.nama_project);
+      
+      setForm(prev => ({
+        ...prev,
+        rekomendasi: firstZone?.rekomendasi_intervensi || 'Belum ada rekomendasi',
+        luasLahan: luasLahan, 
+        namaKth: firstZone?.nama_kelompok || 'Belum ada data KTH',
+        ketuaKth: firstZone?.ketua_kelompok || '-',
+        kth_id: firstZone?.kth_id || '1', 
+        namaProgram: foundProject.nama_project ? `Rehabilitasi Lahan Kritis - ${foundProject.nama_project}` : '',
+        pilihIntervensi: firstZone?.rekomendasi_intervensi?.split(',')[0] || ''
+      }));
+    } else {
+      setLokasiWilayah('');
+      setForm(prev => ({
+        ...prev,
+        rekomendasi: '', luasLahan: '', namaKth: '', ketuaKth: '', kth_id: '', namaProgram: '', pilihIntervensi: ''
+      }));
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedProjectId) return toast.error('Pilih lokasi prioritas terlebih dahulu.');
+
+    setIsLoading(true);
+    const loadingToast = toast.loading('Memproses Rancangan Program...');
+
+    const payload = {
+      kth_id: form.kth_id,
+      nama_program: form.namaProgram,
+      deskripsi_rencana: form.deskripsi,
+      anggaran: form.anggaran,
+      target_luas_lahan: form.luasLahan,
+      pilihan_intervensi: form.pilihIntervensi,
+    };
+
+    try {
+      await createProgramApbdAPI(payload);
+      toast.success('Draft Program APBD berhasil dikirim ke Kepala PDAS!', { id: loadingToast });
+      navigate(-1);
+    } catch (error: any) {
+      toast.error(error.message, { id: loadingToast });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -49,15 +142,21 @@ const CreateProgramAPBD: React.FC = () => {
             </label>
             <select 
               required
-              value={lokasi}
-              onChange={(e) => setLokasi(e.target.value)}
-              className="w-full bg-white border border-gray-400 rounded-full px-4 py-3 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#185325] focus:border-[#185325] transition-all cursor-pointer shadow-sm appearance-none"
+              value={selectedProjectId}
+              onChange={handleProjectChange}
+              disabled={isFetchingProjects}
+              className="w-full bg-white border border-gray-400 rounded-full px-4 py-3 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#185325] focus:border-[#185325] transition-all cursor-pointer shadow-sm appearance-none disabled:bg-gray-50"
             >
-              <option value="" disabled>-- Pilih Lokasi Prioritas --</option>
-              <option value="Hulu Citarum">Hulu Citarum</option>
-              <option value="DAS Cisadane">DAS Cisadane</option>
-              <option value="Blok Kertasari">Blok Kertasari</option>
+              <option value="" disabled>
+                {isFetchingProjects ? 'Memuat lokasi...' : '-- Pilih Lokasi Prioritas --'}
+              </option>
+              {projects.map((proj) => (
+                <option key={proj.id} value={proj.id}>
+                  {proj.nama_project || proj.kode_project} ({proj.status})
+                </option>
+              ))}
             </select>
+            {lokasiWilayah && <p className="text-[11px] text-gray-500 mt-2 ml-2">Area Terpilih: {lokasiWilayah}</p>}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -68,8 +167,9 @@ const CreateProgramAPBD: React.FC = () => {
               <input 
                 type="text" 
                 readOnly
-                value="Agroforesty"
+                value={form.rekomendasi}
                 className="w-full bg-gray-50 border border-gray-400 rounded-full px-4 py-3 text-sm text-gray-600 outline-none cursor-not-allowed"
+                placeholder="Akan otomatis terisi..."
               />
             </div>
             <div>
@@ -79,8 +179,9 @@ const CreateProgramAPBD: React.FC = () => {
               <input 
                 type="text" 
                 readOnly
-                value="120 Ha"
+                value={form.luasLahan ? `${form.luasLahan} Ha` : ''}
                 className="w-full bg-gray-50 border border-gray-400 rounded-full px-4 py-3 text-sm text-gray-600 outline-none cursor-not-allowed"
+                placeholder="Akan otomatis terisi..."
               />
             </div>
           </div>
@@ -93,8 +194,9 @@ const CreateProgramAPBD: React.FC = () => {
               <input 
                 type="text" 
                 readOnly
-                value="KTH Rimba"
+                value={form.namaKth}
                 className="w-full bg-gray-50 border border-gray-400 rounded-full px-4 py-3 text-sm text-gray-600 outline-none cursor-not-allowed"
+                placeholder="Akan otomatis terisi..."
               />
             </div>
             <div>
@@ -104,8 +206,9 @@ const CreateProgramAPBD: React.FC = () => {
               <input 
                 type="text" 
                 readOnly
-                value="KTH Rimba"
+                value={form.ketuaKth}
                 className="w-full bg-gray-50 border border-gray-400 rounded-full px-4 py-3 text-sm text-gray-600 outline-none cursor-not-allowed"
+                placeholder="Akan otomatis terisi..."
               />
             </div>
           </div>
@@ -116,9 +219,10 @@ const CreateProgramAPBD: React.FC = () => {
             </label>
             <input 
               type="text" 
+              name="namaProgram"
               required
-              value={namaProgram}
-              onChange={(e) => setNamaProgram(e.target.value)}
+              value={form.namaProgram}
+              onChange={handleInputChange}
               placeholder="Contoh: Rehabilitasi Lahan Kritis Citarum"
               className="w-full bg-white border border-gray-400 rounded-full px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#185325] focus:border-[#185325] transition-all shadow-sm"
             />
@@ -130,14 +234,17 @@ const CreateProgramAPBD: React.FC = () => {
                 Pilih Intervensi <span className="text-red-500">*</span>
               </label>
               <select 
+                name="pilihIntervensi"
                 required
-                value={pilihIntervensi}
-                onChange={(e) => setPilihIntervensi(e.target.value)}
+                value={form.pilihIntervensi}
+                onChange={handleInputChange}
                 className="w-full bg-white border border-gray-400 rounded-full px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#185325] focus:border-[#185325] transition-all cursor-pointer shadow-sm appearance-none"
               >
+                <option value="" disabled>-- Pilih Jenis Intervensi --</option>
                 <option value="Agroforesty">Agroforesty</option>
                 <option value="Silvopastura">Silvopastura</option>
                 <option value="Penghijauan Lingkungan">Penghijauan Lingkungan</option>
+                <option value="Konservasi Vegetatif">Konservasi Vegetatif</option>
               </select>
             </div>
             <div>
@@ -146,10 +253,11 @@ const CreateProgramAPBD: React.FC = () => {
               </label>
               <input 
                 type="number" 
+                name="anggaran"
                 required
-                value={anggaran}
-                onChange={(e) => setAnggaran(e.target.value)}
-                placeholder="Contoh: Rp 50.000.000"
+                value={form.anggaran}
+                onChange={handleInputChange}
+                placeholder="Contoh: 50000000"
                 className="w-full bg-white border border-gray-400 rounded-full px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#185325] focus:border-[#185325] transition-all shadow-sm appearance-none"
               />
             </div>
@@ -161,15 +269,16 @@ const CreateProgramAPBD: React.FC = () => {
             </label>
             <div className="relative">
               <textarea 
+                name="deskripsi"
                 rows={4}
                 maxLength={MAX_DESC_LENGTH}
-                value={deskripsi}
-                onChange={(e) => setDeskripsi(e.target.value)}
+                value={form.deskripsi}
+                onChange={handleInputChange}
                 placeholder="Masukkan rincian arahan kerja, jenis tanaman / pohon pelindung yang wajib ditanam, serta jangka waktu persiapan persemaian bibit unggul"
                 className="w-full bg-white border border-gray-400 rounded-2xl px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#185325] focus:border-[#185325] transition-all resize-none shadow-sm"
               ></textarea>
               <div className="absolute -bottom-6 right-2 text-[10px] font-bold text-gray-500">
-                {deskripsi.length}/{MAX_DESC_LENGTH}
+                {form.deskripsi.length}/{MAX_DESC_LENGTH}
               </div>
             </div>
           </div>
@@ -184,15 +293,16 @@ const CreateProgramAPBD: React.FC = () => {
             </button>
             <button 
               type="submit"
-              className="px-10 py-3 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors active:scale-95 shadow-sm"
+              disabled={isLoading}
+              className="flex items-center gap-2 px-10 py-3 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors active:scale-95 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
             >
+              {isLoading && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>}
               Kirim ke Kepala PDAS
             </button>
           </div>
 
         </form>
       </div>
-
     </div>
   );
 };

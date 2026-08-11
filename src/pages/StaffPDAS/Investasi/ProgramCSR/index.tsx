@@ -1,71 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HiOutlineMagnifyingGlass, HiOutlineArrowRight, HiOutlineXCircle, HiOutlineEye } from 'react-icons/hi2';
-
-type StatusCSR = 'Menunggu Persetujuan' | 'Disetujui' | 'Ditolak';
-
-interface CSRProposal {
-  id: string;
-  namaProgram: string;
-  kth: string;
-  anggaran: number;
-  status: StatusCSR;
-}
-
-// --- MOCK DATA DISESUAIKAN DENGAN GAMBAR ---
-const mockData: CSRProposal[] = [
-  {
-    id: 'CSR-001',
-    namaProgram: 'Reboisasi Hulu Sungai DAS',
-    kth: 'KTH Rimba',
-    anggaran: 300000000,
-    status: 'Menunggu Persetujuan'
-  },
-  {
-    id: 'CSR-002', 
-    namaProgram: 'Reboisasi Hulu Sungai DAS',
-    kth: 'KTH Rimba',
-    anggaran: 300000000,
-    status: 'Disetujui'
-  },
-  {
-    id: 'CSR-003', 
-    namaProgram: 'Reboisasi Hulu Sungai DAS',
-    kth: 'KTH Rimba',
-    anggaran: 300000000,
-    status: 'Ditolak'
-  }
-];
+import toast from 'react-hot-toast';
+import { getProgramCsrsAPI } from '@/services/program-csr.service';
 
 const ProgramCSRList: React.FC = () => {
   const navigate = useNavigate();
-  const [data] = useState<CSRProposal[]>(mockData);
+  const [data, setData] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filteredData = data.filter(item => 
-    item.namaProgram.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.kth.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await getProgramCsrsAPI();
+        setData(response);
+      } catch (error: any) {
+        toast.error("Gagal memuat data program CSR.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const formatRupiah = (angka: number) => {
-    return 'Rp' + angka.toLocaleString('id-ID');
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(angka || 0));
   };
 
-  const renderStatusBadge = (status: StatusCSR) => {
+  const filteredData = data.filter(item => 
+    item.nama_program?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.kth?.nama?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const renderStatusBadge = (status: string) => {
+    const baseStyle = "px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap";
     switch (status) {
-      case 'Menunggu Persetujuan':
-        return <span className="px-4 py-1.5 bg-gray-200 text-gray-700 rounded-full text-[11px] font-bold whitespace-nowrap">Menunggu Persetujuan</span>;
+      case 'Menunggu Verifikasi':
+        return <span className={`${baseStyle} bg-gray-200 text-gray-700`}>Menunggu Persetujuan</span>;
+      case 'Terverifikasi':
       case 'Disetujui':
-        return <span className="px-4 py-1.5 bg-[#81C784] text-white rounded-full text-[11px] font-bold whitespace-nowrap">Disetujui</span>;
+        return <span className={`${baseStyle} bg-[#81C784] text-white`}>Disetujui</span>;
       case 'Ditolak':
-        return <span className="px-4 py-1.5 bg-red-600 text-white rounded-full text-[11px] font-bold whitespace-nowrap">Ditolak</span>;
+      case 'Perlu Revisi':
+        return <span className={`${baseStyle} bg-red-600 text-white`}>Ditolak</span>;
       default:
-        return null;
+        return <span className={`${baseStyle} bg-blue-100 text-blue-700`}>{status}</span>;
     }
   };
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8">
+    <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8 animate-in fade-in duration-300">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
@@ -104,17 +89,23 @@ const ProgramCSRList: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filteredData.length > 0 ? (
-                filteredData.map((item, index) => (
-                  <tr key={index} className="hover:bg-gray-50/50 transition-colors">
+              {isLoading ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-16 text-center text-gray-500">
+                    <span className="inline-block w-6 h-6 border-2 border-[#185325] border-t-transparent rounded-full animate-spin"></span>
+                  </td>
+                </tr>
+              ) : filteredData.length > 0 ? (
+                filteredData.map((item) => (
+                  <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4 text-sm font-semibold text-gray-800 whitespace-nowrap">
-                      {item.id}
+                      CSR-{item.id}
                     </td>
                     <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
-                      {item.namaProgram}
+                      {item.nama_program}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
-                      {item.kth}
+                      {item.kth?.nama || '-'}
                     </td>
                     <td className="px-6 py-4 text-sm font-bold text-[#185325] whitespace-nowrap">
                       {formatRupiah(item.anggaran)}
@@ -123,7 +114,7 @@ const ProgramCSRList: React.FC = () => {
                       {renderStatusBadge(item.status)}
                     </td>
                     <td className="px-6 py-4 flex justify-center items-center whitespace-nowrap h-full min-h-16">
-                      {item.status === 'Menunggu Persetujuan' ? (
+                      {item.status === 'Menunggu Verifikasi' ? (
                         <button 
                           onClick={() => navigate(`/admin/staff/rehabilitasi/program-csr/detail/${item.id}`)}
                           className="flex items-center gap-1.5 px-5 py-2 bg-[#185325] hover:bg-[#123d1c] text-white text-xs font-bold rounded-full transition-colors active:scale-95 shadow-sm cursor-pointer"

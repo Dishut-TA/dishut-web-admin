@@ -146,6 +146,7 @@ import DetailCPIKABID from "./pages/KepalaBidangPDAS/AnalisisLahanKritis/Dashboa
 import HasilValidasiLokasi from "./pages/KepalaBidangPDAS/AnalisisLahanKritis/HasilValidasiPenyuluh";
 import MasterBibit from "./pages/StaffPDAS/DataMaster/MasterBibit";
 import DetailCPISTAFF from "./pages/StaffPDAS/AnalisisLahanKritis/AnalisisCPI/DetailCPISTAFF";
+import DetailPendanaanCSR from "./pages/KelompokTaniHutan/Rehabilitasi/PendanaanCSR/DetailPendanaanCSR";
 const Login = lazy(() => import("./pages/Authentication/Login"));
 const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -362,6 +363,7 @@ function App() {
                   <Route path="dashboard" element={<DashboardKTH />} />
                   <Route path="rehabilitasi/pendanaan-csr" element={<PendanaanCSR />} />
                   <Route path="rehabilitasi/pendanaan-csr/create" element={<AjukanProgramCSR />} />
+                  <Route path="rehabilitasi/pendanaan-csr/detail/:id" element={<DetailPendanaanCSR />} />
                   <Route path="rehabilitasi/pendanaan-apbd" element={<PendanaanAPBD />} />
                   <Route path="rehabilitasi/pendanaan-apbd/detail/:id" element={<DetailPendanaanAPBD />} />
                   <Route path="rehabilitasi/riwayat" element={<RiwayatRehabilitasi />} />

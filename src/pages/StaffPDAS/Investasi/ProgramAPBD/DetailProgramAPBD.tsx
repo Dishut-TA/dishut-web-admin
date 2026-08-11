@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { getProgramApbdByIdAPI } from '@/services/program-apbd.service';
 import { 
   HiOutlineChevronLeft,
   HiOutlineUserGroup,
@@ -10,17 +12,39 @@ import {
 const DetailProgramAPBD: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams(); 
+  
+  const [data, setData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const data = {
-    id: id || 'PRG-001',
-    kth: 'KTH Rimba',
-    ketuaKth: 'Adam Malik',
-    targetLuas: '120 Ha',
-    lokasi: 'Desa Sukamulya, Subang Jawa Barat',
-    namaProgram: 'Rehabilitasi Lahan Subang',
-    anggaran: 'Rp 80.000.000',
-    pilihan_intervensi: 'Agroforestry',
-    deskripsi: 'Lorem ipsum dolor sit amet consectetur. Sed arcu elementum eu feugiat mattis posuere. Tempus quis consequat in amet. Commodo dignissim sed tellus mi. Rhoncus lectus habitant leo urna et tortor nunc velit accumsan. Adipiscing sed turpis sit aliquet dictum iaculis posuere a.'
+  useEffect(() => {
+    const fetchDetail = async () => {
+      try {
+        if (id) {
+          const res = await getProgramApbdByIdAPI(id);
+          setData(res);
+        }
+      } catch (error: any) {
+        toast.error("Gagal memuat detail program.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchDetail();
+  }, [id]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-48 text-[#185325] font-bold">
+        <span className="w-6 h-6 border-2 border-[#185325] border-t-transparent rounded-full animate-spin mr-3"></span> 
+        Memuat detail...
+      </div>
+    );
+  }
+
+  if (!data) return <div className="text-center text-gray-500 py-10">Data tidak ditemukan.</div>;
+
+  const formatRupiah = (angka: number) => {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(angka);
   };
 
   return (
@@ -37,7 +61,7 @@ const DetailProgramAPBD: React.FC = () => {
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10">
         <div className="mb-6">
-          <span className="inline-block px-3 py-1.5 bg-[#DCECE0]/70 text-[#185325] text-xs font-bold rounded-md mb-4">
+          <span className="inline-block px-3 py-1.5 bg-[#DCECE0]/70 text-[#185325] text-xs font-bold rounded-md mb-4 uppercase tracking-wider">
             Detail Administrasi
           </span>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
@@ -52,7 +76,7 @@ const DetailProgramAPBD: React.FC = () => {
             <p className="text-sm text-gray-500 mb-2">Kelompok Tani Hutan</p>
             <div className="flex items-center gap-2 text-base font-bold text-gray-800">
               <HiOutlineUserGroup className="w-5 h-5 text-[#2E7D32]" />
-              {data.kth}
+              {data.kth?.nama || '-'}
             </div>
           </div>
           
@@ -60,45 +84,49 @@ const DetailProgramAPBD: React.FC = () => {
             <p className="text-sm text-gray-500 mb-2">Nama Ketua KTH</p>
             <div className="flex items-center gap-2 text-base font-bold text-gray-800">
               <HiOutlineIdentification className="w-5 h-5 text-[#2E7D32]" />
-              {data.ketuaKth}
+              {data.kth?.ketua || '-'}
             </div>
           </div>
           
           <div>
             <p className="text-sm text-gray-500 mb-2">Target Luas Lahan</p>
             <div className="text-base font-bold text-gray-800">
-              {data.targetLuas}
+              {data.target_luas_lahan} Ha
             </div>
           </div>
 
           <div>
-            <p className="text-sm text-gray-500 mb-2">Lokasi Lahan</p>
+            <p className="text-sm text-gray-500 mb-2">Lokasi Lahan (KTH)</p>
             <div className="flex items-center gap-2 text-base font-bold text-gray-800">
               <HiOutlineMapPin className="w-5 h-5 text-[#2E7D32]" />
-              {data.lokasi}
+              {data.kth?.desa_kelurahan ? `${data.kth.desa_kelurahan}, ${data.kth.kabupaten_kota}` : '-'}
             </div>
           </div>
           
           <div>
             <p className="text-sm text-gray-500 mb-2">Nama Program</p>
             <div className="text-base font-bold text-gray-800">
-              {data.namaProgram}
+              {data.nama_program}
             </div>
           </div>
           
           <div>
             <p className="text-sm text-gray-500 mb-2">Anggaran APBD</p>
             <div className="text-base font-bold text-gray-800">
-              {data.anggaran}
+              {formatRupiah(data.anggaran)}
             </div>
           </div>
-          
-          <div>
-            <p className="text-sm text-gray-500 mb-2">Pilihan Intervensi</p>
-            <div className="text-base font-bold text-gray-800">
-              {data.pilihan_intervensi}
-            </div>
-          </div>
+        </div>
+
+        <hr className="border-gray-100 mb-8" />
+
+        <div className="mb-8">
+          <h3 className="text-base font-bold text-gray-800 mb-3">
+            Pilihan Intervensi
+          </h3>
+          <p className="text-sm text-gray-600 leading-relaxed text-justify">
+            {data.pilihan_intervensi || '-'}
+          </p>
         </div>
 
         <hr className="border-gray-100 mb-8" />
@@ -108,16 +136,23 @@ const DetailProgramAPBD: React.FC = () => {
             Deskripsi Rencana Kegiatan
           </h3>
           <p className="text-sm text-gray-600 leading-relaxed text-justify">
-            {data.deskripsi}
+            {data.deskripsi_rencana || '-'}
           </p>
         </div>
 
         <hr className="border-gray-100 mb-8" />
 
-        <div className="mb-8">
-          <h3 className="text-base font-bold text-gray-800 mb-3">
-            Status: <span className='italic'>Menunggu Persetujuan</span>
+        <div className="mb-8 flex items-center gap-3">
+          <h3 className="text-base font-bold text-gray-800">
+            Status Terkini: 
           </h3>
+          <span className={`px-4 py-1.5 rounded-full text-xs font-bold ${
+            data.status === 'Disetujui' ? 'bg-green-100 text-green-700' :
+            data.status === 'Ditolak' ? 'bg-red-100 text-red-700' :
+            'bg-yellow-100 text-yellow-800'
+          }`}>
+            {data.status}
+          </span>
         </div>
 
         <hr className="border-gray-100" />
