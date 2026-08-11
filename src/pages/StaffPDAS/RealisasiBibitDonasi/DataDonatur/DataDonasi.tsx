@@ -29,7 +29,7 @@ const formatDonationData = (item: any): DonaturData => {
   };
 };
 
-const DataDonatur: React.FC = () => {
+const DataDonasi: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [donationsData, setDonationsData] = useState<DonaturData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -105,4 +105,4 @@ const DataDonatur: React.FC = () => {
   );
 };
 
-export default DataDonatur;
+export default DataDonasi;

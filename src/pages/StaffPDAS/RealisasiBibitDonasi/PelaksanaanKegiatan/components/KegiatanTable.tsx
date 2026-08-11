@@ -1,7 +1,7 @@
 import React from 'react';
 import { HiOutlineDocumentText, HiOutlineCloudArrowUp, HiOutlinePhoto, HiOutlineEye } from 'react-icons/hi2';
 import StatusBadgeKegiatan from './StatusBadgeKegiatan';
-import type { KegiatanData, ModalType } from '..';
+import type { KegiatanData, ModalType } from '../PelaksanaanKegiatan';
 
 interface KegiatanTableProps {
   data: KegiatanData[];

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { HiOutlineChevronLeft, HiOutlinePaperAirplane, HiOutlineCloud } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
-import { createLaporanDanaAPI, getLaporanDanaByIdAPI, updateLaporanDanaAPI } from '@/services/laporan-dana.service';
+import { createLaporanDanaAPI, getLaporanDanaByIdAPI, updateLaporanDanaAPI, getLaporanDanasAPI } from '@/services/laporan-dana.service';
 import { getProgramApbdsAPI } from '@/services/program-apbd.service';
 import { getProgramCsrsAPI } from '@/services/program-csr.service';
 
@@ -24,28 +24,48 @@ const CreateLaporanDana: React.FC = () => {
     { id: 1, kategori: '', nominal: '', bukti: null as File | null, existingFileName: '' },
   ]);
 
-  // Mengambil Data Program APBD & CSR, dan Data Laporan (jika mode revisi)
   useEffect(() => {
     const initializeData = async () => {
       try {
-        // Fetch Master Proyek
-        const [apbdRes, csrRes] = await Promise.all([
+        // Ambil Data Proyek & Seluruh Histori Laporan secara paralel
+        const [apbdRes, csrRes, laporanRes] = await Promise.all([
           getProgramApbdsAPI(),
-          getProgramCsrsAPI()
+          getProgramCsrsAPI(),
+          getLaporanDanasAPI()
         ]);
 
-        const activeApbd = apbdRes.filter((p: any) => ['Aktif', 'Berjalan', 'Selesai'].includes(p.status)).map((p: any) => ({
-            uid: `APBD-${p.id}`, id: p.id, sumber_dana: 'APBD', nama_program: p.nama_program, anggaran: p.anggaran
-        }));
+        // Helper untuk menghitung dana yang sudah terpakai dari laporan sebelumnya
+        const hitungRealisasiSebelumnya = (sumber: string, progId: string) => {
+          return laporanRes
+            .filter((l: any) => 
+              l.sumber_dana === sumber && 
+              String(l.program_id) === String(progId) && 
+              ['Terverifikasi', 'Menunggu Verifikasi'].includes(l.status) &&
+              String(l.id) !== String(id) // Jangan hitung nominal lama dari laporan yang SEDANG di-edit
+            )
+            .reduce((sum: number, l: any) => sum + Number(l.dana_direalisasikan), 0);
+        };
 
-        const activeCsr = csrRes.filter((p: any) => ['Disetujui', 'Aktif', 'Berjalan', 'Selesai'].includes(p.status)).map((p: any) => ({
-            uid: `CSR-${p.id}`, id: p.id, sumber_dana: 'CSR', nama_program: p.nama_program, anggaran: p.anggaran
-        }));
+        const activeApbd = apbdRes.filter((p: any) => ['Aktif', 'Berjalan', 'Selesai'].includes(p.status)).map((p: any) => {
+          const terpakai = hitungRealisasiSebelumnya('APBD', p.id);
+          return {
+            uid: `APBD-${p.id}`, id: p.id, sumber_dana: 'APBD', nama_program: p.nama_program, anggaran: p.anggaran,
+            realisasi_sebelumnya: terpakai, sisa_anggaran: Number(p.anggaran) - terpakai
+          };
+        });
+
+        const activeCsr = csrRes.filter((p: any) => ['Disetujui', 'Aktif', 'Berjalan', 'Selesai'].includes(p.status)).map((p: any) => {
+          const terpakai = hitungRealisasiSebelumnya('CSR', p.id);
+          return {
+            uid: `CSR-${p.id}`, id: p.id, sumber_dana: 'CSR', nama_program: p.nama_program, anggaran: p.anggaran,
+            realisasi_sebelumnya: terpakai, sisa_anggaran: Number(p.anggaran) - terpakai
+          };
+        });
         
         const allPrograms = [...activeApbd, ...activeCsr];
         setPrograms(allPrograms);
 
-        // Jika mode revisi, fetch data existing dan populate ke state
+        // Jika mode revisi, fetch data existing dan populate ke form
         if (id) {
           const detailRes = await getLaporanDanaByIdAPI(id);
           const data = detailRes.data || detailRes.payload || detailRes;
@@ -59,7 +79,7 @@ const CreateLaporanDana: React.FC = () => {
               id: rin.id,
               kategori: rin.kategori_kegiatan,
               nominal: rin.nominal,
-              bukti: null, // File aslinya tidak bisa dipopulate ulang ke input type=file
+              bukti: null, 
               existingFileName: rin.bukti_transaksi_path ? 'Bukti Nota Terlampir' : ''
             }));
             setPengeluaranList(parsedRincian);
@@ -92,17 +112,21 @@ const CreateLaporanDana: React.FC = () => {
     setPengeluaranList(updated);
   };
 
+  // Kalkulasi Dinamis
   const selectedProgram = programs.find(p => p.uid === selectedUid);
-  // Pastikan saat revisi, nilai anggaran tetap terdeteksi meski dropdown disabled
   const danaDisalurkan = selectedProgram ? Number(selectedProgram.anggaran) : 0;
-  const totalRealisasi = pengeluaranList.reduce((sum, item) => sum + (Number(item.nominal) || 0), 0);
-  const sisaDana = danaDisalurkan - totalRealisasi;
+  const realisasiSebelumnya = selectedProgram ? Number(selectedProgram.realisasi_sebelumnya) : 0;
+  
+  const totalRealisasiSaatIni = pengeluaranList.reduce((sum, item) => sum + (Number(item.nominal) || 0), 0);
+  
+  const danaTersedia = danaDisalurkan - realisasiSebelumnya;
+  const sisaDanaAkhir = danaTersedia - totalRealisasiSaatIni;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedProgram) return toast.error("Silakan pilih proyek terlebih dahulu.");
-    if (totalRealisasi <= 0) return toast.error("Rincian pengeluaran tidak boleh kosong.");
-    if (sisaDana < 0) return toast.error("Total realisasi tidak boleh melebihi dana yang disalurkan.");
+    if (totalRealisasiSaatIni <= 0) return toast.error("Rincian pengeluaran tidak boleh kosong.");
+    if (sisaDanaAkhir < 0) return toast.error("Pengeluaran melebihi sisa dana yang tersedia.");
 
     setIsSubmitting(true);
     const loadingToast = toast.loading(id ? 'Mengirim revisi...' : 'Mengirim laporan dana...');
@@ -125,13 +149,10 @@ const CreateLaporanDana: React.FC = () => {
         if (item.bukti) {
           formData.append(`rincian[${index}][bukti]`, item.bukti);
         } else if (id && !item.bukti) {
-           // Karena rincian di-replace bersih di backend, setiap melakukan revisi, 
-           // KTH wajib melampirkan ulang semua notanya agar tidak hilang.
            hasMissingNewFile = true;
         }
       });
 
-      // Validasi wajib upload ulang saat revisi (karena logika replace backend)
       if (id && hasMissingNewFile) {
           toast.dismiss(loadingToast);
           setIsSubmitting(false);
@@ -182,13 +203,13 @@ const CreateLaporanDana: React.FC = () => {
               required
               value={selectedUid}
               onChange={(e) => setSelectedUid(e.target.value)}
-              disabled={!!id} // Pasti disabled kalau mode revisi
+              disabled={!!id} // Disabled jika mode revisi
               className="w-full px-4 py-3 border border-gray-300 rounded-full text-sm text-gray-600 focus:outline-none focus:ring-1 focus:ring-[#185325] bg-white cursor-pointer disabled:bg-gray-50 disabled:cursor-not-allowed"
             >
               <option value="" disabled>-- Pilih Proyek --</option>
               {programs.map((prog) => (
-                <option key={prog.uid} value={prog.uid}>
-                  [{prog.sumber_dana}] {prog.nama_program} - {formatRupiah(prog.anggaran)}
+                <option key={prog.uid} value={prog.uid} disabled={prog.sisa_anggaran <= 0 && !id}>
+                  [{prog.sumber_dana}] {prog.nama_program} - Sisa: {formatRupiah(prog.sisa_anggaran)}
                 </option>
               ))}
             </select>
@@ -278,20 +299,27 @@ const CreateLaporanDana: React.FC = () => {
           <div className="bg-[#DCECE0]/70 rounded-xl p-6 md:p-8 mt-6">
             <h3 className="text-sm font-bold text-gray-800 mb-4">Ringkasan Saldo</h3>
             <div className="space-y-3">
-              <div className="grid grid-cols-[140px_20px_1fr] text-sm">
-                <span className="text-gray-600 font-medium">Dana Disalurkan</span>
+              <div className="grid grid-cols-[160px_20px_1fr] md:grid-cols-[200px_20px_1fr] text-sm">
+                <span className="text-gray-600 font-medium">Total Anggaran Program</span>
                 <span className="font-bold text-gray-600">:</span>
                 <span className="font-semibold text-gray-800">{formatRupiah(danaDisalurkan)}</span>
               </div>
-              <div className="grid grid-cols-[140px_20px_1fr] text-sm">
-                <span className="text-gray-600 font-medium">Total Realisasi</span>
+              <div className="grid grid-cols-[160px_20px_1fr] md:grid-cols-[200px_20px_1fr] text-sm">
+                <span className="text-gray-600 font-medium">Realisasi Sebelumnya</span>
                 <span className="font-bold text-gray-600">:</span>
-                <span className="font-semibold text-gray-800">{formatRupiah(totalRealisasi)}</span>
+                <span className="font-semibold text-gray-800">{formatRupiah(realisasiSebelumnya)}</span>
               </div>
-              <div className="grid grid-cols-[140px_20px_1fr] text-sm">
-                <span className="text-gray-600 font-medium">Sisa Dana</span>
+              <div className="grid grid-cols-[160px_20px_1fr] md:grid-cols-[200px_20px_1fr] text-sm">
+                <span className="text-gray-600 font-medium">Realisasi Laporan Ini</span>
                 <span className="font-bold text-gray-600">:</span>
-                <span className={`font-semibold ${sisaDana < 0 ? 'text-red-600' : 'text-gray-800'}`}>{formatRupiah(sisaDana)}</span>
+                <span className="font-semibold text-gray-800">{formatRupiah(totalRealisasiSaatIni)}</span>
+              </div>
+              <div className="grid grid-cols-[160px_20px_1fr] md:grid-cols-[200px_20px_1fr] text-sm border-t border-gray-300 pt-3 mt-1">
+                <span className="text-gray-800 font-bold">Sisa Dana Tersedia</span>
+                <span className="font-bold text-gray-800">:</span>
+                <span className={`font-bold ${sisaDanaAkhir < 0 ? 'text-red-600' : 'text-[#185325]'}`}>
+                  {formatRupiah(sisaDanaAkhir)}
+                </span>
               </div>
             </div>
           </div>
@@ -299,7 +327,7 @@ const CreateLaporanDana: React.FC = () => {
           <div className="flex justify-end pt-6 border-t border-gray-100">
             <button 
               type="submit" 
-              disabled={isSubmitting || sisaDana < 0 || !selectedProgram} 
+              disabled={isSubmitting || sisaDanaAkhir < 0 || !selectedProgram} 
               className="flex items-center justify-center gap-2 px-10 py-3.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors shadow-sm w-full md:w-auto cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (

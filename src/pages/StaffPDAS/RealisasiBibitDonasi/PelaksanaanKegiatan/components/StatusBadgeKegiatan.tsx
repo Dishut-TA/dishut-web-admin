@@ -1,5 +1,5 @@
 import React from 'react';
-import type { StatusKegiatan } from '..';
+import type { StatusKegiatan } from '../PelaksanaanKegiatan';
 
 interface StatusBadgeProps {
   status: StatusKegiatan;
