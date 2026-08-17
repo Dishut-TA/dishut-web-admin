@@ -117,11 +117,10 @@ const KabidProgramDonasi: React.FC = () => {
     const loadingToast = toast.loading('Memproses verifikasi...');
 
     try {
-      const payload = {
-        status: newStatus 
-      };
+      const formData = new FormData();
+      formData.append('status', newStatus);
 
-      await updateDonationProgramAPI(id, payload);
+      await updateDonationProgramAPI(id, formData);
 
       toast.success(`Program berhasil ${newStatus === 'Aktif' ? 'disetujui' : 'ditolak'}!`, { id: loadingToast });
       

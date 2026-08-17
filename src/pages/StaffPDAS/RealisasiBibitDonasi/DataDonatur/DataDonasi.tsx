@@ -3,9 +3,10 @@ import toast from 'react-hot-toast';
 import DetailDonaturModal from './components/DetailDonaturModal';
 import DonasiToolbar from './components/DonasiToolbar';
 import DonasiTable from './components/DonasiTable';
-import type { DonaturData } from '@/utils/interface';
-import { getDonationsAPI, updateDonationStatusAPI } from '@/services/donasi.service';
 import VerifikasiDonaturModal from './components/VerifikasiDonaturModal';
+import type { DonaturData } from '@/utils/interface';
+import { getDonationsAPI, updateDonationStatusAPI, deleteDonationAPI } from '@/services/donasi.service';
+import ConfirmAlert from '@/components/ConfirmAlert';
 
 const formatDonationData = (item: any): DonaturData => {
   const spec = item.seed?.specifications?.[0];
@@ -35,7 +36,9 @@ const DataDonasi: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [modalDetail, setModalDetail] = useState<DonaturData | null>(null);
   const [modalVerif, setModalVerif] = useState<DonaturData | null>(null);
-  // const [delete, setDelete] = useState<DonaturData | null>(null);
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+  const [donaturToDelete, setDonaturToDelete] = useState<DonaturData | null>(null);
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
   useEffect(() => {
     fetchDonations();
@@ -68,14 +71,34 @@ const DataDonasi: React.FC = () => {
     }
   };
 
+  const promptDelete = (donatur: DonaturData) => {
+    setDonaturToDelete(donatur);
+    setIsDeleteAlertOpen(true);
+  };
+
+  const executeDelete = async () => {
+    if (!donaturToDelete) return;
+
+    setIsDeleteLoading(true);
+    try {
+      await deleteDonationAPI(donaturToDelete.id);
+      toast.success('Data donasi berhasil dihapus.');
+      
+      setIsDeleteAlertOpen(false);
+      setDonaturToDelete(null);
+      
+      fetchDonations(); 
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Gagal menghapus data donasi.');
+    } finally {
+      setIsDeleteLoading(false);
+    }
+  };
+
   const filteredData = donationsData.filter(donatur => 
     donatur.idTransaksi.toLowerCase().includes(searchTerm.toLowerCase()) ||
     donatur.namaDonatur.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const handleDelete = () => {
-    console.log("tes hapus")
-  }
 
   return (
     <div className="relative flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8">
@@ -90,7 +113,7 @@ const DataDonasi: React.FC = () => {
         isLoading={isLoading} 
         onVerify={(donatur) => setModalVerif(donatur)} 
         onViewDetail={(donatur) => setModalDetail(donatur)} 
-        onDelete={() => handleDelete()}
+        onDelete={promptDelete} 
       />
 
       <DetailDonaturModal 
@@ -105,6 +128,20 @@ const DataDonasi: React.FC = () => {
         donatur={modalVerif}
         onTerima={() => handleVerifyAction('Terkumpul')}
         onTolak={() => handleVerifyAction('Ditolak')}
+      />
+
+      <ConfirmAlert
+        isOpen={isDeleteAlertOpen}
+        title="Hapus Data Donasi?"
+        message={`Apakah Anda yakin ingin menghapus donasi dari ${donaturToDelete?.namaDonatur}? Data yang dihapus tidak dapat dikembalikan.`}
+        isDanger={true}
+        confirmText="Ya, Hapus"
+        isLoading={isDeleteLoading}
+        onConfirm={executeDelete}
+        onCancel={() => {
+          setIsDeleteAlertOpen(false);
+          setDonaturToDelete(null);
+        }}
       />
 
     </div>

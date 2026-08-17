@@ -4,11 +4,13 @@ import {
   HiOutlinePlus,
   HiOutlineEye,
   HiOutlinePencil,
+  HiOutlineTrash
 } from "react-icons/hi2";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import DetailProgramModal from "./components/DetailProgramModal";
-import { getDonationProgramsAPI } from "@/services/program-donasi.service";
+import ConfirmAlert from "@/components/ConfirmAlert"; 
+import { getDonationProgramsAPI, deleteDonationProgramAPI } from "@/services/program-donasi.service";
 
 export interface MappedProgramData {
   id: string;
@@ -37,7 +39,6 @@ const getStatusBadge = (status: string) => {
     case "menunggu verifikasi":
     case "pending":
       return <span className={`${baseStyle} bg-[#F2C94C] text-gray-800`}>Menunggu Verifikasi</span>;
-    // TAMBAHAN STATUS DITOLAK
     case "ditolak":
     case "rejected":
       return <span className={`${baseStyle} bg-red-100 text-red-700`}>Ditolak</span>;
@@ -53,11 +54,16 @@ const ProgramDonasi: React.FC = () => {
   const [programsData, setProgramsData] = useState<MappedProgramData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // --- STATE UNTUK CONFIRM ALERT DELETE ---
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+  const [programToDelete, setProgramToDelete] = useState<{ id: string; nama: string } | null>(null);
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
+
   useEffect(() => {
     fetchPrograms();
   }, []);
 
-const fetchPrograms = async () => {
+  const fetchPrograms = async () => {
     setIsLoading(true);
     try {
       const response = await getDonationProgramsAPI();
@@ -69,7 +75,7 @@ const fetchPrograms = async () => {
               jumlah: bibit.jumlah || 0,
               terealisasi: bibit.terealisasi || 0
             }))
-          : []; // Jika kosong dari backend, biarkan kosong agar merender "Belum ditentukan" di UI
+          : []; 
 
         return {
           id: item.id.toString(),
@@ -87,6 +93,33 @@ const fetchPrograms = async () => {
       toast.error(error.message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // --- FUNGSI MENGAMUNCULKAN ALERT ---
+  const promptDelete = (id: string, nama: string) => {
+    setProgramToDelete({ id, nama });
+    setIsDeleteAlertOpen(true);
+  };
+
+  // --- FUNGSI EKSEKUSI DELETE DARI ALERT ---
+  const executeDelete = async () => {
+    if (!programToDelete) return;
+
+    setIsDeleteLoading(true);
+    try {
+      await deleteDonationProgramAPI(programToDelete.id);
+      toast.success('Program berhasil dihapus!');
+      
+      // Tutup modal dan reset state
+      setIsDeleteAlertOpen(false);
+      setProgramToDelete(null);
+      
+      fetchPrograms(); // Refresh data tabel
+    } catch (error: any) {
+      toast.error(error.message || 'Gagal menghapus program.');
+    } finally {
+      setIsDeleteLoading(false);
     }
   };
 
@@ -212,10 +245,18 @@ const fetchPrograms = async () => {
                           <HiOutlineEye className="w-5 h-5" />
                         </button>
                         <button
+                          onClick={() => navigate(`/admin/staff/donasi/program/edit/${program.id}`)}
                           title="Edit Program"
                           className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors"
                         >
                           <HiOutlinePencil className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => promptDelete(program.id, program.nama)}
+                          title="Hapus Program"
+                          className="p-1.5 text-gray-400 hover:text-red-600 transition-colors"
+                        >
+                          <HiOutlineTrash className="w-5 h-5" />
                         </button>
                       </div>
                     </td>
@@ -241,6 +282,21 @@ const fetchPrograms = async () => {
           program={selectedProgram as any} 
         />
       )}
+
+      {/* IMPLEMENTASI CONFIRM ALERT UNTUK DELETE */}
+      <ConfirmAlert
+        isOpen={isDeleteAlertOpen}
+        title="Hapus Program Donasi?"
+        message={`Apakah Anda yakin ingin menghapus program "${programToDelete?.nama}"? Data yang terhapus tidak dapat dikembalikan.`}
+        isDanger={true}
+        confirmText="Ya, Hapus"
+        isLoading={isDeleteLoading}
+        onConfirm={executeDelete}
+        onCancel={() => {
+          setIsDeleteAlertOpen(false);
+          setProgramToDelete(null);
+        }}
+      />
     </div>
   );
 };
