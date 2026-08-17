@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { HiOutlineXMark, HiOutlineArrowDownTray, HiOutlineDocumentText } from 'react-icons/hi2';
+import React, { useState, useEffect } from 'react';
+import { HiOutlineDocumentText, HiOutlineXMark } from 'react-icons/hi2';
+import * as XLSX from 'xlsx-js-style'; 
 import toast from 'react-hot-toast';
-import { exportLaporanAPI } from '@/services/report.service'; 
-import { useAuth } from '@/context/AuthContext';
-import { getDonationProgramsAPI } from '@/services/program-donasi.service'; 
+import { getDonationsAPI } from '@/services/donasi.service'; 
+import { getDonationProgramsAPI } from '@/services/program-donasi.service';
 
 interface ExportLaporanModalProps {
   isOpen: boolean;
@@ -11,180 +11,271 @@ interface ExportLaporanModalProps {
 }
 
 const ExportLaporanModal: React.FC<ExportLaporanModalProps> = ({ isOpen, onClose }) => {
-  const { user } = useAuth(); 
+  const [isExporting, setIsExporting] = useState(false);
+  const [programs, setPrograms] = useState<any[]>([]);
+  const [isLoadingPrograms, setIsLoadingPrograms] = useState(false);
   const [selectedProgram, setSelectedProgram] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [programsData, setProgramsData] = useState<any[]>([]);
-  const [isFetchingPrograms, setIsFetchingPrograms] = useState(false);
 
   useEffect(() => {
-    document.body.style.overflow = isOpen ? 'hidden' : 'unset';
-    
     if (isOpen) {
-      fetchProgramsList();
+      const fetchPrograms = async () => {
+        setIsLoadingPrograms(true);
+        try {
+          const res = await getDonationProgramsAPI();
+          setPrograms(res.payload || []);
+        } catch (error) {
+          toast.error('Gagal memuat daftar program.');
+        } finally {
+          setIsLoadingPrograms(false);
+        }
+      };
+      fetchPrograms();
     } else {
       setSelectedProgram('');
       setStartDate('');
       setEndDate('');
     }
-    
-    return () => { document.body.style.overflow = 'unset'; };
   }, [isOpen]);
 
-  const fetchProgramsList = async () => {
-    setIsFetchingPrograms(true);
-    try {
-      const response = await getDonationProgramsAPI();
-      setProgramsData(response.payload);
-    } catch (error: any) {
-      toast.error('Gagal mengambil daftar program donasi.');
-    } finally {
-      setIsFetchingPrograms(false);
+  const handleExportExcel = async () => {
+    if (!selectedProgram) {
+      return toast.error("Silakan pilih program terlebih dahulu.");
     }
-  };
+    if (!startDate || !endDate) {
+      return toast.error("Silakan tentukan rentang tanggal (Mulai & Selesai).");
+    }
 
-  const handleExport = async () => {
-    setIsLoading(true);
-    const toastId = toast.loading('Sedang menyiapkan file Excel...');
-
+    setIsExporting(true);
+    const loadingToast = toast.loading('Menyiapkan dokumen Excel...');
+    
     try {
-      const payload = {
-        donation_program_id: selectedProgram === 'semua' ? null : Number(selectedProgram),
-        user_id: user?.id, 
-        start_date: startDate || null,
-        end_date: endDate || null,
-        status: "Success",
-      };
+      const response = await getDonationsAPI();
+      let donations = response.payload || response.data || [];
 
-      const blob = await exportLaporanAPI(payload);
+      if (selectedProgram !== 'all') {
+         donations = donations.filter((don: any) => String(don.donation_program_id) === String(selectedProgram));
+      }
 
-// BUAT TESTING  
-      console.log('=== TESTING RESPONSE API ===');
-      console.log('1. Payload yang dikirim:', payload);
-      console.log('2. Data Blob yang diterima:', blob);
-      console.log('3. Tipe Data (MIME type):', blob?.type);
-      console.log('4. Ukuran File:', blob?.size, 'bytes');
-      console.log('============================');
-//  BUAT TESTING
+      if (startDate) {
+         const start = new Date(startDate);
+         start.setHours(0, 0, 0, 0); 
+         donations = donations.filter((don: any) => new Date(don.created_at) >= start);
+      }
 
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
+      if (endDate) {
+         const end = new Date(endDate);
+         end.setHours(23, 59, 59, 999); 
+         donations = donations.filter((don: any) => new Date(don.created_at) <= end);
+      }
+
+      if (donations.length === 0) {
+        toast.error('Tidak ada data donasi yang sesuai dengan filter tersebut.', { id: loadingToast });
+        setIsExporting(false);
+        return;
+      }
+
+      let countDonatur = 0;
+      let sumTotalDonasi = 0;
+      let sumBibitTerkumpul = 0;
+      let sumBibitTerealisasi = 0;
+
+      const excelData = donations.map((don: any) => {
+        countDonatur++; 
+
+        const nominalRupiah = Number(don.transaction?.amount) || 0;
+        sumTotalDonasi += nominalRupiah; 
+        const totalDonasi = nominalRupiah > 0 ? `Rp ${nominalRupiah.toLocaleString('id-ID')}` : '-';
+
+        const bibitTerkumpul = Number(don.seed_quantity) || 0;
+        sumBibitTerkumpul += bibitTerkumpul; 
+
+        const status = don.seed_status || 'Menunggu Verifikasi';
+        const bibitTerealisasi = (status.toLowerCase() === 'terealisasi' || status.toLowerCase() === 'disalurkan' || status.toLowerCase() === 'selesai') 
+            ? bibitTerkumpul 
+            : 0;
+        sumBibitTerealisasi += bibitTerealisasi; 
+
+        const yearSuffix = new Date(don.created_at).getFullYear().toString().slice(-2);
+        const formatIdDonasi = `DNS-${yearSuffix}-${String(don.id).padStart(3, '0')}`;
+
+        const tglPenanaman = don.donation_program?.start_date 
+            ? new Date(don.donation_program.start_date).toLocaleDateString('id-ID') 
+            : '-';
+
+        return {
+          'ID DONASI': formatIdDonasi,
+          'DONATUR': don.donor?.donor_name || 'Hamba Allah',
+          'ALAMAT': don.donor?.address || '-',
+          'TANGGAL DONASI': new Date(don.created_at).toLocaleDateString('id-ID'),
+          'JENIS BIBIT': don.seed?.nama || don.seed?.name || '-',
+          'TOTAL DONASI': totalDonasi,
+          'BIBIT TERKUMPUL': bibitTerkumpul,
+          'BIBIT TEREALISASI': bibitTerealisasi,
+          'TANGGAL PENANAMAN': tglPenanaman,
+          'STATUS': status,
+        };
+      });
+
+      excelData.push({
+        'ID DONASI': 'TOTAL',
+        'DONATUR': `${countDonatur} Donatur`,
+        'ALAMAT': '',
+        'TANGGAL DONASI': '',
+        'JENIS BIBIT': '',
+        'TOTAL DONASI': `Rp ${sumTotalDonasi.toLocaleString('id-ID')}`,
+        'BIBIT TERKUMPUL': sumBibitTerkumpul,
+        'BIBIT TEREALISASI': sumBibitTerealisasi,
+        'TANGGAL PENANAMAN': '',
+        'STATUS': '',
+      });
+
+      const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+      const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
+
+      for (let R = range.s.r; R <= range.e.r; ++R) {
+        for (let C = range.s.c; C <= range.e.c; ++C) {
+          const cellAddress = { c: C, r: R };
+          const cellRef = XLSX.utils.encode_cell(cellAddress);
+
+          if (!worksheet[cellRef]) continue;
+
+          // Memberikan Border di semua Cell
+          worksheet[cellRef].s = {
+            border: {
+              top: { style: 'thin', color: { rgb: '000000' } },
+              bottom: { style: 'thin', color: { rgb: '000000' } },
+              left: { style: 'thin', color: { rgb: '000000' } },
+              right: { style: 'thin', color: { rgb: '000000' } },
+            },
+            alignment: { vertical: 'center' }
+          };
+
+          if (R === 0) {
+            worksheet[cellRef].s.font = { bold: true };
+            worksheet[cellRef].s.fill = { fgColor: { rgb: "DCECE0" } }; 
+            worksheet[cellRef].s.alignment = { horizontal: 'center', vertical: 'center' };
+          }
+
+          if (R === range.e.r) {
+            worksheet[cellRef].s.font = { bold: true };
+          }
+        }
+      }
       
-      const fileName = `Laporan_Program_${new Date().getTime()}.xlsx`; 
-      link.setAttribute('download', fileName);
-      
-      document.body.appendChild(link);
-      link.click();
-      
-      link.parentNode?.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      worksheet['!cols'] = [
+        { wch: 15 }, 
+        { wch: 25 }, 
+        { wch: 35 }, 
+        { wch: 18 }, 
+        { wch: 25 }, 
+        { wch: 20 }, 
+        { wch: 18 }, 
+        { wch: 18 }, 
+        { wch: 22 }, 
+        { wch: 20 }, 
+      ];
 
-      toast.success('Laporan berhasil diunduh!', { id: toastId });
-      onClose();
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Laporan Donasi");
+
+      XLSX.writeFile(workbook, `Laporan_Donasi_${new Date().getTime()}.xlsx`);
+      
+      toast.success('Laporan berhasil diekspor!', { id: loadingToast });
+      onClose(); 
 
     } catch (error: any) {
-      // BUAT TESTING 
-      console.error('=== ERROR EXPORT API ===', error);
-      // BUAT TESTING
-      toast.error(error.message, { id: toastId });
+      console.error(error);
+      toast.error('Gagal mengekspor laporan. Pastikan koneksi API berjalan baik.', { id: loadingToast });
     } finally {
-      setIsLoading(false);
+      setIsExporting(false);
     }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-60 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-lg bg-white rounded-3xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between p-6 border-b border-gray-100">
-          <div className="flex items-center gap-2 text-gray-800">
-            <HiOutlineArrowDownTray className="w-6 h-6 text-[#185325]" />
-            <h2 className="text-xl font-bold">Export Rekap Laporan</h2>
-          </div>
-          <button onClick={onClose} className="p-2 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer">
-            <HiOutlineXMark className="w-5 h-5" />
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-xl overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="flex justify-between items-center p-6 border-b border-gray-100">
+          <h2 className="text-lg font-bold text-gray-800">Export Laporan Donasi</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
+            <HiOutlineXMark className="w-6 h-6" />
           </button>
         </div>
+        
+        <div className="p-6">
+          <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+            Pilih program dan tentukan rentang waktu untuk mengunduh laporan rekapitulasi data donasi dalam format Excel (.xlsx).
+          </p>
+          
+          <div className="space-y-4 mb-8">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1">Pilih Program</label>
+              <select 
+                value={selectedProgram}
+                onChange={(e) => setSelectedProgram(e.target.value)}
+                disabled={isLoadingPrograms}
+                className="w-full border border-gray-300 rounded-full px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185325]/20 focus:border-[#185325] disabled:bg-gray-50"
+              >
+                <option value="" disabled>-- Pilih Program Donasi --</option>
+                <option value="all">Semua Program</option>
+                {programs.map(prog => (
+                  <option key={prog.id} value={prog.id}>{prog.name}</option>
+                ))}
+              </select>
+            </div>
 
-        <div className="p-6 md:p-8 space-y-5">
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">
-              Pilih Program Donasi <span className="text-red-500">*</span>
-            </label>
-            <select 
-              value={selectedProgram}
-              onChange={(e) => setSelectedProgram(e.target.value)}
-              disabled={isFetchingPrograms}
-              className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#009262]/20 focus:border-[#009262] transition-all cursor-pointer disabled:bg-gray-50 disabled:cursor-not-allowed"
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1">Tanggal Mulai</label>
+                <input 
+                  type="date" 
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full border border-gray-300 rounded-full px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185325]/20 focus:border-[#185325]"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1">Tanggal Selesai</label>
+                <input 
+                  type="date" 
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="w-full border border-gray-300 rounded-full px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185325]/20 focus:border-[#185325]"
+                />
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex justify-end gap-3">
+            <button 
+              onClick={onClose}
+              disabled={isExporting}
+              className="px-5 py-2.5 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors disabled:opacity-50 cursor-pointer"
             >
-              <option value="" disabled>
-                {isFetchingPrograms ? 'Memuat daftar program...' : '-- Pilih Program --'}
-              </option>
-              <option value="semua">Semua Program</option>
-              
-              {programsData.map((program) => (
-                <option key={program.id} value={program.id}>
-                  {program.name}
-                </option>
-              ))}
-            </select>
+              Batal
+            </button>
+            <button 
+              onClick={handleExportExcel}
+              disabled={isExporting}
+              className="px-5 py-2.5 text-sm font-bold text-white bg-[#185325] hover:bg-[#123d1c] rounded-full transition-colors flex items-center gap-2 disabled:opacity-70 shadow-sm cursor-pointer"
+            >
+              {isExporting ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                  Memproses...
+                </span>
+              ) : (
+                <>
+                  <HiOutlineDocumentText className="w-5 h-5" /> Unduh Laporan
+                </>
+              )}
+            </button>
           </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">
-                Tanggal Mulai <span className="text-gray-400 font-normal">(Opsional)</span>
-              </label>
-              <input 
-                type="date" 
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#009262]/20 focus:border-[#009262] transition-all cursor-pointer"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">
-                Tanggal Akhir <span className="text-gray-400 font-normal">(Opsional)</span>
-              </label>
-              <input 
-                type="date" 
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#009262]/20 focus:border-[#009262] transition-all cursor-pointer"
-              />
-            </div>
-          </div>
-
         </div>
-
-        <div className="p-6 border-t border-gray-100 flex items-center justify-end gap-3 bg-gray-50/50">
-          <button 
-            onClick={onClose}
-            disabled={isLoading}
-            className="px-6 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer disabled:opacity-50"
-          >
-            Batal
-          </button>
-          <button 
-            disabled={!selectedProgram || isLoading || isFetchingPrograms}
-            onClick={handleExport}
-            className={`flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white rounded-xl transition-all shadow-sm ${
-              selectedProgram && !isLoading && !isFetchingPrograms ? 'bg-[#009262] hover:bg-[#007a52] active:scale-95 cursor-pointer' : 'bg-gray-300 cursor-not-allowed'
-            }`}
-          >
-            {isLoading ? (
-              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-            ) : (
-              <HiOutlineDocumentText className="w-5 h-5" />
-            )}
-            {isLoading ? 'Memproses...' : 'Unduh Laporan Excel'}
-          </button>
-        </div>
-
       </div>
     </div>
   );

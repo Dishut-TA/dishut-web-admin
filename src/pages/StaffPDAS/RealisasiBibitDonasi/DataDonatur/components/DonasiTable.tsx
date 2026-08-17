@@ -71,18 +71,18 @@ const DonasiTable: React.FC<DonasiTableProps> = ({ data, isLoading, onVerify, on
                         Verifikasi Data
                       </button>
                     ) : (
-                      <div>
+                      <div className='gap-2 flex'>
                         <button
                           onClick={() => onViewDetail(row)}
                           title="Lihat Detail"
-                          className="p-2 border border-gray-200 rounded-lg text-gray-500 hover:text-[#2E7D32] hover:bg-green-50 transition-colors cursor-pointer"
+                          className="p-2 border border-gray-200 rounded-full text-gray-500 hover:text-[#2E7D32] hover:bg-green-50 transition-colors cursor-pointer"
                         >
                           <HiOutlineEye className="w-5 h-5" />
                         </button>
                         <button
                           onClick={() => onDelete(row)}
                           title="Hapus"
-                          className="p-2 border border-gray-200 rounded-lg text-gray-500 hover:text-[#2E7D32] hover:bg-green-50 transition-colors cursor-pointer"
+                          className="p-2 border border-gray-200 rounded-full text-gray-500 hover:text-[#7d2e2e] hover:bg-red-50 transition-colors cursor-pointer"
                         >
                           <HiOutlineTrash className="w-5 h-5" />
                         </button>

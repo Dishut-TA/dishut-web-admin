@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 // const API_URL = import.meta.env.VITE_API_MASTER_URL;
 const API_URL = import.meta.env.VITE_API_EXAMPLE;
 
@@ -38,7 +40,6 @@ export interface GetDonationProgramsResponse {
 export const createDonationProgramAPI = async (formData: FormData) => {
   try {
     const token = localStorage.getItem('token');
-    
     const response = await fetch(`${API_URL}/donation-programs`, {
       method: 'POST',
       headers: {
@@ -47,39 +48,30 @@ export const createDonationProgramAPI = async (formData: FormData) => {
       },
       body: formData, 
     });
-
     const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Terjadi kesalahan saat membuat program.');
-    }
-
+    if (!response.ok) throw new Error(data.message || 'Terjadi kesalahan saat membuat program.');
     return data;
   } catch (error: any) {
     throw new Error(error.message || 'Gagal terhubung ke server.');
   }
 };
 
-export const updateDonationProgramAPI = async (id: string | number, payload: any) => {
+// PERBAIKAN: Gunakan FormData & POST dengan _method=PUT agar Laravel bisa menerima file gambar
+export const updateDonationProgramAPI = async (id: string | number, formData: FormData) => {
   try {
     const token = localStorage.getItem('token'); 
-    
+    formData.append('_method', 'PUT'); // Trik Laravel untuk update form-data
+
     const response = await fetch(`${API_URL}/donation-programs/${id}`, {
-      method: 'PUT',
+      method: 'POST', // Tetap POST, tapi di-override oleh _method di atas
       headers: {
-        'Content-Type': 'application/json',
         'Accept': 'application/json',
         ...(token && { 'Authorization': `Bearer ${token}` })
       },
-      body: JSON.stringify(payload),
+      body: formData,
     });
-
     const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Terjadi kesalahan saat memperbarui status program.');
-    }
-
+    if (!response.ok) throw new Error(data.message || 'Terjadi kesalahan saat memperbarui program.');
     return data;
   } catch (error: any) {
     throw new Error(error.message || 'Gagal terhubung ke server.');
@@ -89,7 +81,6 @@ export const updateDonationProgramAPI = async (id: string | number, payload: any
 export const getDonationProgramsAPI = async (): Promise<GetDonationProgramsResponse> => {
   try {
     const token = localStorage.getItem('token');
-    
     const response = await fetch(`${API_URL}/donation-programs`, {
       method: 'GET',
       headers: {
@@ -97,15 +88,40 @@ export const getDonationProgramsAPI = async (): Promise<GetDonationProgramsRespo
         ...(token && { 'Authorization': `Bearer ${token}` })
       },
     });
-
     const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Gagal mengambil data program donasi dari server.');
-    }
-
+    if (!response.ok) throw new Error(data.message || 'Gagal mengambil data program donasi dari server.');
     return data;
   } catch (error: any) {
     throw new Error(error.message || 'Gagal terhubung ke server.');
+  }
+};
+
+export const getDonationProgramByIdAPI = async (id: string | number) => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_URL}/donation-programs/${id}`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` })
+      },
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Gagal mengambil detail program.');
+    return data;
+  } catch (error: any) {
+    throw new Error(error.message || 'Gagal terhubung ke server.');
+  }
+};
+
+export const deleteDonationProgramAPI = async (id: string | number) => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axios.delete(`${API_URL}/donation-programs/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || 'Gagal menghapus program.');
   }
 };

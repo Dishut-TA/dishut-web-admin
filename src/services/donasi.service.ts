@@ -27,11 +27,19 @@ export const getDonationsAPI = async () => {
   }
 };
 
-export const updateDonationStatusAPI = async (id: number, status: string) => {
+export const updateDonationStatusAPI = async (id: number | string, status: string) => {
   const token = localStorage.getItem('token');
   const response = await axios.put(`${API_URL}/donations/${id}`, {
     seed_status: status 
   }, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return response.data;
+};
+
+export const deleteDonationAPI = async (id: number | string) => {
+  const token = localStorage.getItem('token');
+  const response = await axios.delete(`${API_URL}/donations/${id}`, {
     headers: { Authorization: `Bearer ${token}` }
   });
   return response.data;

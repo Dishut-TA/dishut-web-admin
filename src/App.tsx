@@ -147,6 +147,7 @@ import HasilValidasiLokasi from "./pages/KepalaBidangPDAS/AnalisisLahanKritis/Ha
 import MasterBibit from "./pages/StaffPDAS/DataMaster/MasterBibit/MasterBibit";
 import DetailCPISTAFF from "./pages/StaffPDAS/AnalisisLahanKritis/AnalisisCPI/DetailCPISTAFF";
 import DetailPendanaanCSR from "./pages/KelompokTaniHutan/Rehabilitasi/PendanaanCSR/DetailPendanaanCSR";
+import EditProgram from "./pages/StaffPDAS/RealisasiBibitDonasi/ProgramDonasi/EditProgramDonasi";
 const Login = lazy(() => import("./pages/Authentication/Login/Login"));
 const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -243,6 +244,7 @@ function App() {
                   <Route path="donasi/dashboard" element={<DashboardProgramStaff />} />
                   <Route path="donasi/program" element={<ProgramDonasiStaff />} />
                   <Route path="donasi/program/create" element={<CreateProgram />} />
+                  <Route path="donasi/program/edit/:id" element={<EditProgram />} />
                   <Route path="donasi/donatur" element={<DataDonatur />} />
                   <Route path="donasi/pelaksanaan-kegiatan" element={<PelaksanaanKegiatan />} />
                   <Route path="donasi/pelaporan-data" element={<PelaporanData />} />
