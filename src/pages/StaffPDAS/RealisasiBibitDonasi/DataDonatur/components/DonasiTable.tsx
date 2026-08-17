@@ -1,5 +1,5 @@
 import React from 'react';
-import { HiOutlineEye } from 'react-icons/hi2';
+import { HiOutlineEye, HiOutlineTrash } from 'react-icons/hi2';
 import StatusBadge from './StatusBadge';
 import type { DonaturData } from '@/utils/interface';
 
@@ -8,9 +8,10 @@ interface DonasiTableProps {
   isLoading: boolean;
   onVerify: (donatur: DonaturData) => void;
   onViewDetail: (donatur: DonaturData) => void;
+  onDelete: (donatur: DonaturData) => void;
 }
 
-const DonasiTable: React.FC<DonasiTableProps> = ({ data, isLoading, onVerify, onViewDetail }) => {
+const DonasiTable: React.FC<DonasiTableProps> = ({ data, isLoading, onVerify, onViewDetail, onDelete }) => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mt-2">
       <div className="overflow-x-auto">
@@ -42,7 +43,7 @@ const DonasiTable: React.FC<DonasiTableProps> = ({ data, isLoading, onVerify, on
                   <td className="px-6 py-4 text-sm font-medium text-gray-700 whitespace-nowrap">{row.idDonasi}</td>
                   <td className="px-6 py-4 text-sm font-semibold text-gray-800 whitespace-nowrap">{row.namaDonatur}</td>
                   <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">{row.program}</td>
-                  
+
                   <td className="px-6 py-4 max-w-50">
                     <div className="flex flex-wrap gap-1.5">
                       {row.rincianBibit?.map((bibit, idx) => (
@@ -56,27 +57,37 @@ const DonasiTable: React.FC<DonasiTableProps> = ({ data, isLoading, onVerify, on
                   <td className="px-6 py-4 text-sm font-bold text-[#2E7D32] text-center whitespace-nowrap">
                     {row.jumlahBibit}
                   </td>
-                  
+
                   <td className="px-6 py-4 whitespace-nowrap">
                     <StatusBadge status={row.status} />
                   </td>
-                  
+
                   <td className="px-6 py-4 whitespace-nowrap flex items-center justify-center gap-3">
                     {(row.status === 'Menunggu Verifikasi' || row.status === 'Pending') ? (
-                      <button 
+                      <button
                         onClick={() => onVerify(row)}
                         className="px-4 py-1.5 bg-[#185325] text-white text-xs font-bold rounded-full hover:bg-[#163f1f] transition-colors shadow-sm cursor-pointer"
                       >
                         Verifikasi Data
                       </button>
                     ) : (
-                      <button 
-                        onClick={() => onViewDetail(row)}
-                        title="Lihat Detail"
-                        className="p-2 border border-gray-200 rounded-lg text-gray-500 hover:text-[#2E7D32] hover:bg-green-50 transition-colors cursor-pointer"
-                      >
-                        <HiOutlineEye className="w-5 h-5" />
-                      </button>
+                      <div>
+                        <button
+                          onClick={() => onViewDetail(row)}
+                          title="Lihat Detail"
+                          className="p-2 border border-gray-200 rounded-lg text-gray-500 hover:text-[#2E7D32] hover:bg-green-50 transition-colors cursor-pointer"
+                        >
+                          <HiOutlineEye className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => onDelete(row)}
+                          title="Hapus"
+                          className="p-2 border border-gray-200 rounded-lg text-gray-500 hover:text-[#2E7D32] hover:bg-green-50 transition-colors cursor-pointer"
+                        >
+                          <HiOutlineTrash className="w-5 h-5" />
+                        </button>
+                      </div>
+
                     )}
                   </td>
                 </tr>

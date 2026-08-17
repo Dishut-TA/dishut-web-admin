@@ -85,7 +85,7 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onSelectPr
                             {projects.map((project) => (
                                 <div key={project.id} className="border border-gray-200 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-[#185325]/30 hover:bg-green-50/10 transition-colors">
                                     <div>
-                                        <h3 className="font-bold text-gray-800">{project.project_name || project.project_code}</h3>
+                                        <h3 className="font-bold text-gray-800">{project.nama_project || project.project_code}</h3>
                                         <div className="text-sm text-gray-500 mt-1 flex items-center gap-3">
                                             <span>{new Date(project.created_at).toLocaleString('id-ID')}</span>
                                             {renderStatus(project.status)}
@@ -97,7 +97,7 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onSelectPr
                                             onSelectProject(project.id);
                                             onClose();
                                         }}
-                                        className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors whitespace-nowrap ${
+                                        className={`px-4 py-2 rounded-full text-sm font-semibold cursor-pointer transition-colors whitespace-nowrap ${
                                             project.status === 'completed' 
                                             ? 'bg-[#185325] text-white hover:bg-[#113d1b]' 
                                             : 'bg-gray-100 text-gray-400 cursor-not-allowed'

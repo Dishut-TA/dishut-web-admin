@@ -35,6 +35,7 @@ const DataDonasi: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [modalDetail, setModalDetail] = useState<DonaturData | null>(null);
   const [modalVerif, setModalVerif] = useState<DonaturData | null>(null);
+  // const [delete, setDelete] = useState<DonaturData | null>(null);
 
   useEffect(() => {
     fetchDonations();
@@ -72,6 +73,10 @@ const DataDonasi: React.FC = () => {
     donatur.namaDonatur.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleDelete = () => {
+    console.log("tes hapus")
+  }
+
   return (
     <div className="relative flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8">
       
@@ -85,6 +90,7 @@ const DataDonasi: React.FC = () => {
         isLoading={isLoading} 
         onVerify={(donatur) => setModalVerif(donatur)} 
         onViewDetail={(donatur) => setModalDetail(donatur)} 
+        onDelete={() => handleDelete()}
       />
 
       <DetailDonaturModal 
