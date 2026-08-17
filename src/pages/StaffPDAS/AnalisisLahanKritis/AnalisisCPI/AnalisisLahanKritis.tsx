@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import type { CPIDataRow } from './types';
-import MapSection from './components/MapSection';
-import CPITable from './components/CPITable';
-import InputDataModal from './components/InputDataModal';
-import DetailVerifikasiModal from './components/DetailVerifikasiModal';
-import HistoryModal from './components/HistoryModal';
+import type { CPIDataRow } from './types'; 
+import MapSection from './components/MapSection'; 
+import CPITable from './components/CPITable'; 
+import InputDataModal from './components/InputDataModal'; 
+import DetailVerifikasiModal from './components/DetailVerifikasiModal'; 
+import HistoryModal from './components/HistoryModal'; 
 import { HiOutlineClock } from 'react-icons/hi2';
+import * as turf from '@turf/turf';
 
-const API_URL = "http://127.0.0.1:8000/api";
+const API_URL = "http://127.0.0.1:8000/api"; 
 
 const AnalisisLahanKritis: React.FC = () => {
   const [isInputModalOpen, setIsInputModalOpen] = useState(false);
@@ -16,7 +17,7 @@ const AnalisisLahanKritis: React.FC = () => {
   const [selectedRow, setSelectedRow] = useState<CPIDataRow | null>(null);
   const [petaFilter, setPetaFilter] = useState('Keseluruhan');
   const [geoData, setGeoData] = useState<any>(null);
-  const [tableData, setTableData] = useState<CPIDataRow[]>([]);
+  const [tableData, setTableData] = useState<any[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
 
   useEffect(() => {
@@ -30,6 +31,9 @@ const AnalisisLahanKritis: React.FC = () => {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const json = await res.json();
+        console.log("=== PROJECT TERBARU ===");
+console.log("Response projects:", json);
+console.log("Project pertama:", json.data?.[0]);
 
         if (json.data && json.data.length > 0) {
           loadHistoryData(json.data[0].id);
@@ -57,9 +61,8 @@ const AnalisisLahanKritis: React.FC = () => {
           });
           const tableJson = await tableRes.json();
           
-          // MAPPING DATA TABEL YANG AMAN DARI BERBAGAI FORMAT BACKEND
           const rawRows = tableJson.data || tableJson.payload || [];
-          const mappedTableData: CPIDataRow[] = rawRows.map((row: any, idx: number) => ({
+          let mappedTableData: any[] = rawRows.map((row: any, idx: number) => ({
               id: row.zone_id || idx, 
               kabupaten: row.kota_kabupaten || row.kabupaten || '-',
               kecamatan: row.kecamatan || '-',
@@ -71,25 +74,60 @@ const AnalisisLahanKritis: React.FC = () => {
               namaKth: row.nama_kelompok || 'Belum ada',
               ketuaKth: row.ketua_kelompok || '-',
               statusKelayakan: 'Layak',
+              luas: row.luas_ha || row.luas || '-',
+              latitude: row.latitude || row.lat || row.centroid_lat || '-',
+              longitude: row.longitude || row.lng || row.lon || row.centroid_lng || '-',
           }));
           
-          setTableData(mappedTableData);
-
           const mapRes = await fetch(`${API_URL}/projects/${projectId}/map`, {
               headers: { 'Authorization': `Bearer ${token}` }
           });
           const mapJson = await mapRes.json();
 
+          let finalGeoData = null;
           if (mapJson.type === "FeatureCollection") {
-              setGeoData(mapJson);
+              finalGeoData = mapJson;
           } else if (mapJson.geojson_url) {
               const directGeoRes = await fetch(mapJson.geojson_url);
-              const directGeoJson = await directGeoRes.json();
-              setGeoData(directGeoJson);
+              finalGeoData = await directGeoRes.json();
           }
           
+          setGeoData(finalGeoData);
+
+          if (finalGeoData && finalGeoData.features) {
+             mappedTableData = mappedTableData.map((row, idx) => {
+                 const feature = finalGeoData.features[idx]; 
+                 if (feature) {
+                     const props = feature.properties || {};
+                     let newLat = row.latitude;
+                     let newLng = row.longitude;
+                     let newLuas = row.luas;
+
+                     // Ambil luas dari properti peta jika di API tabel kosong
+                     if (newLuas === '-') {
+                         newLuas = props.luas_ha || props.luas || '-';
+                     }
+
+                     // Hitung centroid otomatis menggunakan Turf (Sama seperti di MapSection)
+                     if (newLat === '-' || newLng === '-') {
+                         try {
+                             const centroid = turf.centerOfMass(feature);
+                             newLng = centroid.geometry.coordinates[0];
+                             newLat = centroid.geometry.coordinates[1];
+                         } catch (e) {
+                             console.error("Gagal menghitung centroid untuk baris:", idx);
+                         }
+                     }
+                     return { ...row, latitude: newLat, longitude: newLng, luas: newLuas };
+                 }
+                 return row;
+             });
+          }
+
+          setTableData(mappedTableData);
+
       } catch (error) {
-          console.error("Gagal menarik data hasil analisis dari server:", error);
+          console.error("Gagal menarik data hasil analisis:", error);
       } finally {
           setIsLoadingData(false);
       }
@@ -107,37 +145,69 @@ const AnalisisLahanKritis: React.FC = () => {
       });
       const tableJson = await tableRes.json();
 
-      const mappedTableData: CPIDataRow[] = (tableJson.data || []).map((row: any, idx: number) => ({
-    id: row.zone_id && row.zone_id !== '-' ? row.zone_id : idx, 
-    kabupaten: row.kota_kabupaten || row.kabupaten || '-',
-    kecamatan: row.kecamatan || '-',
-    desa: row.desa_kelurahan || row.desa || '-',
-    statusKekritisan: row.status_lahan_kritis || row.status || '-',
-    skorCPI: row.skor_cpi_rata2 ? Number(row.skor_cpi_rata2).toFixed(2) : (row.skor_cpi ? Number(row.skor_cpi).toFixed(2) : '-'),
-    rekomendasi: row.rekomendasi_intervensi || '-',
-    
-    // Pastikan key KTH ini terbaca dengan aman
-    cdk: row.cdk || '-',
-    namaKth: row.nama_kelompok || 'Belum ada',
-    ketuaKth: row.ketua_kelompok || '-',
-    
-    statusKelayakan: 'Layak',
-}));
-setTableData(mappedTableData);
-      setTableData(mappedTableData);
+      const rawRows = tableJson.data || tableJson.payload || [];
+      let mappedTableData: any[] = rawRows.map((row: any, idx: number) => ({
+        id: row.zone_id && row.zone_id !== '-' ? row.zone_id : idx, 
+        kabupaten: row.kota_kabupaten || row.kabupaten || '-',
+        kecamatan: row.kecamatan || '-',
+        desa: row.desa_kelurahan || row.desa || '-',
+        statusKekritisan: row.status_lahan_kritis || row.status || '-',
+        skorCPI: row.skor_cpi_rata2 ? Number(row.skor_cpi_rata2).toFixed(2) : (row.skor_cpi ? Number(row.skor_cpi).toFixed(2) : '-'),
+        rekomendasi: row.rekomendasi_intervensi || '-',
+        cdk: row.cdk || '-',
+        namaKth: row.nama_kelompok || 'Belum ada',
+        ketuaKth: row.ketua_kelompok || '-',
+        statusKelayakan: 'Layak',
+        luas: row.luas_ha || row.luas || '-',
+        latitude: row.latitude || row.lat || row.centroid_lat || '-',
+        longitude: row.longitude || row.lng || row.lon || row.centroid_lng || '-',
+      }));
 
       const mapRes = await fetch(`${API_URL}/projects/${projectId}/map`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const mapJson = await mapRes.json();
 
+      let finalGeoData = null;
       if (mapJson.type === "FeatureCollection") {
-        setGeoData(mapJson);
+        finalGeoData = mapJson;
       } else if (mapJson.geojson_url) {
         const directGeoRes = await fetch(mapJson.geojson_url);
-        const directGeoJson = await directGeoRes.json();
-        setGeoData(directGeoJson);
+        finalGeoData = await directGeoRes.json();
       }
+      
+      setGeoData(finalGeoData);
+
+      // LOGIKA PENTING: MENGGABUNGKAN DATA TITIK KOORDINAT SPASIAL KE TABEL PDF
+      if (finalGeoData && finalGeoData.features) {
+         mappedTableData = mappedTableData.map((row, idx) => {
+             const feature = finalGeoData.features[idx]; 
+             if (feature) {
+                 const props = feature.properties || {};
+                 let newLat = row.latitude;
+                 let newLng = row.longitude;
+                 let newLuas = row.luas;
+
+                 if (newLuas === '-') {
+                     newLuas = props.luas_ha || props.luas || '-';
+                 }
+
+                 if (newLat === '-' || newLng === '-') {
+                     try {
+                         const centroid = turf.centerOfMass(feature);
+                         newLng = centroid.geometry.coordinates[0];
+                         newLat = centroid.geometry.coordinates[1];
+                     } catch (e) {
+                         console.error("Gagal menghitung centroid untuk baris:", idx);
+                     }
+                 }
+                 return { ...row, latitude: newLat, longitude: newLng, luas: newLuas };
+             }
+             return row;
+         });
+      }
+
+      setTableData(mappedTableData);
     } catch (error) {
       console.error("Gagal menarik data hasil analisis dari server:", error);
     } finally {
@@ -179,6 +249,8 @@ setTableData(mappedTableData);
         geoData={geoData}
         isLoading={isLoadingData}
         onOpenInputModal={() => setIsInputModalOpen(true)}
+        tableData={tableData}
+        petaFilter={petaFilter}
       />
 
       <CPITable

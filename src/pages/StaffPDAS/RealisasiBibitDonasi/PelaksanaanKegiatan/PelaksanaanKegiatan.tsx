@@ -100,9 +100,9 @@ const PelaksanaanKegiatan: React.FC = () => {
   return (
     <div className="relative flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">Pelaksanaan Kegiatan (Donasi)</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">Pelaksanaan Kegiatan Program Donasi</h1>
         <p className="text-sm md:text-base text-gray-600">
-          Mendokumentasikan penyerahan bibit donasi ke Kelompok Tani Hutan (KTH).
+          Dokumentasi penyerahan dan penanaman bibit donasi di lapangan.
         </p>
       </div>
 

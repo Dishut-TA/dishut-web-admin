@@ -7,4 +7,6 @@ export interface CPIDataRow {
   skorCPI: string;
   rekomendasi: string;
   statusKelayakan: string;
+  namaKth: string;
+  ketuaKth: string;
 }

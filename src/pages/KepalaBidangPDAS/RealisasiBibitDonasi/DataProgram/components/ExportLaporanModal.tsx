@@ -60,6 +60,15 @@ const ExportLaporanModal: React.FC<ExportLaporanModalProps> = ({ isOpen, onClose
 
       const blob = await exportLaporanAPI(payload);
 
+// BUAT TESTING  
+      console.log('=== TESTING RESPONSE API ===');
+      console.log('1. Payload yang dikirim:', payload);
+      console.log('2. Data Blob yang diterima:', blob);
+      console.log('3. Tipe Data (MIME type):', blob?.type);
+      console.log('4. Ukuran File:', blob?.size, 'bytes');
+      console.log('============================');
+//  BUAT TESTING
+
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -77,6 +86,9 @@ const ExportLaporanModal: React.FC<ExportLaporanModalProps> = ({ isOpen, onClose
       onClose();
 
     } catch (error: any) {
+      // BUAT TESTING 
+      console.error('=== ERROR EXPORT API ===', error);
+      // BUAT TESTING
       toast.error(error.message, { id: toastId });
     } finally {
       setIsLoading(false);
