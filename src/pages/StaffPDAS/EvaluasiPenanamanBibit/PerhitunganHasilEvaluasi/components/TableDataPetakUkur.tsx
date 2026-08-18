@@ -72,7 +72,7 @@ const TableDataPetakUkur: React.FC<TableDataPetakUkurProps> = ({
                         className="px-4 py-3 text-center align-middle border-r border-gray-200 bg-gray-50/30 w-24"
                       >
                         <div className="flex flex-col items-center justify-center gap-1.5">
-                          <span className="bg-[#EBF8F1] text-[#185325] border border-[#C6EBD6] px-3 py-1.5 rounded-lg text-xs font-black uppercase shadow-sm">
+                          <span className="bg-[#EBF8F1] text-[#185325] border border-[#C6EBD6] px-3 py-1.5 rounded-lg text-xs font-bold uppercase shadow-sm">
                             {periode}
                           </span>
                           <span className="text-[10px] text-gray-400 font-medium">({items.length} PU)</span>

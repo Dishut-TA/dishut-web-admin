@@ -71,19 +71,19 @@ const DetailMonitoringProgram: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center gap-4">
           <div className="p-3 bg-emerald-50 text-emerald-600 rounded-full"><PiPlant className="w-6 h-6"/></div>
-          <div><p className="text-[10px] font-bold text-gray-500">Target Tanaman</p><p className="text-2xl font-black text-gray-800 leading-none mt-1">2.500</p><p className="text-[10px] font-medium text-gray-500 mt-1">pohon</p></div>
+          <div><p className="text-[10px] font-bold text-gray-500">Target Tanaman</p><p className="text-2xl font-bold text-gray-800 leading-none mt-1">2.500</p><p className="text-[10px] font-medium text-gray-500 mt-1">pohon</p></div>
         </div>
         <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center gap-4">
           <div className="p-3 bg-emerald-50 text-emerald-600 rounded-full"><PiFileText className="w-6 h-6"/></div>
-          <div><p className="text-[10px] font-bold text-gray-500">Sudah Diinput</p><p className="text-2xl font-black text-gray-800 leading-none mt-1">18</p><p className="text-[10px] font-medium text-gray-500 mt-1">pohon</p></div>
+          <div><p className="text-[10px] font-bold text-gray-500">Sudah Diinput</p><p className="text-2xl font-bold text-gray-800 leading-none mt-1">18</p><p className="text-[10px] font-medium text-gray-500 mt-1">pohon</p></div>
         </div>
         <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center gap-4">
           <div className="p-3 bg-orange-50 text-orange-500 rounded-full"><PiHourglassHigh className="w-6 h-6"/></div>
-          <div><p className="text-[10px] font-bold text-gray-500">Belum Diinput</p><p className="text-2xl font-black text-gray-800 leading-none mt-1">2.482</p><p className="text-[10px] font-medium text-gray-500 mt-1">pohon</p></div>
+          <div><p className="text-[10px] font-bold text-gray-500">Belum Diinput</p><p className="text-2xl font-bold text-gray-800 leading-none mt-1">2.482</p><p className="text-[10px] font-medium text-gray-500 mt-1">pohon</p></div>
         </div>
         <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center gap-4">
           <div className="p-3 bg-purple-50 text-purple-600 rounded-full"><PiCalendarBlank className="w-6 h-6"/></div>
-          <div><p className="text-[10px] font-bold text-gray-500">Periode Aktif</p><p className="text-2xl font-black text-gray-800 leading-none mt-1">2 dari 4</p><p className="text-[10px] font-medium text-gray-500 mt-1">Periode</p></div>
+          <div><p className="text-[10px] font-bold text-gray-500">Periode Aktif</p><p className="text-2xl font-bold text-gray-800 leading-none mt-1">2 dari 4</p><p className="text-[10px] font-medium text-gray-500 mt-1">Periode</p></div>
         </div>
       </div>
 

@@ -46,8 +46,8 @@ import DetailVerifikasiDanaCSRKABID from "./pages/KepalaBidangPDAS/VerifikasiDan
 import VerifikasiDanaCSRKABID from "./pages/KepalaBidangPDAS/VerifikasiDanaCSR/VerifikasiDanaCSRKABID";
 // import VerifikasiDanaCSR from "./pages/StaffPDAS/Investasi/VerifikasiDanaCSRSTAFF";
 // import DetailVerifikasiDanaCSR from "./pages/StaffPDAS/Investasi/VerifikasiDanaCSRSTAFF/DetailVerifikasiLaporanDanaSTAFF";
-import LaporanKeuanganIndex from "./pages/CSR/LaporanKeuanganCSR/LaporanKeuanganIndex";
-import DetailLaporanKeuangan from "./pages/CSR/LaporanKeuanganCSR/DetailLaporanKeuanganCSR";
+import LaporanKeuanganIndex from "./pages/CSR/LaporanRealisasiDanaCSR/LaporanRealisasiDanaCSR";
+import DetailLaporanKeuangan from "./pages/CSR/LaporanRealisasiDanaCSR/DetailLaporanRealisasiDanaCSR";
 import LaporanDanaIndex from "./pages/KelompokTaniHutan/Rehabilitasi/LaporanDana/LaporanDanaIndex";
 import CreateLaporanDana from "./pages/KelompokTaniHutan/Rehabilitasi/LaporanDana/CreateLaporanDana";
 import DetailLaporanDana from "./pages/KelompokTaniHutan/Rehabilitasi/LaporanDana/DetailLaporanDana";
@@ -108,7 +108,7 @@ import LaporanDanaIndexSTAFF from "./pages/StaffPDAS/Investasi/LaporanDana/Lapor
 import DetailRiwayatPendanaan from "./pages/CSR/RiwayatPendanaan/DetailRiwayatPendanaan";
 import RiwayatPendanaan from "./pages/CSR/RiwayatPendanaan/RiwayatPendanaan";
 import DetailProgres from "./pages/StaffPDAS/PelaksanaanDanMonitoring/PenugasanPenyuluh/DetailProgres";
-import DetailHasilValidasiPenugasan from "./pages/StaffPDAS/PelaksanaanDanMonitoring/PenugasanPenyuluh/DetailHasilValidasiPenugasan";
+// import DetailHasilValidasiPenugasan from "./pages/StaffPDAS/PelaksanaanDanMonitoring/PenugasanPenyuluh/DetailHasilValidasiPenugasan";
 import DetailVerifikasiPelaksanaan from "./pages/StaffPDAS/PelaksanaanDanMonitoring/VerifikasiMonitoring/components/DetailVerifikasiPelaksanaan";
 import MonitoringProgram from "./pages/StaffPDAS/PelaksanaanDanMonitoring/MonitoringProgram";
 import ProgresMonitoring from "./pages/StaffPDAS/PelaksanaanDanMonitoring/MonitoringProgram/ProgresMonitoring";
@@ -148,6 +148,11 @@ import MasterBibit from "./pages/StaffPDAS/DataMaster/MasterBibit/MasterBibit";
 import DetailCPISTAFF from "./pages/StaffPDAS/AnalisisLahanKritis/AnalisisCPI/DetailCPISTAFF";
 import DetailPendanaanCSR from "./pages/KelompokTaniHutan/Rehabilitasi/PendanaanCSR/DetailPendanaanCSR";
 import EditProgram from "./pages/StaffPDAS/RealisasiBibitDonasi/ProgramDonasi/EditProgramDonasi";
+import DashboardPelaksanaanMonitoringKabid from "./pages/KepalaBidangPDAS/PelaksanaanDanMonitoring/Dashboard/DashboardPelaksanaanMonitoringKABID";
+import DetailPenugasan from "./pages/StaffPDAS/PelaksanaanDanMonitoring/PenugasanPenyuluh/DetailPenugasan";
+import PelaksanaanWizard from "./pages/Penyuluh/PelaksanaanPenanaman/InputDataTanaman";
+import DetailMonitoringPage from "./pages/StaffPDAS/PelaksanaanDanMonitoring/MonitoringProgram/DetailMonitoringPage";
+import TugaskanMonitoring from "./pages/StaffPDAS/PelaksanaanDanMonitoring/VerifikasiMonitoring/TugaskanMonitoring";
 const Login = lazy(() => import("./pages/Authentication/Login/Login"));
 const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -165,7 +170,7 @@ const StaffTugasEvaluasi = lazy(() => import("./pages/StaffPDAS/EvaluasiPenanama
 const AnalisisLahanKritis = lazy(() => import("./pages/StaffPDAS/AnalisisLahanKritis/AnalisisCPI/AnalisisLahanKritis"));
 const DashboardMonitoring = lazy(() => import("./pages/StaffPDAS/PelaksanaanDanMonitoring/DashboardMonitoring"));
 const DaftarKegiatan = lazy(() => import("./pages/StaffPDAS/PelaksanaanDanMonitoring/DaftarKegiatan"));
-const VerifikasiMonitoring = lazy(() => import("./pages/StaffPDAS/PelaksanaanDanMonitoring/VerifikasiMonitoring"));
+// const VerifikasiMonitoring = lazy(() => import("./pages/StaffPDAS/PelaksanaanDanMonitoring/VerifikasiMonitoring"));
 const RekapMonitoring = lazy(() => import("./pages/StaffPDAS/PelaksanaanDanMonitoring/RekapMonitoring"));
 const DashboardEvaluasi = lazy(() => import("./pages/StaffPDAS/EvaluasiPenanamanBibit/DashboardEvaluasi/DashboardEvaluasi"));
 // const DataEvaluasi = lazy(() => import("./pages/StaffPDAS/EvaluasiPenanamanBibit/DataEvaluasi"));
@@ -263,9 +268,9 @@ function App() {
 
                   {/* Monitoring */}
                   <Route path="monitoring/dashboard" element={<DashboardMonitoring />} />
-                  <Route path="monitoring/penugasan-penyuluh" element={<PenugasanPenyuluh />} />
+                  <Route path="monitoring/penugasan-pelaksanaan" element={<PenugasanPenyuluh />} />
+                  <Route path="monitoring/penugasan-pelaksanaan/detail/:id" element={<DetailPenugasan />} />
                   <Route path="monitoring/penugasan-penyuluh/progres/:id" element={<DetailProgres />} />
-                  <Route path="monitoring/penugasan-penyuluh/detail/:id" element={<DetailHasilValidasiPenugasan />} />
                   <Route path="monitoring/penugasan-penyuluh/detail/:id" element={<DetailPenugasanPenyuluh />} />
                   <Route path="monitoring/monitoring-program" element={<MonitoringProgram />} />
                   <Route path="monitoring/monitoring-program/penugasan/:id" element={<DetailPenugasanMonitoring />} />
@@ -279,13 +284,14 @@ function App() {
                   <Route path="monitoring/pelaporan/donasi/:id" element={<DetailPelaporanDonasi />} />
                   <Route path="monitoring/master-penyuluh" element={<MasterPenyuluh />} />
                   <Route path="monitoring/master-penyuluh/:id" element={<DetailPenyuluh />} />
-                  <Route path="monitoring/hasil-validasi-lokasi/" element={<HasilValidasiPenyuluh />} />
-                  <Route path="monitoring/hasil-validasi-lokasi/detail/:id" element={<DetailHasilValidasi />} />
-                  <Route path="monitoring/hasil-validasi-lokasi/proses/:id" element={<ProsesValidasiPenyuluh />} />
+                  <Route path="monitoring/hasil-validasi-penyuluh/" element={<HasilValidasiPenyuluh />} />
+                  <Route path="monitoring/hasil-validasi-penyuluh/detail/:id" element={<DetailHasilValidasi />} />
+                  <Route path="monitoring/hasil-validasi-penyuluh/proses/:id" element={<ProsesValidasiPenyuluh />} />
                   <Route path="monitoring/kegiatan" element={<DaftarKegiatan />} />
                   <Route path="monitoring/kegiatan/detail/:id" element={<DetailKegiatan />} />
-                  <Route path="monitoring/verifikasi" element={<VerifikasiMonitoring />} />
-                  <Route path="monitoring/verifikasi/detail/:id" element={<DetailVerifikasiPelaksanaan />} />
+                  <Route path="monitoring/verifikasi" element={<MonitoringProgram />} />
+                  <Route path="monitoring/verifikasi/detail/:id" element={<DetailMonitoringPage />} />
+                  <Route path="monitoring/verifikasi/tugaskan/:id" element={<TugaskanMonitoring />} />
                   <Route path="monitoring/rekap" element={<RekapMonitoring />} />
 
                   {/* Evaluasi */}
@@ -312,15 +318,18 @@ function App() {
                   <Route index element={<Navigate to="dashboard" replace />} />
                   <Route path="dashboard" element={<DashboardKabid />} />
 
+                  {/* Analisis CPI */}
                   <Route path="analisis-cpi/dashboard" element={<DashboardCPIKABID />} />
                   <Route path="analisis-cpi/dashboard/detail/:id" element={<DetailCPIKABID />} />
                   <Route path="analisis-cpi/hasil-validasi-lokasi" element={<HasilValidasiLokasi />} />
                   <Route path="analisis-cpi/hasil-validasi-lokasi/detail/:id" element={<DetailHasilValidasi />} />
                   <Route path="analisis-cpi/hasil-validasi-lokasi/proses/:id" element={<ProsesValidasiPenyuluh />} />
 
+                  {/* Donasi */}
                   <Route path="donasi/dashboard" element={<DashhboardProgramKabid />} />
                   <Route path="donasi/program" element={<DataProgramKabid />} />
 
+                  {/* Rehabilitasi */}
                   <Route path="rehabilitasi/program-apbd" element={<DaftarUsulanAPBD />} />
                   <Route path="rehabilitasi/program-apbd/verifikasi/:id" element={<VerifikasiAPBD />} />
                   <Route path="rehabilitasi/validasi-csr" element={<DaftarUsulanCSR />} />
@@ -332,6 +341,10 @@ function App() {
                   <Route path="rehabilitasi/riwayat-rehabilitasi" element={<RiwayatRehabilitasiKABID />} />
                   <Route path="rehabilitasi/riwayat-rehabilitasi/detail/:id" element={<DetailRiwayatRehabilitasiKABID />} />
 
+                  {/* Monitoring */}
+                  <Route path="monitoring/dashboard" element={<DashboardPelaksanaanMonitoringKabid />} />
+                  
+                  {/* Evaluasi */}
                   <Route path="evaluasi/penugasan" element={<InisiasiPenugasanEvaluasiKABID />} />
                   <Route path="evaluasi/penugasan/create" element={<CreateInisiasiPenugasanEvaluasiKABID />} />
                   <Route path="evaluasi/penugasan/detail/:id" element={<DetailInisiasiPenugasan />} />
@@ -463,6 +476,7 @@ function App() {
                   <Route path="pelaksanaan-penanaman" element={<PelaksanaanPenanamanIndex />} />
                   <Route path="pelaksanaan-penanaman/create/:id" element={<InputProgresPage />} />
                   <Route path="pelaksanaan-penanaman/mulai/:id" element={<MulaiKegiatan />} />
+                  <Route path="pelaksanaan-penanaman/input-data" element={<PelaksanaanWizard />} />
                   <Route path="monitoring-program" element={<MonitoringProgramRehabilitasi />} />
                   <Route path="monitoring-program/detail/:id" element={<DetailMonitoringProgram />} />
                   <Route path="monitoring-lanjutan" element={<MonitoringLanjutanIndex />} />

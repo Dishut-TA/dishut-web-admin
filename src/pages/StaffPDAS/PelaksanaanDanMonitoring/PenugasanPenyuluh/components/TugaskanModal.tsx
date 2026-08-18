@@ -1,234 +1,245 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { 
-  HiOutlineXMark, 
-  HiOutlineMapPin, 
+  HiOutlineXMark,
+  HiOutlineMapPin,
   HiOutlineListBullet,
   HiOutlineDocumentText,
-  HiOutlineUsers,
-  HiOutlineLockClosed,
-  HiOutlineInformationCircle,
-  HiOutlinePaperAirplane
+  HiOutlineUserGroup,
+  HiOutlineEye,
+  HiOutlineInformationCircle
 } from 'react-icons/hi2';
-import { PiPlant } from 'react-icons/pi';
-import toast from 'react-hot-toast';
+import DetailRencanaPOModal from './DetailRencanaPOModal';
 
-interface ModalTugaskanProps {
+const SproutIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 22V12M12 12C12 12 7 12 7 7C7 12 12 12 12 12ZM12 12C12 12 17 12 17 7C17 12 12 12 12 12Z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M8 22H16" />
+  </svg>
+);
+
+interface TugaskanModalProps {
   isOpen: boolean;
   onClose: () => void;
   data: any | null; 
 }
 
-const ModalTugaskan: React.FC<ModalTugaskanProps> = ({ isOpen, onClose, data }) => {
-  const [penyuluh, setPenyuluh] = useState('');
-  const [tanggalMulai, setTanggalMulai] = useState('');
-  const [batasWaktu, setBatasWaktu] = useState('');
-  const [prioritas, setPrioritas] = useState('Sedang');
-  const [catatan, setCatatan] = useState('');
+const TugaskanModal: React.FC<TugaskanModalProps> = ({ isOpen, onClose, data }) => {
+  const [formData, setFormData] = useState({
+    penyuluh: '',
+    tanggal: '',
+    batasWaktu: '',
+    prioritas: '',
+    catatan: '',
+    kth: 'kth1' // Default value for locked select
+  });
 
-  useEffect(() => {
-    if (isOpen) {
-      setPenyuluh('');
-      setTanggalMulai('');
-      setBatasWaktu('');
-      setPrioritas('Sedang');
-      setCatatan('');
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => { document.body.style.overflow = 'unset'; };
-  }, [isOpen]);
+  // State untuk mengontrol Modal Detail Rencana PO
+  const [isDetailPOOpen, setIsDetailPOOpen] = useState(false);
 
   if (!isOpen || !data) return null;
 
-  const isValidasi = data.jenis === 'Validasi Lokasi';
+  const isValidasi = data.jenisKegiatan === 'Validasi Lokasi';
 
-  const theme = {
-    color: isValidasi ? 'emerald' : 'purple',
-    textMain: isValidasi ? 'text-emerald-700' : 'text-purple-700',
-    textBadge: isValidasi ? 'text-emerald-600' : 'text-purple-600',
-    bgBadge: isValidasi ? 'bg-emerald-50' : 'bg-purple-50',
-    borderSection: isValidasi ? 'border-emerald-200' : 'border-purple-200',
-    bgInfo: isValidasi ? 'bg-emerald-50' : 'bg-purple-50',
-    btnDraftBorder: isValidasi ? 'border-emerald-600' : 'border-purple-600',
-    btnDraftText: isValidasi ? 'text-emerald-600' : 'text-purple-600',
-    btnDraftHover: isValidasi ? 'hover:bg-emerald-50' : 'hover:bg-purple-50',
-    btnSubmitBg: isValidasi ? 'bg-emerald-600' : 'bg-purple-600',
-    btnSubmitHover: isValidasi ? 'hover:bg-emerald-700' : 'hover:bg-purple-700',
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSimpan = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success(`Penugasan berhasil dikirim ke penyuluh!`);
+    console.log("Data Penugasan:", formData, "Tipe:", data.jenisKegiatan);
     onClose();
   };
 
-  const SummaryRow = ({ label, value }: { label: string, value: string }) => (
-    <div className="flex text-sm">
-      <span className="w-28 text-gray-500 shrink-0">{label}</span>
-      <span className="mr-2 text-gray-500">:</span>
-      <span className="font-medium text-gray-800">{value}</span>
-    </div>
-  );
-
   return (
-    <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-      <div className="w-full max-w-2xl bg-white rounded-3xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[95vh]">
-        
-        {/* Header Modals */}
-        <div className="flex items-start justify-between p-6 border-b border-gray-100 bg-white shrink-0">
-          <div className="flex items-start gap-4">
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${theme.bgBadge} ${theme.textBadge}`}>
-              {isValidasi ? <HiOutlineMapPin className="w-6 h-6" /> : <PiPlant className="w-6 h-6" />}
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-gray-800">
-                Tugaskan {isValidasi ? 'Validasi Lokasi' : 'Pelaksanaan Kegiatan'}
-              </h2>
-              <span className={`inline-block mt-1.5 px-3 py-1 rounded-full text-[11px] font-bold ${theme.bgBadge} ${theme.textBadge}`}>
-                {isValidasi ? 'Validasi Lokasi' : 'Pelaksanaan Kegiatan'}
-              </span>
-            </div>
-          </div>
-          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors cursor-pointer">
-            <HiOutlineXMark className="w-6 h-6" />
-          </button>
-        </div>
-
-        {/* Body Modals (Scrollable) */}
-        <div className="flex-1 overflow-y-auto p-6 md:p-8 bg-white space-y-6">
+    <>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
+        <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto flex flex-col animate-in fade-in zoom-in-95 duration-200">
           
-          {/* Section 1: Ringkasan Lokasi/Program */}
-          <div className={`border rounded-2xl p-5 ${theme.borderSection}`}>
-            <h3 className={`text-base font-bold flex items-center gap-2 mb-4 ${theme.textMain}`}>
-              <HiOutlineListBullet className="w-5 h-5" /> 
-              Ringkasan {isValidasi ? 'Lokasi' : 'Program'}
-            </h3>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
-              {isValidasi ? (
-                <>
-                  <SummaryRow label="ID Referensi" value={data.ref || 'LOC-2026-0012'} />
-                  <SummaryRow label="CDK" value="Cimanuk" />
-                  <SummaryRow label="Lokasi Usulan" value={data.objek || 'Blok Cibodas'} />
-                  <SummaryRow label="Desa / Kecamatan" value={data.lokasi || 'Desa Sukamaju / Kec. Rancabali'} />
-                  <SummaryRow label="Sumber Lokasi" value="Analisis CPI" />
-                  <SummaryRow label="Luas" value="12,5 Ha" />
-                </>
-              ) : (
-                <>
-                  <SummaryRow label="ID Program" value={data.ref || 'PRG-2026-0021'} />
-                  <SummaryRow label="Jenis Kegiatan" value="Penanaman" />
-                  <SummaryRow label="Nama Program" value={data.objek || 'Rehabilitasi DAS Cimanuk'} />
-                  <SummaryRow label="Lokasi Program" value={data.lokasi || 'Desa Sukamaju / Kec. Rancabali'} />
-                  <SummaryRow label="Sumber Dana" value="APBD" />
-                  <SummaryRow label="Target Kegiatan" value="500 tanaman" />
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Section 2: Pihak Terlibat (Khusus Pelaksanaan) */}
-          {!isValidasi && (
-            <div className={`border rounded-2xl p-5 ${theme.borderSection}`}>
-              <h3 className={`text-base font-bold flex items-center gap-2 mb-4 ${theme.textMain}`}>
-                <HiOutlineUsers className="w-5 h-5" /> Pihak Terlibat
-              </h3>
+          {/* HEADER */}
+          <div className="px-6 py-5 flex items-start justify-between sticky top-0 bg-white z-10">
+            <div className="flex gap-4 items-center">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-emerald-50 text-emerald-600">
+                {isValidasi ? <HiOutlineMapPin className="w-6 h-6" /> : <SproutIcon className="w-6 h-6" />}
+              </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">KTH Terlibat</label>
-                <div className="relative">
-                  <input 
-                    disabled type="text" value="KTH Mekar Jaya" 
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-500 cursor-not-allowed"
-                  />
-                  <HiOutlineLockClosed className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                </div>
-                <p className="text-xs text-gray-400 mt-2">KTH sudah ditetapkan pada program.</p>
+                <h2 className="text-lg font-bold text-gray-900 mb-1">
+                  {isValidasi ? 'Tugaskan Validasi Lokasi' : 'Tugaskan Pelaksanaan Kegiatan'}
+                </h2>
+                <span className="inline-block px-2.5 py-0.5 rounded text-[11px] font-bold border bg-emerald-50 text-emerald-600 border-emerald-100">
+                  {data.jenisKegiatan}
+                </span>
               </div>
             </div>
-          )}
+            <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 rounded-full transition-colors">
+              <HiOutlineXMark className="w-5 h-5" />
+            </button>
+          </div>
 
-          {/* Section 3: Form Penugasan */}
-          <div className={`border rounded-2xl p-5 ${theme.borderSection}`}>
-            <h3 className={`text-base font-bold flex items-center gap-2 mb-5 ${theme.textMain}`}>
-              <HiOutlineDocumentText className="w-5 h-5" /> Form Penugasan
-            </h3>
+          <form onSubmit={handleSimpan} className="px-6 pb-6 space-y-6">
             
-            <form id="form-tugaskan" onSubmit={handleSubmit} className="space-y-5">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Penyuluh yang Ditugaskan <span className="text-red-500">*</span>
-                  </label>
-                  <select required value={penyuluh} onChange={e => setPenyuluh(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-1 focus:ring-gray-400 bg-white cursor-pointer">
-                    <option value="" disabled>Pilih Penyuluh...</option>
-                    <option value="Ahmad Fauzi">Ahmad Fauzi</option>
-                    <option value="Rina Herlina">Rina Herlina</option>
-                  </select>
+            {/* SECTION: RINGKASAN */}
+            <div className="border border-emerald-100 rounded-xl overflow-hidden">
+              <div className="px-5 py-3 flex items-center gap-2 border-b border-emerald-100 bg-emerald-50/30">
+                <HiOutlineListBullet className="w-5 h-5 text-emerald-600" />
+                <h3 className="text-sm font-bold text-emerald-700">
+                  {isValidasi ? 'Ringkasan Lokasi' : 'Ringkasan Program'}
+                </h3>
+              </div>
+              <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 text-sm">
+                {isValidasi ? (
+                  <>
+                    <div className="flex items-start"><span className="w-32 text-gray-500 shrink-0">ID Referensi</span><span className="font-bold text-gray-900">: LOC-2026-0012</span></div>
+                    <div className="flex items-start"><span className="w-32 text-gray-500 shrink-0">CDK</span><span className="font-bold text-gray-900">: {data.wilayah}</span></div>
+                    <div className="flex items-start"><span className="w-32 text-gray-500 shrink-0">Lokasi Usulan</span><span className="font-bold text-gray-900">: Blok Cibodas</span></div>
+                    <div className="flex items-start"><span className="w-32 text-gray-500 shrink-0">Desa / Kecamatan</span><span className="font-bold text-gray-900 whitespace-pre-line">: {data.lokasi.replace('\n', ' ')}</span></div>
+                    <div className="flex items-start"><span className="w-32 text-gray-500 shrink-0">Sumber Lokasi</span><span className="font-bold text-gray-900">: Analisis CPI</span></div>
+                    <div className="flex items-start"><span className="w-32 text-gray-500 shrink-0">Luas</span><span className="font-bold text-gray-900">: 12.5 Ha</span></div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-start"><span className="w-32 text-gray-500 shrink-0">ID Program</span><span className="font-bold text-gray-900">: PRG-2026-0021</span></div>
+                    <div className="flex items-start"><span className="w-32 text-gray-500 shrink-0">Jenis Kegiatan</span><span className="font-bold text-gray-900">: Penanaman</span></div>
+                    <div className="flex items-start"><span className="w-32 text-gray-500 shrink-0">Nama Program</span><span className="font-bold text-gray-900">: {data.program}</span></div>
+                    <div className="flex items-start"><span className="w-32 text-gray-500 shrink-0">Lokasi Program</span><span className="font-bold text-gray-900 whitespace-pre-line">: {data.lokasi.replace('\n', ' ')}</span></div>
+                    <div className="flex items-start"><span className="w-32 text-gray-500 shrink-0">Sumber Dana</span><span className="font-bold text-gray-900">: APBD</span></div>
+                    <div className="flex items-start"><span className="w-32 text-gray-500 shrink-0">Target Kegiatan</span><span className="font-bold text-gray-900">: 500 tanaman</span></div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* SECTION KHUSUS PELAKSANAAN: PIHAK TERLIBAT */}
+            {!isValidasi && (
+              <div className="border border-emerald-100 rounded-xl overflow-hidden">
+                <div className="px-5 py-3 flex items-center gap-2 border-b border-emerald-100 bg-emerald-50/30">
+                  <HiOutlineUserGroup className="w-5 h-5 text-emerald-600" />
+                  <h3 className="text-sm font-bold text-emerald-700">Pihak Terlibat</h3>
                 </div>
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    {isValidasi ? 'Tanggal Validasi' : 'Tanggal Mulai'} <span className="text-red-500">*</span>
-                  </label>
-                  <input required type="date" value={tanggalMulai} onChange={e => setTanggalMulai(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-1 focus:ring-gray-400 text-gray-600" />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Batas Waktu <span className="text-red-500">*</span>
-                  </label>
-                  <input required type="date" value={batasWaktu} onChange={e => setBatasWaktu(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-1 focus:ring-gray-400 text-gray-600" />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Prioritas <span className="text-red-500">*</span>
-                  </label>
-                  <select value={prioritas} onChange={e => setPrioritas(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-1 focus:ring-gray-400 bg-white cursor-pointer">
-                    <option value="Tinggi">Tinggi</option>
-                    <option value="Sedang">Sedang</option>
-                    <option value="Rendah">Rendah</option>
-                  </select>
+                <div className="p-5 space-y-4">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">KTH Terlibat</label>
+                    <select 
+                      disabled
+                      value={formData.kth} 
+                      className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-500 cursor-not-allowed focus:outline-none"
+                    >
+                      <option value="kth1">KTH Tani Maju (Telah ditetapkan CPI)</option>
+                    </select>
+                    <p className="text-[11px] mt-2 font-medium text-emerald-700">KTH akan menerima informasi penugasan setelah disimpan.</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Rencana / Periode Penanaman (PO)</label>
+                    <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-bold text-gray-900">PO - Rencana Penanaman Awal</p>
+                        <p className="text-[11px] text-gray-500 mt-1">Target: 500 tanaman | Periode Pelaksanaan: 01 Jul 2026 - 31 Jul 2026</p>
+                      </div>
+                      <button 
+                        type="button" 
+                        onClick={() => setIsDetailPOOpen(true)}
+                        className="px-4 py-2 bg-white border border-gray-300 text-gray-700 text-xs font-bold rounded-lg hover:bg-gray-50 flex items-center gap-2 shadow-sm transition-colors shrink-0"
+                      >
+                        <HiOutlineEye className="w-4 h-4" /> Lihat Detail
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
+            )}
 
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Catatan Penugasan</label>
-                <textarea 
-                  rows={3} value={catatan} onChange={e => setCatatan(e.target.value)}
-                  placeholder={isValidasi ? "Lakukan verifikasi koordinat, kondisi lahan, akses lokasi, dan dokumentasi lapangan." : "Dampingi pelaksanaan penanaman sesuai target dan laporkan progres berkala."} 
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-1 focus:ring-gray-400" 
-                />
+            {/* SECTION: FORM PENUGASAN */}
+            <div className="border border-emerald-100 rounded-xl overflow-hidden">
+              <div className="px-5 py-3 flex items-center gap-2 border-b border-emerald-100 bg-emerald-50/30">
+                <HiOutlineDocumentText className="w-5 h-5 text-emerald-600" />
+                <h3 className="text-sm font-bold text-emerald-700">Form Penugasan</h3>
               </div>
+              <div className="p-5 space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Penyuluh yang Ditugaskan</label>
+                    <select 
+                      value={formData.penyuluh} onChange={(e) => setFormData({...formData, penyuluh: e.target.value})}
+                      className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-gray-700"
+                    >
+                      <option value="">-- Pilih Penyuluh --</option>
+                      <option value="Ahmad">Ahmad Fauzi</option>
+                      <option value="Siti">Siti Nurhaliza</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">
+                      {isValidasi ? 'Tanggal Validasi' : 'Tanggal Mulai Pelaksanaan'}
+                    </label>
+                    <input 
+                      type="date" 
+                      value={formData.tanggal} onChange={(e) => setFormData({...formData, tanggal: e.target.value})}
+                      className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-gray-700" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">
+                      {isValidasi ? 'Batas Waktu Validasi' : 'Batas Waktu Pelaksanaan'}
+                    </label>
+                    <input 
+                      type="date" 
+                      value={formData.batasWaktu} onChange={(e) => setFormData({...formData, batasWaktu: e.target.value})}
+                      className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-gray-700" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Prioritas</label>
+                    <select 
+                      value={formData.prioritas} onChange={(e) => setFormData({...formData, prioritas: e.target.value})}
+                      className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-gray-700"
+                    >
+                      <option value="">-- Pilih Prioritas --</option>
+                      <option value="Tinggi">Tinggi</option>
+                      <option value="Sedang">Sedang</option>
+                      <option value="Rendah">Rendah</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Catatan Penugasan (Opsional)</label>
+                  <textarea 
+                    value={formData.catatan} onChange={(e) => setFormData({...formData, catatan: e.target.value})}
+                    placeholder={isValidasi ? "Contoh: Lakukan verifikasi koordinat, kondisi lahan, akses lokasi, dan dokumentasi lapangan." : "Contoh: Dampingi KTH dalam pelaksanaan penanaman sesuai target dan laporkan progres berkala."}
+                    rows={3}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 resize-none text-gray-700"
+                  ></textarea>
+                </div>
 
-              {/* Action Buttons */}
-              <div className="flex justify-end gap-3 pt-4">
-                <button type="button" onClick={onClose} className="px-6 py-2.5 text-sm font-bold text-gray-600 bg-white border border-gray-300 hover:bg-gray-50 rounded-xl transition-colors cursor-pointer">
-                  Batal
-                </button>
-                <button type="button" className={`px-6 py-2.5 text-sm font-bold bg-white border ${theme.btnDraftBorder} ${theme.btnDraftText} ${theme.btnDraftHover} rounded-xl transition-colors cursor-pointer`}>
-                  Simpan Draft
-                </button>
-                <button type="submit" className={`flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white ${theme.btnSubmitBg} ${theme.btnSubmitHover} rounded-xl shadow-sm transition-colors cursor-pointer`}>
-                  <HiOutlinePaperAirplane className="w-4 h-4 -rotate-45 mb-0.5" />
-                  Kirim Penugasan
-                </button>
+                {/* Info Text Bawah */}
+                <div className="px-4 py-3 rounded-lg flex items-start gap-2 border bg-emerald-50/50 border-emerald-100 text-emerald-700">
+                  <HiOutlineInformationCircle className="w-5 h-5 shrink-0" />
+                  <p className="text-xs font-medium pt-0.5">
+                    {isValidasi 
+                      ? 'Penugasan ini ditujukan untuk validasi lapangan sebelum lokasi ditetapkan.'
+                      : 'Penyuluh bertugas mendampingi KTH dalam pelaksanaan penanaman sesuai rencana program.'}
+                  </p>
+                </div>
+
               </div>
-            </form>
-          </div>
+            </div>
 
-          {/* Alert Info Bottom */}
-          <div className={`p-4 rounded-xl flex items-start gap-3 text-sm font-medium ${theme.bgInfo} ${theme.textMain}`}>
-            <HiOutlineInformationCircle className="w-5 h-5 shrink-0 mt-0.5" />
-            <p>
-              {isValidasi 
-                ? "Penugasan ini ditujukan untuk validasi lapangan sebelum lokasi ditetapkan." 
-                : "KTH sudah ditentukan, penyuluh ditugaskan untuk mendampingi pelaksanaan kegiatan."}
-            </p>
-          </div>
+            {/* ACTIONS */}
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-end gap-3">
+              <button type="button" onClick={onClose} className="w-full sm:w-auto px-6 py-2.5 border border-gray-300 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-50 transition-colors">
+                Batal
+              </button>
+              <button type="submit" className="w-full sm:w-auto px-6 py-2.5 bg-[#1F7A4D] hover:bg-emerald-800 text-white text-sm font-bold rounded-lg transition-colors shadow-sm">
+                Kirim Penugasan
+              </button>
+            </div>
 
+          </form>
         </div>
       </div>
-    </div>
+
+      <DetailRencanaPOModal
+        isOpen={isDetailPOOpen} 
+        onClose={() => setIsDetailPOOpen(false)} 
+      />
+    </>
   );
 };
 
-export default ModalTugaskan;
+export default TugaskanModal;

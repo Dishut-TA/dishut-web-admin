@@ -44,8 +44,8 @@ const DaftarUsulanAPBD: React.FC = () => {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'Disetujui': 
-        return <span className="inline-block px-4 py-1.5 bg-green-100 text-green-700 rounded-full text-[11px] font-bold">Disetujui</span>;
+      case 'Terverifikasi': 
+        return <span className="inline-block px-4 py-1.5 bg-green-100 text-green-700 rounded-full text-[11px] font-bold">Terverifikasi</span>;
       case 'Ditolak': 
         return <span className="inline-block px-4 py-1.5 bg-red-100 text-red-700 rounded-full text-[11px] font-bold">Ditolak</span>;
       case 'Menunggu Persetujuan': 

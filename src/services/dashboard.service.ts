@@ -34,3 +34,13 @@ export const getKabidDashboardAPI = async () => {
   const result = await response.json();
   return result.data;
 };
+
+export const getDashboardKabidPDASAPI = async (year: string) => {
+  try {
+    const response = await fetch(`${API_URL}/dashboard/kabid?year=${year}`);
+    const result = await response.json();
+    return result.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || 'Gagal memuat data dashboard');
+  }
+};

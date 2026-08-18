@@ -207,7 +207,7 @@ const TindakLanjutMonitoring: React.FC = () => {
 
             <div className="border border-gray-200 rounded-xl p-3 flex items-center justify-between mt-auto">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-8 h-8 bg-red-50 text-red-500 font-black text-[9px] flex items-center justify-center rounded uppercase shrink-0 border border-red-100">PDF</div>
+                <div className="w-8 h-8 bg-red-50 text-red-500 font-bold text-[9px] flex items-center justify-center rounded uppercase shrink-0 border border-red-100">PDF</div>
                 <div className="min-w-0">
                   <p className="text-xs font-bold text-gray-700 truncate">Arahan_Perbaikan_Mangrove.pdf</p>
                   <p className="text-[10px] text-gray-400 font-medium mt-0.5">1.2 MB</p>

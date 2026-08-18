@@ -41,7 +41,7 @@ export const createProgramApbdAPI = async (payload: any) => {
   return json;
 };
 
-export const updateProgramApbdStatusAPI = async (id: string | number, status: 'Disetujui' | 'Ditolak' | 'Menunggu Persetujuan' | 'Selesai') => {
+export const updateProgramApbdStatusAPI = async (id: string | number, status: 'Terverifikasi' | 'Ditolak' | 'Menunggu Persetujuan' | 'Selesai') => {
   const res = await fetch(`${API_URL}/program-apbds/${id}`, {
     method: "PUT",
     headers: getHeaders(),

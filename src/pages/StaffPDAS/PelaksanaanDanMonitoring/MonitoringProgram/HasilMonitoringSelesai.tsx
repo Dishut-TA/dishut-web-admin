@@ -140,32 +140,32 @@ const HasilMonitoringSelesai: React.FC = () => {
                   <div className="relative w-5 h-5 rounded-full border-4 border-emerald-500 flex items-center justify-center border-t-emerald-200"></div>
                   <span className="text-[9px] font-bold text-gray-500 leading-tight">Persentase Keberhasilan</span>
                 </div>
-                <div><p className="text-2xl font-black text-gray-800">92%</p><p className="text-[10px] text-emerald-600 font-bold mt-0.5">Sangat Baik</p></div>
+                <div><p className="text-2xl font-bold text-gray-800">92%</p><p className="text-[10px] text-emerald-600 font-bold mt-0.5">Sangat Baik</p></div>
               </div>
               
               <div className="flex flex-col gap-2 sm:px-4">
                 <div className="flex items-center gap-2"><div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600"><HiOutlineUserGroup className="w-4 h-4"/></div><span className="text-[9px] font-bold text-gray-500 leading-tight">Jumlah Tanaman Hidup</span></div>
-                <div><p className="text-2xl font-black text-emerald-600">2.300</p><p className="text-[10px] text-gray-400 font-medium mt-0.5">(92%)</p></div>
+                <div><p className="text-2xl font-bold text-emerald-600">2.300</p><p className="text-[10px] text-gray-400 font-medium mt-0.5">(92%)</p></div>
               </div>
 
               <div className="flex flex-col gap-2 sm:px-4">
                 <div className="flex items-center gap-2"><div className="p-1.5 rounded-lg bg-orange-50 text-orange-500"><HiOutlineChartBar className="w-4 h-4"/></div><span className="text-[9px] font-bold text-gray-500 leading-tight">Jumlah Tanaman Mati</span></div>
-                <div><p className="text-2xl font-black text-gray-800">200</p><p className="text-[10px] text-gray-400 font-medium mt-0.5">(8%)</p></div>
+                <div><p className="text-2xl font-bold text-gray-800">200</p><p className="text-[10px] text-gray-400 font-medium mt-0.5">(8%)</p></div>
               </div>
 
               <div className="flex flex-col gap-2 sm:px-4 border-l-0 lg:border-l">
                 <div className="flex items-center gap-2"><div className="p-1.5 rounded-lg bg-blue-50 text-blue-500"><PiPlant className="w-4 h-4"/></div><span className="text-[9px] font-bold text-gray-500 leading-tight">Jumlah Belum Tumbuh</span></div>
-                <div><p className="text-2xl font-black text-gray-800">0</p><p className="text-[10px] text-gray-400 font-medium mt-0.5">(0%)</p></div>
+                <div><p className="text-2xl font-bold text-gray-800">0</p><p className="text-[10px] text-gray-400 font-medium mt-0.5">(0%)</p></div>
               </div>
 
               <div className="flex flex-col gap-2 sm:px-4">
                 <div className="flex items-center gap-2"><div className="p-1.5 rounded-lg bg-purple-50 text-purple-500"><HiOutlineMapPin className="w-4 h-4"/></div><span className="text-[9px] font-bold text-gray-500 leading-tight">Jumlah Titik Geotag</span></div>
-                <div><p className="text-2xl font-black text-gray-800">18</p><p className="text-[10px] text-gray-400 font-medium mt-0.5">titik</p></div>
+                <div><p className="text-2xl font-bold text-gray-800">18</p><p className="text-[10px] text-gray-400 font-medium mt-0.5">titik</p></div>
               </div>
 
               <div className="flex flex-col gap-2 sm:px-4 last:pr-0">
                 <div className="flex items-center gap-2"><div className="p-1.5 rounded-lg bg-yellow-50 text-yellow-600"><HiOutlinePhoto className="w-4 h-4"/></div><span className="text-[9px] font-bold text-gray-500 leading-tight">Jumlah Foto</span></div>
-                <div><p className="text-2xl font-black text-gray-800">64</p><p className="text-[10px] text-gray-400 font-medium mt-0.5">foto</p></div>
+                <div><p className="text-2xl font-bold text-gray-800">64</p><p className="text-[10px] text-gray-400 font-medium mt-0.5">foto</p></div>
               </div>
 
             </div>

@@ -147,6 +147,8 @@ const CreateProgram: React.FC = () => {
       formData.append('total_seeds_collected', '0');
       formData.append('total_seeds_realized', '0');
       if (imageFile) formData.append('image', imageFile);
+      formData.append('start_date', form.tanggalMulai); 
+      formData.append('end_date', form.tanggalSelesai);
 
       daftarBibit.forEach(bibit => formData.append('jenis_bibit[]', bibit.seed_id.toString()));
 

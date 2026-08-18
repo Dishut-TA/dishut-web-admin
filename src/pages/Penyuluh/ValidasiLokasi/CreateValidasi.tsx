@@ -41,7 +41,7 @@ const HISTORY_LIST = [
 // 2. MICRO COMPONENTS (Atoms & Molecules)
 const PageHeader = () => (
   <div className="mb-6">
-    <h1 className="text-2xl font-bold text-gray-900 mb-1">Lakukan Validasi Lokasi</h1>
+    <h1 className="text-2xl font-bold text-gray-900 mb-1">Lakukanasdasdasd Validasi Lokasi</h1>
     <p className="text-sm text-gray-500">Lengkapi hasil validasi lokasi berdasarkan penugasan yang diberikan.</p>
   </div>
 );

@@ -69,7 +69,7 @@ const DetailPendanaanAPBD: React.FC = () => {
   if (!data) return <div className="text-center text-gray-500 py-10">Data tidak ditemukan.</div>;
 
   // Tombol aksi hanya muncul jika status masih 'Disetujui' oleh Kabid (menunggu konfirmasi KTH)
-  const isMenungguKonfirmasi = data.status === 'Disetujui';
+  const isMenungguKonfirmasi = data.status === 'Terverifikasi';
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8 text-gray-800 animate-in fade-in duration-300">

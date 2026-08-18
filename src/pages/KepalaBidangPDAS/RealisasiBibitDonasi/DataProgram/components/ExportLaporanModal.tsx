@@ -4,7 +4,6 @@ import * as XLSX from 'xlsx-js-style';
 import toast from 'react-hot-toast';
 import { getDonationsAPI } from '@/services/donasi.service'; 
 import { getDonationProgramsAPI } from '@/services/program-donasi.service';
-
 interface ExportLaporanModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -38,6 +37,13 @@ const ExportLaporanModal: React.FC<ExportLaporanModalProps> = ({ isOpen, onClose
       setEndDate('');
     }
   }, [isOpen]);
+
+  // Fungsi helper format tanggal jadi "3 Agustus 2026"
+  const formatTanggalTitle = (dateString: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+  };
 
   const handleExportExcel = async () => {
     if (!selectedProgram) {
@@ -76,12 +82,29 @@ const ExportLaporanModal: React.FC<ExportLaporanModalProps> = ({ isOpen, onClose
         return;
       }
 
+      // --- MENGAMBIL NAMA PROGRAM & PERIODE UNTUK JUDUL EXCEL ---
+      const progNameText = selectedProgram === 'all' 
+        ? 'Semua Program Donasi' 
+        : programs.find(p => p.id.toString() === selectedProgram)?.name || 'Program Donasi';
+      
+      const periodText = `Periode Dari Tanggal ${formatTanggalTitle(startDate)} - ${formatTanggalTitle(endDate)}`;
+
+      // --- MEMBANGUN ARRAY OF ARRAYS (AOA) ---
+      const wsData: any[][] = [
+        [progNameText], // Baris 1
+        [periodText],   // Baris 2
+        [],             // Baris 3 (Kosong)
+        [],             // Baris 4 (Kosong)
+        ['ID DONASI', 'DONATUR', 'ALAMAT', 'TANGGAL DONASI', 'JENIS BIBIT', 'TOTAL DONASI', 'BIBIT TERKUMPUL', 'BIBIT TEREALISASI', 'TANGGAL PENANAMAN', 'STATUS'] // Baris 5 (Header Tabel)
+      ];
+
       let countDonatur = 0;
       let sumTotalDonasi = 0;
       let sumBibitTerkumpul = 0;
       let sumBibitTerealisasi = 0;
 
-      const excelData = donations.map((don: any) => {
+      // Loop Data Donasi
+      donations.forEach((don: any) => {
         countDonatur++; 
 
         const nominalRupiah = Number(don.transaction?.amount) || 0;
@@ -99,40 +122,43 @@ const ExportLaporanModal: React.FC<ExportLaporanModalProps> = ({ isOpen, onClose
 
         const yearSuffix = new Date(don.created_at).getFullYear().toString().slice(-2);
         const formatIdDonasi = `DNS-${yearSuffix}-${String(don.id).padStart(3, '0')}`;
+        const tglPenanaman = don.donation_program?.start_date ? new Date(don.donation_program.start_date).toLocaleDateString('id-ID') : '-';
 
-        const tglPenanaman = don.donation_program?.start_date 
-            ? new Date(don.donation_program.start_date).toLocaleDateString('id-ID') 
-            : '-';
-
-        return {
-          'ID DONASI': formatIdDonasi,
-          'DONATUR': don.donor?.donor_name || 'Hamba Allah',
-          'ALAMAT': don.donor?.address || '-',
-          'TANGGAL DONASI': new Date(don.created_at).toLocaleDateString('id-ID'),
-          'JENIS BIBIT': don.seed?.nama || don.seed?.name || '-',
-          'TOTAL DONASI': totalDonasi,
-          'BIBIT TERKUMPUL': bibitTerkumpul,
-          'BIBIT TEREALISASI': bibitTerealisasi,
-          'TANGGAL PENANAMAN': tglPenanaman,
-          'STATUS': status,
-        };
+        wsData.push([
+          formatIdDonasi,
+          don.donor?.donor_name || 'Hamba Allah',
+          don.donor?.address || '-',
+          new Date(don.created_at).toLocaleDateString('id-ID'),
+          don.seed?.nama || don.seed?.name || '-',
+          totalDonasi,
+          bibitTerkumpul,
+          bibitTerealisasi,
+          tglPenanaman,
+          status
+        ]);
       });
 
-      excelData.push({
-        'ID DONASI': 'TOTAL',
-        'DONATUR': `${countDonatur} Donatur`,
-        'ALAMAT': '',
-        'TANGGAL DONASI': '',
-        'JENIS BIBIT': '',
-        'TOTAL DONASI': `Rp ${sumTotalDonasi.toLocaleString('id-ID')}`,
-        'BIBIT TERKUMPUL': sumBibitTerkumpul,
-        'BIBIT TEREALISASI': sumBibitTerealisasi,
-        'TANGGAL PENANAMAN': '',
-        'STATUS': '',
-      });
+      // Tambahkan Baris Total di Paling Bawah
+      wsData.push([
+        'TOTAL',
+        `${countDonatur} Donatur`,
+        '', '', '',
+        `Rp ${sumTotalDonasi.toLocaleString('id-ID')}`,
+        sumBibitTerkumpul,
+        sumBibitTerealisasi,
+        '', ''
+      ]);
 
-      const worksheet = XLSX.utils.json_to_sheet(excelData);
+      // Buat Worksheet dari Data Array
+      const worksheet = XLSX.utils.aoa_to_sheet(wsData);
 
+      // --- MENGGABUNGKAN CELL (MERGE) UNTUK JUDUL ---
+      worksheet['!merges'] = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 9 } }, // Merge Baris 1 dari Kolom A sampai J
+        { s: { r: 1, c: 0 }, e: { r: 1, c: 9 } }  // Merge Baris 2 dari Kolom A sampai J
+      ];
+
+      // --- STYLING BORDER, BOLD, DLL ---
       const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
 
       for (let R = range.s.r; R <= range.e.r; ++R) {
@@ -142,40 +168,53 @@ const ExportLaporanModal: React.FC<ExportLaporanModalProps> = ({ isOpen, onClose
 
           if (!worksheet[cellRef]) continue;
 
-          // Memberikan Border di semua Cell
-          worksheet[cellRef].s = {
-            border: {
-              top: { style: 'thin', color: { rgb: '000000' } },
-              bottom: { style: 'thin', color: { rgb: '000000' } },
-              left: { style: 'thin', color: { rgb: '000000' } },
-              right: { style: 'thin', color: { rgb: '000000' } },
-            },
-            alignment: { vertical: 'center' }
-          };
+          // Style untuk Judul (Baris 1 dan 2)
+          if (R === 0 || R === 1) {
+            worksheet[cellRef].s = {
+              font: { bold: true, sz: R === 0 ? 14 : 12 },
+              alignment: { horizontal: 'center', vertical: 'center' }
+            };
+          } 
+          // Style untuk Header Tabel (Baris 5 / index 4) dan Data
+          else if (R >= 4) {
+            worksheet[cellRef].s = {
+              ...worksheet[cellRef].s,
+              border: {
+                top: { style: 'thin', color: { rgb: '000000' } },
+                bottom: { style: 'thin', color: { rgb: '000000' } },
+                left: { style: 'thin', color: { rgb: '000000' } },
+                right: { style: 'thin', color: { rgb: '000000' } },
+              },
+              alignment: { vertical: 'center' }
+            };
 
-          if (R === 0) {
-            worksheet[cellRef].s.font = { bold: true };
-            worksheet[cellRef].s.fill = { fgColor: { rgb: "DCECE0" } }; 
-            worksheet[cellRef].s.alignment = { horizontal: 'center', vertical: 'center' };
-          }
+            // Warna hijau untuk Header
+            if (R === 4) {
+              worksheet[cellRef].s.font = { bold: true };
+              worksheet[cellRef].s.fill = { fgColor: { rgb: "DCECE0" } }; 
+              worksheet[cellRef].s.alignment = { horizontal: 'center', vertical: 'center' };
+            }
 
-          if (R === range.e.r) {
-            worksheet[cellRef].s.font = { bold: true };
+            // Bold untuk baris TOTAL paling bawah
+            if (R === range.e.r) {
+              worksheet[cellRef].s.font = { bold: true };
+            }
           }
         }
       }
       
+      // Mengatur Lebar Kolom
       worksheet['!cols'] = [
-        { wch: 15 }, 
-        { wch: 25 }, 
-        { wch: 35 }, 
-        { wch: 18 }, 
-        { wch: 25 }, 
-        { wch: 20 }, 
-        { wch: 18 }, 
-        { wch: 18 }, 
-        { wch: 22 }, 
-        { wch: 20 }, 
+        { wch: 15 }, // ID DONASI
+        { wch: 25 }, // DONATUR
+        { wch: 35 }, // ALAMAT
+        { wch: 18 }, // TANGGAL DONASI
+        { wch: 25 }, // JENIS BIBIT
+        { wch: 20 }, // TOTAL DONASI
+        { wch: 18 }, // BIBIT TERKUMPUL
+        { wch: 18 }, // BIBIT TEREALISASI
+        { wch: 22 }, // TANGGAL PENANAMAN
+        { wch: 20 }, // STATUS
       ];
 
       const workbook = XLSX.utils.book_new();
