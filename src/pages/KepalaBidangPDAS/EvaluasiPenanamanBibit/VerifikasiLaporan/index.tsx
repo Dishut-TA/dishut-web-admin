@@ -134,7 +134,7 @@ const KabidVerifikasiBAP: React.FC = () => {
 
                 <div className="bg-[#f0f9f3] border border-[#C8E0CD] rounded-xl p-6 shadow-sm flex flex-col justify-center items-center text-center">
                   <span className="text-xs font-bold uppercase tracking-wider mb-2 text-[#185325]">Kesimpulan Sistem</span>
-                  <h2 className="text-2xl font-black mb-4 text-[#185325]">{selectedBAP.hasilAkhir.statusKelulusan}</h2>
+                  <h2 className="text-2xl font-bold mb-4 text-[#185325]">{selectedBAP.hasilAkhir.statusKelulusan}</h2>
                   <div className="w-full grid grid-cols-2 gap-2 mt-auto">
                     <div className="bg-white/70 border border-white/50 p-2 rounded-lg"><span className="block text-[10px] text-gray-500 font-bold uppercase">Rerata Tumbuh</span><span className="font-bold text-gray-800 text-sm">{selectedBAP.hasilAkhir.persentaseTotal}%</span></div>
                     <div className="bg-white/70 border border-white/50 p-2 rounded-lg"><span className="block text-[10px] text-gray-500 font-bold uppercase">Rerata Tinggi</span><span className="font-bold text-gray-800 text-sm">{selectedBAP.hasilAkhir.rerataTinggiTotal} cm</span></div>

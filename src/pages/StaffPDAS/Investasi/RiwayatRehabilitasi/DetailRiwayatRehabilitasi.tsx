@@ -1,216 +1,243 @@
-import React, { useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { HiOutlineChevronLeft, HiCheck, HiPrinter } from 'react-icons/hi2';
+import toast from 'react-hot-toast';
+import { getProgramApbdByIdAPI } from '@/services/program-apbd.service';
+import { getProgramCsrByIdAPI } from '@/services/program-csr.service';
+import { getLaporanDanasAPI } from '@/services/laporan-dana.service';
 
-const formatRupiah = (angka: number) => {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(angka);
-};
+const STORAGE_BASE_URL = "http://127.0.0.1:8000/storage/";
 
 const DetailRiwayatRehabilitasiSTAFF: React.FC = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { id } = useParams(); // Format: "CSR-1" atau "APBD-1"
+  
+  const [programData, setProgramData] = useState<any>(null);
+  const [reports, setReports] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const data = useMemo(() => {
-    const isSelesai = id === 'CSR-001';
-    const isDihentikan = id === 'CSR-002';
-    const isBerjalan = id === 'APBD-001';
+  useEffect(() => {
+    const fetchDetailData = async () => {
+      if (!id) return;
+      setIsLoading(true);
 
-    return {
-      id: id || 'CSR-001',
-      nama: 'Rehabilitasi Citarum',
-      lokasi: 'Bandung Barat',
-      kth: 'KTH Rimba',
-      sumberDana: isBerjalan ? 'APBD' : 'CSR',
-      mitra: isBerjalan ? 'Dinas Kehutanan Jabar' : 'PT. Alfamart',
-      luasLahan: '120 Ha',
-      danaDisalurkan: isSelesai ? 75000000 : 100000000,
-      danaDirealisasikan: isSelesai ? 75000000 : 80000000,
-      sisaDana: isSelesai ? 0 : 20000000,
-      status: isSelesai ? 'Selesai' : isDihentikan ? 'Dihentikan' : 'Sedang Berjalan',
-      
-      tahap1: 'Selesai',
-      tahap2: isSelesai ? 'Selesai' : isDihentikan ? 'Program dihentikan pada tahap ini' : 'Selesai',
-      tahap3: isSelesai ? 'Selesai' : isDihentikan ? 'Program dihentikan pada tahap ini' : 'Sedang Berjalan',
+      try {
+        const [tipePendanaan, dbId] = id.split('-'); // Memecah 'CSR-1' menjadi 'CSR' dan '1'
+
+        // 1. Ambil Informasi Program (APBD / CSR)
+        let progData;
+        if (tipePendanaan === 'APBD') {
+          const res = await getProgramApbdByIdAPI(dbId);
+          progData = res.data || res.payload || res;
+        } else {
+          const res = await getProgramCsrByIdAPI(dbId);
+          progData = res.data || res.payload || res;
+        }
+
+        setProgramData({
+          ...progData,
+          tipe_pendanaan: tipePendanaan, // Tambahkan marker ke state
+        });
+
+        // 2. Ambil Semua Laporan Dana, lalu filter berdasarkan ID dan Tipe Program
+        const allReports = await getLaporanDanasAPI();
+        const filteredReports = allReports.filter((r: any) => 
+          String(r.program_id) === String(dbId) && 
+          r.sumber_dana?.toUpperCase() === tipePendanaan
+        );
+
+        // Urutkan laporan agar Tahap 1 muncul duluan, lalu Tahap 2, dst.
+        filteredReports.sort((a: any, b: any) => a.id - b.id);
+        setReports(filteredReports);
+
+      } catch (error) {
+        toast.error("Gagal memuat detail riwayat rehabilitasi.");
+      } finally {
+        setIsLoading(false);
+      }
     };
+
+    fetchDetailData();
   }, [id]);
 
+  const formatRupiah = (angka: number) => {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(angka || 0));
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  };
+
   const getStatusColor = (status: string) => {
-    if (status === 'Selesai') return 'text-[#2E7D32]';
-    if (status === 'Sedang Berjalan') return 'text-orange-500';
-    if (status.includes('dihentikan') || status === 'Dihentikan') return 'text-red-600';
+    const s = status?.toLowerCase() || '';
+    if (s.includes('selesai')) return 'text-[#2E7D32]';
+    if (s.includes('berjalan') || s.includes('aktif')) return 'text-orange-500';
+    if (s.includes('dihentikan') || s.includes('ditolak')) return 'text-red-600';
     return 'text-gray-800';
   };
 
-  const InfoRow = ({ label, value, isStatus = false }: { label: string, value: string, isStatus?: boolean }) => (
+  const handlePrint = () => {
+    window.print();
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-48 text-[#185325] font-bold">
+        <span className="w-6 h-6 border-2 border-[#185325] border-t-transparent rounded-full animate-spin mr-3"></span> 
+        Memuat detail riwayat...
+      </div>
+    );
+  }
+
+  if (!programData) {
+    return <div className="text-center text-gray-500 py-10">Data tidak ditemukan.</div>;
+  }
+
+  // Kalkulasi Dana
+  const danaDisalurkan = Number(programData.anggaran) || 0;
+  const totalRealisasi = reports.reduce((sum, rep) => sum + Number(rep.dana_direalisasikan), 0);
+  const sisaDana = danaDisalurkan - totalRealisasi;
+
+  // Cek Status Laporan Tahapan untuk "Progress Tahapan"
+  const isTahap1Selesai = reports.some(r => r.tahap?.includes('1'));
+  const isTahap2Selesai = reports.some(r => r.tahap?.includes('2'));
+  const isTahap3Selesai = reports.some(r => r.tahap?.includes('3'));
+
+  const getTahapStatus = (isSelesai: boolean, isProgramDihentikan: boolean) => {
+    if (isSelesai) return 'Selesai';
+    if (isProgramDihentikan) return 'Program dihentikan pada tahap ini';
+    return 'Belum Mulai';
+  };
+
+  const isDihentikan = programData.status?.toLowerCase().includes('dihentikan');
+
+  const InfoRow = ({ label, value, isStatus = false }: { label: string, value: string | number, isStatus?: boolean }) => (
     <div className="grid grid-cols-[160px_20px_1fr] md:grid-cols-[200px_20px_1fr] mb-3 text-sm">
       <span className="text-gray-500">{label}</span>
       <span className="text-gray-500">:</span>
-      <span className={`font-semibold ${isStatus ? getStatusColor(value) : 'text-gray-800'}`}>{value}</span>
+      <span className={`font-semibold ${isStatus ? getStatusColor(String(value)) : 'text-gray-800'}`}>{value}</span>
     </div>
   );
 
   return (
-    <div className="flex flex-col gap-6 w-full mx-auto pb-12 text-gray-800 px-4 sm:px-0">
+    <div className="flex flex-col gap-6 w-full mx-auto pb-12 text-gray-800 px-4 sm:px-0 animate-in fade-in duration-300">
       <div>
         <button 
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 text-sm font-semibold hover:text-[#2E7D32] transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 text-sm font-semibold hover:text-[#2E7D32] transition-colors cursor-pointer print:hidden"
         >
           <HiOutlineChevronLeft className="w-4 h-4 stroke-2" /> Kembali
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10">
-        <h1 className="text-xl md:text-2xl font-bold text-gray-800 mb-8">
-          {data.status === 'Selesai' ? 'Laporan Riwayat Rehabilitasi' : 'Halaman Detail'}
+      <div className="bg-[#FAFBF9] rounded-none sm:rounded-2xl shadow-none sm:shadow-sm border-0 sm:border border-gray-100 p-6 md:p-10 print:p-0 print:shadow-none print:bg-white text-gray-900">
+        <h1 className="text-xl md:text-2xl font-bold text-gray-800 mb-8 border-b border-gray-200 pb-4">
+          Laporan Riwayat Rehabilitasi
         </h1>
 
-        <div className="mb-8">
-          <h3 className="text-base font-bold text-gray-800 mb-4 border-b border-gray-200 pb-2">Informasi Program</h3>
-          <InfoRow label="ID" value={data.id} />
-          <InfoRow label="Nama Program" value={data.nama} />
-          <InfoRow label="Lokasi" value={data.lokasi} />
-          {data.status === 'Selesai' && <InfoRow label="KTH" value={data.kth} />}
-          <InfoRow label="Sumber Dana" value={data.sumberDana} />
-          <InfoRow label="Mitra" value={data.mitra} />
-          <InfoRow label="Luas Lahan" value={data.luasLahan} />
-          <InfoRow label="Dana Disalurkan" value={formatRupiah(data.danaDisalurkan)} />
-          <InfoRow label="Dana Direalisasikan" value={formatRupiah(data.danaDirealisasikan)} />
-          <InfoRow label="Sisa Dana" value={formatRupiah(data.sisaDana)} />
-          <InfoRow label="Status" value={data.status} isStatus />
+        <div className="mb-10">
+          <h3 className="text-base font-bold text-gray-800 mb-4">Informasi Program</h3>
+          <InfoRow label="ID" value={id!} />
+          <InfoRow label="Nama Program" value={programData.nama_program} />
+          <InfoRow label="Lokasi" value={programData.lokasi || 'Tidak ada data lokasi'} />
+          <InfoRow label="KTH" value={programData.kth?.nama || 'KTH Rimba'} />
+          <InfoRow label="Sumber Dana" value={programData.tipe_pendanaan} />
+          <InfoRow label="Mitra" value={programData.tipe_pendanaan === 'APBD' ? 'Dinas Kehutanan Jabar' : (programData.rekomendasi_mitra || 'Mitra CSR')} />
+          <InfoRow label="Luas Lahan" value={`${programData.target_luas_lahan || '-'} Ha`} />
+          <InfoRow label="Dana Disalurkan" value={formatRupiah(danaDisalurkan)} />
+          <InfoRow label="Dana Direalisasikan" value={formatRupiah(totalRealisasi)} />
+          <InfoRow label="Sisa Dana" value={formatRupiah(sisaDana)} />
+          <InfoRow label="Status" value={programData.status} isStatus />
         </div>
 
         {/* Progress Tahapan */}
-        <div className="mb-8">
-          <h3 className="text-base font-bold text-gray-800 mb-4 border-b border-gray-200 pb-2">Progress Tahapan</h3>
-          <InfoRow label="Persiapan Lahan" value={data.tahap1} isStatus />
-          <InfoRow label="Pembibitan & Penanaman" value={data.tahap2} isStatus />
-          <InfoRow label="Perawatan & Pemeliharaan" value={data.tahap3} isStatus />
+        <div className="mb-10">
+          <h3 className="text-base font-bold text-gray-800 mb-4">Progress Tahapan</h3>
+          <InfoRow label="Persiapan Lahan" value={getTahapStatus(isTahap1Selesai, isDihentikan)} isStatus />
+          <InfoRow label="Pembibitan & Penanaman" value={getTahapStatus(isTahap2Selesai, isDihentikan)} isStatus />
+          <InfoRow label="Perawatan & Pemeliharaan" value={getTahapStatus(isTahap3Selesai, isDihentikan)} isStatus />
         </div>
 
-        {/* ALASAN DIHENTIKAN (Hanya Tampil Jika Status Dihentikan) */}
-        {data.status === 'Dihentikan' && (
-          <div className="mb-8">
-            <h3 className="text-base font-bold text-gray-800 mb-4 border-b border-gray-200 pb-2">Alasan Program Dihentikan</h3>
-            <p className="text-sm text-gray-700">Program tidak memenuhi target rehabilitasi sesuai ketentuan</p>
+        {/* ALASAN DIHENTIKAN */}
+        {isDihentikan && (
+          <div className="mb-10">
+            <h3 className="text-base font-bold text-gray-800 mb-4">Alasan Program Dihentikan</h3>
+            <p className="text-sm text-gray-700">{programData.catatan || 'Program tidak memenuhi kriteria kelanjutan rehabilitasi atau bermasalah dalam pelaporan.'}</p>
           </div>
         )}
 
-        {/* TABEL DETAIL & REKAP (Hanya Tampil Jika Status Selesai) */}
-        {data.status === 'Selesai' && (
-          <>
-            {/* Tahap 1 */}
-            <div className="mb-8">
-              <h3 className="text-sm font-bold text-gray-800 mb-4">Tahap 1 - Persiapan Lahan</h3>
-              <table className="w-full text-left text-sm mb-4">
-                <thead className="border-y border-gray-200 text-gray-600 uppercase text-xs">
-                  <tr>
-                    <th className="py-3 font-semibold">KEGIATAN</th>
-                    <th className="py-3 font-semibold">TANGGAL</th>
-                    <th className="py-3 font-semibold">NOMINAL</th>
-                    <th className="py-3 font-semibold"></th>
+        {/* TABEL RINCIAN BERDASARKAN LAPORAN (Sama persis seperti desain detail laporan keuangan) */}
+        {reports.length > 0 ? reports.map((report) => (
+          <div key={report.id} className="mb-8">
+            <h3 className="text-sm font-bold text-gray-800 mb-4 bg-gray-100/50 py-2 border-b border-gray-200">
+              {report.tahap} - Rincian Pengeluaran
+            </h3>
+            <table className="w-full text-left text-sm mb-4">
+              <thead className="border-y border-gray-200 text-gray-600 uppercase text-xs">
+                <tr>
+                  <th className="py-3 font-semibold w-2/5">KEGIATAN</th>
+                  <th className="py-3 font-semibold text-center">TANGGAL</th>
+                  <th className="py-3 font-semibold text-right">NOMINAL</th>
+                  <th className="py-3 font-semibold text-center">BUKTI TRANSAKSI</th>
+                  <th className="py-3 font-semibold text-center">STATUS</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 border-b border-gray-200">
+                {report.rincian?.map((item: any, idx: number) => (
+                  <tr key={idx}>
+                    <td className="py-4 font-bold text-gray-800">{item.kategori_kegiatan}</td>
+                    <td className="py-4 text-center text-gray-600">{formatDate(report.tanggal_pengeluaran)}</td>
+                    <td className="py-4 text-right text-gray-600">{formatRupiah(item.nominal)}</td>
+                    <td className="py-4 text-center">
+                      {item.bukti_transaksi_path ? (
+                        <a 
+                          href={`${STORAGE_BASE_URL}${item.bukti_transaksi_path}`} 
+                          target="_blank" 
+                          rel="noreferrer"
+                          className="text-[#185325] underline hover:text-green-800 text-xs font-medium"
+                        >
+                          Lihat
+                        </a>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </td>
+                    <td className="py-4 text-[#2E7D32] text-center"><HiCheck className="w-5 h-5 mx-auto" /></td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 border-b border-gray-200">
-                  <tr>
-                    <td className="py-3 text-gray-800">Pembersihan Lahan</td>
-                    <td className="py-3 text-gray-600">01/01/2024</td>
-                    <td className="py-3 text-gray-600">{formatRupiah(8000000)}</td>
-                    <td className="py-3 text-[#2E7D32]"><HiCheck className="w-5 h-5 ml-auto" /></td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 text-gray-800">Pengolahan Tanah</td>
-                    <td className="py-3 text-gray-600">01/01/2024</td>
-                    <td className="py-3 text-gray-600">{formatRupiah(12000000)}</td>
-                    <td className="py-3 text-[#2E7D32]"><HiCheck className="w-5 h-5 ml-auto" /></td>
-                  </tr>
-                </tbody>
-              </table>
-              <p className="text-sm text-gray-800 font-bold mb-1">Subtotal Tahap 1</p>
-              <p className="text-sm text-gray-600">{formatRupiah(20000000)}</p>
-            </div>
+                ))}
+              </tbody>
+            </table>
+            
+            <p className="text-sm text-gray-800 font-bold mb-1">Subtotal {report.tahap}</p>
+            <p className="text-sm text-gray-600">{formatRupiah(report.dana_direalisasikan)}</p>
+          </div>
+        )) : (
+          <div className="mb-10 text-center py-6 border border-gray-200 border-dashed rounded-xl text-gray-500 text-sm">
+            Belum ada laporan pengeluaran dana yang tercatat untuk program ini.
+          </div>
+        )}
 
-            {/* Tahap 2 */}
-            <div className="mb-8">
-              <h3 className="text-sm font-bold text-gray-800 mb-4">Tahap 2 - Pembibitan & Penanaman</h3>
-              <table className="w-full text-left text-sm mb-4">
-                <thead className="border-y border-gray-200 text-gray-600 uppercase text-xs">
-                  <tr>
-                    <th className="py-3 font-semibold">KEGIATAN</th>
-                    <th className="py-3 font-semibold">TANGGAL</th>
-                    <th className="py-3 font-semibold">NOMINAL</th>
-                    <th className="py-3 font-semibold"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 border-b border-gray-200">
-                  <tr>
-                    <td className="py-3 text-gray-800">Pembelian Bibit</td>
-                    <td className="py-3 text-gray-600">01/01/2024</td>
-                    <td className="py-3 text-gray-600">{formatRupiah(25000000)}</td>
-                    <td className="py-3 text-[#2E7D32]"><HiCheck className="w-5 h-5 ml-auto" /></td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 text-gray-800">Penanaman</td>
-                    <td className="py-3 text-gray-600">01/01/2024</td>
-                    <td className="py-3 text-gray-600">{formatRupiah(15000000)}</td>
-                    <td className="py-3 text-[#2E7D32]"><HiCheck className="w-5 h-5 ml-auto" /></td>
-                  </tr>
-                </tbody>
-              </table>
-              <p className="text-sm text-gray-800 font-bold mb-1">Subtotal Tahap 2</p>
-              <p className="text-sm text-gray-600">{formatRupiah(40000000)}</p>
+        {/* KOTAK REKAPITULASI (Jika ada report) */}
+        {reports.length > 0 && (
+          <div className="bg-[#DCECE0]/70 rounded-xl p-6 md:p-8 mt-10">
+            <h3 className="text-sm font-bold text-gray-800 mb-4 border-b border-[#b2d6bc] pb-2">Rekapitulasi Total</h3>
+            <div className="border-b border-[#b2d6bc] pb-4 mb-4">
+              {reports.map((rep) => (
+                <InfoRow key={`sum-${rep.id}`} label={rep.tahap} value={formatRupiah(rep.dana_direalisasikan)} />
+              ))}
             </div>
-
-            {/* Tahap 3 */}
-            <div className="mb-8">
-              <h3 className="text-sm font-bold text-gray-800 mb-4">Tahap 3 - Perawatan & Pemeliharaan</h3>
-              <table className="w-full text-left text-sm mb-4">
-                <thead className="border-y border-gray-200 text-gray-600 uppercase text-xs">
-                  <tr>
-                    <th className="py-3 font-semibold">KEGIATAN</th>
-                    <th className="py-3 font-semibold">TANGGAL</th>
-                    <th className="py-3 font-semibold">NOMINAL</th>
-                    <th className="py-3 font-semibold"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 border-b border-gray-200">
-                  <tr>
-                    <td className="py-3 text-gray-800">Pemupukan</td>
-                    <td className="py-3 text-gray-600">01/01/2024</td>
-                    <td className="py-3 text-gray-600">{formatRupiah(10000000)}</td>
-                    <td className="py-3 text-[#2E7D32]"><HiCheck className="w-5 h-5 ml-auto" /></td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 text-gray-800">Pengendalian Gulma</td>
-                    <td className="py-3 text-gray-600">01/01/2024</td>
-                    <td className="py-3 text-gray-600">{formatRupiah(5000000)}</td>
-                    <td className="py-3 text-[#2E7D32]"><HiCheck className="w-5 h-5 ml-auto" /></td>
-                  </tr>
-                </tbody>
-              </table>
-              <p className="text-sm text-gray-800 font-bold mb-1">Subtotal Tahap 3</p>
-              <p className="text-sm text-gray-600">{formatRupiah(15000000)}</p>
+            <InfoRow label="Total Realisasi" value={formatRupiah(totalRealisasi)} />
+            
+            <div className="flex justify-end mt-8 print:hidden">
+              <button 
+                onClick={handlePrint}
+                className="flex items-center gap-2 px-8 py-3 bg-[#185325] text-white font-bold rounded-full hover:bg-[#123d1c] transition-colors active:scale-95 shadow-sm text-sm cursor-pointer"
+              >
+                <HiPrinter className="w-5 h-5" /> Cetak Laporan
+              </button>
             </div>
-
-            <div className="bg-[#DCECE0]/50 rounded-xl p-6 mt-10">
-              <h3 className="text-sm font-bold text-gray-800 mb-4">Rekapitulasi</h3>
-              <div className="border-b border-gray-300 pb-4 mb-4">
-                <InfoRow label="Tahap 1" value={formatRupiah(20000000)} />
-                <InfoRow label="Tahap 2" value={formatRupiah(40000000)} />
-                <InfoRow label="Tahap 3" value={formatRupiah(15000000)} />
-              </div>
-              <InfoRow label="Total Realisasi" value={formatRupiah(75000000)} />
-              
-              <div className="flex justify-end mt-6">
-                <button 
-                  onClick={() => window.print()}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-[#185325] text-white font-semibold rounded-full hover:bg-[#123d1c] transition-colors active:scale-95 shadow-sm text-sm"
-                >
-                  <HiPrinter className="w-5 h-5" /> Cetak Laporan
-                </button>
-              </div>
-            </div>
-          </>
+          </div>
         )}
 
       </div>

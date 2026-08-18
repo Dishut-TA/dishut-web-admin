@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { HiOutlineChevronLeft, HiOutlineUser, HiOutlineMapPin, HiOutlineXMark, HiOutlineCheckCircle } from "react-icons/hi2";
+import { HiOutlineChevronLeft, HiOutlineUser, HiOutlineMapPin, HiOutlineXMark, HiOutlineCheckCircle, HiOutlineArrowRight } from "react-icons/hi2";
 import toast from "react-hot-toast";
 import { getProgramCsrByIdAPI, updateProgramCsrStatusAPI } from '@/services/program-csr.service';
 
@@ -39,12 +39,12 @@ const DetailTinjauProposal: React.FC = () => {
     setIsSubmitting(true);
     const loadingToast = toast.loading('Mengirim tanggapan perusahaan...');
     try {
-      const newStatus = isApproved ? 'Disetujui' : 'Ditolak';
+      // PERBAIKAN ALUR: Jika disetujui, statusnya 'Menunggu Pembayaran' bukan langsung 'Selesai'
+      const newStatus = isApproved ? 'Menunggu Pembayaran' : 'Ditolak';
       await updateProgramCsrStatusAPI(id!, { status: newStatus, tanggapan_perusahaan: tanggapan });
       
-      toast.success(isApproved ? 'Proposal Disetujui!' : 'Proposal Ditolak.', { id: loadingToast });
+      toast.success(isApproved ? 'Proposal Disetujui! Lanjutkan ke pembayaran.' : 'Proposal Ditolak.', { id: loadingToast });
       
-      // Jika setuju, langsung arahkan ke halaman pembayaran (PendanaanProgram)
       if (isApproved) {
         navigate(`/admin/csr/pendanaan/${id}`);
       } else {
@@ -63,7 +63,8 @@ const DetailTinjauProposal: React.FC = () => {
   if (isLoading) return <div className="flex justify-center items-center h-48 text-[#185325]"><span className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin mr-3 border-[#185325]"></span> Memuat...</div>;
   if (!data) return <div className="text-center text-gray-500 py-10">Data tidak ditemukan.</div>;
 
-  const isMenungguMitra = data.status === 'Mencari Mitra CSR';
+  const isMenungguMitra = data.status === 'Menunggu Persetujuan';
+  const isMenungguPembayaran = data.status === 'Menunggu Pembayaran';
 
   return (
     <div className="flex flex-col gap-6 w-full mx-auto pb-12 animate-in fade-in duration-300">
@@ -118,7 +119,21 @@ const DetailTinjauProposal: React.FC = () => {
           <div className="pt-4 flex-1 border-t border-gray-100">
              <h1 className="text-sm font-bold text-gray-800 mb-2">Tanggapan Resmi Perusahaan Anda</h1>
              <p className="text-sm text-gray-500 text-justify mb-6">{data.tanggapan_perusahaan || '-'}</p>
-             <span className={`px-4 py-1.5 rounded-full text-xs font-bold inline-block ${data.status.includes('Ditolak') ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-700'}`}>Status: {data.status}</span>
+             
+             <div className="flex items-center gap-4">
+               <span className={`px-4 py-1.5 rounded-full text-xs font-bold inline-block ${data.status.includes('Ditolak') ? 'bg-red-100 text-red-600' : isMenungguPembayaran ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                 Status: {data.status}
+               </span>
+
+               {isMenungguPembayaran && (
+                 <button 
+                   onClick={() => navigate(`/admin/csr/pendanaan/${data.id}`)}
+                   className="flex items-center gap-2 px-5 py-1.5 bg-[#185325] hover:bg-[#123d1c] text-white text-xs font-bold rounded-full transition-colors shadow-sm"
+                 >
+                   Lanjutkan Pembayaran <HiOutlineArrowRight className="w-4 h-4" />
+                 </button>
+               )}
+             </div>
           </div>
         )}
       </div>

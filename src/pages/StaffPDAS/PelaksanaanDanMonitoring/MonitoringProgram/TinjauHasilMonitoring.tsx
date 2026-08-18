@@ -93,32 +93,32 @@ const TinjauHasilMonitoring: React.FC = () => {
               
               <div className="flex flex-col gap-2 border-r border-gray-100 last:border-0 pr-4">
                 <div className="flex items-center gap-2"><div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600"><HiOutlineChartBar className="w-4 h-4"/></div><span className="text-[9px] font-bold text-gray-500 leading-tight">Persentase Keberhasilan</span></div>
-                <div><p className="text-2xl font-black text-gray-800">62%</p><p className="text-[10px] text-gray-400 font-medium">dari target</p></div>
+                <div><p className="text-2xl font-bold text-gray-800">62%</p><p className="text-[10px] text-gray-400 font-medium">dari target</p></div>
               </div>
               
               <div className="flex flex-col gap-2 border-r border-gray-100 last:border-0 pr-4">
                 <div className="flex items-center gap-2"><div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600"><HiOutlineUserGroup className="w-4 h-4"/></div><span className="text-[9px] font-bold text-gray-500 leading-tight">Jumlah Tanaman Hidup</span></div>
-                <div><p className="text-2xl font-black text-gray-800">1.550</p><p className="text-[10px] text-gray-400 font-medium">(62%)</p></div>
+                <div><p className="text-2xl font-bold text-gray-800">1.550</p><p className="text-[10px] text-gray-400 font-medium">(62%)</p></div>
               </div>
 
               <div className="flex flex-col gap-2 border-r border-gray-100 last:border-0 pr-4">
                 <div className="flex items-center gap-2"><div className="p-1.5 rounded-lg bg-orange-50 text-orange-500"><HiOutlineChartBar className="w-4 h-4"/></div><span className="text-[9px] font-bold text-gray-500 leading-tight">Jumlah Tanaman Mati</span></div>
-                <div><p className="text-2xl font-black text-gray-800">650</p><p className="text-[10px] text-gray-400 font-medium">(26%)</p></div>
+                <div><p className="text-2xl font-bold text-gray-800">650</p><p className="text-[10px] text-gray-400 font-medium">(26%)</p></div>
               </div>
 
               <div className="flex flex-col gap-2 border-r border-gray-100 last:border-0 pr-4">
                 <div className="flex items-center gap-2"><div className="p-1.5 rounded-lg bg-blue-50 text-blue-500"><PiPlant className="w-4 h-4"/></div><span className="text-[9px] font-bold text-gray-500 leading-tight">Belum Tumbuh</span></div>
-                <div><p className="text-2xl font-black text-gray-800">300</p><p className="text-[10px] text-gray-400 font-medium">(12%)</p></div>
+                <div><p className="text-2xl font-bold text-gray-800">300</p><p className="text-[10px] text-gray-400 font-medium">(12%)</p></div>
               </div>
 
               <div className="flex flex-col gap-2 border-r border-gray-100 last:border-0 pr-4">
                 <div className="flex items-center gap-2"><div className="p-1.5 rounded-lg bg-purple-50 text-purple-500"><HiOutlineMapPin className="w-4 h-4"/></div><span className="text-[9px] font-bold text-gray-500 leading-tight">Jumlah Titik Geotag</span></div>
-                <div><p className="text-2xl font-black text-gray-800">18</p><p className="text-[10px] text-gray-400 font-medium">titik</p></div>
+                <div><p className="text-2xl font-bold text-gray-800">18</p><p className="text-[10px] text-gray-400 font-medium">titik</p></div>
               </div>
 
               <div className="flex flex-col gap-2 pr-4">
                 <div className="flex items-center gap-2"><div className="p-1.5 rounded-lg bg-yellow-50 text-yellow-600"><HiOutlineDocumentText className="w-4 h-4"/></div><span className="text-[9px] font-bold text-gray-500 leading-tight">Jumlah Foto</span></div>
-                <div><p className="text-2xl font-black text-gray-800">42</p><p className="text-[10px] text-gray-400 font-medium">foto</p></div>
+                <div><p className="text-2xl font-bold text-gray-800">42</p><p className="text-[10px] text-gray-400 font-medium">foto</p></div>
               </div>
 
             </div>

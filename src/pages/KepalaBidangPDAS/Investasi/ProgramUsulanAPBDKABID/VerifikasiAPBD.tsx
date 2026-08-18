@@ -35,7 +35,7 @@ const VerifikasiAPBD: React.FC = () => {
     fetchDetail();
   }, [id]);
 
-  const handleUpdateStatus = async (newStatus: 'Disetujui' | 'Ditolak') => {
+  const handleUpdateStatus = async (newStatus: 'Terverifikasi' | 'Ditolak') => {
     if (!id) return;
     setIsSubmitting(true);
     const loadingToast = toast.loading(`Memproses ${newStatus.toLowerCase()} program...`);
@@ -67,7 +67,7 @@ const VerifikasiAPBD: React.FC = () => {
 
   if (!data) return <div className="text-center text-gray-500 py-10">Data tidak ditemukan.</div>;
 
-  const isVerified = data.status === 'Disetujui' || data.status === 'Ditolak';
+  const isVerified = data.status === 'Terverifikasi' || data.status === 'Ditolak';
 
   return (
     <div className="flex flex-col gap-6 w-full mx-auto pb-12 animate-in fade-in duration-300">
@@ -82,7 +82,7 @@ const VerifikasiAPBD: React.FC = () => {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 md:p-10 flex flex-col">
         <div className="mb-8">
           <span className={`inline-block px-3 py-1 text-xs font-bold rounded-md mb-3 ${
-            data.status === 'Disetujui' ? 'bg-green-100 text-green-700' :
+            data.status === 'Terverifikasi' ? 'bg-green-100 text-green-700' :
             data.status === 'Ditolak' ? 'bg-red-100 text-red-700' :
             'bg-[#DCECE0] text-[#185325]'
           }`}>
@@ -161,7 +161,7 @@ const VerifikasiAPBD: React.FC = () => {
               <HiOutlineXMark className="w-4 h-4" /> Tolak
             </button>
             <button 
-              onClick={() => handleUpdateStatus('Disetujui')}
+              onClick={() => handleUpdateStatus('Terverifikasi')}
               disabled={isSubmitting}
               className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-2.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >

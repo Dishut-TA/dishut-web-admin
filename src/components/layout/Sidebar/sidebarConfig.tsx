@@ -37,22 +37,6 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
         ],
     };
 
-    const menuMonitoring = {
-        id: 'monitoring',
-        title: 'Pelaksanaan dan Monitoring Program',
-        icon: <HiOutlineComputerDesktop className="w-5 h-5" />,
-        items: [
-            { name: 'Dashboard', path: `${basePath}/monitoring/dashboard` },
-            { name: 'Penugasan Penyuluh', path: `${basePath}/monitoring/penugasan-penyuluh` },
-            { name: 'Monitoring Program', path: `${basePath}/monitoring/monitoring-program` },
-            { name: 'Pelaksanaan Kegiatan Rehabilitasi', path: `${basePath}/monitoring/kegiatan` },
-            { name: 'Pelaporan', path: `${basePath}/monitoring/pelaporan` },
-            { name: 'Master Penyuluh', path: `${basePath}/monitoring/master-penyuluh` },
-            { name: 'Hasil Validasi Lokasi', path: `${basePath}/monitoring/hasil-validasi-lokasi` },
-            { name: 'Verifikasi Pelaksanaan dan Monitoring', path: `${basePath}/monitoring/verifikasi` },
-        ],
-    };
-
     // Staff PDAS (Contoh penerapan array tunggal)
     const staffMenus = [
         dashboard,
@@ -82,11 +66,22 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
                 { name: 'Daftar Program APBD', path: `${basePath}/rehabilitasi/program-apbd` },
                 { name: 'Program CSR', path: `${basePath}/rehabilitasi/program-csr` },
                 { name: 'Verifikasi Laporan Dana', path: `${basePath}/rehabilitasi/verifikasi-dana` },
-                { name: 'Laporan Dana', path: `${basePath}/rehabilitasi/laporan-dana` },
+                // { name: 'Laporan Dana', path: `${basePath}/rehabilitasi/laporan-dana` },
                 { name: 'Riwayat Rehabilitasi', path: `${basePath}/rehabilitasi/riwayat-rehabilitasi` },
             ],
         },
-        menuMonitoring,
+        {
+            id: 'monitoring',
+            title: 'Pelaksanaan dan Monitoring Program',
+            icon: <HiOutlineComputerDesktop className="w-5 h-5" />,
+            items: [
+                { name: 'Dashboard', path: `${basePath}/monitoring/dashboard` },
+                { name: 'Penugasan Kegiatan Rehabilitasi ', path: `${basePath}/monitoring/penugasan-pelaksanaan` },
+                // { name: 'Pelaksanaan Kegiatan Rehabilitasi', path: `${basePath}/monitoring/kegiatan` },
+                // { name: 'Hasil Validasi Lokasi', path: `${basePath}/monitoring/hasil-validasi-lokasi` },
+                { name: 'Monitoring Program Rehabilitasi', path: `${basePath}/monitoring/verifikasi` },
+            ],
+        },
         {
             id: 'evaluasi', title: 'Evaluasi Penanaman Bibit', icon: <HiOutlineGlobeAlt className="w-5 h-5" />,
             items: [
@@ -127,7 +122,18 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
                 { name: 'Riwayat Rehabilitasi', path: `${basePath}/rehabilitasi/riwayat-rehabilitasi` },
             ],
         },
-        menuMonitoring,
+        {
+            id: 'monitoring',
+            title: 'Pelaksanaan dan Monitoring Program',
+            icon: <HiOutlineComputerDesktop className="w-5 h-5" />,
+            items: [
+                { name: 'Dashboard', path: `${basePath}/monitoring/dashboard` },
+                { name: 'Penugasan Kegiatan Rehabilitasi ', path: `${basePath}/monitoring/penugasan-pelaksanaan` },
+                // { name: 'Pelaksanaan Kegiatan Rehabilitasi', path: `${basePath}/monitoring/kegiatan` },
+                // { name: 'Hasil Validasi Lokasi', path: `${basePath}/monitoring/hasil-validasi-lokasi` },
+                { name: 'Monitoring Program Rehabilitasi', path: `${basePath}/monitoring/verifikasi` },
+            ],
+        },
         {
             id: 'evaluasi', title: 'Evaluasi Penanaman Bibit', icon: <HiOutlineGlobeAlt className="w-5 h-5" />,
             items: [
@@ -145,7 +151,7 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
         { name: 'Tinjau Proposal', path: `${basePath}/tinjau-proposal`, icon: <HiOutlineDocumentText className="w-5 h-5" /> },
         { name: 'Riwayat Pendanaan', path: `${basePath}/riwayat-pendanaan`, icon: <HiOutlineClock className="w-5 h-5" /> },
         { name: 'Monitoring Proyek', path: `${basePath}/monitoring-proyek`, icon: <HiOutlineChartPie className="w-5 h-5" /> },
-        { name: 'Laporan Keuangan', path: `${basePath}/laporan-keuangan`, icon: <HiOutlineChartPie className="w-5 h-5" /> },
+        { name: 'Laporan Realisasi Dana', path: `${basePath}/laporan-keuangan`, icon: <HiOutlineChartPie className="w-5 h-5" /> },
     ];
 
     // STAFF BUPM & KABID BUPM
@@ -162,8 +168,8 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
         dashboard,
         { name: 'Validasi Lokasi', path: `${basePath}/validasi-lokasi`, icon: <HiOutlineMapPin className="w-5 h-5" /> },
         { name: 'Pelaksanaan Kegiatan', path: `${basePath}/pelaksanaan-penanaman`, icon: <HiOutlineSparkles className="w-5 h-5" /> },
-        { name: 'Monitoring Program Rehabilitasi', path: `${basePath}/monitoring-program`, icon: <HiOutlineEye className="w-5 h-5" /> },
-        { name: 'Monitoring Lanjutan', path: `${basePath}/monitoring-lanjutan`, icon: <HiOutlineEye className="w-5 h-5" /> },
+        // { name: 'Monitoring Program Rehabilitasi', path: `${basePath}/monitoring-program`, icon: <HiOutlineEye className="w-5 h-5" /> },
+        { name: 'Monitoring Program', path: `${basePath}/monitoring-lanjutan`, icon: <HiOutlineEye className="w-5 h-5" /> },
     ];
 
     // KELOMPOK TANI HUTAN (KTH)

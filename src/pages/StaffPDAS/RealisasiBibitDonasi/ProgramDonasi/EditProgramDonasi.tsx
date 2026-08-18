@@ -23,8 +23,7 @@ const formatRupiah = (angka: number) =>
 
 const EditProgram: React.FC = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); // Ambil ID dari URL
-  
+  const { id } = useParams(); 
   const [form, setForm] = useState({
     namaProgram: '', 
     lokasiLahan: '', 
@@ -39,10 +38,8 @@ const EditProgram: React.FC = () => {
   const [daftarBibit, setDaftarBibit] = useState<MergedBibitSpec[]>([]);
   const [bibitOptions, setBibitOptions] = useState<MergedBibitSpec[]>([]);
   const [selectedSpecId, setSelectedSpecId] = useState('');
-  
   const [isFetchingData, setIsFetchingData] = useState(true);
   const [isLoading, setIsLoading] = useState(false);  
-
   const [projects, setProjects] = useState<any[]>([]);
 
   useEffect(() => {
@@ -52,7 +49,6 @@ const EditProgram: React.FC = () => {
         const token = localStorage.getItem("token");
         const headers: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
 
-        // Fetch paralel: Master Bibit, Spesifikasi, Project Lahan, dan Data Detail Program Ini
         const [bibitRes, specRes, projRes, detailRes] = await Promise.all([ 
           getBibitsAPI(), 
           getSeedSpecificationsAPI(),
@@ -67,7 +63,6 @@ const EditProgram: React.FC = () => {
         const projList = projJson.payload || projJson.data || [];
         setProjects(projList);
 
-        // Map opsi dropdown bibit
         const mergedData = specs.reduce((acc: MergedBibitSpec[], spec: any) => {
           const bibit = bibitsData.find((b: any) => Number(b.id) === Number(spec.seed_id));
           if (bibit) {
@@ -80,7 +75,6 @@ const EditProgram: React.FC = () => {
         }, []);
         setBibitOptions(mergedData);
 
-        // PENGISIAN DATA EXISTING KE FORM
         const existingData = detailRes.payload || detailRes.data;
         if (existingData) {
           setForm({
@@ -88,17 +82,16 @@ const EditProgram: React.FC = () => {
             lokasiLahan: existingData.location || '',
             kthPelaksana: existingData.kth_id ? `KTH ID: ${existingData.kth_id}` : 'Tanpa KTH',
             deskripsi: existingData.description || '',
-            tanggalMulai: '', // Sesuaikan jika ada di Backend
-            tanggalSelesai: '' // Sesuaikan jika ada di Backend
+            tanggalMulai: existingData.start_date || '', 
+            tanggalSelesai: existingData.end_date || ''
           });
           
           setSelectedProjectId(existingData.analysis_result_id || '');
 
-          // Map bibit yang sudah ada
           if (existingData.jenis_bibit) {
              const existingBibits = existingData.jenis_bibit.map((eb: any) => {
                  return mergedData.find((m: MergedBibitSpec) => m.seed_id === eb.id) || {
-                     spec_id: Date.now() + Math.random(), // Dummy ID fallback
+                     spec_id: Date.now() + Math.random(), 
                      seed_id: eb.id,
                      bibit_nama: eb.nama,
                      price: 0
@@ -170,10 +163,12 @@ const EditProgram: React.FC = () => {
       formData.append('name', form.namaProgram);
       formData.append('location', form.lokasiLahan); 
       formData.append('description', form.deskripsi);
-      formData.append('kth_id', '1'); // Ganti dengan KTH Aktual jika ada
+      formData.append('kth_id', '1'); 
+      formData.append('start_date', form.tanggalMulai); 
+      formData.append('end_date', form.tanggalSelesai);
       
       if (selectedProjectId) formData.append('analysis_result_id', selectedProjectId);
-      if (imageFile) formData.append('image', imageFile); // Upload gambar baru jika ada
+      if (imageFile) formData.append('image', imageFile);
 
       daftarBibit.forEach(bibit => formData.append('jenis_bibit[]', bibit.seed_id.toString()));
 

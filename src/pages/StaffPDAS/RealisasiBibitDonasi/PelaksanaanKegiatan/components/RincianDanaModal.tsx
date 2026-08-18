@@ -87,7 +87,7 @@ const RincianDanaModal: React.FC<RincianDanaModalProps> = ({ isOpen, onClose, da
 
             <div className="bg-[#f0f9f3] px-5 py-4 border-t border-[#e2f1e6] flex justify-between items-center">
               <span className="text-sm font-bold text-[#185325]">Total Donasi Terkumpul:</span>
-              <span className="text-lg font-black text-[#185325]">{formatRupiah(totalDana)}</span>
+              <span className="text-lg font-bold text-[#185325]">{formatRupiah(totalDana)}</span>
             </div>
           </div>
 

@@ -133,7 +133,7 @@ const InputEvaluasiLapanganStaff: React.FC = () => {
                   
                   <div className="flex items-center justify-between mb-5 border-b border-gray-100 pb-3">
                     <div className="flex items-center gap-3">
-                      <span className="flex items-center justify-center w-8 h-8 rounded-full bg-[#DCECE0] text-[#185325] font-black text-sm">
+                      <span className="flex items-center justify-center w-8 h-8 rounded-full bg-[#DCECE0] text-[#185325] font-bold text-sm">
                         {index + 1}
                       </span>
                       <input 

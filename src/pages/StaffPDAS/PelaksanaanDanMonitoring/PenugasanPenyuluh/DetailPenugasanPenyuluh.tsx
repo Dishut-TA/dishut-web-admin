@@ -123,13 +123,13 @@ const getStatusStyle = (status: string) => {
             <div className="flex items-center gap-2 text-sm font-bold text-gray-600">
               <HiOutlineBriefcase className="w-5 h-5 text-blue-500" /> Total Penugasan
             </div>
-            <span className="text-lg font-black text-gray-800">{mockPenyuluhProfile.totalTugas}</span>
+            <span className="text-lg font-bold text-gray-800">{mockPenyuluhProfile.totalTugas}</span>
           </div>
           <div className="flex items-center justify-between border-t border-gray-50 pt-3">
             <div className="flex items-center gap-2 text-sm font-bold text-gray-600">
               <HiOutlineCheckCircle className="w-5 h-5 text-emerald-500" /> Tugas Selesai
             </div>
-            <span className="text-lg font-black text-emerald-600">{mockPenyuluhProfile.tugasSelesai}</span>
+            <span className="text-lg font-bold text-emerald-600">{mockPenyuluhProfile.tugasSelesai}</span>
           </div>
         </div>
       </div>

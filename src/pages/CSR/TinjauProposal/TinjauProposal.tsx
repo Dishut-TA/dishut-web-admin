@@ -13,8 +13,8 @@ const TinjauProposal: React.FC = () => {
     const fetchData = async () => {
       try {
         const response = await getProgramCsrsAPI();
-        const filtered = response.filter((item: any) => item.status === 'Mencari Mitra CSR');
-        setData(filtered);
+        // const filtered = response.filter((item: any) => item.status === 'Mencari Mitra CSR');
+        setData(response);
       } catch (error: any) {
         toast.error("Gagal memuat daftar proposal rekomendasi.");
       } finally {
@@ -56,6 +56,7 @@ const TinjauProposal: React.FC = () => {
                 <th className="px-6 py-4 whitespace-nowrap">NAMA PROGRAM</th>
                 <th className="px-6 py-4 whitespace-nowrap">KTH</th>
                 <th className="px-6 py-4 whitespace-nowrap">ANGGARAN DIAJUKAN</th>
+                <th className="px-6 py-4 whitespace-nowrap">STATUS</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">AKSI</th>
               </tr>
             </thead>
@@ -74,6 +75,9 @@ const TinjauProposal: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 text-sm font-bold text-gray-800 whitespace-nowrap">
                     {formatRupiah(item.anggaran)}
+                  </td>
+                  <td className="px-6 py-4 text-sm font-bold text-gray-800 whitespace-nowrap">
+                    {item.status}
                   </td>
                   <td className="px-6 py-4 flex justify-center whitespace-nowrap">
                     <button 

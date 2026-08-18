@@ -17,7 +17,7 @@ const PendanaanAPBD: React.FC = () => {
         
         // Ubah 'Berjalan' menjadi 'Aktif' sesuai Figma
         const validPrograms = response.filter((item: any) => 
-          ['Disetujui', 'Aktif', 'Selesai'].includes(item.status)
+          ['Terverifikasi', 'Aktif', 'Selesai'].includes(item.status)
         );
         
         setData(validPrograms);
@@ -93,16 +93,16 @@ const PendanaanAPBD: React.FC = () => {
                     <td className="px-6 py-5 text-sm font-bold text-[#185325]">{formatRupiah(item.anggaran)}</td>
                     <td className="px-6 py-5 text-center">
                       <span className={`px-4 py-1.5 rounded-full text-xs font-bold ${
-                        item.status === 'Disetujui' ? 'bg-gray-200 text-gray-700' : 
+                        item.status === 'Terverifikasi' ? 'bg-gray-200 text-gray-700' : 
                         item.status === 'Aktif' ? 'bg-blue-100 text-blue-700 border border-blue-200' : // Warna untuk 'Aktif'
                         'bg-green-100 text-green-700'
                       }`}>
-                        {item.status === 'Disetujui' ? 'Menunggu Konfirmasi' : item.status}
+                        {item.status === 'Terverifikasi' ? 'Menunggu Konfirmasi' : item.status}
                       </span>
                     </td>
                     
                     <td className="px-6 py-5 flex justify-center items-center h-full">
-                      {item.status === 'Disetujui' ? (
+                      {item.status === 'Terverifikasi' ? (
                         <button 
                           onClick={() => navigate(`/admin/kth/rehabilitasi/pendanaan-apbd/detail/${item.id}`)} 
                           className="bg-[#185325] hover:bg-[#123d1c] text-white px-5 py-2 rounded-full text-xs font-bold transition-colors shadow-sm active:scale-95"

@@ -34,7 +34,6 @@ const PendanaanProgram: React.FC = () => {
     { id: 'mandiri', name: 'Bank Mandiri', code: 'MDR', color: 'bg-blue-900' },
   ];
 
-  // Ambil data asli dari database berdasarkan ID CSR
   useEffect(() => {
     const fetchProgram = async () => {
       try {
@@ -51,7 +50,6 @@ const PendanaanProgram: React.FC = () => {
     fetchProgram();
   }, [id]);
 
-  // Tutup dropdown jika klik di luar area
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -72,11 +70,10 @@ const PendanaanProgram: React.FC = () => {
     const loadingToast = toast.loading('Memproses status pembayaran...');
 
     try {
-      // Update status proposal menjadi 'Disetujui' setelah pembayaran selesai
-      await updateProgramCsrStatusAPI(id, { status: 'Disetujui' });
+      // PERBAIKAN ALUR: Setelah bayar lunas, barulah statusnya menjadi 'Selesai'
+      await updateProgramCsrStatusAPI(id, { status: 'Selesai' });
       
-      toast.success('Pembayaran Berhasil! Status program telah diperbarui.', { id: loadingToast });
-      // Arahkan kembali ke dashboard atau halaman riwayat/list
+      toast.success('Pembayaran Berhasil! Pendanaan Selesai.', { id: loadingToast });
       navigate('/admin/csr/tinjau-proposal');
     } catch (error: any) {
       toast.error(error.message || 'Gagal memperbarui status pembayaran.', { id: loadingToast });
@@ -229,10 +226,7 @@ const PendanaanProgram: React.FC = () => {
             </div>
           </div>
 
-          {/* Kanan: Tab QR & VA */}
           <div className="flex flex-col items-center">
-            
-            {/* Toggle Switch */}
             <div className="flex w-64 rounded-full border border-gray-300 p-1 bg-transparent mb-8">
               <button
                 onClick={() => setActiveTab('QR')}
