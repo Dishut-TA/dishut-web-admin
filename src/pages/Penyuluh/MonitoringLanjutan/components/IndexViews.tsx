@@ -1,6 +1,6 @@
 import { 
   HiOutlineMagnifyingGlass, HiOutlineFunnel, HiOutlineMapPin, 
-  HiChevronLeft, HiChevronRight, HiChevronRight as HiChevronRightSolid 
+  HiChevronLeft, HiChevronRight 
 } from 'react-icons/hi2';
 import { MOCK_DATA, getPeriodeBadge, getStatusBadgeStyles } from '../constants';
 
@@ -18,10 +18,10 @@ export const HeaderAndFilter = () => (
           <HiOutlineMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input 
             type="text" placeholder="Cari program, KTH, atau lokasi..." 
-            className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500" 
+            className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-full focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500" 
           />
         </div>
-        <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-300 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-50 shadow-sm transition-colors">
+        <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-300 text-gray-700 text-sm font-bold rounded-full hover:bg-gray-50 shadow-sm transition-colors">
           <HiOutlineFunnel className="w-4 h-4" /> Filter
         </button>
       </div>
@@ -48,7 +48,7 @@ export const DataTable = ({ navigate }: { navigate: any }) => (
         <tbody className="divide-y divide-gray-100">
           {MOCK_DATA.map((item) => (
             <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-              <td className="px-5 py-5 font-bold text-primary text-xs">{item.id}</td>
+              <td className="px-5 py-5 font-bold text-emerald-600 text-xs">{item.id}</td>
               <td className="px-5 py-5">
                 <div className="font-bold text-gray-900 text-sm mb-1">{item.nama}</div>
                 <div className="text-[11px] text-gray-500 flex items-center gap-1">
@@ -72,11 +72,17 @@ export const DataTable = ({ navigate }: { navigate: any }) => (
               </td>
               <td className="px-5 py-5 text-center">
                 {item.statusText === 'Siap Monitoring' ? (
-                  <button onClick={() => navigate(`/admin/penyuluh/monitoring-lanjutan/form/${item.id}`)} className="flex items-center justify-between w-36 px-4 py-2 text-xs font-bold text-white bg-[#008A4B] rounded-lg hover:bg-emerald-800 transition-colors shadow-sm mx-auto">
-                    Mulai Monitoring <HiChevronRightSolid className="w-4 h-4 stroke-2" />
+                  <button 
+                    onClick={() => navigate(`/admin/penyuluh/monitoring-lanjutan/form/${item.id}`, { state: { status: item.statusText } })} 
+                    className="flex items-center justify-between w-36 px-4 py-2 text-xs font-bold text-white bg-[#008A4B] rounded-full hover:bg-emerald-800 transition-colors shadow-sm mx-auto cursor-pointer"
+                  >
+                    Mulai Monitoring <HiChevronRight className="w-4 h-4 stroke-2" />
                   </button>
                 ) : (
-                  <button onClick={() => navigate(`/admin/penyuluh/monitoring-lanjutan/form/${item.id}`)} className="px-4 py-1.5 text-xs font-bold text-emerald-600 border border-emerald-500 bg-white rounded-md hover:bg-emerald-50 transition-colors">
+                  <button 
+                    onClick={() => navigate(`/admin/penyuluh/monitoring-lanjutan/form/${item.id}`, { state: { status: item.statusText } })} 
+                    className="px-4 py-1.5 text-xs font-bold text-emerald-600 border border-emerald-500 bg-white rounded-full hover:bg-emerald-50 transition-colors cursor-pointer"
+                  >
                     Lihat Detail
                   </button>
                 )}

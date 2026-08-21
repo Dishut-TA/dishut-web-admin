@@ -1,6 +1,9 @@
+import { useNavigate } from 'react-router-dom';
 import { TABLE_BERJALAN_DATA } from '../data/mockData';
 
 export default function TableBerjalan() {
+  const navigate = useNavigate();
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 overflow-hidden flex flex-col">
       <div className="flex justify-between items-center mb-4">
@@ -18,7 +21,8 @@ export default function TableBerjalan() {
               <th className="py-3 px-2">Tahap Kegiatan</th>
               <th className="py-3 px-2">Kategori</th>
               <th className="py-3 px-2 text-right">Progress Tahap</th>
-              <th className="py-3 pl-2 text-right">Terakhir Diperbarui</th>
+              <th className="py-3 px-2 text-right">Terakhir Diperbarui</th>
+              <th className="py-3 pl-2 text-center">Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -42,7 +46,15 @@ export default function TableBerjalan() {
                     </div>
                   </div>
                 </td>
-                <td className="py-3 pl-2 text-right text-[10px] text-gray-500">{row.tanggal}</td>
+                <td className="py-3 px-2 text-right text-[10px] text-gray-500">{row.tanggal}</td>
+                <td className="py-3 pl-2 text-center">
+                  <button 
+                    onClick={() => navigate(`/admin/kabid/monitoring/dashboard/detail/${row.no}`, { state: { kategori: row.kategori, status: row.kategori === 'Pelaksanaan' ? 'Selesai' : 'Berjalan', periode: row.tahap.includes('V') ? 'Validasi' : 'P2' } })}
+                    className="px-3 py-1.5 border border-emerald-600 text-emerald-700 hover:bg-emerald-50 text-[10px] font-bold rounded-lg transition-colors cursor-pointer"
+                  >
+                    Lihat Detail
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>

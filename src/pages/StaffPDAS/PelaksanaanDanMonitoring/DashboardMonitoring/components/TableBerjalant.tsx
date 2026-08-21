@@ -10,7 +10,7 @@ export default function TableBerjalan() {
       
       <div className="overflow-x-auto">
          <table className="w-full text-left text-xs whitespace-nowrap">
-           <thead className="border-b border-gray-100 text-gray-500 font-bold">
+           <thead className="bg-[#DCECE0] text-[#3A4D3F] text-xs uppercase tracking-wider font-bold">
              <tr>
                <th className="py-3 pr-2">No</th>
                <th className="py-3 px-2">Program</th>
@@ -46,7 +46,7 @@ export default function TableBerjalan() {
                  </td>
                  <td className="py-3 px-2 text-center text-[10px] text-gray-500">{row.tanggal}</td>
                  <td className="py-3 pl-2 text-center">
-                    <button className="px-3 py-1.5 bg-white border border-green-600 text-green-700 hover:bg-green-50 rounded-md font-bold text-[10px] shadow-sm transition-colors cursor-pointer">
+                    <button className="px-3 py-1.5 bg-white border border-green-600 text-green-700 hover:bg-green-50 rounded-full font-bold text-[10px] shadow-sm transition-colors cursor-pointer">
                       Lihat Detail
                     </button>
                  </td>

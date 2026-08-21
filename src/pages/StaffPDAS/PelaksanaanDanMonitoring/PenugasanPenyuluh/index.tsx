@@ -7,19 +7,13 @@ import {
   HiOutlineArrowPath,
   HiOutlineFunnel,
   HiOutlineUserPlus,
-  HiOutlineInformationCircle
 } from 'react-icons/hi2';
-
-// IMPORT MODAL YANG DIBUTUHKAN (Modal Detail sudah dihapus karena diganti halaman)
 import ModalBuatPenugasan from './components/CreatePenugasanModal';
 import TugaskanModal from './components/TugaskanModal';
 import { useNavigate } from 'react-router-dom';
 
-// ==========================================
-// 1. MOCK DATA (Diupdate sesuai NOTES)
-// ==========================================
 type JenisKegiatan = 'Validasi Lokasi' | 'Pelaksanaan Penanaman';
-type StatusPenugasan = 'Menunggu Penugasan' | 'Menunggu Verifikasi' | 'Selesai';
+type StatusPenugasan = 'Menunggu Penugasan' | 'Berjalan' | 'Menunggu Verifikasi' | 'Selesai';
 
 interface PenugasanData {
   id: string;
@@ -35,7 +29,7 @@ interface PenugasanData {
 
 const NEW_MOCK_DATA: PenugasanData[] = [
   { id: '1', program: 'Rehabilitasi DAS Cikapundung', lokasi: 'Desa Cibeusi,\nKec. Cileunyi', jenisKegiatan: 'Validasi Lokasi', wilayah: 'Kab. Bandung', rencanaPeriode: '-', penyuluh: '-', status: 'Menunggu Penugasan', tanggalPenugasan: '-' },
-  { id: '2', program: 'Rehabilitasi DAS Cilaki', lokasi: 'Desa Mekarsari,\nKec. Cilawu', jenisKegiatan: 'Pelaksanaan Penanaman', wilayah: 'Kab. Garut', rencanaPeriode: 'PO (Rencana\nPenanaman)', penyuluh: '-', status: 'Menunggu Penugasan', tanggalPenugasan: '-' },
+  { id: '2', program: 'Rehabilitasi DAS Cilaki', lokasi: 'Desa Mekarsari,\nKec. Cilawu', jenisKegiatan: 'Pelaksanaan Penanaman', wilayah: 'Kab. Garut', rencanaPeriode: 'PO (Rencana\nPenanaman)', penyuluh: 'Rizky Febrian', status: 'Berjalan', tanggalPenugasan: '14/05/2026' },
   { id: '3', program: 'Rehabilitasi DAS Cimanuk', lokasi: 'Desa Sukamaju,\nKec. Terisi', jenisKegiatan: 'Validasi Lokasi', wilayah: 'Kab. Indramayu', rencanaPeriode: '-', penyuluh: 'Andi Wijaya', status: 'Menunggu Verifikasi', tanggalPenugasan: '15/05/2026' },
   { id: '4', program: 'Rehabilitasi DAS Citarum Hulu', lokasi: 'Desa Cikalong,\nKec. Cikalong Wetan', jenisKegiatan: 'Pelaksanaan Penanaman', wilayah: 'Kab. Purwakarta', rencanaPeriode: 'PO (Rencana\nPenanaman)', penyuluh: 'Siti Nurhaliza', status: 'Selesai', tanggalPenugasan: '16/05/2026' },
   { id: '5', program: 'Rehabilitasi DAS Cisadane', lokasi: 'Desa Rangkas,\nKec. Maja', jenisKegiatan: 'Validasi Lokasi', wilayah: 'Kab. Lebak', rencanaPeriode: '-', penyuluh: 'Budi Santoso', status: 'Selesai', tanggalPenugasan: '10/05/2026' },
@@ -51,24 +45,18 @@ const SproutIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-// ==========================================
-// 2. MAIN COMPONENT
-// ==========================================
 const PenugasanPenyuluh: React.FC = () => {
   const navigate = useNavigate(); 
   const [activeTab, setActiveTab] = useState('Semua');
-  
-  // State Modal Buat Penugasan
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
-  // State Modal Tugaskan
   const [isTugaskanModalOpen, setIsTugaskanModalOpen] = useState(false);
   const [selectedPenugasan, setSelectedPenugasan] = useState<PenugasanData | null>(null);
 
   const getStatusStyle = (status: StatusPenugasan) => {
     switch (status) {
       case 'Menunggu Penugasan': return 'bg-orange-50 text-orange-600 border-orange-100';
-      case 'Menunggu Verifikasi': return 'bg-blue-50 text-blue-600 border-blue-100';
+      case 'Berjalan': return 'bg-blue-50 text-blue-600 border-blue-100';
+      case 'Menunggu Verifikasi': return 'bg-yellow-50 text-yellow-600 border-yellow-100';
       case 'Selesai': return 'bg-emerald-50 text-emerald-600 border-emerald-100';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
@@ -79,9 +67,14 @@ const PenugasanPenyuluh: React.FC = () => {
     setIsTugaskanModalOpen(true);
   };
 
-  // Navigasi ke Halaman Detail
+  // Navigasi ke Halaman Detail sambil MENGIRIMKAN STATUS
   const handleBukaDetail = (item: PenugasanData) => {
-    navigate(`/admin/staff/monitoring/penugasan-pelaksanaan/detail/${item.id}`);
+    navigate(`/admin/staff/monitoring/penugasan-pelaksanaan/detail/${item.id}`, { 
+      state: { 
+        status: item.status,
+        jenisKegiatan: item.jenisKegiatan 
+      } 
+    });
   };
 
   return (
@@ -95,7 +88,7 @@ const PenugasanPenyuluh: React.FC = () => {
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="px-4 py-2.5 bg-primary hover:bg-emerald-800 text-white font-bold rounded-lg flex items-center gap-2 transition-colors text-sm shadow-sm"
+          className="px-4 py-2.5 bg-[#008A4B] hover:bg-emerald-800 text-white font-bold rounded-full flex items-center gap-2 transition-colors text-sm shadow-sm cursor-pointer"
         >
           <HiOutlinePlus className="w-5 h-5" /> Buat Penugasan
         </button>
@@ -109,7 +102,7 @@ const PenugasanPenyuluh: React.FC = () => {
             <button 
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`pb-3 text-sm font-bold transition-colors border-b-2 ${activeTab === tab ? 'border-emerald-600 text-emerald-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+              className={`pb-3 text-sm font-bold transition-colors border-b-2 cursor-pointer ${activeTab === tab ? 'border-emerald-600 text-emerald-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
             >
               {tab}
             </button>
@@ -135,10 +128,10 @@ const PenugasanPenyuluh: React.FC = () => {
           </div>
           
           <div className="flex items-center gap-3 w-full xl:w-auto shrink-0 justify-end">
-            <button className="px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
+            <button className="px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 cursor-pointer">
               <HiOutlineArrowPath className="w-4 h-4" /> Reset
             </button>
-            <button className="px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
+            <button className="px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 cursor-pointer">
               <HiOutlineFunnel className="w-4 h-4" /> Filter
             </button>
           </div>
@@ -147,7 +140,7 @@ const PenugasanPenyuluh: React.FC = () => {
         {/* TABLE */}
         <div className="overflow-x-auto w-full">
           <table className="w-full text-left text-sm text-gray-600 min-w-250 xl:min-w-full">
-            <thead className="text-[11px] text-gray-900 font-bold uppercase tracking-wider border-b border-gray-100 bg-white">
+            <thead className="bg-[#DCECE0] text-[#3A4D3F] text-xs uppercase tracking-wider font-bold">
               <tr>
                 <th className="px-4 py-4 whitespace-nowrap">No</th>
                 <th className="px-4 py-4 whitespace-nowrap">Program</th>
@@ -169,11 +162,11 @@ const PenugasanPenyuluh: React.FC = () => {
                   <td className="px-4 py-4 text-xs min-w-40 leading-snug text-gray-600">{item.lokasi}</td>
                   <td className="px-4 py-4">
                     {item.jenisKegiatan === 'Validasi Lokasi' ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100 whitespace-nowrap">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100 whitespace-nowrap">
                         <HiOutlineMapPin className="w-3.5 h-3.5" /> Validasi Lokasi
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 whitespace-nowrap">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 whitespace-nowrap">
                         <SproutIcon className="w-3.5 h-3.5" /> Pelaksanaan Penanaman
                       </span>
                     )}
@@ -182,7 +175,7 @@ const PenugasanPenyuluh: React.FC = () => {
                   <td className="px-4 py-4 text-xs whitespace-pre-line text-gray-500 leading-snug min-w-30">{item.rencanaPeriode}</td>
                   <td className="px-4 py-4 text-xs font-medium text-gray-700 whitespace-nowrap">{item.penyuluh}</td>
                   <td className="px-4 py-4">
-                    <span className={`inline-block px-2.5 py-1 rounded-md text-[10px] font-bold border whitespace-nowrap ${getStatusStyle(item.status)}`}>
+                    <span className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold border whitespace-nowrap ${getStatusStyle(item.status)}`}>
                       {item.status}
                     </span>
                   </td>
@@ -190,21 +183,19 @@ const PenugasanPenyuluh: React.FC = () => {
                   <td className="px-4 py-4">
                     <div className="flex items-center justify-end gap-3 whitespace-nowrap">
                       
-                      {/* Tombol Tugaskan */}
                       {item.status === 'Menunggu Penugasan' && (
                         <button 
                           onClick={() => handleTugaskan(item)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold rounded-md transition-colors shadow-sm"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#008A4B] hover:bg-emerald-800 text-white text-[11px] font-bold rounded-full transition-colors shadow-sm cursor-pointer"
                         >
                           <HiOutlineUserPlus className="w-3.5 h-3.5" /> Tugaskan
                         </button>
                       )}
 
-                      {/* Tombol Detail (Menggunakan Navigasi Halaman) */}
-                      {(item.status === 'Menunggu Verifikasi' || item.status === 'Selesai') && (
+                      {(item.status === 'Berjalan' || item.status === 'Menunggu Verifikasi' || item.status === 'Selesai') && (
                         <button 
                           onClick={() => handleBukaDetail(item)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-[11px] font-bold rounded-md transition-colors shadow-sm"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-[11px] font-bold rounded-full transition-colors shadow-sm cursor-pointer"
                         >
                           <HiOutlineEye className="w-3.5 h-3.5" /> Detail
                         </button>
@@ -216,51 +207,10 @@ const PenugasanPenyuluh: React.FC = () => {
             </tbody>
           </table>
         </div>
-
-        {/* PAGINATION */}
-        <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between bg-white text-sm text-gray-500">
-          <span>Menampilkan 1 - 8 dari 24 data</span>
-          <div className="flex items-center gap-1.5">
-            <button className="w-8 h-8 flex items-center justify-center rounded border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors">&lt;</button>
-            <button className="w-8 h-8 flex items-center justify-center rounded bg-emerald-700 text-white font-bold shadow-sm">1</button>
-            <button className="w-8 h-8 flex items-center justify-center rounded border border-transparent text-gray-600 hover:bg-gray-50 transition-colors">2</button>
-            <button className="w-8 h-8 flex items-center justify-center rounded border border-transparent text-gray-600 hover:bg-gray-50 transition-colors">3</button>
-            <span className="px-1 text-gray-400">...</span>
-            <button className="w-8 h-8 flex items-center justify-center rounded border border-transparent text-gray-600 hover:bg-gray-50 transition-colors">3</button>
-            <button className="w-8 h-8 flex items-center justify-center rounded border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors">&gt;</button>
-          </div>
-        </div>
-      </div>
-
-      {/* BANNER KETERANGAN BAWAH */}
-      <div className="bg-[#f0f9f3] border border-[#DCECE0] rounded-xl p-5 flex gap-4">
-        <HiOutlineInformationCircle className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
-        <div>
-          <h4 className="text-sm font-bold text-emerald-900 mb-2">Keterangan Jenis Kegiatan</h4>
-          <div className="space-y-2 text-xs font-medium text-emerald-800">
-            <div className="flex items-start md:items-center gap-3">
-              <span className="inline-flex items-center gap-1.5 px-2 py-2 rounded text-[10px] font-bold bg-white text-blue-600 border border-blue-100 shrink-0 w-42 justify-center">
-                <HiOutlineMapPin className="w-3.5 h-3.5" /> Validasi Lokasi
-              </span>
-              <span>: Penugasan penyuluh untuk melakukan validasi lokasi rehabilitasi sebelum pelaksanaan kegiatan.</span>
-            </div>
-            <div className="flex items-start md:items-center gap-3">
-              <span className="inline-flex items-center gap-1.5 px-2 py-2 rounded text-[10px] font-bold bg-white text-emerald-700 border border-emerald-100 shrink-0 w-42 justify-center">
-                <SproutIcon className="w-3.5 h-3.5" /> Pelaksanaan Penanaman
-              </span>
-              <span>: Penugasan penyuluh untuk mendampingi pelaksanaan penanaman sesuai rencana program.</span>
-            </div>
-          </div>
-        </div>
       </div>
 
       <ModalBuatPenugasan isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-      
-      <TugaskanModal 
-        isOpen={isTugaskanModalOpen} 
-        onClose={() => setIsTugaskanModalOpen(false)} 
-        data={selectedPenugasan} 
-      />
+      <TugaskanModal isOpen={isTugaskanModalOpen} onClose={() => setIsTugaskanModalOpen(false)} data={selectedPenugasan} />
 
     </div>
   );

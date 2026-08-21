@@ -7,6 +7,7 @@ export const ROLES = {
   KTH: "kelompok tani hutan (kth)",
   CSR: "csr",
   PENYULUH: "penyuluh",
+  KTH_PELAKSANAAN: "kth pelaksanaan",
 };
 
 export const ROLE_BASE_PATHS: Record<string, string> = {
@@ -16,6 +17,7 @@ export const ROLE_BASE_PATHS: Record<string, string> = {
   [ROLES.STAFFBUPM]: "/admin/staff/bupm",
   [ROLES.KABIDBUPM]: "/admin/kabid/bupm",
   [ROLES.KTH]: "/admin/kth", 
+  [ROLES.KTH_PELAKSANAAN]: "/admin/kth-pelaksanaan", 
   [ROLES.CSR]: "/admin/csr", 
   [ROLES.PENYULUH]: "/admin/penyuluh", 
 };
@@ -28,6 +30,7 @@ export const ROLE_REDIRECTS: Record<string, string> = {
   "kabid bupm": "/admin/kabid/bupm",
   "admin": "/admin/staff",
   "kelompok tani hutan (kth)": "/admin/kth",
+  "kth pelaksanaan": "/admin/kth-pelaksanaan",
   "csr": "/admin/csr",
   "penyuluh": "/admin/penyuluh",
 };

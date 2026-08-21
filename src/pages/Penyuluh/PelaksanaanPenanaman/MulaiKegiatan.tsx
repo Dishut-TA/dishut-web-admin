@@ -446,7 +446,7 @@ const Step2PoligonPU = ({ onNext, onPrev }: { onNext: () => void, onPrev: () => 
 
       {/* FOOTER ACTION */}
       <div className="p-4 px-6 z-40">
-        <div className="mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="mx-auto flex flex-col md:flex-row justify-between items-center gap-4 bg-black">
           <button 
             onClick={onPrev} 
             className="w-full px-6 py-2.5 bg-white border border-gray-300 text-gray-700 text-sm font-bold rounded-full hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
@@ -457,7 +457,6 @@ const Step2PoligonPU = ({ onNext, onPrev }: { onNext: () => void, onPrev: () => 
             <button className="w-full px-6 py-2.5 bg-white border border-gray-300 text-gray-700 text-sm font-bold rounded-full hover:bg-gray-50 flex items-center justify-center gap-2">
               <HiOutlineDocumentText className="w-4 h-4" /> Simpan & Keluar
             </button>
-            {/* Tombol Lanjutkan hanya aktif (hijau) jika minimal 1 PU telah dibuat, untuk mock kita set opacity 50 jika bukan mode gambar */}
             <button 
               onClick={onNext}
               className={`w-full px-8 py-2.5 text-white text-sm font-bold rounded-full transition-colors flex items-center justify-center gap-2 ${isDrawingMode ? 'bg-[#168a53] hover:bg-emerald-700' : 'bg-gray-300 cursor-not-allowed'}`}

@@ -13,7 +13,6 @@ import {
   HiOutlineFunnel
 } from 'react-icons/hi2';
 
-// --- INTERFACES & MOCK DATA ---
 interface TugasValidasi {
   id: string;
   sumber: string;
@@ -167,7 +166,7 @@ const ValidasiTable = ({ data, navigate }: { data: TugasValidasi[], navigate: an
       <h3 className="text-sm font-bold text-slate-800">Daftar Validasi Lokasi</h3>
     </div>
     <table className="w-full text-left text-sm text-slate-600 whitespace-nowrap">
-      <thead className="text-xs text-slate-800 bg-slate-50 border-b border-slate-200">
+      <thead className="bg-[#DCECE0]/50 text-[#3A4D3F] text-xs font-bold uppercase border-b border-gray-100">
         <tr>
           <th className="px-4 py-4 font-bold">No</th>
           <th className="px-4 py-4 font-bold">ID Penugasan</th>
@@ -198,7 +197,7 @@ const ValidasiTable = ({ data, navigate }: { data: TugasValidasi[], navigate: an
               {item.status === 'Ditugaskan' && (
                 <button 
                   onClick={() => navigate(`/admin/penyuluh/validasi-lokasi/detail/${item.id}`, { state: { status: item.status } })}
-                  className="inline-flex items-center justify-between w-36 px-4 py-2 text-xs font-bold text-white bg-[#008A4B] rounded-lg hover:bg-emerald-800 transition-colors shadow-sm"
+                  className="inline-flex items-center justify-between w-36 px-4 py-2 text-xs font-bold text-white bg-primary rounded-full hover:bg-emerald-800 transition-colors shadow-sm"
                 >
                   Mulai Validasi <HiChevronRight className="w-4 h-4 stroke-2" />
                 </button>
@@ -206,7 +205,7 @@ const ValidasiTable = ({ data, navigate }: { data: TugasValidasi[], navigate: an
               {item.status === 'Selesai' && (
                 <button 
                   onClick={() => navigate(`/admin/penyuluh/validasi-lokasi/detail/${item.id}`, { state: { status: item.status } })}
-                  className="inline-flex items-center justify-center gap-1.5 w-36 px-4 py-2 text-xs font-bold text-[#008A4B] bg-white border border-[#008A4B] rounded-lg hover:bg-emerald-50 transition-colors"
+                  className="inline-flex items-center justify-center gap-1.5 w-36 px-4 py-2 text-xs font-bold text-[#008A4B] bg-white border border-[#008A4B] rounded-full hover:bg-emerald-50 transition-colors"
                 >
                   <HiOutlineEye className="w-4 h-4 stroke-2" /> Lihat Detail
                 </button>

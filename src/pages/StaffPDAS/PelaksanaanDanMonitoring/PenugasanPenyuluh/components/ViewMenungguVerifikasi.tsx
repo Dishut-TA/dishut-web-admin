@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   HiOutlineMapPin, HiOutlineCalendar, HiOutlineCheckCircle, HiCheckCircle, 
-  HiOutlineXMark, HiOutlineEye, HiOutlineArrowDownTray, HiOutlineInformationCircle, 
+  HiOutlineXMark, HiOutlineEye, HiOutlineInformationCircle, 
   HiOutlinePhoto, HiOutlineDocumentText, HiOutlineUser, HiOutlineUsers, 
   HiOutlineBriefcase, HiCheck, HiOutlineArrowLeft 
 } from 'react-icons/hi2';
@@ -204,7 +204,6 @@ const DetailPUCard = ({ selectedPU, onClose }: { selectedPU: string | null, onCl
                 </tbody>
               </table>
             </div>
-            <div className="pt-4 flex justify-end"><button className="px-4 py-2 bg-white border border-gray-300 text-gray-700 text-xs font-bold rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm"><HiOutlineArrowDownTray className="w-4 h-4"/> Unduh Data PU</button></div>
           </div>
         )}
       </div>

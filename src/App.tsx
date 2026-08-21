@@ -57,7 +57,6 @@ import DashboardPenyuluh from "./pages/Penyuluh/Dashboard";
 import PelaksanaanPenanamanIndex from "./pages/Penyuluh/PelaksanaanPenanaman";
 import InputProgresPage from "./pages/Penyuluh/PelaksanaanPenanaman/CreateProgress";
 import MonitoringLanjutanIndex from "./pages/Penyuluh/MonitoringLanjutan";
-import FormMonitoringPage from "./pages/Penyuluh/MonitoringLanjutan/FormMonitoringPage";
 import DetailInvestasiKTH from "./pages/KelompokTaniHutan/DataInvestasiKTH/DetailInvestasiKTH";
 import InputEvaluasi from "./pages/StaffPDAS/EvaluasiPenanamanBibit/Penugasan/InputEvaluasi";
 import CreateInisiasiPenugasanEvaluasiKABID from "./pages/KepalaBidangPDAS/EvaluasiPenanamanBibit/InisiasiPenugasanEvaluasi/CreateInisiasiPenugasanEvaluasiKABID";
@@ -109,7 +108,7 @@ import DetailRiwayatPendanaan from "./pages/CSR/RiwayatPendanaan/DetailRiwayatPe
 import RiwayatPendanaan from "./pages/CSR/RiwayatPendanaan/RiwayatPendanaan";
 import DetailProgres from "./pages/StaffPDAS/PelaksanaanDanMonitoring/PenugasanPenyuluh/DetailProgres";
 // import DetailHasilValidasiPenugasan from "./pages/StaffPDAS/PelaksanaanDanMonitoring/PenugasanPenyuluh/DetailHasilValidasiPenugasan";
-import DetailVerifikasiPelaksanaan from "./pages/StaffPDAS/PelaksanaanDanMonitoring/VerifikasiMonitoring/components/DetailVerifikasiPelaksanaan";
+// import DetailVerifikasiPelaksanaan from "./pages/StaffPDAS/PelaksanaanDanMonitoring/VerifikasiMonitoring/components/DetailVerifikasiPelaksanaan";
 import MonitoringProgram from "./pages/StaffPDAS/PelaksanaanDanMonitoring/MonitoringProgram";
 import ProgresMonitoring from "./pages/StaffPDAS/PelaksanaanDanMonitoring/MonitoringProgram/ProgresMonitoring";
 import DetailTitikMonitoring from "./pages/StaffPDAS/PelaksanaanDanMonitoring/MonitoringProgram/DetailTitikMonitoring";
@@ -153,6 +152,11 @@ import DetailPenugasan from "./pages/StaffPDAS/PelaksanaanDanMonitoring/Penugasa
 import PelaksanaanWizard from "./pages/Penyuluh/PelaksanaanPenanaman/InputDataTanaman";
 import DetailMonitoringPage from "./pages/StaffPDAS/PelaksanaanDanMonitoring/MonitoringProgram/DetailMonitoringPage";
 import TugaskanMonitoring from "./pages/StaffPDAS/PelaksanaanDanMonitoring/VerifikasiMonitoring/TugaskanMonitoring";
+import DashboardKTHPelaksanaan from "./pages/KTHPelaksanaan/Dashboard/DashboardKTHPelaksanaan";
+import DetailPenugasanPenanaman from "./pages/KTHPelaksanaan/Dashboard/DetailPenugasanPenanaman";
+import DetailPenugasanPenyulaman from "./pages/KTHPelaksanaan/Dashboard/DetailPenugasanPenyulaman";
+import FormMonitoringPage from "./pages/Penyuluh/MonitoringLanjutan/FormMonitoringPage";
+import DetailPelaksanaanProgramKabid from "./pages/KepalaBidangPDAS/PelaksanaanDanMonitoring/Dashboard/DetailPelaksanaanProgramKabid";
 const Login = lazy(() => import("./pages/Authentication/Login/Login"));
 const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -343,6 +347,7 @@ function App() {
 
                   {/* Monitoring */}
                   <Route path="monitoring/dashboard" element={<DashboardPelaksanaanMonitoringKabid />} />
+                  <Route path="monitoring/dashboard/detail/:id" element={<DetailPelaksanaanProgramKabid />} />
                   
                   {/* Evaluasi */}
                   <Route path="evaluasi/penugasan" element={<InisiasiPenugasanEvaluasiKABID />} />
@@ -483,6 +488,17 @@ function App() {
                   <Route path="monitoring-lanjutan/form/:id" element={<FormMonitoringPage />} />
                 </Route>
               </Route>
+
+              {/* KTH Pelaksanaan */}
+              <Route element={<RoleGuard allowedRoles={[ROLES.KTH_PELAKSANAAN]} />}>
+                <Route path="kth-pelaksanaan">
+                  <Route index element={<Navigate to="dashboard" replace />} />
+                  <Route path="dashboard" element={<DashboardKTHPelaksanaan />} />
+                  <Route path="dashboard/penanaman/:id" element={<DetailPenugasanPenanaman />} />
+                  <Route path="dashboard/penyulaman/:id" element={<DetailPenugasanPenyulaman />} />
+                </Route>
+              </Route>
+              
             </Route>
           </Route>
 
