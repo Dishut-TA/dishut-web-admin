@@ -326,7 +326,7 @@ const KegiatanTable = ({ data, navigate }: { data: ProgramData[], navigate: any 
               {item.status === 'Ditugaskan' && (
                 <button 
                   onClick={() => navigate(`/admin/penyuluh/pelaksanaan-penanaman/create/${item.id}`)}
-                  className="inline-flex items-center justify-center gap-2 w-40 px-4 py-2 text-xs font-bold text-white bg-[#008A4B] rounded-lg hover:bg-emerald-800 transition-colors shadow-sm"
+                  className="inline-flex items-center justify-center gap-2 w-40 px-4 py-2 text-xs font-bold text-white bg-primary rounded-full hover:bg-emerald-800 transition-colors shadow-sm"
                 >
                   Mulai Pelaksanaan <HiChevronRight className="w-3.5 h-3.5 stroke-2" />
                 </button>
@@ -334,7 +334,7 @@ const KegiatanTable = ({ data, navigate }: { data: ProgramData[], navigate: any 
               {item.status === 'Berjalan' && (
                 <button 
                   onClick={() => navigate(`/admin/penyuluh/pelaksanaan-penanaman/create/${item.id}`)}
-                  className="inline-flex items-center justify-center gap-2 w-40 px-4 py-2 text-xs font-bold text-blue-600 bg-white border border-blue-500 rounded-lg hover:bg-blue-50 transition-colors shadow-sm"
+                  className="inline-flex items-center justify-center gap-2 w-40 px-4 py-2 text-xs font-bold text-blue-600 bg-white border border-blue-500 rounded-full hover:bg-blue-50 transition-colors shadow-sm"
                 >
                   Lanjutkan Pelaksanaan <HiChevronRight className="w-3.5 h-3.5 stroke-2" />
                 </button>
@@ -342,7 +342,7 @@ const KegiatanTable = ({ data, navigate }: { data: ProgramData[], navigate: any 
               {item.status === 'Selesai' && (
                 <button 
                   onClick={() => navigate(`/admin/penyuluh/pelaksanaan-penanaman/create/${item.id}`)}
-                  className="inline-flex items-center justify-center gap-2 w-40 px-4 py-2 text-xs font-bold text-[#008A4B] bg-white border border-[#008A4B] rounded-lg hover:bg-emerald-50 transition-colors shadow-sm"
+                  className="inline-flex items-center justify-center gap-2 w-40 px-4 py-2 text-xs font-bold text-[#008A4B] bg-white border border-[#008A4B] rounded-full hover:bg-emerald-50 transition-colors shadow-sm"
                 >
                   <HiOutlineEye className="w-4 h-4 stroke-2" /> Lihat Detail <HiChevronRight className="w-3.5 h-3.5 stroke-2" />
                 </button>

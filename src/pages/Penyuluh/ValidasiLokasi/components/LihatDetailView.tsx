@@ -2,7 +2,7 @@ import {
   HiChevronRight, HiOutlineArrowLeft, HiCheckCircle, HiOutlineDocumentText, 
   HiOutlineMapPin, HiOutlineSquare2Stack, HiOutlineCalendar, HiOutlineUser, 
   HiOutlineInformationCircle, HiOutlineDocumentCheck, HiOutlineXMark, 
-  HiOutlineArrowDownTray, HiOutlineClipboardDocumentList, HiCheck 
+  HiOutlineArrowDownTray
 } from 'react-icons/hi2';
 import { type ValidasiData } from '../data/mockData';
 
@@ -109,37 +109,6 @@ export const LihatDetailView = ({ data, navigate }: { data: ValidasiData, naviga
               <button className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 text-xs font-bold rounded-lg hover:bg-gray-50 flex items-center justify-center gap-2 shadow-sm">
                 <HiOutlineArrowDownTray className="w-4 h-4" /> Unduh PDF
               </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Sidebar Kanan Selesai */}
-        <div className="w-full lg:w-80 space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-            <h3 className="text-xs font-bold text-emerald-700 flex items-center gap-2 mb-6">
-              <HiOutlineClipboardDocumentList className="w-4 h-4" /> Riwayat Proses Validasi
-            </h3>
-            <div className="relative pl-3 border-l-2 border-emerald-200 space-y-8 ml-2">
-              <div className="relative">
-                <div className="absolute -left-5.5 top-0 bg-emerald-600 rounded-full p-0.5"><HiCheck className="w-3 h-3 text-white"/></div>
-                <p className="text-[11px] font-bold text-gray-800">Penugasan diterima</p>
-                <p className="text-[9px] text-gray-500 mt-0.5">{data.waktuPenugasan}</p>
-              </div>
-              <div className="relative">
-                <div className="absolute -left-5.5 top-0 bg-emerald-600 rounded-full p-0.5"><HiCheck className="w-3 h-3 text-white"/></div>
-                <p className="text-[11px] font-bold text-gray-800">Validasi dimulai</p>
-                <p className="text-[9px] text-gray-500 mt-0.5">{data.waktuValidasiMulai}</p>
-              </div>
-              <div className="relative">
-                <div className="absolute -left-5.5 top-0 bg-emerald-600 rounded-full p-0.5"><HiCheck className="w-3 h-3 text-white"/></div>
-                <p className="text-[11px] font-bold text-gray-800">Hasil validasi dikirim</p>
-                <p className="text-[9px] text-gray-500 mt-0.5">{data.waktuValidasiKirim}</p>
-              </div>
-              <div className="relative">
-                <div className="absolute -left-5.5 top-0 bg-emerald-600 rounded-full p-0.5"><HiCheck className="w-3 h-3 text-white"/></div>
-                <p className="text-[11px] font-bold text-gray-800">Validasi selesai</p>
-                <p className="text-[9px] text-gray-500 mt-0.5">{data.waktuValidasiSelesai}</p>
-              </div>
             </div>
           </div>
         </div>

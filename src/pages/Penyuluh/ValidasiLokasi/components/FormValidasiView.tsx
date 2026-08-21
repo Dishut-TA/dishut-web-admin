@@ -4,7 +4,7 @@ import {
 } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 import { type ValidasiData, INFO_DATA } from '../data/mockData';
-import { PageHeader, InfoItem, RadioStatus, SidebarKanan } from './SharedComponents';
+import { PageHeader, InfoItem, RadioStatus } from './SharedComponents';
 
 export const FormValidasiView = ({ data, navigate }: { data: ValidasiData, navigate: any }) => {
   const [formData, setFormData] = useState({
@@ -157,7 +157,6 @@ export const FormValidasiView = ({ data, navigate }: { data: ValidasiData, navig
           </div>
         </div>
 
-        <SidebarKanan data={data} />
       </div>
     </div>
   );

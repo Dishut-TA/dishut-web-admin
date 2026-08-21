@@ -37,11 +37,11 @@ export interface ProgramMonitoring {
 }
 
 export const MOCK_DASHBOARD_DATA: Record<string, any> = {
-  'PRG-2026-0030': { nama: 'Rehabilitasi Mangrove Tanjungpura', lokasi: 'Desa Tanjungpura, Kec. Karangampel,\nKab. Indramayu', periode: 'P1 - Monitoring P1', badge: 'P1' },
-  'PRG-2026-0012': { nama: 'Rehabilitasi Mangrove Eretan', lokasi: 'Desa Eretan, Kec. Kandanghaur,\nKab. Indramayu', periode: 'P1 - Monitoring P1', badge: 'P1' },
-  'PRG-2026-0007': { nama: 'Rehabilitasi Mangrove Karangsong', lokasi: 'Desa Karangsong, Kec. Indramayu,\nKab. Indramayu', periode: 'P1 - Monitoring P1', badge: 'P1' },
-  'PRG-2026-0018': { nama: 'Rehabilitasi Mangrove Kertasemaya', lokasi: 'Desa Kertasemaya, Kec. Kertasemaya,\nKab. Indramayu', periode: 'P2 - Monitoring P2', badge: 'P2' },
-  'PRG-2026-0021': { nama: 'Rehabilitasi Mangrove Pawidean', lokasi: 'Desa Pawidean, Kec. Juntinyuat,\nKab. Indramayu', periode: 'P3 - Monitoring P3', badge: 'P3' },
+  'PRG-2026-0030': { nama: 'Rehabilitasi Mangrove Tanjungpura', lokasi: 'Desa Tanjungpura, Kec. Karangampel,\nKab. Indramayu', periode: 'P1' },
+  'PRG-2026-0012': { nama: 'Rehabilitasi Mangrove Eretan', lokasi: 'Desa Eretan, Kec. Kandanghaur,\nKab. Indramayu', periode: 'P1' },
+  'PRG-2026-0007': { nama: 'Rehabilitasi Mangrove Karangsong', lokasi: 'Desa Karangsong, Kec. Indramayu,\nKab. Indramayu', periode: 'P1' },
+  'PRG-2026-0018': { nama: 'Rehabilitasi Mangrove Kertasemaya', lokasi: 'Desa Kertasemaya, Kec. Kertasemaya,\nKab. Indramayu', periode: 'P2' },
+  'PRG-2026-0021': { nama: 'Rehabilitasi Mangrove Pawidean', lokasi: 'Desa Pawidean, Kec. Juntinyuat,\nKab. Indramayu', periode: 'P3' },
 };
 
 export const MOCK_REKAP_DATA = [

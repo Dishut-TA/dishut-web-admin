@@ -206,6 +206,11 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
         { name: 'Saldo Keuntungan', path: `${basePath}/saldo/keuntungan`, icon: <HiOutlineWallet className='w-5 h-5'/> }
     ];
 
+    // KTH Pelaksanaan
+    const kthPelaksanaanMenus = [
+        dashboard,
+    ];
+
     const MENU_MAP: Record<string, any[]> = {
         [ROLES.STAFF]: staffMenus,
         [ROLES.KABID]: kabidDanSuperadminMenus,
@@ -215,6 +220,7 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
         [ROLES.KABIDBUPM]: bupmMenus,
         [ROLES.PENYULUH]: penyuluhMenus,
         [ROLES.KTH]: kthMenus,
+        [ROLES.KTH_PELAKSANAAN]: kthPelaksanaanMenus,
     };
 
     return MENU_MAP[userRole] || MENU_MAP[ROLES.STAFF];

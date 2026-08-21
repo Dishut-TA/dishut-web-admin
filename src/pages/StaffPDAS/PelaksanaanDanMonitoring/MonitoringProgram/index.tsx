@@ -4,7 +4,6 @@ import {
   HiOutlinePlus,
   HiOutlineMagnifyingGlass,
   HiOutlineFunnel,
-  HiEllipsisVertical,
   HiOutlineClipboardDocumentList,
   HiOutlineClock,
   HiOutlineArrowPath,
@@ -300,7 +299,7 @@ const MonitoringProgram: React.FC = () => {
         
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-slate-600 min-w-250">
-            <thead className="text-xs text-slate-600 font-bold border-b border-slate-100 bg-slate-50/50">
+            <thead className="bg-[#DCECE0] text-[#3A4D3F] text-xs uppercase tracking-wider font-bold">
               <tr>
                 <th className="py-3.5 px-6 font-semibold">Program</th>
                 <th className="py-3.5 px-6 font-semibold">Lokasi / KTH</th>
@@ -341,13 +340,9 @@ const MonitoringProgram: React.FC = () => {
                     <div className="flex items-center justify-center gap-2">
                       <button 
                         className="px-3 py-1.5 bg-white border border-[#008A4B] text-[#008A4B] hover:bg-emerald-50 text-xs font-semibold rounded-lg transition-colors"
-                        // MENGIRIM STATUS MELALUI STATE
                         onClick={() => navigate(`/admin/staff/monitoring/verifikasi/detail/${row.id}`, { state: { status: row.status } })}
                       >
                         Lihat Progres
-                      </button>
-                      <button className="p-1.5 text-slate-400 hover:text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
-                        <HiEllipsisVertical className="w-4 h-4" />
                       </button>
                     </div>
                   </td>

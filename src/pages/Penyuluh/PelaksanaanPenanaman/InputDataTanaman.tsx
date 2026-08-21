@@ -824,7 +824,7 @@ const PelaksanaanWizard: React.FC = () => {
          </div>
          <div className="overflow-x-auto p-4">
            <table className="w-full text-center text-[11px]">
-             <thead className="bg-[#F8FAFC] text-slate-600 font-bold border-b border-slate-200">
+             <thead className="bg-[#DCECE0] text-[#3A4D3F] text-xs uppercase tracking-wider font-bold">
                <tr>
                  <th className="py-3 px-3 text-left">No.</th>
                  <th className="py-3 px-3 text-left">Kode PU</th>
@@ -929,20 +929,20 @@ const PelaksanaanWizard: React.FC = () => {
       </div>
 
       {/* BOTTOM ACTION BAR (Sticky) */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 px-6 flex justify-between items-center z-40 shadow-[0_-4px_6px_-1px_rgb(0,0,0,0.05)] lg:pl-70">
-         <button onClick={prevStep} className="px-6 py-2.5 bg-white border border-slate-300 text-slate-700 font-bold text-sm hover:bg-slate-50 rounded-lg flex items-center gap-2 shadow-sm transition-colors">
+      <div className="flex justify-between items-center z-40">
+         <button onClick={prevStep} className="px-6 py-2.5 bg-white border border-slate-300 text-slate-700 font-bold text-sm hover:bg-slate-50 rounded-full flex items-center gap-2 shadow-sm transition-colors">
            <HiOutlineArrowLeft className="w-4 h-4" /> {currentStep === 5 ? 'Kembali Periksa' : 'Kembali'}
          </button>
          
          <div className="flex items-center gap-3">
-            <button className="px-6 py-2.5 border border-slate-300 text-slate-700 font-bold text-sm hover:bg-slate-50 rounded-lg flex items-center gap-2 shadow-sm transition-colors bg-white">
+            <button className="px-6 py-2.5 border border-slate-300 text-slate-700 font-bold text-sm hover:bg-slate-50 rounded-full flex items-center gap-2 shadow-sm transition-colors bg-white">
               <HiOutlineDocumentArrowDown className="w-4 h-4" /> Simpan Draft
             </button>
             
             {currentStep < 5 ? (
               <button 
                 onClick={nextStep} 
-                className="px-6 py-2.5 bg-[#008A4B] text-white font-bold text-sm hover:bg-emerald-800 rounded-lg flex items-center gap-2 shadow-sm transition-colors"
+                className="px-6 py-2.5 bg-[#008A4B] text-white font-bold text-sm hover:bg-emerald-800 rounded-full flex items-center gap-2 shadow-sm transition-colors"
               >
                 {currentStep === 2 && 'Lanjutkan ke Input Tanaman'}
                 {currentStep === 3 && 'Lanjut ke Dokumentasi Kegiatan'}
@@ -950,10 +950,10 @@ const PelaksanaanWizard: React.FC = () => {
                 <HiOutlineArrowRight className="w-4 h-4 stroke-2" />
               </button>
             ) : (
-              <button 
+              <button
                 onClick={handleSubmit} 
                 disabled={!isAgreed}
-                className={`px-8 py-2.5 font-bold text-sm rounded-lg flex items-center gap-2 shadow-sm transition-colors ${isAgreed ? 'bg-[#008A4B] text-white hover:bg-emerald-800' : 'bg-emerald-200 text-emerald-50 cursor-not-allowed'}`}
+                className={`px-8 py-2.5 font-bold text-sm rounded-full flex items-center gap-2 shadow-sm transition-colors ${isAgreed ? 'bg-primary text-white hover:bg-emerald-800' : 'bg-emerald-200 text-emerald-50 cursor-not-allowed'}`}
               >
                 Kirim Hasil Pelaksanaan <HiOutlineArrowRight className="w-4 h-4 stroke-2" />
               </button>

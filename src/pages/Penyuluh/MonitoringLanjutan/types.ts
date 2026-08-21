@@ -1,4 +1,3 @@
-// types.ts
 export type ViewMode = 'rekap' | 'table' | 'input' | 'edit';
 
 export type MonitoringStatus = 'Siap Monitoring' | 'Berjalan' | 'Menunggu Evaluasi' | 'Tindak Lanjut' | 'Selesai' | 'Dihentikan';
@@ -22,7 +21,6 @@ export interface ProgramData {
   nama: string;
   lokasi: string;
   periode: string;
-  badge: string;
 }
 
 export interface RekapRow {

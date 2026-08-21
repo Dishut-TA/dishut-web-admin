@@ -6,12 +6,10 @@ import {
   HiOutlineUserPlus,
   HiOutlineMapPin,
   HiOutlineCheckCircle,
-  HiOutlineXCircle,
   HiOutlineInformationCircle,
   HiOutlineDocumentText,
   HiOutlineClock,
   HiOutlineDocumentCheck,
-  HiChevronRight,
   HiOutlineCalendar,
   HiOutlineArrowDownTray,
   HiArrowRight,
@@ -27,14 +25,11 @@ type MonitoringStatus = 'Siap Monitoring' | 'Berjalan' | 'Menunggu Evaluasi' | '
 const DetailMonitoringPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  
   const location = useLocation();
-  const initialStatus = (location.state?.status as MonitoringStatus) || 'Siap Monitoring';
+  
+  // Membaca status secara dinamis dari tabel sebelumnya
+  const currentStatus = (location.state?.status as MonitoringStatus) || 'Siap Monitoring';
 
-  // --- DEV MODE TOGGLE ---
-  const ENABLE_DEV_MODE = false; 
-
-  const [currentStatus, setCurrentStatus] = useState<MonitoringStatus>(initialStatus);
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
 
   const getBadgeColor = (status: string) => {
@@ -82,26 +77,25 @@ const DetailMonitoringPage: React.FC = () => {
         <div className="flex items-center gap-3">
           {currentStatus === 'Selesai' ? (
             <>
-              <button onClick={() => navigate(-1)} className="px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2">
+              <button onClick={() => navigate(-1)} className="px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 cursor-pointer shadow-sm">
                 <HiOutlineArrowLeft className="w-4 h-4" /> Kembali ke Daftar
               </button>
-              {/* TRIGGER MODAL UNDUH RINGKASAN AKHIR */}
-              <button onClick={() => setIsDownloadModalOpen(true)} className="px-4 py-2 bg-[#008A4B] text-white text-sm font-bold rounded-lg hover:bg-emerald-800 transition-colors flex items-center gap-2 shadow-sm">
+              <button onClick={() => setIsDownloadModalOpen(true)} className="px-4 py-2 bg-[#008A4B] text-white text-sm font-bold rounded-lg hover:bg-emerald-800 transition-colors flex items-center gap-2 shadow-sm cursor-pointer">
                 <HiOutlineArrowDownTray className="w-4 h-4 stroke-2" /> Unduh Ringkasan Akhir
               </button>
             </>
           ) : (
             <>
-              <button onClick={() => navigate(-1)} className="px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2">
+              <button onClick={() => navigate(-1)} className="px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 cursor-pointer shadow-sm">
                 <HiOutlineArrowLeft className="w-4 h-4" /> Kembali
               </button>
               {currentStatus !== 'Berjalan' && (
-                <button onClick={() => setIsDownloadModalOpen(true)} className="px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2">
+                <button onClick={() => setIsDownloadModalOpen(true)} className="px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 cursor-pointer shadow-sm">
                   <HiOutlinePrinter className="w-4 h-4" /> Cetak Ringkasan
                 </button>
               )}
               {currentStatus === 'Siap Monitoring' && (
-                <button onClick={() => navigate(`/admin/staff/monitoring/verifikasi/tugaskan/${id || 'PRG-2026-0007'}`)} className="px-4 py-2 bg-[#008A4B] text-white text-sm font-semibold rounded-lg hover:bg-emerald-800 transition-colors flex items-center gap-2 shadow-sm">
+                <button onClick={() => navigate(`/admin/staff/monitoring/verifikasi/tugaskan/${id || 'PRG-2026-0007'}`)} className="px-4 py-2 bg-[#008A4B] text-white text-sm font-semibold rounded-lg hover:bg-emerald-800 transition-colors flex items-center gap-2 shadow-sm cursor-pointer">
                   <HiOutlineUserPlus className="w-4 h-4 stroke-2" /> Tugaskan Monitoring
                 </button>
               )}
@@ -120,7 +114,7 @@ const DetailMonitoringPage: React.FC = () => {
             <PiPlant className="w-7 h-7 text-[#008A4B]" />
           </div>
           <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-y-5 gap-x-4">
-            <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">ID Program</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">PRG-2026-0007</span></div>
+            <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">ID Program</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">{id || 'PRG-2026-0007'}</span></div>
             <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">KTH</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">KTH Karangsong Lestari</span></div>
             <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">Jenis Program</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">Rehabilitasi Mangrove</span></div>
             <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">Penyuluh</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">Ahmad Fauzi</span></div>
@@ -133,14 +127,13 @@ const DetailMonitoringPage: React.FC = () => {
           </div>
           <div className="w-full lg:w-64 h-28 shrink-0 bg-slate-100 rounded-lg relative overflow-hidden bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=400')] bg-cover bg-center border border-slate-200">
             <HiOutlineMapPin className="w-7 h-7 text-red-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 drop-shadow-md" />
-            <div className="absolute bottom-2 left-2"><button className="text-[11px] font-bold text-blue-600 bg-white/90 px-2 py-1 rounded shadow-sm flex items-center gap-1">Lihat di Peta</button></div>
+            <div className="absolute bottom-2 left-2"><button className="text-[11px] font-bold text-blue-600 bg-white/90 px-2 py-1 rounded shadow-sm flex items-center gap-1 cursor-pointer hover:bg-white transition-colors">Lihat di Peta</button></div>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-8 space-y-6">
-          
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="px-5 py-4 border-b border-slate-100">
               <h3 className="text-sm font-bold text-slate-800">Ringkasan Realisasi P0</h3>
@@ -222,7 +215,7 @@ const DetailMonitoringPage: React.FC = () => {
                   <HiOutlineMapPin className="w-5 h-5 text-orange-500 absolute bottom-1/3 right-1/4" />
                 </div>
                 <div className="absolute bottom-3 left-3">
-                  <button className="px-3 py-1.5 bg-white rounded-md text-[11px] font-bold text-blue-600 shadow-sm flex items-center gap-1 hover:bg-slate-50 transition-colors">
+                  <button className="px-3 py-1.5 bg-white rounded-md text-[11px] font-bold text-blue-600 shadow-sm flex items-center gap-1 hover:bg-slate-50 transition-colors cursor-pointer">
                     Lihat di Peta <HiOutlineMapPin className="w-3 h-3" />
                   </button>
                 </div>
@@ -232,7 +225,7 @@ const DetailMonitoringPage: React.FC = () => {
                   {[1,2,3,4].map(i => <div key={i} className="bg-slate-200 rounded-lg h-full w-full bg-[url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?q=80&w=150')] bg-cover border border-slate-200"></div>)}
                 </div>
                 <div className="mt-1">
-                  <button className="text-[11px] font-bold text-blue-600 hover:text-blue-700 transition-colors">Lihat semua dokumentasi →</button>
+                  <button className="text-[11px] font-bold text-blue-600 hover:text-blue-700 transition-colors cursor-pointer">Lihat semua dokumentasi →</button>
                 </div>
               </div>
             </div>
@@ -279,10 +272,8 @@ const DetailMonitoringPage: React.FC = () => {
               </table>
             </div>
           </div>
-
         </div>
         
-        {/* Sidebar Kanan Khusus "Siap Monitoring" */}
         <div className="lg:col-span-4 space-y-6">
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="px-5 py-4 border-b border-slate-100">
@@ -341,13 +332,12 @@ const DetailMonitoringPage: React.FC = () => {
 
   const renderViewBerjalan = () => (
     <div className="space-y-6">
-      {/* Ringkasan Program Card */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
         <h3 className="text-sm font-bold text-slate-900 mb-4">Ringkasan Program</h3>
         <div className="flex flex-col lg:flex-row gap-6">
           <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-y-6 gap-x-4">
             <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Nama Program</p><p className="text-xs font-bold text-slate-900">Rehabilitasi Mangrove Karangsong</p></div>
-            <div><p className="text-[10px] text-slate-500 font-semibold mb-1">ID Program</p><p className="text-xs font-bold text-slate-900">PRG-2026-0007</p></div>
+            <div><p className="text-[10px] text-slate-500 font-semibold mb-1">ID Program</p><p className="text-xs font-bold text-slate-900">{id || 'PRG-2026-0007'}</p></div>
             <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Jenis Program</p><p className="text-xs font-bold text-slate-900">Rehabilitasi Mangrove</p></div>
             <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Luas Area</p><p className="text-xs font-bold text-slate-900">25,40 Ha</p></div>
             <div className="col-span-2">
@@ -370,15 +360,14 @@ const DetailMonitoringPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Hasil Monitoring Tabs & Content */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="px-6 py-5 border-b border-slate-100">
           <h3 className="text-base font-bold text-slate-900 mb-4">Hasil Monitoring P2 <span className="text-xs font-normal text-slate-500 ml-1">(22 Mei 2026)</span></h3>
           <div className="flex gap-6 border-b border-slate-200 text-sm">
-            <button className="pb-3 border-b-2 border-[#008A4B] text-[#008A4B] font-bold">Ringkasan Hasil</button>
-            <button className="pb-3 text-slate-500 font-medium hover:text-slate-700">Data Detail</button>
-            <button className="pb-3 text-slate-500 font-medium hover:text-slate-700">Dokumentasi</button>
-            <button className="pb-3 text-slate-500 font-medium hover:text-slate-700">Catatan Penyuluh</button>
+            <button className="pb-3 border-b-2 border-[#008A4B] text-[#008A4B] font-bold cursor-pointer">Ringkasan Hasil</button>
+            <button className="pb-3 text-slate-500 font-medium hover:text-slate-700 cursor-pointer">Data Detail</button>
+            <button className="pb-3 text-slate-500 font-medium hover:text-slate-700 cursor-pointer">Dokumentasi</button>
+            <button className="pb-3 text-slate-500 font-medium hover:text-slate-700 cursor-pointer">Catatan Penyuluh</button>
           </div>
         </div>
         
@@ -456,7 +445,7 @@ const DetailMonitoringPage: React.FC = () => {
               <div><p className="text-[10px] text-slate-500 font-semibold mb-1">KTH</p><p className="text-xs font-bold text-slate-900">KTH Karangsong Lestari</p></div>
               <div className="col-span-1 row-span-4 hidden md:block lg:hidden">
               </div>
-              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">ID Program</p><p className="text-xs font-bold text-slate-900">PRG-2026-0007</p></div>
+              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">ID Program</p><p className="text-xs font-bold text-slate-900">{id || 'PRG-2026-0007'}</p></div>
               <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Penyuluh</p><p className="text-xs font-bold text-slate-900">Ahmad Fauzi</p></div>
               <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Jenis Program</p><p className="text-xs font-bold text-slate-900">Rehabilitasi Mangrove</p></div>
               <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Periode Monitoring</p><p className="text-xs font-bold text-slate-900">P2</p></div>
@@ -469,7 +458,7 @@ const DetailMonitoringPage: React.FC = () => {
                <div className="w-full h-24 bg-slate-100 rounded-lg relative overflow-hidden bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=400')] bg-cover bg-center border border-slate-200">
                   <div className="absolute inset-0 flex items-center justify-center"><HiOutlineMapPin className="w-6 h-6 text-green-500 drop-shadow" /></div>
                </div>
-               <button className="text-[10px] font-bold text-blue-600 mt-1.5 flex items-center gap-1 hover:text-blue-700">Lihat di Peta <HiOutlineMapPin className="w-3 h-3"/></button>
+               <button className="text-[10px] font-bold text-blue-600 mt-1.5 flex items-center gap-1 hover:text-blue-700 cursor-pointer">Lihat di Peta <HiOutlineMapPin className="w-3 h-3"/></button>
             </div>
           </div>
         </div>
@@ -517,7 +506,7 @@ const DetailMonitoringPage: React.FC = () => {
             <h3 className="text-sm font-bold text-slate-900">Data Hasil Monitoring P2</h3>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-[11px]">
               <thead className="bg-[#F8FAFC] text-[10px] text-slate-600 font-bold border-b border-slate-200">
                 <tr><th className="py-3 px-5">Indikator</th><th className="py-3 px-5">Target (P0)</th><th className="py-3 px-5">Hasil P2</th><th className="py-3 px-5">Perubahan</th><th className="py-3 px-5">Persentase</th><th className="py-3 px-5">Keterangan</th></tr>
               </thead>
@@ -551,27 +540,12 @@ const DetailMonitoringPage: React.FC = () => {
 
       <div className="lg:col-span-4 space-y-6">
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col items-center text-center">
-          <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3 ${
-             currentStatus === 'Menunggu Evaluasi' ? 'bg-orange-100 text-orange-600' :
-             currentStatus === 'Dihentikan' ? 'bg-red-100 text-red-600' :
-             currentStatus === 'Selesai' ? 'bg-green-100 text-green-600' :
-             'bg-blue-100 text-blue-600'
-          }`}>
-             {currentStatus === 'Menunggu Evaluasi' ? <HiOutlineClock className="w-8 h-8"/> :
-              currentStatus === 'Selesai' ? <HiOutlineCheckCircle className="w-8 h-8"/> :
-              currentStatus === 'Dihentikan' ? <HiOutlineXCircle className="w-8 h-8"/> :
-              <HiOutlineClock className="w-8 h-8"/>}
+          <div className="w-16 h-16 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mb-3">
+             <HiOutlineClock className="w-8 h-8"/>
           </div>
-          <h2 className={`text-xl font-bold mb-2 ${
-             currentStatus === 'Menunggu Evaluasi' ? 'text-orange-600' :
-             currentStatus === 'Dihentikan' ? 'text-red-600' :
-             currentStatus === 'Selesai' ? 'text-green-600' :
-             'text-blue-600'
-          }`}>{currentStatus}</h2>
+          <h2 className="text-xl font-bold mb-2 text-orange-600">Menunggu Evaluasi</h2>
           <p className="text-xs text-gray-500">
-             {currentStatus === 'Menunggu Evaluasi' ? 'Hasil monitoring telah dikirim dan sedang menunggu proses evaluasi oleh Tim Evaluasi.' :
-              currentStatus === 'Dihentikan' ? 'Program tidak dilanjutkan ke periode berikutnya berdasarkan keputusan penghentian pada modul evaluasi.' :
-              'Data dan dokumentasi telah diverifikasi dan divalidasi.'}
+             Hasil monitoring telah dikirim dan sedang menunggu proses evaluasi oleh Tim Evaluasi.
           </p>
         </div>
 
@@ -625,7 +599,7 @@ const DetailMonitoringPage: React.FC = () => {
           <h3 className="text-sm font-bold text-slate-900 mb-4">Timeline Program</h3>
           <div className="space-y-6">
             <div className="flex gap-4 relative">
-              <div className="absolute left-[11px] top-7 bottom-[-24px] w-0.5 bg-green-200"></div>
+              <div className="absolute left-2.75 top-7 bottom-6 w-0.5 bg-green-200"></div>
               <div className="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center shrink-0 z-10 shadow-sm border-2 border-white">
                 <HiOutlineCheckCircle className="w-4 h-4" />
               </div>
@@ -639,7 +613,7 @@ const DetailMonitoringPage: React.FC = () => {
             </div>
             
             <div className="flex gap-4 relative">
-              <div className="absolute left-[11px] top-7 bottom-[-24px] w-0.5 bg-green-200"></div>
+              <div className="absolute left-2.75 top-7 bottom-6 w-0.5 bg-green-200"></div>
               <div className="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center shrink-0 z-10 shadow-sm border-2 border-white">
                 <HiOutlineCheckCircle className="w-4 h-4" />
               </div>
@@ -653,7 +627,7 @@ const DetailMonitoringPage: React.FC = () => {
             </div>
 
             <div className="flex gap-4 relative">
-              <div className="absolute left-[11px] top-7 bottom-[-24px] w-0.5 bg-gray-200"></div>
+              <div className="absolute left-2.75 top-7 bottom-6 w-0.5 bg-gray-200"></div>
               <div className="w-6 h-6 rounded-full bg-orange-500 text-white flex items-center justify-center shrink-0 z-10 shadow-sm border-2 border-white">
                 <div className="w-2 h-2 bg-white rounded-full"></div>
               </div>
@@ -667,285 +641,34 @@ const DetailMonitoringPage: React.FC = () => {
             </div>
 
             <div className="flex gap-4 relative">
-              <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center shrink-0 z-10 border-2 border-white"></div>
+              <div className="absolute left-2.75 top-7 bottom-6 w-0.5 bg-gray-200"></div>
+              <div className="w-6 h-6 rounded-full bg-white border-2 border-gray-300 flex items-center justify-center shrink-0 z-10"></div>
               <div className="flex-1">
                 <div className="flex justify-between items-start mb-0.5">
-                  <p className="text-xs font-bold text-gray-500">P3 - Monitoring P3</p>
+                  <p className="text-[11px] font-bold text-gray-500">P3 - Monitoring P3</p>
                   <span className="text-[9px] font-bold text-gray-500">Menunggu</span>
                 </div>
                 <p className="text-[10px] text-gray-400">Jul 2026</p>
               </div>
             </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  );
-
-  // ==========================================================================
-  // VIEW 4: SELESAI (Hasil Akhir)
-  // ==========================================================================
-  const renderViewSelesai = () => (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-      <div className="lg:col-span-8 space-y-6">
-        
-        {/* Informasi Program (Selesai Layout) */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <h3 className="text-sm font-bold text-slate-900 mb-4">Informasi Program</h3>
-          <div className="flex flex-col lg:flex-row gap-6">
-            <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-y-5 gap-x-4">
-              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Nama Program</p><p className="text-xs font-bold text-slate-900 leading-snug">Rehabilitasi Mangrove<br/>Karangsong</p></div>
-              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">ID Program</p><p className="text-xs font-bold text-slate-900">PRG-2026-0007</p></div>
-              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Jenis Program</p><p className="text-xs font-bold text-slate-900">Rehabilitasi Mangrove</p></div>
-              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Luas Area</p><p className="text-xs font-bold text-slate-900">25,40 Ha</p></div>
-              <div className="col-span-2">
-                <p className="text-[10px] text-slate-500 font-semibold mb-1 flex items-center gap-1"><HiOutlineMapPin className="w-3.5 h-3.5 text-green-600"/> Lokasi Program</p>
-                <p className="text-xs font-bold text-slate-900 leading-relaxed">Desa Karangsong, Kec. Indramayu<br/>Kabupaten Indramayu, Jawa Barat</p>
-              </div>
-              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Penyuluh Pendamping</p><p className="text-xs font-bold text-slate-900">Ahmad Fauzi, SP</p></div>
-              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">KTH Pelaksana</p><p className="text-xs font-bold text-slate-900">KTH Karangsong Lestari</p></div>
-              <div className="col-span-4 border-t border-slate-100 pt-4 grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
-                <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Periode Monitoring</p><p className="text-xs font-bold text-slate-900">P0 – P4</p></div>
-                <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Tanggal Monitoring Awal</p><p className="text-xs font-bold text-slate-900">10 Mei 2026</p></div>
-                <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Tanggal Monitoring Akhir</p><p className="text-xs font-bold text-slate-900">12 Mei 2027</p></div>
-                <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Total Durasi Monitoring</p><p className="text-xs font-bold text-slate-900">12 Bulan</p></div>
-              </div>
-            </div>
-            <div className="w-full md:hidden lg:block lg:w-48 shrink-0">
-               <p className="text-[10px] text-slate-500 font-semibold mb-2">Lokasi Program</p>
-               <div className="w-full h-32 bg-slate-100 rounded-lg relative overflow-hidden bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=400')] bg-cover bg-center border border-slate-200"></div>
-            </div>
-          </div>
-        </div>
-
-        {/* Ringkasan Hasil Akhir (P4) */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <h3 className="text-sm font-bold text-slate-900 mb-4">Ringkasan Hasil Akhir (P4)</h3>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            <div className="border border-emerald-100 rounded-xl p-4 shadow-sm relative overflow-hidden">
-               <PiPlant className="w-6 h-6 text-emerald-600 mb-2"/>
-               <p className="text-[10px] text-slate-500 font-semibold">Tanaman Hidup</p>
-               <h3 className="text-xl font-bold text-slate-900 my-1">16.820 <span className="text-[10px] font-normal text-slate-500">batang</span></h3>
-               <p className="text-[10px] font-bold text-emerald-600">94,55% dari P0</p>
-            </div>
-            <div className="border border-red-100 rounded-xl p-4 shadow-sm relative overflow-hidden">
-               <PiTree className="w-6 h-6 text-red-500 mb-2"/>
-               <p className="text-[10px] text-slate-500 font-semibold">Tanaman Mati</p>
-               <h3 className="text-xl font-bold text-slate-900 my-1">910 <span className="text-[10px] font-normal text-slate-500">batang</span></h3>
-               <p className="text-[10px] font-bold text-red-500">5,11% dari P0</p>
-            </div>
-            <div className="border border-slate-200 rounded-xl p-4 shadow-sm">
-               <HiOutlineMapPin className="w-6 h-6 text-blue-500 mb-2"/>
-               <p className="text-[10px] text-slate-500 font-semibold">Titik Geotag</p>
-               <h3 className="text-xl font-bold text-slate-900 my-1">118 <span className="text-[10px] font-normal text-slate-500">titik</span></h3>
-               <p className="text-[10px] font-bold text-emerald-600">100% terverifikasi</p>
-            </div>
-            <div className="border border-slate-200 rounded-xl p-4 shadow-sm">
-               <HiOutlineDocumentText className="w-6 h-6 text-purple-500 mb-2"/>
-               <p className="text-[10px] text-slate-500 font-semibold">Dokumentasi</p>
-               <h3 className="text-xl font-bold text-slate-900 my-1">42 <span className="text-[10px] font-normal text-slate-500">foto</span></h3>
-               <p className="text-[10px] font-bold text-emerald-600">100% lengkap</p>
-            </div>
-            <div className="border border-slate-200 rounded-xl p-4 shadow-sm bg-slate-50/50">
-               <HiOutlineCalendar className="w-6 h-6 text-blue-500 mb-2"/>
-               <p className="text-[10px] text-slate-500 font-semibold">Periode Monitoring</p>
-               <h3 className="text-xs font-bold text-slate-900 my-1 leading-snug">10 Mei 2026 –<br/>12 Mei 2027</h3>
-               <p className="text-[10px] font-bold text-slate-600 mt-1">5 periode selesai</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Charts / Perbandingan Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col">
-             <h3 className="text-sm font-bold text-slate-900 mb-4">Perkembangan Persentase Hidup (P0 – P4)</h3>
-             {/* Mock Chart Area */}
-             <div className="flex-1 bg-gradient-to-b from-emerald-50 to-white border-x border-t border-slate-100 rounded-t-lg relative mt-4 min-h-[140px]">
-                {/* Y-Axis mock */}
-                <div className="absolute left-2 top-0 bottom-0 flex flex-col justify-between text-[8px] text-slate-400 py-2">
-                  <span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span>
-                </div>
-                {/* Data points mock */}
-                <div className="absolute left-10 right-4 top-4 bottom-8 flex justify-between items-end">
-                   {/* P0 */} <div className="flex flex-col items-center gap-1 w-full"><span className="text-[9px] font-bold text-emerald-800 absolute top-2">93,33%</span><div className="w-2 h-2 rounded-full bg-emerald-600 z-10"></div></div>
-                   {/* P1 */} <div className="flex flex-col items-center gap-1 w-full"><span className="text-[9px] font-bold text-emerald-800 absolute top-0">95,20%</span><div className="w-2 h-2 rounded-full bg-emerald-600 z-10 mb-2"></div></div>
-                   {/* P2 */} <div className="flex flex-col items-center gap-1 w-full"><span className="text-[9px] font-bold text-emerald-800 absolute top-3">92,01%</span><div className="w-2 h-2 rounded-full bg-emerald-600 z-10 -mb-1"></div></div>
-                   {/* P3 */} <div className="flex flex-col items-center gap-1 w-full"><span className="text-[9px] font-bold text-emerald-800 absolute top-1.5">93,17%</span><div className="w-2 h-2 rounded-full bg-emerald-600 z-10 mb-1"></div></div>
-                   {/* P4 */} <div className="flex flex-col items-center gap-1 w-full"><span className="text-[9px] font-bold text-emerald-800 absolute top-[1px]">94,55%</span><div className="w-2 h-2 rounded-full bg-emerald-600 z-10 mb-3"></div></div>
-                </div>
-                {/* Mock Line */}
-                <div className="absolute left-10 right-10 top-8 h-[1px] bg-emerald-600"></div>
-                {/* X-Axis labels */}
-                <div className="absolute left-10 right-4 bottom-2 flex justify-between text-[8px] text-slate-500 font-medium">
-                  <div className="text-center">P0<br/><span className="text-[7px]">10 Mei 2026</span></div>
-                  <div className="text-center">P1<br/><span className="text-[7px]">12 Jun 2026</span></div>
-                  <div className="text-center">P2<br/><span className="text-[7px]">12 Mei 2026</span></div>
-                  <div className="text-center">P3<br/><span className="text-[7px]">20 Jul 2026</span></div>
-                  <div className="text-center">P4<br/><span className="text-[7px]">12 Mei 2027</span></div>
-                </div>
-             </div>
-             <div className="text-center mt-3"><span className="inline-flex items-center gap-1 text-[9px] font-semibold text-slate-600"><span className="w-2 h-2 rounded-full bg-emerald-600"></span>Persentase Hidup</span></div>
-           </div>
-
-           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col">
-             <h3 className="text-sm font-bold text-slate-900 mb-4">Perbandingan Awal dan Akhir</h3>
-             <div className="flex items-center gap-3 mb-4 flex-1">
-                <div className="flex-1 bg-slate-50 border border-slate-200 rounded-lg p-3 text-center">
-                   <p className="text-[10px] font-bold text-slate-600 mb-2">Kondisi Awal (P0)</p>
-                   <h4 className="text-base font-bold text-slate-900">13.860 <span className="text-[9px] font-normal text-slate-500">batang</span></h4>
-                   <p className="text-[9px] text-slate-500 mb-2">Tanaman Hidup</p>
-                   <span className="text-lg font-bold text-emerald-600">93,33%</span>
-                </div>
-                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0 border border-slate-200">
-                   <HiArrowRight className="w-4 h-4 text-slate-400" />
-                </div>
-                <div className="flex-1 bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-center relative overflow-hidden">
-                   <p className="text-[10px] font-bold text-emerald-800 mb-2">Kondisi Akhir (P4)</p>
-                   <h4 className="text-base font-bold text-slate-900">16.820 <span className="text-[9px] font-normal text-slate-500">batang</span></h4>
-                   <p className="text-[9px] text-slate-500 mb-2">Tanaman Hidup</p>
-                   <span className="text-lg font-bold text-emerald-600">94,55%</span>
-                   <PiPlant className="w-12 h-12 text-emerald-200 absolute -bottom-2 -right-2 opacity-50" />
-                </div>
-             </div>
-             <div className="bg-[#f0fdf4] border border-[#bbf7d0] rounded-lg p-3 flex items-center gap-3">
-                <div className="bg-emerald-100 p-1.5 rounded-md"><HiArrowTrendingUp className="w-4 h-4 text-emerald-700"/></div>
-                <div>
-                   <p className="text-[10px] text-emerald-800 font-semibold mb-0.5">Peningkatan Tanaman Hidup</p>
-                   <p className="text-sm font-bold text-emerald-700">+ 2.960 batang (+1,22%)</p>
-                </div>
-             </div>
-           </div>
-        </div>
-
-        {/* Bottom Row Selesai */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-             <div className="flex justify-between items-center mb-3">
-               <h3 className="text-sm font-bold text-slate-900">Dokumentasi Kegiatan</h3>
-               <span className="text-[10px] font-bold text-blue-600 hover:text-blue-700 cursor-pointer">Lihat Semua (42)</span>
-             </div>
-             <div className="grid grid-cols-4 gap-2">
-               {[1,2,3,4].map(i => <div key={i} className="bg-slate-200 rounded h-16 bg-[url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?q=80&w=150')] bg-cover border border-slate-200"></div>)}
-             </div>
-           </div>
-           
-           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-             <h3 className="text-sm font-bold text-slate-900 mb-3">Evaluasi Akhir Program</h3>
-             <div className="flex gap-3 items-start">
-                <div className="mt-1"><HiOutlineDocumentCheck className="w-6 h-6 text-[#008A4B]" /></div>
-                <div>
-                  <h4 className="text-xs font-bold text-[#008A4B] mb-1">Program dinyatakan berhasil.</h4>
-                  <p className="text-[10px] text-slate-600 leading-relaxed mb-2">Persentase hidup tanaman mangrove telah mencapai target ({'>'}80%) dan tidak terdapat indikasi kegagalan signifikan.</p>
-                  <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded text-[9px] font-bold">Memenuhi Kriteria</span>
-                </div>
-             </div>
-           </div>
-        </div>
-
-      </div>
-
-      <div className="lg:col-span-4 space-y-6">
-        
-        {/* Status Selesai Card */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 text-center">
-          <h3 className="text-sm font-bold text-slate-500 mb-4 text-left border-b border-slate-100 pb-3">Status Program</h3>
-          <div className="flex justify-center mb-4 mt-2">
-             <div className="w-16 h-16 rounded-full bg-emerald-50 border-2 border-emerald-100 flex items-center justify-center">
-               <HiOutlineCheckCircle className="w-8 h-8 text-emerald-500" />
-             </div>
-          </div>
-          <h2 className="text-xl font-bold text-emerald-600 mb-2">Monitoring Selesai</h2>
-          <p className="text-[11px] text-slate-600 leading-relaxed mb-6 px-2">Seluruh periode monitoring (P0 – P4) telah selesai dilaksanakan. Data dan dokumentasi telah diverifikasi.</p>
-          <div className="bg-slate-50 border border-slate-100 rounded-lg p-3 text-left space-y-2">
-             <div className="flex justify-between items-center text-[10px]">
-               <span className="text-slate-500 flex items-center gap-1.5"><HiOutlineCalendar className="w-3.5 h-3.5 text-emerald-600"/> Tanggal Selesai Monitoring Akhir</span>
-               <span className="font-bold text-slate-900">12 Mei 2027</span>
-             </div>
-             <div className="flex justify-between items-center text-[10px] border-t border-slate-200 pt-2">
-               <span className="text-slate-500 flex items-center gap-1.5"><HiOutlineUserPlus className="w-3.5 h-3.5 text-emerald-600"/> Dievaluasi Oleh</span>
-               <span className="font-bold text-slate-900">Tim Evaluasi PDAS Citarum</span>
-             </div>
-          </div>
-        </div>
-
-        {/* Riwayat Status Program P0-P4 */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <h3 className="text-sm font-bold text-slate-900 mb-5">Riwayat Status Program</h3>
-          <div className="space-y-6">
-            <div className="flex gap-4 relative">
-              <div className="absolute left-[11px] top-7 bottom-[-24px] w-0.5 bg-emerald-200"></div>
-              <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 z-10 shadow-sm border-2 border-white"><HiOutlineCheckCircle className="w-4 h-4" /></div>
-              <div className="flex-1">
-                <div className="flex justify-between items-start mb-0.5"><p className="text-xs font-bold text-slate-900">P0 - Penanaman Awal</p><span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Selesai</span></div>
-                <p className="text-[10px] text-slate-500">10 Mei 2026</p>
-              </div>
-            </div>
             
             <div className="flex gap-4 relative">
-              <div className="absolute left-[11px] top-7 bottom-[-24px] w-0.5 bg-emerald-200"></div>
-              <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 z-10 shadow-sm border-2 border-white"><HiOutlineCheckCircle className="w-4 h-4" /></div>
-              <div className="flex-1">
-                <div className="flex justify-between items-start mb-0.5"><p className="text-xs font-bold text-slate-900">P1 - Monitoring P1</p><span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Selesai</span></div>
-                <p className="text-[10px] text-slate-500">27 Mei – 12 Jun 2026</p>
-              </div>
-            </div>
-
-            <div className="flex gap-4 relative">
-              <div className="absolute left-[11px] top-7 bottom-[-24px] w-0.5 bg-emerald-200"></div>
-              <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 z-10 shadow-sm border-2 border-white"><HiOutlineCheckCircle className="w-4 h-4" /></div>
-              <div className="flex-1">
-                <div className="flex justify-between items-start mb-0.5"><p className="text-xs font-bold text-slate-900">P2 - Monitoring P2</p><span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Selesai</span></div>
-                <p className="text-[10px] text-slate-500">10 Mei – 12 Mei 2026</p>
-              </div>
-            </div>
-
-            <div className="flex gap-4 relative">
-              <div className="absolute left-[11px] top-7 bottom-[-24px] w-0.5 bg-emerald-200"></div>
-              <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 z-10 shadow-sm border-2 border-white"><HiOutlineCheckCircle className="w-4 h-4" /></div>
-              <div className="flex-1">
-                <div className="flex justify-between items-start mb-0.5"><p className="text-xs font-bold text-slate-900">P3 - Monitoring P3</p><span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Selesai</span></div>
-                <p className="text-[10px] text-slate-500">01 Jul – 20 Jul 2026</p>
-              </div>
-            </div>
-
-            <div className="flex gap-4 relative">
-              <div className="absolute left-[11px] top-7 bottom-[-24px] w-0.5 bg-emerald-200"></div>
-              <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 z-10 shadow-sm border-2 border-white"><HiOutlineCheckCircle className="w-4 h-4" /></div>
-              <div className="flex-1">
-                <div className="flex justify-between items-start mb-0.5"><p className="text-xs font-bold text-slate-900">P4 - Monitoring P4 (Akhir)</p><span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Selesai</span></div>
-                <p className="text-[10px] text-slate-500">10 Mei 2026 – 12 Mei 2027</p>
-              </div>
-            </div>
-            
-            <div className="flex gap-4 relative bg-emerald-50 -mx-6 p-4 rounded-b-xl border-t border-emerald-100">
-              <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 z-10 shadow-sm border-2 border-white ml-2"><HiOutlineCheckCircle className="w-4 h-4" /></div>
+              <div className="w-6 h-6 rounded-full bg-white border-2 border-gray-300 flex items-center justify-center shrink-0 z-10"></div>
               <div className="flex-1">
                 <div className="flex justify-between items-start mb-0.5">
-                  <p className="text-xs font-bold text-[#008A4B]">Monitoring Selesai</p>
-                  <span className="text-[9px] font-bold text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded bg-white">Selesai</span>
+                  <p className="text-[11px] font-bold text-gray-500">P4 - Monitoring P4</p>
+                  <span className="text-[9px] font-bold text-gray-500">Menunggu</span>
                 </div>
-                <p className="text-[10px] text-emerald-600">12 Mei 2027</p>
+                <p className="text-[10px] text-gray-400">Sep 2026</p>
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Catatan Akhir */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 relative overflow-hidden">
-           <PiPlant className="w-32 h-32 text-slate-50 absolute -bottom-6 -right-6 pointer-events-none" />
-           <h3 className="text-sm font-bold text-slate-900 mb-3 relative z-10">Catatan Akhir</h3>
-           <p className="text-[11px] text-slate-600 leading-relaxed mb-3 relative z-10">Seluruh rangkaian monitoring telah dilaksanakan sesuai jadwal. Lokasi program menunjukkan pertumbuhan yang stabil dan ekosistem mangrove terlindungi dengan baik.</p>
-           <p className="text-[11px] text-slate-600 leading-relaxed font-semibold relative z-10">Terima kasih kepada Penyuluh dan KTH atas kerja sama dan partisipasinya.</p>
         </div>
 
       </div>
     </div>
   );
 
-  // ==========================================================================
-  // VIEW 5: TINDAK LANJUT
-  // ==========================================================================
   const renderViewTindakLanjut = () => (
     <div className="space-y-6">
       
@@ -956,7 +679,7 @@ const DetailMonitoringPage: React.FC = () => {
           <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-4">
             <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">Nama Program</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">Rehabilitasi Mangrove Karangsong</span></div>
             <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">KTH</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">KTH Karangsong Lestari</span></div>
-            <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">ID Program</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">PRG-2026-0007</span></div>
+            <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">ID Program</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">{id || 'PRG-2026-0007'}</span></div>
             <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">Penyuluh</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">Ahmad Fauzi</span></div>
             <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">Jenis Program</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">Rehabilitasi Mangrove</span></div>
             <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">Periode Monitoring</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">P2</span></div>
@@ -1168,7 +891,7 @@ const DetailMonitoringPage: React.FC = () => {
                <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
                  <tr><td className="py-2.5 px-3 font-bold text-slate-800">P0</td><td className="py-2.5 px-3">10 Mei 2026</td><td className="py-2.5 px-3">Ahmad Fauzi</td><td className="py-2.5 px-3">93,33%</td><td className="py-2.5 px-3"><span className="text-emerald-700 border border-emerald-200 bg-emerald-50 px-2 py-0.5 rounded font-bold text-[9px]">Selesai</span></td></tr>
                  <tr><td className="py-2.5 px-3 font-bold text-slate-800">P1</td><td className="py-2.5 px-3">12 Mei 2026</td><td className="py-2.5 px-3">Ahmad Fauzi</td><td className="py-2.5 px-3">93,31%</td><td className="py-2.5 px-3"><span className="text-emerald-700 border border-emerald-200 bg-emerald-50 px-2 py-0.5 rounded font-bold text-[9px]">Selesai</span></td></tr>
-                 <tr><td className="py-2.5 px-3 font-bold text-slate-800">P2</td><td className="py-2.5 px-3">22 Mei 2026</td><td className="py-2.5 px-3">Ahmad Fauzi</td><td className="py-2.5 px-3">92,01%</td><td className="py-2.5 px-3"><span className="text-orange-700 border border-orange-200 bg-orange-50 px-2 py-0.5 rounded font-bold text-[9px] leading-tight block w-[120px]">Menunggu Penyulaman /<br/>Tindak Lanjut</span></td></tr>
+                 <tr><td className="py-2.5 px-3 font-bold text-slate-800">P2</td><td className="py-2.5 px-3">22 Mei 2026</td><td className="py-2.5 px-3">Ahmad Fauzi</td><td className="py-2.5 px-3">92,01%</td><td className="py-2.5 px-3"><span className="text-orange-700 border border-orange-200 bg-orange-50 px-2 py-0.5 rounded font-bold text-[9px] leading-tight block w-30">Menunggu Penyulaman /<br/>Tindak Lanjut</span></td></tr>
                </tbody>
              </table>
            </div>
@@ -1178,45 +901,272 @@ const DetailMonitoringPage: React.FC = () => {
     </div>
   );
 
+  const renderViewSelesai = () => (
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="lg:col-span-8 space-y-6">
+        
+        {/* Informasi Program (Selesai Layout) */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <h3 className="text-sm font-bold text-slate-900 mb-4">Informasi Program</h3>
+          <div className="flex flex-col lg:flex-row gap-6">
+            <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-y-5 gap-x-4">
+              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Nama Program</p><p className="text-xs font-bold text-slate-900 leading-snug">Rehabilitasi Mangrove<br/>Karangsong</p></div>
+              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">ID Program</p><p className="text-xs font-bold text-slate-900">{id || 'PRG-2026-0007'}</p></div>
+              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Jenis Program</p><p className="text-xs font-bold text-slate-900">Rehabilitasi Mangrove</p></div>
+              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Luas Area</p><p className="text-xs font-bold text-slate-900">25,40 Ha</p></div>
+              <div className="col-span-2">
+                <p className="text-[10px] text-slate-500 font-semibold mb-1 flex items-center gap-1"><HiOutlineMapPin className="w-3.5 h-3.5 text-green-600"/> Lokasi Program</p>
+                <p className="text-xs font-bold text-slate-900 leading-relaxed">Desa Karangsong, Kec. Indramayu<br/>Kabupaten Indramayu, Jawa Barat</p>
+              </div>
+              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Penyuluh Pendamping</p><p className="text-xs font-bold text-slate-900">Ahmad Fauzi, SP</p></div>
+              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">KTH Pelaksana</p><p className="text-xs font-bold text-slate-900">KTH Karangsong Lestari</p></div>
+              <div className="col-span-4 border-t border-slate-100 pt-4 grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
+                <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Periode Monitoring</p><p className="text-xs font-bold text-slate-900">P0 – P4</p></div>
+                <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Tanggal Monitoring Awal</p><p className="text-xs font-bold text-slate-900">10 Mei 2026</p></div>
+                <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Tanggal Monitoring Akhir</p><p className="text-xs font-bold text-slate-900">12 Mei 2027</p></div>
+                <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Total Durasi Monitoring</p><p className="text-xs font-bold text-slate-900">12 Bulan</p></div>
+              </div>
+            </div>
+            <div className="w-full md:hidden lg:block lg:w-48 shrink-0">
+               <p className="text-[10px] text-slate-500 font-semibold mb-2">Lokasi Program</p>
+               <div className="w-full h-32 bg-slate-100 rounded-lg relative overflow-hidden bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=400')] bg-cover bg-center border border-slate-200"></div>
+            </div>
+          </div>
+        </div>
 
-  // ==========================================================================
-  // RENDER UTAMA
-  // ==========================================================================
+        {/* Ringkasan Hasil Akhir (P4) */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <h3 className="text-sm font-bold text-slate-900 mb-4">Ringkasan Hasil Akhir (P4)</h3>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="border border-emerald-100 rounded-xl p-4 shadow-sm relative overflow-hidden">
+               <PiPlant className="w-6 h-6 text-emerald-600 mb-2"/>
+               <p className="text-[10px] text-slate-500 font-semibold">Tanaman Hidup</p>
+               <h3 className="text-xl font-bold text-slate-900 my-1">16.820 <span className="text-[10px] font-normal text-slate-500">batang</span></h3>
+               <p className="text-[10px] font-bold text-emerald-600">94,55% dari P0</p>
+            </div>
+            <div className="border border-red-100 rounded-xl p-4 shadow-sm relative overflow-hidden">
+               <PiTree className="w-6 h-6 text-red-500 mb-2"/>
+               <p className="text-[10px] text-slate-500 font-semibold">Tanaman Mati</p>
+               <h3 className="text-xl font-bold text-slate-900 my-1">910 <span className="text-[10px] font-normal text-slate-500">batang</span></h3>
+               <p className="text-[10px] font-bold text-red-500">5,11% dari P0</p>
+            </div>
+            <div className="border border-slate-200 rounded-xl p-4 shadow-sm">
+               <HiOutlineMapPin className="w-6 h-6 text-blue-500 mb-2"/>
+               <p className="text-[10px] text-slate-500 font-semibold">Titik Geotag</p>
+               <h3 className="text-xl font-bold text-slate-900 my-1">118 <span className="text-[10px] font-normal text-slate-500">titik</span></h3>
+               <p className="text-[10px] font-bold text-emerald-600">100% terverifikasi</p>
+            </div>
+            <div className="border border-slate-200 rounded-xl p-4 shadow-sm">
+               <HiOutlineDocumentText className="w-6 h-6 text-purple-500 mb-2"/>
+               <p className="text-[10px] text-slate-500 font-semibold">Dokumentasi</p>
+               <h3 className="text-xl font-bold text-slate-900 my-1">42 <span className="text-[10px] font-normal text-slate-500">foto</span></h3>
+               <p className="text-[10px] font-bold text-emerald-600">100% lengkap</p>
+            </div>
+            <div className="border border-slate-200 rounded-xl p-4 shadow-sm bg-slate-50/50">
+               <HiOutlineCalendar className="w-6 h-6 text-blue-500 mb-2"/>
+               <p className="text-[10px] text-slate-500 font-semibold">Periode Monitoring</p>
+               <h3 className="text-xs font-bold text-slate-900 my-1 leading-snug">10 Mei 2026 –<br/>12 Mei 2027</h3>
+               <p className="text-[10px] font-bold text-slate-600 mt-1">5 periode selesai</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Charts / Perbandingan Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col">
+             <h3 className="text-sm font-bold text-slate-900 mb-4">Perkembangan Persentase Hidup (P0 – P4)</h3>
+             {/* Mock Chart Area */}
+             <div className="flex-1 bg-linear-to-b from-emerald-50 to-white border-x border-t border-slate-100 rounded-t-lg relative mt-4 min-h-35">
+                {/* Y-Axis mock */}
+                <div className="absolute left-2 top-0 bottom-0 flex flex-col justify-between text-[8px] text-slate-400 py-2">
+                  <span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span>
+                </div>
+                {/* Data points mock */}
+                <div className="absolute left-10 right-4 top-4 bottom-8 flex justify-between items-end">
+                   {/* P0 */} <div className="flex flex-col items-center gap-1 w-full"><span className="text-[9px] font-bold text-emerald-800 absolute top-2">93,33%</span><div className="w-2 h-2 rounded-full bg-emerald-600 z-10"></div></div>
+                   {/* P1 */} <div className="flex flex-col items-center gap-1 w-full"><span className="text-[9px] font-bold text-emerald-800 absolute top-0">95,20%</span><div className="w-2 h-2 rounded-full bg-emerald-600 z-10 mb-2"></div></div>
+                   {/* P2 */} <div className="flex flex-col items-center gap-1 w-full"><span className="text-[9px] font-bold text-emerald-800 absolute top-3">92,01%</span><div className="w-2 h-2 rounded-full bg-emerald-600 z-10 -mb-1"></div></div>
+                   {/* P3 */} <div className="flex flex-col items-center gap-1 w-full"><span className="text-[9px] font-bold text-emerald-800 absolute top-1.5">93,17%</span><div className="w-2 h-2 rounded-full bg-emerald-600 z-10 mb-1"></div></div>
+                   {/* P4 */} <div className="flex flex-col items-center gap-1 w-full"><span className="text-[9px] font-bold text-emerald-800 absolute top-px">94,55%</span><div className="w-2 h-2 rounded-full bg-emerald-600 z-10 mb-3"></div></div>
+                </div>
+                {/* Mock Line */}
+                <div className="absolute left-10 right-10 top-8 h-px bg-emerald-600"></div>
+                {/* X-Axis labels */}
+                <div className="absolute left-10 right-4 bottom-2 flex justify-between text-[8px] text-slate-500 font-medium">
+                  <div className="text-center">P0<br/><span className="text-[7px]">10 Mei 2026</span></div>
+                  <div className="text-center">P1<br/><span className="text-[7px]">12 Jun 2026</span></div>
+                  <div className="text-center">P2<br/><span className="text-[7px]">12 Mei 2026</span></div>
+                  <div className="text-center">P3<br/><span className="text-[7px]">20 Jul 2026</span></div>
+                  <div className="text-center">P4<br/><span className="text-[7px]">12 Mei 2027</span></div>
+                </div>
+             </div>
+             <div className="text-center mt-3"><span className="inline-flex items-center gap-1 text-[9px] font-semibold text-slate-600"><span className="w-2 h-2 rounded-full bg-emerald-600"></span>Persentase Hidup</span></div>
+           </div>
+
+           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col">
+             <h3 className="text-sm font-bold text-slate-900 mb-4">Perbandingan Awal dan Akhir</h3>
+             <div className="flex items-center gap-3 mb-4 flex-1">
+                <div className="flex-1 bg-slate-50 border border-slate-200 rounded-lg p-3 text-center">
+                   <p className="text-[10px] font-bold text-slate-600 mb-2">Kondisi Awal (P0)</p>
+                   <h4 className="text-base font-bold text-slate-900">13.860 <span className="text-[9px] font-normal text-slate-500">batang</span></h4>
+                   <p className="text-[9px] text-slate-500 mb-2">Tanaman Hidup</p>
+                   <span className="text-lg font-bold text-emerald-600">93,33%</span>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0 border border-slate-200">
+                   <HiArrowRight className="w-4 h-4 text-slate-400" />
+                </div>
+                <div className="flex-1 bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-center relative overflow-hidden">
+                   <p className="text-[10px] font-bold text-emerald-800 mb-2">Kondisi Akhir (P4)</p>
+                   <h4 className="text-base font-bold text-slate-900">16.820 <span className="text-[9px] font-normal text-slate-500">batang</span></h4>
+                   <p className="text-[9px] text-slate-500 mb-2">Tanaman Hidup</p>
+                   <span className="text-lg font-bold text-emerald-600">94,55%</span>
+                   <PiPlant className="w-12 h-12 text-emerald-200 absolute -bottom-2 -right-2 opacity-50" />
+                </div>
+             </div>
+             <div className="bg-[#f0fdf4] border border-[#bbf7d0] rounded-lg p-3 flex items-center gap-3">
+                <div className="bg-emerald-100 p-1.5 rounded-md"><HiArrowTrendingUp className="w-4 h-4 text-emerald-700"/></div>
+                <div>
+                   <p className="text-[10px] text-emerald-800 font-semibold mb-0.5">Peningkatan Tanaman Hidup</p>
+                   <p className="text-sm font-bold text-emerald-700">+ 2.960 batang (+1,22%)</p>
+                </div>
+             </div>
+           </div>
+        </div>
+
+        {/* Bottom Row Selesai */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+             <div className="flex justify-between items-center mb-3">
+               <h3 className="text-sm font-bold text-slate-900">Dokumentasi Kegiatan</h3>
+               <span className="text-[10px] font-bold text-blue-600 hover:text-blue-700 cursor-pointer">Lihat Semua (42)</span>
+             </div>
+             <div className="grid grid-cols-4 gap-2">
+               {[1,2,3,4].map(i => <div key={i} className="bg-slate-200 rounded h-16 bg-[url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?q=80&w=150')] bg-cover border border-slate-200"></div>)}
+             </div>
+           </div>
+           
+           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+             <h3 className="text-sm font-bold text-slate-900 mb-3">Evaluasi Akhir Program</h3>
+             <div className="flex gap-3 items-start">
+                <div className="mt-1"><HiOutlineDocumentCheck className="w-6 h-6 text-[#008A4B]" /></div>
+                <div>
+                  <h4 className="text-xs font-bold text-[#008A4B] mb-1">Program dinyatakan berhasil.</h4>
+                  <p className="text-[10px] text-slate-600 leading-relaxed mb-2">Persentase hidup tanaman mangrove telah mencapai target ({'>'}80%) dan tidak terdapat indikasi kegagalan signifikan.</p>
+                  <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded text-[9px] font-bold">Memenuhi Kriteria</span>
+                </div>
+             </div>
+           </div>
+        </div>
+
+      </div>
+
+      <div className="lg:col-span-4 space-y-6">
+        
+        {/* Status Selesai Card */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 text-center">
+          <h3 className="text-sm font-bold text-slate-500 mb-4 text-left border-b border-slate-100 pb-3 w-full">Status Program</h3>
+          <div className="flex justify-center mb-4 mt-2">
+             <div className="w-16 h-16 rounded-full bg-emerald-50 border-2 border-emerald-100 flex items-center justify-center">
+               <HiOutlineCheckCircle className="w-8 h-8 text-emerald-500" />
+             </div>
+          </div>
+          <h2 className="text-xl font-bold text-emerald-600 mb-2">Monitoring Selesai</h2>
+          <p className="text-[11px] text-slate-600 leading-relaxed mb-6 px-2">Seluruh periode monitoring (P0 – P4) telah selesai dilaksanakan. Data dan dokumentasi telah diverifikasi.</p>
+          <div className="bg-slate-50 border border-slate-100 rounded-lg p-3 text-left space-y-2">
+             <div className="flex justify-between items-center text-[10px]">
+               <span className="text-slate-500 flex items-center gap-1.5"><HiOutlineCalendar className="w-3.5 h-3.5 text-emerald-600"/> Tanggal Selesai Monitoring Akhir</span>
+               <span className="font-bold text-slate-900">12 Mei 2027</span>
+             </div>
+             <div className="flex justify-between items-center text-[10px] border-t border-slate-200 pt-2">
+               <span className="text-slate-500 flex items-center gap-1.5"><HiOutlineUserPlus className="w-3.5 h-3.5 text-emerald-600"/> Dievaluasi Oleh</span>
+               <span className="font-bold text-slate-900">Tim Evaluasi PDAS Citarum</span>
+             </div>
+          </div>
+        </div>
+
+        {/* Riwayat Status Program P0-P4 */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <h3 className="text-sm font-bold text-slate-900 mb-5">Riwayat Status Program</h3>
+          <div className="space-y-6">
+            <div className="flex gap-4 relative">
+              <div className="absolute left-2.75 top-7 bottom-6 w-0.5 bg-emerald-200"></div>
+              <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 z-10 shadow-sm border-2 border-white"><HiOutlineCheckCircle className="w-4 h-4" /></div>
+              <div className="flex-1">
+                <div className="flex justify-between items-start mb-0.5"><p className="text-xs font-bold text-slate-900">P0 - Penanaman Awal</p><span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Selesai</span></div>
+                <p className="text-[10px] text-slate-500">10 Mei 2026</p>
+              </div>
+            </div>
+            
+            <div className="flex gap-4 relative">
+              <div className="absolute left-2.75 top-7 bottom-6 w-0.5 bg-emerald-200"></div>
+              <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 z-10 shadow-sm border-2 border-white"><HiOutlineCheckCircle className="w-4 h-4" /></div>
+              <div className="flex-1">
+                <div className="flex justify-between items-start mb-0.5"><p className="text-xs font-bold text-slate-900">P1 - Monitoring P1</p><span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Selesai</span></div>
+                <p className="text-[10px] text-slate-500">27 Mei – 12 Jun 2026</p>
+              </div>
+            </div>
+
+            <div className="flex gap-4 relative">
+              <div className="absolute left-2.75 top-7 bottom-6 w-0.5 bg-emerald-200"></div>
+              <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 z-10 shadow-sm border-2 border-white"><HiOutlineCheckCircle className="w-4 h-4" /></div>
+              <div className="flex-1">
+                <div className="flex justify-between items-start mb-0.5"><p className="text-xs font-bold text-slate-900">P2 - Monitoring P2</p><span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Selesai</span></div>
+                <p className="text-[10px] text-slate-500">10 Mei – 12 Mei 2026</p>
+              </div>
+            </div>
+
+            <div className="flex gap-4 relative">
+              <div className="absolute left-2.75 top-7 bottom-6 w-0.5 bg-emerald-200"></div>
+              <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 z-10 shadow-sm border-2 border-white"><HiOutlineCheckCircle className="w-4 h-4" /></div>
+              <div className="flex-1">
+                <div className="flex justify-between items-start mb-0.5"><p className="text-xs font-bold text-slate-900">P3 - Monitoring P3</p><span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Selesai</span></div>
+                <p className="text-[10px] text-slate-500">01 Jul – 20 Jul 2026</p>
+              </div>
+            </div>
+
+            <div className="flex gap-4 relative">
+              <div className="absolute left-2.75 top-7 bottom-6 w-0.5 bg-emerald-200"></div>
+              <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 z-10 shadow-sm border-2 border-white"><HiOutlineCheckCircle className="w-4 h-4" /></div>
+              <div className="flex-1">
+                <div className="flex justify-between items-start mb-0.5"><p className="text-xs font-bold text-slate-900">P4 - Monitoring P4 (Akhir)</p><span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Selesai</span></div>
+                <p className="text-[10px] text-slate-500">10 Mei 2026 – 12 Mei 2027</p>
+              </div>
+            </div>
+            
+            <div className="flex gap-4 relative bg-emerald-50 -mx-6 p-4 rounded-b-xl border-t border-emerald-100">
+              <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 z-10 shadow-sm border-2 border-white ml-2"><HiOutlineCheckCircle className="w-4 h-4" /></div>
+              <div className="flex-1">
+                <div className="flex justify-between items-start mb-0.5">
+                  <p className="text-xs font-bold text-[#008A4B]">Monitoring Selesai</p>
+                  <span className="text-[9px] font-bold text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded bg-white">Selesai</span>
+                </div>
+                <p className="text-[10px] text-emerald-600">12 Mei 2027</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+
   return (
     <div className="w-full bg-[#F8FAFC] min-h-screen font-sans text-slate-800 pb-12">
       
-      {ENABLE_DEV_MODE && (
-        <div className="bg-slate-800 text-white flex justify-center gap-2 flex-wrap text-xs font-mono mb-6 sticky top-0 z-50 shadow-md">
-          <span className="py-1">DEV MODE: Pilih Status &rarr; </span>
-          {(['Siap Monitoring', 'Berjalan', 'Menunggu Evaluasi', 'Tindak Lanjut', 'Selesai'] as MonitoringStatus[]).map(s => (
-            <button 
-              key={s} 
-              onClick={() => setCurrentStatus(s)} 
-              className={`px-3 py-1 rounded-md border transition-colors ${currentStatus === s ? 'bg-[#008A4B] border-[#008A4B] font-bold' : 'border-slate-500 hover:bg-slate-700'}`}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
-      )}
-
+      {/* Tampilan Content Berubah Sepenuhnya Sesuai Status */}
       <div className="max-w-[1600px] mx-auto">
         {renderHeader()}
-
-        {/* Tampilan Content Berubah Sepenuhnya Sesuai Status */}
         {currentStatus === 'Siap Monitoring' && renderViewSiapMonitoring()}
         {currentStatus === 'Berjalan' && renderViewBerjalan()}
         {currentStatus === 'Menunggu Evaluasi' && renderViewMenungguEvaluasi()}
         {currentStatus === 'Tindak Lanjut' && renderViewTindakLanjut()}
         {currentStatus === 'Selesai' && renderViewSelesai()}
-        {currentStatus === 'Dihentikan' && renderViewSiapMonitoring() /* Fallback for dihentikan */}
+        {currentStatus === 'Dihentikan' && renderViewSiapMonitoring()}
       </div>
 
-      {/* ========================================================================== */}
       {/* MODAL UNDUH / CETAK RINGKASAN */}
-      {/* ========================================================================== */}
       {isDownloadModalOpen && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+        <div className="fixed inset-0 z-70 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl flex flex-col max-h-[90vh] overflow-hidden">
             
             {/* Modal Header */}
@@ -1231,7 +1181,7 @@ const DetailMonitoringPage: React.FC = () => {
                     : 'Unduh ringkasan progres monitoring program dalam format dokumen resmi.'}
                 </p>
               </div>
-              <button onClick={() => setIsDownloadModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full transition-colors">
+              <button onClick={() => setIsDownloadModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full transition-colors cursor-pointer">
                 <HiOutlineXMark className="w-5 h-5" />
               </button>
             </div>
@@ -1247,7 +1197,7 @@ const DetailMonitoringPage: React.FC = () => {
                 <div className="flex-1">
                   <h3 className="font-bold text-slate-900 text-base">Rehabilitasi Mangrove Karangsong</h3>
                   <div className="flex items-center gap-2 mt-1 mb-1.5">
-                     <span className="text-xs font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">PRG-2026-0007</span>
+                     <span className="text-xs font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">{id || 'PRG-2026-0007'}</span>
                      <span className="text-[11px] text-slate-500">Desa Karangsong, Kec. Indramayu, Kab. Indramayu</span>
                   </div>
                 </div>
@@ -1327,7 +1277,7 @@ const DetailMonitoringPage: React.FC = () => {
 
                 {/* Kolom Kanan: Preview Dokumen Cover Mockup */}
                 <div className="flex items-center justify-center">
-                   <div className="w-full max-w-[280px] aspect-[1/1.4] bg-white border border-slate-200 rounded-lg shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex flex-col relative overflow-hidden">
+                   <div className="w-full max-w-70 aspect-[1/1.4] bg-white border border-slate-200 rounded-lg shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex flex-col relative overflow-hidden">
                      {/* Kop Surat Header Mockup */}
                      <div className="p-4 flex items-center gap-3 border-b border-slate-100">
                         <div className="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center"><PiPlant className="text-white w-4 h-4"/></div>
@@ -1345,7 +1295,7 @@ const DetailMonitoringPage: React.FC = () => {
                      </div>
                      {/* Ilustrasi Bawah Mockup */}
                      <div className="mt-auto h-32 bg-[url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?q=80&w=400')] bg-cover bg-center opacity-80 relative">
-                        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/40 to-transparent"></div>
+                        <div className="absolute inset-0 bg-linear-to-t from-white via-white/40 to-transparent"></div>
                         <p className="absolute bottom-4 left-6 text-[10px] font-bold text-slate-500">Mei 2027</p>
                      </div>
                    </div>
@@ -1362,18 +1312,17 @@ const DetailMonitoringPage: React.FC = () => {
 
             </div>
 
-            {/* Modal Footer */}
             <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-3 bg-slate-50/50 rounded-b-2xl">
               <button 
                 onClick={() => setIsDownloadModalOpen(false)} 
-                className="px-6 py-2.5 text-sm font-bold text-slate-600 border border-slate-300 rounded-lg hover:bg-white hover:text-slate-900 transition-colors"
+                className="px-6 py-2.5 text-sm font-bold text-slate-600 border border-slate-300 rounded-lg hover:bg-white hover:text-slate-900 transition-colors cursor-pointer"
               >
                 Batal
               </button>
-              <button className="px-6 py-2.5 text-sm font-bold text-[#0f172a] bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2">
+              <button className="px-6 py-2.5 text-sm font-bold text-[#0f172a] bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 cursor-pointer shadow-sm">
                 <HiOutlineEye className="w-4 h-4" /> Lihat Preview
               </button>
-              <button className="px-6 py-2.5 text-sm font-bold text-white bg-[#008A4B] rounded-lg hover:bg-[#00753f] transition-colors flex items-center gap-2 shadow-sm">
+              <button className="px-6 py-2.5 text-sm font-bold text-white bg-[#008A4B] rounded-lg hover:bg-[#00753f] transition-colors flex items-center gap-2 shadow-sm cursor-pointer">
                 <HiOutlineArrowDownTray className="w-4 h-4" /> Unduh PDF
               </button>
             </div>
