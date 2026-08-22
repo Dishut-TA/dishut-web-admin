@@ -1,12 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  HiOutlineChevronLeft, 
-  HiOutlineUserPlus, 
-  HiOutlineTrash 
-} from 'react-icons/hi2';
+import { HiOutlineChevronLeft, HiOutlineUserPlus, HiOutlineTrash } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 import * as pdfjsLib from 'pdfjs-dist';
+import { getProgramsReadyAPI, postPenugasanAPI } from '@/services/evaluasi.service'; 
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -15,12 +12,36 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
 
 const CreateInisiasiPenugasan: React.FC = () => {
   const navigate = useNavigate();
-  const [anggotaTim, setAnggotaTim] = useState([{ id: 1, nama: '', peran: 'Ketua Tim' }]);
+  const [programsReady, setProgramsReady] = useState<any[]>([]);
+  const [isLoadingPrograms, setIsLoadingPrograms] = useState(true);
+  const [fileSurat, setFileSurat] = useState<File | null>(null);
   const [nomorSurat, setNomorSurat] = useState('');
+  const [tanggalSurat, setTanggalSurat] = useState('');
+  const [idProgram, setIdProgram] = useState('');
+  const [periodeEvaluasi, setPeriodeEvaluasi] = useState('');
+  const [jenisProgram, setJenisProgram] = useState('');
+  const [tanggalMulai, setTanggalMulai] = useState('');
+  const [tanggalAkhir, setTanggalAkhir] = useState('');
+  const [anggotaTim, setAnggotaTim] = useState([{ id: 1, id_user: '', peran: 'Ketua Tim' }]);
   const [isLoadingPdf, setIsLoadingPdf] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const fetchPrograms = async () => {
+      try {
+        const result = await getProgramsReadyAPI();
+        setProgramsReady(result);
+      } catch (error: any) {
+        toast.error(error.message || 'Gagal memuat daftar program.');
+      } finally {
+        setIsLoadingPrograms(false);
+      }
+    };
+    fetchPrograms();
+  }, []);
 
   const handleAddAnggota = () => {
-    setAnggotaTim([...anggotaTim, { id: Date.now(), nama: '', peran: 'Anggota Tim' }]);
+    setAnggotaTim([...anggotaTim, { id: Date.now(), id_user: '', peran: 'Anggota Tim' }]);
   };
 
   const handleRemoveAnggota = (id: number) => {
@@ -31,12 +52,12 @@ const CreateInisiasiPenugasan: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    setFileSurat(file);
     setIsLoadingPdf(true);
     const toastId = toast.loading('Membaca dokumen PDF...');
 
     try {
       const arrayBuffer = await file.arrayBuffer();
-      // Konversi ArrayBuffer menjadi Uint8Array agar TypeScript dan PDF.js tidak error
       const typedArray = new Uint8Array(arrayBuffer); 
       const pdf = await pdfjsLib.getDocument({ data: typedArray }).promise;
       
@@ -44,7 +65,6 @@ const CreateInisiasiPenugasan: React.FC = () => {
       const textContent = await page.getTextContent();
       
       const text = textContent.items.map((item: any) => item.str).join(' ');
-      
       const regex = /NOMOR\s*[:]?\s*([A-Z0-9.\/-]+)/i;
       const match = text.match(regex);
 
@@ -61,10 +81,36 @@ const CreateInisiasiPenugasan: React.FC = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success('Surat Tugas berhasil diterbitkan! Notifikasi terkirim ke Staff PDAS.');
-    navigate(-1);
+    if (!fileSurat) return toast.error('Harap unggah surat tugas (PDF).');
+
+    setIsSubmitting(true);
+    const loadingToast = toast.loading('Menerbitkan penugasan...');
+
+    try {
+      const formData = new FormData();
+      formData.append('file_surat_tugas', fileSurat);
+      formData.append('nomor_surat', nomorSurat);
+      formData.append('tanggal_surat', tanggalSurat);
+      formData.append('id_program', idProgram);
+      formData.append('periode_evaluasi', periodeEvaluasi);
+      formData.append('jenis_program', jenisProgram);
+      formData.append('tanggal_pelaksanaan_mulai', tanggalMulai);
+      formData.append('tanggal_pelaksanaan_selesai', tanggalAkhir);
+      
+      const timPenilaiPayload = anggotaTim.map(a => ({ id_user: a.id_user, peran: a.peran }));
+      formData.append('tim_penilai', JSON.stringify(timPenilaiPayload));
+
+      await postPenugasanAPI(formData);
+      
+      toast.success('Surat Tugas berhasil diterbitkan! Notifikasi terkirim ke Staff.', { id: loadingToast });
+      navigate(-1);
+    } catch (error: any) {
+      toast.error(error.message || 'Gagal menerbitkan penugasan.', { id: loadingToast });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -74,11 +120,9 @@ const CreateInisiasiPenugasan: React.FC = () => {
       </button>
 
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 md:p-10">
-        <div className="border-b border-gray-100 pb-5 mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl md:text-2xl font-bold text-gray-800">Buat Penugasan Evaluasi Baru</h1>
-            <p className="text-sm text-gray-500 mt-1">Upload surat tugas dari kementerian dan tunjuk Tim Penilai.</p>
-          </div>
+        <div className="border-b border-gray-100 pb-5 mb-8">
+          <h1 className="text-xl md:text-2xl font-bold text-gray-800">Buat Penugasan Evaluasi Baru</h1>
+          <p className="text-sm text-gray-500 mt-1">Upload surat tugas dari kementerian dan tunjuk Tim Penilai.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
@@ -92,7 +136,7 @@ const CreateInisiasiPenugasan: React.FC = () => {
                   type="file" 
                   accept=".pdf" 
                   onChange={handleFileUpload}
-                  disabled={isLoadingPdf}
+                  disabled={isLoadingPdf || isSubmitting}
                   className="w-full px-4 py-3 border border-gray-300 rounded-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-[#f0f9f3] file:text-[#185325] hover:file:bg-[#DCECE0] transition-colors" 
                 />
               </div>
@@ -105,30 +149,30 @@ const CreateInisiasiPenugasan: React.FC = () => {
                   value={nomorSurat}
                   onChange={(e) => setNomorSurat(e.target.value)}
                   placeholder="Contoh: ST.76/TKTRH/..." 
-                  className="w-full px-4 py-3 border border-gray-300 rounded-full text-sm focus:ring-1 focus:ring-[#185325] focus:border-[#185325]" 
+                  className="w-full px-4 py-3 border border-gray-300 rounded-full text-sm focus:ring-1 focus:ring-[#185325]" 
                 />
-                <p className="text-[10px] text-gray-400 mt-1.5">
-                  *Terisi otomatis dari PDF, namun dapat disesuaikan manual.
-                </p>
               </div>
               
               <div>
                 <label className="block text-xs font-bold text-gray-700 mb-1.5">Tanggal Surat <span className="text-red-500">*</span></label>
-                <input required type="date" className="w-full px-4 py-3 border border-gray-300 rounded-full text-sm focus:ring-1 focus:ring-[#185325] focus:border-[#185325]" />
+                <input required type="date" value={tanggalSurat} onChange={(e)=>setTanggalSurat(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-full text-sm focus:ring-1 focus:ring-[#185325]" />
               </div>
               
               <div className="md:col-span-2">
                 <label className="block text-xs font-bold text-gray-700 mb-1.5">Pilih Program / Lokasi Rehabilitasi <span className="text-red-500">*</span></label>
-                <select required defaultValue="" className="w-full px-4 py-3 border border-gray-300 rounded-full text-sm focus:ring-1 focus:ring-[#185325] bg-white">
-                  <option value="" disabled>-- Pilih Program dari Modul Pelaksanaan --</option>
-                  <option value="1">Rehabilitasi DAS PT. Jawa Satu Power - Kab. Garut</option>
-                  <option value="2">Rehabilitasi DAS SKK Migas PT Pertamina EP - Kab. Majalengka</option>
+                <select required value={idProgram} onChange={(e)=>setIdProgram(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-full text-sm focus:ring-1 focus:ring-[#185325] bg-white">
+                  <option value="" disabled>{isLoadingPrograms ? 'Memuat Program...' : '-- Pilih Program dari Modul Pelaksanaan --'}</option>
+                  {programsReady.map((prog: any) => (
+                    <option key={prog.id_program} value={prog.id_program}>
+                      {prog.nama_program} - {prog.lokasi} ({prog.jenis_program})
+                    </option>
+                  ))}
                 </select>
               </div>
               
               <div>
                 <label className="block text-xs font-bold text-gray-700 mb-1.5">Periode Evaluasi <span className="text-red-500">*</span></label>
-                <select required defaultValue="" className="w-full px-4 py-3 border border-gray-300 rounded-full text-sm focus:ring-1 focus:ring-[#185325] bg-white">
+                <select required value={periodeEvaluasi} onChange={(e)=>setPeriodeEvaluasi(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-full text-sm focus:ring-1 focus:ring-[#185325] bg-white">
                   <option value="" disabled>-- Pilih Tahap Evaluasi --</option>
                   <option value="P0">Penanaman Awal (P0)</option>
                   <option value="P1">Pemeliharaan I (P1)</option>
@@ -138,7 +182,7 @@ const CreateInisiasiPenugasan: React.FC = () => {
               
               <div>
                 <label className="block text-xs font-bold text-gray-700 mb-1.5">Jenis Program <span className="text-red-500">*</span></label>
-                <select required defaultValue="" className="w-full px-4 py-3 border border-gray-300 rounded-full text-sm focus:ring-1 focus:ring-[#185325] bg-white">
+                <select required value={jenisProgram} onChange={(e)=>setJenisProgram(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-full text-sm focus:ring-1 focus:ring-[#185325] bg-white">
                   <option value="" disabled>-- Pilih Jenis --</option>
                   <option value="APBD">APBD</option>
                   <option value="CSR">CSR</option>
@@ -149,11 +193,11 @@ const CreateInisiasiPenugasan: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label className="block text-xs font-bold text-gray-700 mb-1.5">Periode Pelaksanaan Evaluasi (Mulai) <span className="text-red-500">*</span></label>
-                <input required type="date" className="w-full px-4 py-3 border border-gray-300 rounded-full text-sm focus:ring-1 focus:ring-[#185325] focus:border-[#185325]" />
+                <input required type="date" value={tanggalMulai} onChange={(e)=>setTanggalMulai(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-full text-sm focus:ring-1 focus:ring-[#185325]" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-700 mb-1.5">Periode Pelaksanaan Evaluasi (Selesai) <span className="text-red-500">*</span></label>
-                <input required type="date" className="w-full px-4 py-3 border border-gray-300 rounded-full text-sm focus:ring-1 focus:ring-[#185325] focus:border-[#185325]" />
+                <input required type="date" value={tanggalAkhir} onChange={(e)=>setTanggalAkhir(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-full text-sm focus:ring-1 focus:ring-[#185325]" />
               </div>
             </div>
           </div>
@@ -166,11 +210,21 @@ const CreateInisiasiPenugasan: React.FC = () => {
                 <div key={anggota.id} className="flex flex-col sm:flex-row gap-3 items-end">
                   <div className="w-full">
                     <label className="block text-xs font-bold text-gray-700 mb-1.5">Nama & Email Staff PDAS</label>
-                    <select required defaultValue="" className="w-full px-4 py-2.5 border border-gray-300 rounded-full text-sm focus:ring-1 focus:ring-[#185325] bg-white">
+                    <select 
+                      required 
+                      value={anggota.id_user}
+                      onChange={(e) => {
+                        const newTim = [...anggotaTim];
+                        newTim[index].id_user = e.target.value;
+                        setAnggotaTim(newTim);
+                      }}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-full text-sm focus:ring-1 focus:ring-[#185325] bg-white"
+                    >
                       <option value="" disabled>Pilih Staff...</option>
-                      <option>Srie Resmita Dewi, SP., MP (srie@pdas.go.id)</option>
-                      <option>Muhammad Caskadi (caskadi@pdas.go.id)</option>
-                      <option>Andi Mansur, S.P (andi@pdas.go.id)</option>
+                      {/* TODO: Idealnya ini ditarik dari API Get Staff. Sementara dilist manual ID-nya */}
+                      <option value="user-srie">Srie Resmita Dewi, SP., MP (srie@pdas.go.id)</option>
+                      <option value="user-caskadi">Muhammad Caskadi (caskadi@pdas.go.id)</option>
+                      <option value="user-andi">Andi Mansur, S.P (andi@pdas.go.id)</option>
                     </select>
                   </div>
                   <div className="w-full sm:w-1/3">
@@ -190,21 +244,21 @@ const CreateInisiasiPenugasan: React.FC = () => {
                     </select>
                   </div>
                   {index > 0 && (
-                    <button type="button" onClick={() => handleRemoveAnggota(anggota.id)} className="p-3 text-red-500 hover:bg-red-50 rounded-full transition-colors shrink-0 border border-transparent hover:border-red-200 active:scale-95">
+                    <button type="button" onClick={() => handleRemoveAnggota(anggota.id)} className="p-3 text-red-500 hover:bg-red-50 rounded-full transition-colors shrink-0">
                       <HiOutlineTrash className="w-5 h-5" />
                     </button>
                   )}
                 </div>
               ))}
-              <button type="button" onClick={handleAddAnggota} className="mt-4 px-4 py-2.5 border-2 border-dashed border-[#185325] text-[#185325] hover:bg-[#f0f9f3] text-xs font-bold rounded-full transition-colors flex items-center gap-2 active:scale-95">
+              <button type="button" onClick={handleAddAnggota} className="mt-4 px-4 py-2.5 border-2 border-dashed border-[#185325] text-[#185325] hover:bg-[#f0f9f3] text-xs font-bold rounded-full transition-colors flex items-center gap-2">
                 <HiOutlineUserPlus className="w-4 h-4" /> Tambah Personil Tim
               </button>
             </div>
           </div>
 
           <div className="pt-6 border-t border-gray-100 flex justify-end">
-            <button type="submit" className="w-full md:w-auto px-10 py-3.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full shadow-sm transition-colors active:scale-95">
-              Simpan & Terbitkan Penugasan
+            <button disabled={isSubmitting} type="submit" className="w-full md:w-auto px-10 py-3.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full shadow-sm transition-colors active:scale-95 disabled:opacity-70">
+              {isSubmitting ? 'Memproses...' : 'Simpan & Terbitkan Penugasan'}
             </button>
           </div>
         </form>
