@@ -43,7 +43,7 @@ const LaporanEvaluasiKABID: React.FC = () => {
             placeholder="Cari laporan atau periode..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-[#185325] outline-none shadow-sm" 
+            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-full text-sm focus:ring-[#185325] outline-none shadow-sm" 
           />
         </div>
       </div>
