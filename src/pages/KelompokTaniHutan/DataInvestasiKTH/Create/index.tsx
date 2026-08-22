@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HiOutlineChevronLeft, HiCheck } from 'react-icons/hi2';
 import Step1 from './Step1';
@@ -13,6 +13,7 @@ export interface InvestasiFormState {
     persentase: string;
     batasWaktu: string;
     deskripsi: string;
+    coverFile?: File | null;
     milestones: { id: number; nama: string; batas: string; deskripsi: string }[];
     dokumen: Record<string, File | null>;
 }
@@ -23,17 +24,40 @@ const CreateInvestasi: React.FC = () => {
     const navigate = useNavigate();
     const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState<InvestasiFormState>({
-        namaInvestasi: '', namaKTH: '', targetFunding: '', persentase: '', batasWaktu: '', deskripsi: '',
+        namaInvestasi: '', 
+        namaKTH: '', 
+        targetFunding: '', 
+        persentase: '', 
+        batasWaktu: '', 
+        deskripsi: '',
+        coverFile: null,
         milestones: [],
         dokumen: {}
     });
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            try {
+                const parsedUser = JSON.parse(storedUser);
+                setFormData(prev => ({ 
+                    ...prev, 
+                    namaKTH: parsedUser.nama_pengguna || parsedUser.nama || 'KTH Cikole Lestari' 
+                }));
+            } catch (e) {
+                setFormData(prev => ({ ...prev, namaKTH: storedUser }));
+            }
+        } else {
+            setFormData(prev => ({ ...prev, namaKTH: 'KTH Cikole Lestari' }));
+        }
+    }, []);
 
     const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, 4));
     const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1)); 
 
     return (
         <div className="flex flex-col w-full mx-auto pb-12">
-            <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-bold text-gray-700 hover:text-[#185325] mb-6">
+            <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-bold text-gray-700 hover:text-[#185325] mb-6 cursor-pointer">
                 <HiOutlineChevronLeft className="w-4 h-4" strokeWidth={2.5} /> Kembali
             </button>
 
@@ -68,7 +92,7 @@ const CreateInvestasi: React.FC = () => {
             {currentStep === 1 && <Step1 data={formData} updateData={setFormData} onNext={nextStep} />}
             {currentStep === 2 && <Step2 data={formData} updateData={setFormData} onNext={nextStep} onPrev={prevStep} />}
             {currentStep === 3 && <Step3 data={formData} updateData={setFormData} onNext={nextStep} onPrev={prevStep} />}
-            {currentStep === 4 && <Step4 data={formData} onNext={() => alert('Investasi Berhasil Dibuat!')} onPrev={prevStep} />}
+            {currentStep === 4 && <Step4 data={formData} onNext={() => {}} onPrev={prevStep} />}
         </div>
     );
 };

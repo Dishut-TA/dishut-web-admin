@@ -1,51 +1,54 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HiOutlineFunnel, HiOutlineEye, HiOutlinePlus } from 'react-icons/hi2';
-
-interface InvestasiKTH {
-  id: string;
-  no: number;
-  nama: string;
-  target: number;
-  tenggatWaktu: string;
-  status: 'Active' | 'Menunggu' | 'Selesai';
-}
-
-const mockData: InvestasiKTH[] = [
-  {
-    id: 'INV-001',
-    no: 1,
-    nama: 'Investasi Ekowisata Kebun Stroberi',
-    target: 100000000,
-    tenggatWaktu: '17/09/2025',
-    status: 'Active'
-  }
-];
+import toast from 'react-hot-toast';
+import { getKthProgramsAPI } from '@/services/investasi.service';
+import type { ProgramInvestasi } from '@/utils/interface';
 
 const DataInvestasiKTH: React.FC = () => {
   const navigate = useNavigate();
+  const [data, setData] = useState<ProgramInvestasi[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await getKthProgramsAPI();
+        console.log(result)
+        setData(result);
+      } catch (error: any) {
+        toast.error(error.message || "Gagal memuat data investasi.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const formatRupiah = (angka: number) => {
     return new Intl.NumberFormat('id-ID', { 
       style: 'currency', 
       currency: 'IDR', 
       maximumFractionDigits: 0 
-    }).format(angka);
+    }).format(Number(angka || 0));
   };
 
   const renderStatusBadge = (status: string) => {
     switch (status) {
+      case 'WAITING_STAFF_VERIFICATION':
+        return <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold">Menunggu Verifikasi</span>;
       case 'Active':
-        return <span className="px-3 py-1 bg-[#DCECE0] text-[#185325] rounded-full text-xs font-bold">Active</span>;
-      case 'Menunggu':
-        return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold">Menunggu</span>;
+      case 'APPROVED':
+        return <span className="px-3 py-1 bg-[#DCECE0] text-[#185325] rounded-full text-xs font-bold">Aktif</span>;
+      case 'Completed':
+        return <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">Selesai</span>;
       default:
         return <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-bold">{status}</span>;
     }
   };
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8">
+    <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8 animate-in fade-in duration-300">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 className="text-2xl font-bold text-gray-800">
           Data Investasi
@@ -54,12 +57,12 @@ const DataInvestasiKTH: React.FC = () => {
         <div className="flex items-center gap-3">
           <button 
             onClick={() => navigate('/admin/kth/investasi/data/create')}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-lg transition-colors shadow-sm active:scale-95"
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-lg transition-colors shadow-sm active:scale-95 cursor-pointer"
           >
             <HiOutlinePlus className="w-4 h-4" strokeWidth={2.5} /> Buat Investasi
           </button>
           
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-50 transition-colors shadow-sm active:scale-95">
+          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-50 transition-colors shadow-sm cursor-pointer">
             <HiOutlineFunnel className="w-4 h-4" /> Filter
           </button>
         </div>
@@ -72,7 +75,7 @@ const DataInvestasiKTH: React.FC = () => {
               <tr>
                 <th className="px-6 py-4 whitespace-nowrap text-center w-16">No</th>
                 <th className="px-6 py-4 whitespace-nowrap">Nama Proyek</th>
-                <th className="px-6 py-4 whitespace-nowrap">Target</th>
+                <th className="px-6 py-4 whitespace-nowrap">Target Dana</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">Tenggat Waktu</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center">Status</th>
                 <th className="px-6 py-4 whitespace-nowrap text-center w-24">Aksi</th>
@@ -80,39 +83,52 @@ const DataInvestasiKTH: React.FC = () => {
             </thead>
             
             <tbody className="divide-y divide-gray-100">
-              {mockData.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4 text-sm font-medium text-gray-700 text-center">
-                    {item.no}
-                  </td>
-                  <td className="px-6 py-4 text-sm font-bold text-gray-800 whitespace-nowrap">
-                    {item.nama}
-                  </td>
-                  <td className="px-6 py-4 text-sm font-semibold text-gray-500 whitespace-nowrap">
-                    {formatRupiah(item.target)}
-                  </td>
-                  <td className="px-6 py-4 text-sm font-medium text-gray-800 text-center whitespace-nowrap">
-                    {item.tenggatWaktu}
-                  </td>
-                  <td className="px-6 py-4 text-center whitespace-nowrap">
-                    {renderStatusBadge(item.status)}
-                  </td>
-                  <td className="px-6 py-4 flex justify-center whitespace-nowrap">
-                    <button 
-                      title="Lihat Detail"
-                      onClick={() => navigate(`/admin/kth/investasi/data/detail/${item.id}`)}
-                      className="p-1.5 text-gray-500 hover:text-[#185325] hover:bg-[#DCECE0] rounded-full transition-colors"
-                    >
-                      <HiOutlineEye className="w-5 h-5" />
-                    </button>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500 font-medium">
+                    Memuat data investasi...
                   </td>
                 </tr>
-              ))}
+              ) : data.length > 0 ? (
+                data.map((item, index) => (
+                  <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-6 py-4 text-sm font-medium text-gray-700 text-center">
+                      {index + 1}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-bold text-gray-800 whitespace-nowrap">
+                      {item.nama_program}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-semibold text-gray-500 whitespace-nowrap">
+                      {formatRupiah(item.target_dana)}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-medium text-gray-800 text-center whitespace-nowrap">
+                      {new Date(item.batas_waktu_pengumpulan).toLocaleDateString('id-ID')}
+                    </td>
+                    <td className="px-6 py-4 text-center whitespace-nowrap">
+                      {renderStatusBadge(item.status)}
+                    </td>
+                    <td className="px-6 py-4 flex justify-center whitespace-nowrap">
+                      <button 
+                        title="Lihat Detail"
+                        onClick={() => navigate(`/admin/kth/investasi/data/detail/${item.id}`, { state: { program: item } })}
+                        className="p-1.5 text-gray-500 hover:text-[#185325] hover:bg-[#DCECE0] rounded-full transition-colors cursor-pointer"
+                      >
+                        <HiOutlineEye className="w-5 h-5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500 font-medium">
+                    Belum ada data investasi yang diajukan.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
-
     </div>
   );
 };

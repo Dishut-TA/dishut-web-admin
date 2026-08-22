@@ -21,7 +21,7 @@ const MilestoneSectionKTH: React.FC<MilestoneSectionProps> = ({ milestones }) =>
   const hasMore = milestones.length > 2;
 
   const renderMilestone = (m: Milestone) => (
-    <div key={m.id} className="mb-8 last:mb-0 text-sm">
+    <div key={m.id} className="mb-8 last:mb-0 text-sm bg-gray-50 p-4 rounded-xl">
       <div className="flex mb-2">
         <span className="w-40 shrink-0 text-gray-500">Nama Milestone</span>
         <span className="w-4 shrink-0">:</span>
@@ -36,17 +36,15 @@ const MilestoneSectionKTH: React.FC<MilestoneSectionProps> = ({ milestones }) =>
         <span className="w-40 shrink-0 text-gray-500">Status</span>
         <span className="w-4 shrink-0">:</span>
         <span
-          className={`font-bold flex items-center gap-1 ${m.status === "Tercapai"
-              ? "text-[#185325]"
-              : "text-gray-500"
-            }`}
+          className={`font-bold flex items-center gap-1 ${
+            m.status === "Tercapai" ? "text-[#185325]" : "text-gray-500"
+          }`}
         >
           {m.status}
           {m.status === "Tercapai" ? (
             <HiOutlineCheckCircle className="w-4 h-4" />
           ) : (
             <HiOutlineClock className="w-4 h-4" />
-
           )}
         </span>
       </div>
@@ -67,13 +65,13 @@ const MilestoneSectionKTH: React.FC<MilestoneSectionProps> = ({ milestones }) =>
 
   return (
     <div className="mb-8">
-      <h3 className="font-bold text-gray-800 mb-4">Milestone</h3>
+      <h3 className="font-bold text-gray-800 mb-4">Milestone ({milestones.length})</h3>
 
-      <div>{displayedMilestones.slice(0, 2).map(renderMilestone)}</div>
+      <div className="space-y-4">{displayedMilestones.map(renderMilestone)}</div>
 
       {hasMore && (
-        <div className={`grid transition-all duration-500 ease-in-out ${isExpanded ? 'grid-rows-[1fr] opacity-100 mt-8' : 'grid-rows-[0fr] opacity-0'}`}>
-          <div className="overflow-hidden">
+        <div className={`grid transition-all duration-500 ease-in-out ${isExpanded ? 'grid-rows-[1fr] opacity-100 mt-4' : 'grid-rows-[0fr] opacity-0'}`}>
+          <div className="overflow-hidden space-y-4">
             {milestones.slice(2).map(renderMilestone)}
           </div>
         </div>
@@ -82,7 +80,7 @@ const MilestoneSectionKTH: React.FC<MilestoneSectionProps> = ({ milestones }) =>
       {hasMore && (
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="mt-6 flex items-center justify-center gap-2 w-full py-2.5 bg-gray-50 hover:bg-gray-100 text-gray-600 text-sm font-semibold rounded-lg transition-colors border border-gray-200"
+          className="mt-6 flex items-center justify-center gap-2 w-full py-2.5 bg-gray-50 hover:bg-gray-100 text-gray-600 text-sm font-semibold rounded-lg transition-colors border border-gray-200 cursor-pointer"
         >
           {isExpanded ? (
             <>Tutup Milestone <HiOutlineChevronUp className="w-4 h-4" /></>

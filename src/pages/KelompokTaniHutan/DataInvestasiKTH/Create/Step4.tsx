@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { HiOutlineChevronDown, HiOutlineChevronUp, HiOutlineArrowLeft, HiCheck } from 'react-icons/hi2';
+import toast from 'react-hot-toast';
+import { createKthProgramAPI } from '@/services/investasi.service';
 import type { InvestasiFormState } from './index';
 
 interface StepProps {
@@ -8,78 +11,131 @@ interface StepProps {
   onPrev?: () => void;
 }
 
-const Step4: React.FC<StepProps> = ({ data, onNext, onPrev }) => {
+const Step4: React.FC<StepProps> = ({ data, onPrev }) => {
+  const navigate = useNavigate();
   const [showAllMilestones, setShowAllMilestones] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const displayedMilestones = showAllMilestones ? data.milestones : data.milestones.slice(0, 2);
   const hasMoreMilestones = data.milestones.length > 2;
 
   const hitungPersentaseInvestor = (persentaseKTH: string) => {
-    const kth = parseInt(persentaseKTH) || 0;
+    const kth = parseFloat(persentaseKTH) || 0;
     return `${100 - kth}%`;
   };
 
-  const docsList = [
-    'Dokumen Perjanjian Investasi', 'Dokumen Rencana Bisnis', 
-    'Dokumen Proyeksi Keuangan', 'Dokumen Hukum dan Perizinan', 
-    'Template Perjanjian Investor'
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    const loadingToast = toast.loading('Mengirim pengajuan investasi...');
+
+    try {
+      const mappedDokumens = Object.values(data.dokumen)
+  .filter((file) => file !== null)
+  .map((file: any) => ({
+    tipe_dokumen: "PROPOSAL_BISNIS", 
+    file_url: file ? URL.createObjectURL(file) : "https://example.com/default-doc.pdf"
+  }));
+
+      const payload = {
+        nama_program: data.namaInvestasi,
+        kategori_usaha: "Agroforestri",
+        target_dana: Number(data.targetFunding.replace(/\D/g, '')) || 0,
+        persentase_keuntungan: parseFloat(data.persentase) || 0,
+        periode_kontrak_bulan: 24,
+        batas_waktu_pengumpulan: data.batasWaktu,
+        deskripsi: data.deskripsi,
+        milestones: data.milestones.map(m => ({
+          judul_milestone: m.nama,
+          deskripsi: m.deskripsi || 'Deskripsi milestone',
+          target_tanggal: m.batas
+        })),
+        dokumens: mappedDokumens.length > 0 ? mappedDokumens : [
+          { tipe_dokumen: "PROPOSAL_BISNIS", file_url: "https://example.com/proposal.pdf" }
+        ]
+      };
+
+      await createKthProgramAPI(payload);
+      toast.success('Program investasi berhasil diajukan!', { id: loadingToast });
+      navigate('/admin/kth/investasi/data');
+    } catch (error: any) {
+      const errorPayload = error.response?.payload || error.payload;
+      if (errorPayload && typeof errorPayload === 'object') {
+        const firstKey = Object.keys(errorPayload)[0];
+        const errorMessages = errorPayload[firstKey];
+        const readableMsg = Array.isArray(errorMessages) ? errorMessages[0] : errorMessages;
+        toast.error(`Validasi Gagal: ${readableMsg}`, { id: loadingToast, duration: 5000 });
+      } else {
+        toast.error(error.message || 'Gagal mengajukan investasi.', { id: loadingToast });
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const docLabels = [
+    'Dokumen Proposal Bisnis',
+    'Dokumen Proyeksi Keuangan',
+    'Dokumen Hukum & Perizinan'
   ];
 
   return (
-    <div className="animate-in fade-in duration-300">
-      {/* ... BAGIAN PREVIEW DATA TETAP SAMA ... */}
+    <div className="animate-in fade-in duration-300 w-full mx-auto bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+      <h2 className="text-lg font-bold text-gray-800 mb-6 pb-3 border-b border-gray-100">Review Pengajuan Investasi</h2>
       
       <div className="flex flex-col md:flex-row gap-6 mb-8">
-        <div className="w-full md:w-56 h-36 bg-gray-200 rounded-xl shrink-0 flex items-center justify-center text-gray-400 text-xs overflow-hidden">
-          <img src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=800&auto=format&fit=crop" alt="Cover" className="w-full h-full object-cover" />
+        <div className="w-full md:w-56 h-36 bg-gray-100 rounded-xl shrink-0 flex items-center justify-center text-gray-400 text-xs overflow-hidden border border-gray-200">
+          {data.coverFile ? (
+            <img src={URL.createObjectURL(data.coverFile)} alt="Cover" className="w-full h-full object-cover" />
+          ) : (
+            <span>Tidak ada cover</span>
+          )}
         </div>
         <div className="flex flex-col justify-center gap-2 text-sm w-full">
           <h2 className="text-xl font-bold text-gray-800">{data.namaInvestasi || 'Proyek Pembangunan...'}</h2>
           <div className="grid grid-cols-[140px_auto] gap-y-2 mt-2 font-medium text-xs">
-            <span className="text-gray-500">KTH</span> 
+            <span className="text-gray-500">Nama KTH</span> 
             <span className="text-[#185325] font-bold">: {data.namaKTH || 'Rimba Nusantara'}</span>
             
-            <span className="text-gray-500">Target Funding</span> 
+            <span className="text-gray-500">Target Dana</span> 
             <span className="text-[#185325] font-bold">: Rp. {data.targetFunding || '0'}</span>
             
-            <span className="text-gray-500">Persentase Keuntungan</span> 
+            <span className="text-gray-500">Persentase Keuntungan (KTH)</span> 
             <span className="text-gray-800 font-bold">: {data.persentase || '0'}%</span>
             
-            <span className="text-gray-500">Tenggat Waktu</span> 
+            <span className="text-gray-500">Batas Waktu</span> 
             <span className="text-orange-500 font-bold">: {data.batasWaktu || '-'}</span>
           </div>
         </div>
       </div>
 
       <div className="mb-8">
-        <p className="text-sm text-gray-500 leading-relaxed text-justify">
-          {data.deskripsi || 'Lorem ipsum dolor sit amet consectetur. Faucibus faucibus urna nulla amet at nascetur...'}
+        <h4 className="font-bold text-gray-800 mb-2 text-xs uppercase tracking-wider">Deskripsi Proyek</h4>
+        <p className="text-sm text-gray-600 leading-relaxed text-justify bg-gray-50 p-4 rounded-xl">
+          {data.deskripsi || 'Tidak ada deskripsi.'}
         </p>
       </div>
 
       <div className="mb-8">
         <h3 className="font-bold text-gray-800 mb-2">Pembagian Keuntungan</h3>
-        <p className="text-sm text-gray-500 text-justify leading-relaxed mb-4">
-          Keuntungan akan dibagi rata sesuai dengan kesepakatan tertulis persentase saat pendaftaran program.
-        </p>
-        <div className="text-sm font-bold text-gray-800 space-y-2">
-          <div className="flex"><span className="w-24 text-gray-500 font-medium">KTH</span> <span>: {data.persentase || '0'}%</span></div>
-          <div className="flex"><span className="w-24 text-gray-500 font-medium">Investor</span> <span>: {hitungPersentaseInvestor(data.persentase)}</span></div>
+        <div className="text-sm font-bold text-gray-800 space-y-2 bg-gray-50 p-4 rounded-xl">
+          <div className="flex"><span className="w-28 text-gray-500 font-medium">KTH</span> <span>: {data.persentase || '0'}%</span></div>
+          <div className="flex"><span className="w-28 text-gray-500 font-medium">Investor</span> <span>: {hitungPersentaseInvestor(data.persentase)}</span></div>
         </div>
       </div>
 
       <div className="mb-8 border-b border-gray-100 pb-8">
-        <h3 className="font-bold text-gray-800 mb-6">Milestone</h3>
+        <h3 className="font-bold text-gray-800 mb-6">Milestone ({data.milestones.length})</h3>
         
         {displayedMilestones.map((m, idx) => (
-          <div key={m.id} className={`mb-6 last:mb-0 text-sm ${idx !== 0 ? 'pt-6 border-t border-gray-50' : ''}`}>
+          <div key={idx} className={`mb-6 last:mb-0 text-sm bg-gray-50 p-4 rounded-xl ${idx !== 0 ? 'mt-4' : ''}`}>
             <div className="flex mb-1.5"><span className="w-36 shrink-0 text-gray-500">Nama Milestone</span> <span className="w-4 shrink-0">:</span> <span className="font-bold text-gray-800">{m.nama}</span></div>
             <div className="flex mb-1.5"><span className="w-36 shrink-0 text-gray-500">Batas Milestone</span> <span className="w-4 shrink-0">:</span> <span className="text-gray-800">{m.batas}</span></div>
-            <div className="flex"><span className="w-36 shrink-0 text-gray-500">Deskripsi</span> <span className="w-4 shrink-0">:</span> <span className="text-gray-500 leading-relaxed text-justify">{m.deskripsi || 'Tidak ada deskripsi.'}</span></div>
+            <div className="flex"><span className="w-36 shrink-0 text-gray-500">Deskripsi</span> <span className="w-4 shrink-0">:</span> <span className="text-gray-500 leading-relaxed text-justify">{m.deskripsi || '-'}</span></div>
           </div>
         ))}
         
         {hasMoreMilestones && (
-          <button onClick={() => setShowAllMilestones(!showAllMilestones)} className="flex items-center justify-center gap-2 w-full mt-4 text-xs font-bold text-gray-500 hover:text-gray-800 transition-colors">
+          <button onClick={() => setShowAllMilestones(!showAllMilestones)} className="flex items-center justify-center gap-2 w-full mt-4 text-xs font-bold text-gray-500 hover:text-gray-800 transition-colors cursor-pointer">
             {showAllMilestones ? 'Tutup Milestone' : 'Lihat Milestone Lainnya'} 
             {showAllMilestones ? <HiOutlineChevronUp className="w-4 h-4" /> : <HiOutlineChevronDown className="w-4 h-4" />}
           </button>
@@ -87,29 +143,28 @@ const Step4: React.FC<StepProps> = ({ data, onNext, onPrev }) => {
       </div>
 
       <div className="mb-12">
-        <h3 className="font-bold text-gray-800 mb-4">Dokumen Pendukung</h3>
+        <h3 className="font-bold text-gray-800 mb-4">Dokumen Pendukung ({Object.keys(data.dokumen).length})</h3>
         <div className="text-sm space-y-3">
-          {docsList.map((doc, idx) => (
-            <div key={idx} className="flex">
-              <span className="w-56 shrink-0 text-gray-500">{doc}</span>
-              <span className="w-4 shrink-0">:</span>
-              <span className="font-bold underline text-gray-800 hover:text-[#185325] cursor-pointer">
-                {doc.replace(/\s+/g, '')}.pdf
-              </span>
-            </div>
-          ))}
+          {Object.entries(data.dokumen).map(([_, file]: [string, any], idx) => (
+          <div key={idx} className="flex">
+            <span className="w-56 shrink-0 text-gray-500">{docLabels[idx] || 'Dokumen Pendukung'}</span>
+            <span className="w-4 shrink-0">:</span>
+            <span className="font-bold text-gray-800 truncate">
+              {file ? file.name : 'Belum diunggah'}
+            </span>
+          </div>
+        ))}
         </div>
       </div>
 
       <div className="flex gap-4 mt-6">
-        <button onClick={onPrev} className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-white border border-[#185325] text-[#185325] hover:bg-gray-50 text-sm font-bold rounded-full transition-colors">
+        <button disabled={isSubmitting} onClick={onPrev} className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-white border border-[#185325] text-[#185325] hover:bg-gray-50 text-sm font-bold rounded-full transition-colors cursor-pointer">
           <HiOutlineArrowLeft className="w-4 h-4 stroke-2" /> Kembali
         </button>
-        <button onClick={onNext} className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors shadow-sm">
-          Simpan & Selesai <HiCheck className="w-5 h-5 stroke-2" />
+        <button disabled={isSubmitting} onClick={handleSubmit} className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors shadow-sm cursor-pointer disabled:opacity-50">
+          {isSubmitting ? 'Menyimpan...' : 'Simpan & Ajukan Investasi'} <HiCheck className="w-5 h-5 stroke-2" />
         </button>
       </div>
-
     </div>
   );
 };

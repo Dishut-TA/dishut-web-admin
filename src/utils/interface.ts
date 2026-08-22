@@ -212,3 +212,60 @@ export interface EvaluasiProgramData {
   };
   rincianPU: PetakUkur[];
 }
+
+export interface Milestone {
+  id?: string;
+  program_id?: string;
+  judul_milestone: string;
+  deskripsi: string;
+  target_tanggal: string;
+  status?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface DokumenInvestasi {
+  id?: string;
+  program_id?: string;
+  tipe_dokumen: string;
+  file_url: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ProgramInvestasi {
+  id: string;
+  user_id: string;
+  nama_program: string;
+  kategori_usaha: string;
+  target_dana: number;
+  dana_terkumpul: number;
+  persentase_terkumpul: number;
+  persentase_keuntungan: number;
+  periode_kontrak_bulan: number;
+  batas_waktu_pengumpulan: string;
+  deskripsi: string;
+  status: string;
+  created_at: string;
+  milestones: Milestone[];
+  dokumens: DokumenInvestasi[];
+}
+
+export interface CreateProgramInvestasiPayload {
+  nama_program: string;
+  kategori_usaha: string;
+  target_dana: number;
+  persentase_keuntungan: number;
+  periode_kontrak_bulan: number;
+  batas_waktu_pengumpulan: string;
+  deskripsi: string;
+  milestones: {
+    judul_milestone: string;
+    deskripsi: string;
+    target_tanggal: string;
+  }[];
+  dokumens: {
+    tipe_dokumen: string;
+    file_url: string;
+  }[];
+}
