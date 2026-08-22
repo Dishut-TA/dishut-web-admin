@@ -28,6 +28,29 @@ const DaftarUsulanCSR: React.FC = () => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(angka || 0));
   };
 
+  const renderStatusBadge = (status: string) => {
+    const baseStyle = "px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap inline-block";
+    switch (status) {
+      case 'Menunggu Verifikasi':
+      case 'Menunggu Persetujuan':
+        return <span className={`${baseStyle} bg-amber-100 text-amber-800`}>{status}</span>;
+      case 'Terverifikasi':
+        return <span className={`${baseStyle} bg-emerald-100 text-emerald-800 border border-emerald-200`}>{status}</span>;
+      case 'Selesai':
+      case 'Disetujui':
+        return <span className={`${baseStyle} bg-emerald-600 text-white`}>{status}</span>;
+      case 'Mencari Mitra CSR':
+      case 'Aktif':
+      case 'Berjalan':
+        return <span className={`${baseStyle} bg-blue-100 text-blue-800 border border-blue-200`}>{status}</span>;
+      case 'Ditolak':
+      case 'Revisi':
+        return <span className={`${baseStyle} bg-red-100 text-red-700 border border-red-200`}>{status}</span>;
+      default:
+        return <span className={`${baseStyle} bg-gray-100 text-gray-700`}>{status || 'Menunggu'}</span>;
+    }
+  };
+
   const filteredData = data.filter(item => 
     item.nama_program?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.kth?.nama?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -59,7 +82,7 @@ const DaftarUsulanCSR: React.FC = () => {
           <table className="w-full text-left border-collapse min-w-225">
             <thead className="bg-[#DCECE0] text-[#3A4D3F] text-[11px] uppercase tracking-wider font-bold">
               <tr>
-                <th className="px-6 py-4 whitespace-nowrap">ID</th>
+                <th className="px-6 py-4 whitespace-nowrap">ID PROGRAM</th>
                 <th className="px-6 py-4 whitespace-nowrap">NAMA PROGRAM</th>
                 <th className="px-6 py-4 whitespace-nowrap">KTH</th>
                 <th className="px-6 py-4 whitespace-nowrap">ANGGARAN DIAJUKAN</th>
@@ -75,37 +98,39 @@ const DaftarUsulanCSR: React.FC = () => {
                   </td>
                 </tr>
               ) : filteredData.length > 0 ? (
-                filteredData.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4">
-                      <span className="text-sm font-bold text-gray-800">CSR-{item.id}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-sm font-bold text-gray-800">{item.nama_program}</span>
-                    </td>
-                    <td className="px-6 py-4 text-sm font-bold text-gray-700 whitespace-nowrap">
-                      {item.kth?.nama || '-'}
-                    </td>
-                    <td className="px-6 py-4 text-sm font-bold text-gray-800 whitespace-nowrap">
-                      {formatRupiah(item.anggaran)}
-                    </td>
-                    <td className="px-6 py-4 text-center whitespace-nowrap">
-                      <span className={`inline-block px-4 py-1.5 rounded-full text-[11px] font-bold ${
-                        item.status === 'Terverifikasi' ? 'bg-[#FDE68A] text-yellow-800' : 'bg-gray-100 text-gray-700'
-                      }`}>
-                        {item.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 flex justify-center whitespace-nowrap">
-                      <button 
-                        onClick={() => navigate(`/admin/kabid/rehabilitasi/validasi-csr/verifikasi/${item.id}`)}
-                        className="flex items-center gap-2 px-4 py-1.5 bg-white border border-[#185325] text-[#185325] hover:bg-[#f0f9f3] text-xs font-bold rounded-full transition-colors cursor-pointer"
-                      >
-                        Periksa Berkas <HiOutlineArrowRight className="w-3 h-3" />
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                filteredData.map((item) => {
+                  const year = item.created_at ? new Date(item.created_at).getFullYear() : new Date().getFullYear();
+                  const paddedId = String(item.id).padStart(3, '0');
+                  const formattedId = `P-CSR-${year}-${paddedId}`;
+
+                  return (
+                    <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-6 py-4">
+                        <span className="text-sm font-bold text-gray-800">{formattedId}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-sm font-bold text-gray-800">{item.nama_program}</span>
+                      </td>
+                      <td className="px-6 py-4 text-sm font-bold text-gray-700 whitespace-nowrap">
+                        {item.kth?.nama || '-'}
+                      </td>
+                      <td className="px-6 py-4 text-sm font-bold text-gray-800 whitespace-nowrap">
+                        {formatRupiah(item.anggaran)}
+                      </td>
+                      <td className="px-6 py-4 text-center whitespace-nowrap">
+                        {renderStatusBadge(item.status)}
+                      </td>
+                      <td className="px-6 py-4 flex justify-center whitespace-nowrap">
+                        <button 
+                          onClick={() => navigate(`/admin/kabid/rehabilitasi/validasi-csr/verifikasi/${item.id}`)}
+                          className="flex items-center gap-2 px-4 py-1.5 bg-white border border-[#185325] text-[#185325] hover:bg-[#f0f9f3] text-xs font-bold rounded-full transition-colors cursor-pointer"
+                        >
+                          Periksa Berkas <HiOutlineArrowRight className="w-3 h-3" />
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })
               ) : (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-gray-500">

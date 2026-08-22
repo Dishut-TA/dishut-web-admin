@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { HiOutlineChevronLeft, HiPrinter, HiOutlinePencilSquare } from 'react-icons/hi2';
+import { HiOutlineChevronLeft, HiPrinter } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 import { getLaporanDanasAPI } from '@/services/laporan-dana.service';
-import RincianDanaList from './components/RincianDanaList';
 import ProgramInfo from './components/ProgramInfo';
+import RincianDanaList from './components/RincianDanaList';
 import SummaryDanaSection from './components/SummaryDanaSection';
 
-const DetailLaporanDana: React.FC = () => {
+const DetailLaporanDanaKABID: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
@@ -19,7 +19,10 @@ const DetailLaporanDana: React.FC = () => {
     const fetchDetail = async () => {
       try {
         if (location.state?.allReports) {
-          setLaporanDanas(location.state.allReports);
+          const sortedReports = location.state.allReports.sort((a: any, b: any) => 
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          );
+          setLaporanDanas(sortedReports);
           setIsLoading(false);
           return;
         }
@@ -29,7 +32,10 @@ const DetailLaporanDana: React.FC = () => {
         
         if (target) {
           const related = res.filter((l: any) => l.nama_program === target.nama_program);
-          setLaporanDanas(related);
+          const sortedReports = related.sort((a: any, b: any) => 
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          );
+          setLaporanDanas(sortedReports);
         } else {
           toast.error("Data laporan tidak ditemukan.");
         }
@@ -53,12 +59,7 @@ const DetailLaporanDana: React.FC = () => {
 
   if (laporanDanas.length === 0) return <div className="text-center text-gray-500 py-10">Data tidak ditemukan.</div>;
 
-  const mainData = laporanDanas[0];
-  const hasRevisi = laporanDanas.some((l: any) => l.status === 'Revisi');
-
-  const year = mainData.created_at ? new Date(mainData.created_at).getFullYear() : new Date().getFullYear();
-  const paddedId = String(mainData.program_id || mainData.id).padStart(3, '0');
-  const formattedId = `P-${mainData.sumber_dana}-${year}-${paddedId}`;
+  const latestData = laporanDanas[laporanDanas.length - 1];
 
   return (
     <div className="flex flex-col gap-6 w-full mx-auto pb-12 px-4 sm:px-0 animate-in fade-in duration-300">
@@ -69,23 +70,14 @@ const DetailLaporanDana: React.FC = () => {
         >
           <HiOutlineChevronLeft className="w-4 h-4 stroke-2" /> Kembali
         </button>
-
-        {hasRevisi && (
-          <button 
-            onClick={() => navigate(`/admin/kth/rehabilitasi/laporan-dana/edit/${mainData.id}`)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-red-100 text-red-800 hover:bg-red-200 text-sm font-bold rounded-full transition-colors cursor-pointer shadow-sm active:scale-95"
-          >
-            <HiOutlinePencilSquare className="w-5 h-5" /> Revisi Laporan
-          </button>
-        )}
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10">
         <h1 className="text-xl md:text-2xl font-bold text-gray-800 mb-8">
-          Detail Laporan {formattedId}
+          Riwayat Laporan Dana Program
         </h1>
         
-        <ProgramInfo data={mainData} laporanDanas={laporanDanas} />
+        <ProgramInfo data={latestData} laporanDanas={laporanDanas} />
 
         <RincianDanaList laporanDanas={laporanDanas} />
 
@@ -96,7 +88,7 @@ const DetailLaporanDana: React.FC = () => {
             onClick={() => window.print()}
             className="flex items-center gap-2 px-8 py-3 bg-[#185325] text-white font-bold rounded-full hover:bg-[#123d1c] transition-colors active:scale-95 shadow-sm text-sm cursor-pointer"
           >
-            <HiPrinter className="w-5 h-5" /> Cetak Laporan
+            <HiPrinter className="w-5 h-5" /> Cetak Laporan Lengkap
           </button>
         </div>
       </div>
@@ -104,4 +96,4 @@ const DetailLaporanDana: React.FC = () => {
   );
 };
 
-export default DetailLaporanDana;
+export default DetailLaporanDanaKABID;

@@ -23,7 +23,6 @@ const VerifikasiAPBD: React.FC = () => {
       try {
         if (id) {
           const res = await getProgramApbdByIdAPI(id);
-          
           setData(res.data || res.payload || res);
         }
       } catch (error: any) {
@@ -67,13 +66,14 @@ const VerifikasiAPBD: React.FC = () => {
 
   if (!data) return <div className="text-center text-gray-500 py-10">Data tidak ditemukan.</div>;
 
-  const isVerified = data.status === 'Terverifikasi' || data.status === 'Ditolak';
+  // Menambahkan 'Aktif' ke dalam daftar status yang membuat tombol aksi disembunyikan
+  const isVerified = ['Terverifikasi', 'Ditolak', 'Aktif'].includes(data.status);
 
   return (
     <div className="flex flex-col gap-6 w-full mx-auto pb-12 animate-in fade-in duration-300">
       <button 
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-sm font-bold text-gray-700 hover:text-[#185325] self-start transition-colors"
+        className="flex items-center gap-2 text-sm font-bold text-gray-700 hover:text-[#185325] self-start transition-colors cursor-pointer"
       >
         <HiOutlineChevronLeft className="w-4 h-4" strokeWidth={2.5} />
         Kembali
@@ -82,7 +82,7 @@ const VerifikasiAPBD: React.FC = () => {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 md:p-10 flex flex-col">
         <div className="mb-8">
           <span className={`inline-block px-3 py-1 text-xs font-bold rounded-md mb-3 ${
-            data.status === 'Terverifikasi' ? 'bg-green-100 text-green-700' :
+            data.status === 'Terverifikasi' || data.status === 'Aktif' ? 'bg-green-100 text-green-700' :
             data.status === 'Ditolak' ? 'bg-red-100 text-red-700' :
             'bg-[#DCECE0] text-[#185325]'
           }`}>
@@ -156,14 +156,14 @@ const VerifikasiAPBD: React.FC = () => {
             <button 
               onClick={() => handleUpdateStatus('Ditolak')}
               disabled={isSubmitting}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-white border border-red-300 text-red-600 text-sm font-bold rounded-full hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-white border border-red-300 text-red-600 text-sm font-bold rounded-full hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               <HiOutlineXMark className="w-4 h-4" /> Tolak
             </button>
             <button 
               onClick={() => handleUpdateStatus('Terverifikasi')}
               disabled={isSubmitting}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-2.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-2.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               <HiOutlineCheckCircle className="w-5 h-5" /> Sahkan Program APBD
             </button>

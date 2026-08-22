@@ -7,8 +7,6 @@ import { createProgramCsrAPI } from '@/services/program-csr.service';
 const AjukanProgramCSR: React.FC = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-
-  // State Form
   const [form, setForm] = useState({
     judul: '',
     luasLahan: '',
@@ -35,9 +33,8 @@ const AjukanProgramCSR: React.FC = () => {
     const loadingToast = toast.loading('Mengirim proposal CSR...');
 
     try {
-      // Menggunakan FormData karena kita mengirim file PDF
       const formData = new FormData();
-      formData.append('kth_id', '1'); // <-- Sesuaikan dengan ID KTH user yang sedang login nantinya
+      formData.append('kth_id', '1');
       formData.append('nama_program', form.judul);
       formData.append('target_luas_lahan', form.luasLahan);
       formData.append('jenis_tanaman', form.jenisPohon);

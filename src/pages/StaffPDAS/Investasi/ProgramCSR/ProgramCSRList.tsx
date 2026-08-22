@@ -34,18 +34,27 @@ const ProgramCSRList: React.FC = () => {
   );
 
   const renderStatusBadge = (status: string) => {
-    const baseStyle = "px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap";
+    const baseStyle = "px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap inline-block";
+    
     switch (status) {
       case 'Menunggu Verifikasi':
-        return <span className={`${baseStyle} bg-gray-200 text-gray-700`}>Menunggu Persetujuan</span>;
+      case 'Menunggu Persetujuan':
+        return <span className={`${baseStyle} bg-amber-100 text-amber-800`}>{status}</span>;
       case 'Terverifikasi':
+        return <span className={`${baseStyle} bg-emerald-100 text-emerald-800 border border-emerald-200`}>Terverifikasi</span>;
+      case 'Selesai':
       case 'Disetujui':
-        return <span className={`${baseStyle} bg-[#81C784] text-white`}>Disetujui</span>;
+        return <span className={`${baseStyle} bg-emerald-600 text-white`}>{status}</span>;
+      case 'Mencari Mitra CSR':
+        return <span className={`${baseStyle} bg-blue-100 text-blue-800`}>Mencari Mitra CSR</span>;
+      case 'Aktif':
+      case 'Berjalan':
+        return <span className={`${baseStyle} bg-blue-100 text-blue-800 border border-blue-200`}>{status}</span>;
       case 'Ditolak':
       case 'Perlu Revisi':
-        return <span className={`${baseStyle} bg-red-600 text-white`}>Ditolak</span>;
+        return <span className={`${baseStyle} bg-red-100 text-red-700 border border-red-200`}>{status === 'Ditolak' ? 'Perlu Revisi' : status}</span>;
       default:
-        return <span className={`${baseStyle} bg-blue-100 text-blue-700`}>{status}</span>;
+        return <span className={`${baseStyle} bg-gray-100 text-gray-700`}>{status}</span>;
     }
   };
 
@@ -96,43 +105,49 @@ const ProgramCSRList: React.FC = () => {
                   </td>
                 </tr>
               ) : filteredData.length > 0 ? (
-                filteredData.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4 text-sm font-semibold text-gray-800 whitespace-nowrap">
-                      CSR-{item.id}
-                    </td>
-                    <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
-                      {item.nama_program}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
-                      {item.kth?.nama || '-'}
-                    </td>
-                    <td className="px-6 py-4 text-sm font-bold text-[#185325] whitespace-nowrap">
-                      {formatRupiah(item.anggaran)}
-                    </td>
-                    <td className="px-6 py-4 text-center whitespace-nowrap">
-                      {renderStatusBadge(item.status)}
-                    </td>
-                    <td className="px-6 py-4 flex justify-center items-center whitespace-nowrap h-full min-h-16">
-                      {item.status === 'Menunggu Verifikasi' ? (
-                        <button 
-                          onClick={() => navigate(`/admin/staff/rehabilitasi/program-csr/detail/${item.id}`)}
-                          className="flex items-center gap-1.5 px-5 py-2 bg-[#185325] hover:bg-[#123d1c] text-white text-xs font-bold rounded-full transition-colors active:scale-95 shadow-sm cursor-pointer"
-                        >
-                          Tinjau Berkas <HiOutlineArrowRight className="w-4 h-4 stroke-2" />
-                        </button>
-                      ) : (
-                        <button 
-                          title="Lihat Detail"
-                          onClick={() => navigate(`/admin/staff/rehabilitasi/program-csr/detail/${item.id}`)}
-                          className="p-1.5 text-gray-700 hover:text-[#185325] hover:bg-gray-200 border border-gray-400 rounded-full transition-colors cursor-pointer"
-                        >
-                          <HiOutlineEye className="w-4 h-4 stroke-2" />
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))
+                filteredData.map((item) => {
+                  const year = item.created_at ? new Date(item.created_at).getFullYear() : new Date().getFullYear();
+                  const paddedId = String(item.id).padStart(3, '0');
+                  const formattedId = `P-CSR-${year}-${paddedId}`;
+
+                  return (
+                    <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-6 py-4 text-sm font-semibold text-gray-800 whitespace-nowrap">
+                        {formattedId}
+                      </td>
+                      <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
+                        {item.nama_program}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
+                        {item.kth?.nama || '-'}
+                      </td>
+                      <td className="px-6 py-4 text-sm font-bold text-[#185325] whitespace-nowrap">
+                        {formatRupiah(item.anggaran)}
+                      </td>
+                      <td className="px-6 py-4 text-center whitespace-nowrap">
+                        {renderStatusBadge(item.status)}
+                      </td>
+                      <td className="px-6 py-4 flex justify-center items-center whitespace-nowrap h-full min-h-16">
+                        {item.status === 'Menunggu Verifikasi' ? (
+                          <button 
+                            onClick={() => navigate(`/admin/staff/rehabilitasi/program-csr/detail/${item.id}`)}
+                            className="flex items-center gap-1.5 px-5 py-2 bg-[#185325] hover:bg-[#123d1c] text-white text-xs font-bold rounded-full transition-colors active:scale-95 shadow-sm cursor-pointer"
+                          >
+                            Tinjau Berkas <HiOutlineArrowRight className="w-4 h-4 stroke-2" />
+                          </button>
+                        ) : (
+                          <button 
+                            title="Lihat Detail"
+                            onClick={() => navigate(`/admin/staff/rehabilitasi/program-csr/detail/${item.id}`)}
+                            className="p-1.5 text-gray-700 hover:text-[#185325] hover:bg-gray-200 border border-gray-400 rounded-full transition-colors cursor-pointer"
+                          >
+                            <HiOutlineEye className="w-4 h-4 stroke-2" />
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  )
+                })
               ) : (
                 <tr>
                   <td colSpan={6} className="px-6 py-20 text-center">

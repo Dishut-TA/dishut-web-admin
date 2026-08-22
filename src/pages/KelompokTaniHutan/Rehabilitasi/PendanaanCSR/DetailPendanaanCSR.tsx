@@ -3,7 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { 
   HiOutlineChevronLeft,
   HiOutlineUser,
-  HiOutlineMapPin
+  HiOutlineMapPin,
+  HiOutlinePencilSquare
 } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 import { getProgramCsrByIdAPI } from '@/services/program-csr.service';
@@ -38,10 +39,12 @@ const DetailPendanaanCSR: React.FC = () => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(angka));
   };
 
+  const displayStatus = data?.status === 'Ditolak' ? 'Perlu Revisi' : (data?.status || 'Menunggu Persetujuan');
+
   const getStatusColor = (status: string) => {
     const lowerStatus = status?.toLowerCase() || '';
-    if (lowerStatus.includes('ditolak')) return 'text-red-600';
-    if (lowerStatus.includes('disetujui')) return 'text-[#2E7D32]'; 
+    if (lowerStatus.includes('tolak') || lowerStatus.includes('revisi')) return 'text-red-600';
+    if (lowerStatus.includes('setuju')) return 'text-[#2E7D32]'; 
     return 'text-gray-500'; 
   };
 
@@ -63,8 +66,8 @@ const DetailPendanaanCSR: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-7-xl mx-auto pb-12 pt-4 px-4 sm:px-8 text-gray-800 animate-in fade-in duration-300 bg-[#F8FAFC] min-h-screen">
-      <div>
+    <div className="flex flex-col gap-6 w-full mx-auto text-gray-800 animate-in fade-in duration-300 bg-[#F8FAFC] min-h-screen">
+      <div className="flex items-center justify-between">
         <button 
           onClick={() => navigate(-1)}
           className="flex items-center gap-1.5 text-sm font-semibold hover:text-[#2E7D32] transition-colors cursor-pointer"
@@ -72,6 +75,15 @@ const DetailPendanaanCSR: React.FC = () => {
           <HiOutlineChevronLeft className="w-4 h-4 stroke-2" />
           Kembali
         </button>
+
+        {data.status === 'Perlu Revisi' && (
+          <button 
+            onClick={() => navigate(`/admin/kth/rehabilitasi/pendanaan-csr/edit/${data.id}`)}
+            className="flex items-center gap-2 px-5 py-2.5 bg-red-100 text-red-800 hover:bg-red-200 text-sm font-bold rounded-full transition-colors cursor-pointer shadow-sm active:scale-95"
+          >
+            <HiOutlinePencilSquare className="w-5 h-5" /> Revisi Pengajuan
+          </button>
+        )}
       </div>
 
       <div className="mb-4">
@@ -84,6 +96,14 @@ const DetailPendanaanCSR: React.FC = () => {
       </div>
 
       <hr className="border-gray-200 mb-6" />
+
+      {/* Catatan Penolakan dari Staff (jika ada) */}
+      {data.status === 'Ditolak' && data.catatan && (
+        <div className="mb-8 bg-red-50 border border-red-200 rounded-xl p-5">
+          <h3 className="text-sm font-bold text-red-800 mb-2">Catatan Evaluasi / Alasan Penolakan:</h3>
+          <p className="text-sm text-red-700 leading-relaxed italic">{data.catatan}</p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-10 gap-x-8 mb-10">
         <div>
@@ -179,8 +199,8 @@ const DetailPendanaanCSR: React.FC = () => {
         <h3 className="text-base font-medium text-gray-600 mb-3">
           Status
         </h3>
-        <p className={`text-sm font-semibold ${getStatusColor(data.status)}`}>
-          {data.status || 'Menunggu Persetujuan'}
+        <p className={`text-sm font-semibold ${getStatusColor(displayStatus)}`}>
+          {displayStatus}
         </p>
       </div>
 

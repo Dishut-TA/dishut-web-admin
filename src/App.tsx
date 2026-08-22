@@ -157,6 +157,10 @@ import DetailPenugasanPenanaman from "./pages/KTHPelaksanaan/Dashboard/DetailPen
 import DetailPenugasanPenyulaman from "./pages/KTHPelaksanaan/Dashboard/DetailPenugasanPenyulaman";
 import FormMonitoringPage from "./pages/Penyuluh/MonitoringLanjutan/FormMonitoringPage";
 import DetailPelaksanaanProgramKabid from "./pages/KepalaBidangPDAS/PelaksanaanDanMonitoring/Dashboard/DetailPelaksanaanProgramKabid";
+import EditProgramCSR from "./pages/KelompokTaniHutan/Rehabilitasi/PendanaanCSR/EditProgramCSR";
+import DetailLaporanDanaKABID from "./pages/KepalaBidangPDAS/LaporanDana/DetailLaporanDanaKABID";
+import RencanaRehabilitasiIndex from "./pages/StaffPDAS/AnalisisLahanKritis/RencanaRehabilitasi/RencanaRehabilitasiIndex";
+import RencanaRehabilitasiDetail from "./pages/StaffPDAS/AnalisisLahanKritis/RencanaRehabilitasi/RencanaRehabilitasiDetail";
 const Login = lazy(() => import("./pages/Authentication/Login/Login"));
 const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -244,6 +248,8 @@ function App() {
                   <Route path="analisis-cpi/peta/:id" element={<DetailCPISTAFF />} />
                   <Route path="analisis-cpi/zonasi" element={<DataZonasi />} />
                   <Route path="analisis-cpi/kth" element={<DataKTH />} />
+                  <Route path="analisis-cpi/rencana" element={<RencanaRehabilitasiIndex />} />
+                  <Route path="analisis-cpi/rencana/detail/:id" element={<RencanaRehabilitasiDetail />} />
 
                   {/* Donasi */}
                   <Route path="donasi/bibit" element={<IndexBibit />} />
@@ -342,6 +348,7 @@ function App() {
                   <Route path="rehabilitasi/verifikasi-dana-csr/detail/:id" element={<DetailVerifikasiDanaCSRKABID />} />
                   <Route path="rehabilitasi/riwayat-keputusan" element={<RiwayatKeputusan />} />
                   <Route path="rehabilitasi/laporan-dana" element={<LaporanDanaIndexKABID />} />
+                  <Route path="rehabilitasi/laporan-dana/detail/:id" element={<DetailLaporanDanaKABID />} />
                   <Route path="rehabilitasi/riwayat-rehabilitasi" element={<RiwayatRehabilitasiKABID />} />
                   <Route path="rehabilitasi/riwayat-rehabilitasi/detail/:id" element={<DetailRiwayatRehabilitasiKABID />} />
 
@@ -383,6 +390,7 @@ function App() {
                   <Route path="dashboard" element={<DashboardKTH />} />
                   <Route path="rehabilitasi/pendanaan-csr" element={<PendanaanCSR />} />
                   <Route path="rehabilitasi/pendanaan-csr/create" element={<AjukanProgramCSR />} />
+                  <Route path="rehabilitasi/pendanaan-csr/edit/:id" element={<EditProgramCSR />} />
                   <Route path="rehabilitasi/pendanaan-csr/detail/:id" element={<DetailPendanaanCSR />} />
                   <Route path="rehabilitasi/pendanaan-apbd" element={<PendanaanAPBD />} />
                   <Route path="rehabilitasi/pendanaan-apbd/detail/:id" element={<DetailPendanaanAPBD />} />

@@ -128,6 +128,29 @@ export const createSeedSpecificationAPI = async (payload: SeedSpecificationPaylo
   }
 };
 
+export const updateSeedSpecificationAPI = async (id: string | number, payload: SeedSpecificationPayload) => {
+  try {
+    const token = localStorage.getItem('token'); 
+    const response = await fetch(`${API_URL}/seed-specifications/${id}`, {
+      method: 'PUT', 
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` })
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Terjadi kesalahan saat memperbarui spesifikasi bibit.');
+    }
+    return data;
+  } catch (error: any) {
+    throw new Error(error.message || 'Gagal terhubung ke server saat memperbarui spesifikasi.');
+  }
+};
+
 export const getBibitsAPI = async (page: number = 1): Promise<GetBibitsResponse> => {
   try {
     const token = localStorage.getItem('token');
