@@ -5,128 +5,161 @@ import MilestoneSection from './components/MilestoneSection';
 import RevisionModal from './components/RevisionModal';
 import ApprovalModal from './components/ApprovalModal';
 import toast from 'react-hot-toast';
+import { verifyProgramBupmAPI } from '@/services/investasi.service';
 
 const DetailInvestasi: React.FC = () => {
   const navigate = useNavigate();
-  const [showRevisionModal, setShowRevisionModal] = useState(false);
-  const [showApprovalModal, setShowApprovalModal] = useState(false);
   const location = useLocation();
   const isKonfirmasiMode = location.pathname.includes('/konfirmasi');
+  const [showRevisionModal, setShowRevisionModal] = useState(false);
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // --- MOCK DATA ---
+  const programFromState = location.state?.program;
+
+  const docLabels = ['Dokumen Proposal Bisnis', 'Dokumen Proyeksi Keuangan', 'Dokumen Hukum & Perizinan'];
+  const defaultFileNames = ['Proposal_Bisnis.pdf', 'Proyeksi_Keuangan.pdf', 'Perizinan_Usaha.pdf'];
+
   const projectData = {
-    title: 'Proyek Pembangunan Ekowisata Kebun Stroberi',
-    kth: 'Rimba Nusantara',
-    targetFunding: 'Rp. 100.000.000',
-    persentase: '40%',
-    tenggatWaktu: '20 Agustus 2024',
+    id: programFromState?.id || '',
+    title: programFromState?.nama_program || 'Proyek Pembangunan Ekowisata...',
+    kth: programFromState?.user_id ? `${programFromState.user_id}` : 'KTH Cikole Lestari',
+    targetFunding: programFromState ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(programFromState.target_dana) : 'Rp. 0',
+    persentase: programFromState ? `${programFromState.persentase_keuntungan}%` : '40%',
+    tenggatWaktu: programFromState ? new Date(programFromState.batas_waktu_pengumpulan).toLocaleDateString('id-ID') : '-',
     image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=800&auto=format&fit=crop',
-    deskripsiUmum: 'Lorem ipsum dolor sit amet consectetur. Faucibus faucibus urna nulla amet at nascetur. Enim aliquam sed nibh bibendum. Pulvinar nec risus et vulputate consequat tortor. Quisque tristique in dapibus laoreet eu augue. Maecenas quam eget habitant non. Lobortis lobortis dui phasellus sodales consectetur faucibus mauris eros odio. Diam tortor massa et venenatis ornare tristique nulla.',
+    deskripsiUmum: programFromState?.deskripsi || 'Tidak ada deskripsi.',
     pembagianKeuntungan: {
-      kth: '60%',
-      investor: '40%'
+      kth: programFromState ? `${programFromState.persentase_keuntungan}%` : '60%',
+      investor: programFromState ? `${100 - programFromState.persentase_keuntungan}%` : '40%'
     },
-    milestones: [
-      { id: 1, nama: 'Milestone 1', batas: '22/04/2024', status: 'Tercapai' as const, dokumen: 'RencanaProyekPembangunanEkowisata.pdf', deskripsi: 'Lorem ipsum dolor sit amet consectetur...' },
-      { id: 2, nama: 'Milestone 2', batas: '22/04/2024', status: 'Belum Dimulai' as const, dokumen: '-', deskripsi: 'Lorem ipsum dolor sit amet consectetur...' },
-      { id: 3, nama: 'Milestone 3', batas: '22/05/2024', status: 'Belum Dimulai' as const, dokumen: '-', deskripsi: 'Tahap penyelesaian akhir dan serah terima.' },
-      { id: 4, nama: 'Milestone 4', batas: '22/06/2024', status: 'Belum Dimulai' as const, dokumen: '-', deskripsi: 'Evaluasi operasional bulan pertama.' }
-    ],
-    dokumen: [
-      { label: 'Dokumen Perjanjian Investasi', file: 'PerjanjianInvestor.pdf' },
-      { label: 'Dokumen Rencana Bisnis', file: 'RencanaProyekPembangunanEkowisata.pdf' },
-      { label: 'Template Perjanjian Investor', file: 'DokumenPerjanjian.pdf' },
-    ]
+    milestones: programFromState?.milestones?.map((m: any, i: number) => ({
+      id: i + 1,
+      nama: m.judul_milestone,
+      batas: m.target_tanggal,
+      status: m.status === 'COMPLETED' ? 'Tercapai' : 'Belum Dimulai',
+      dokumen: '-',
+      deskripsi: m.deskripsi
+    })) || [],
+    dokumen: programFromState?.dokumens?.map((_d: any, idx: number) => ({
+      label: docLabels[idx] || 'Dokumen Pendukung',
+      file: defaultFileNames[idx] || `Dokumen_${idx + 1}.pdf`
+    })) || []
   };
 
-  const handleRevisionSubmit = (_alasan: string) => {
-    setShowRevisionModal(false);
-    toast.error('Proposal dikembalikan untuk revisi.');
-    navigate(-1);
+  const handleRevisionSubmit = async (alasan: string) => {
+    setIsSubmitting(true);
+    const loadingToast = toast.loading('Mengirim permintaan revisi...');
+    try {
+      await verifyProgramBupmAPI(projectData.id, {
+        status: 'REVISION', 
+        catatan_verifikasi: alasan
+      });
+      toast.success('Proposal berhasil dikembalikan untuk revisi.', { id: loadingToast });
+      setShowRevisionModal(false);
+      navigate('/admin/staff/bupm/data-investasi');
+    } catch (error: any) {
+      toast.error(error.message || 'Gagal mengirim revisi.', { id: loadingToast });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleApprovalSubmit = () => {
-    setShowApprovalModal(false);
-    toast.success('Investasi berhasil disetujui!');
-    navigate(-1);
+  const handleApprovalSubmit = async () => {
+    setIsSubmitting(true);
+    const loadingToast = toast.loading('Memproses persetujuan...');
+    try {
+      await verifyProgramBupmAPI(projectData.id, {
+        status: 'WAITING_HEAD_APPROVAL',
+        catatan_verifikasi: 'Telah disetujui oleh Staff, menunggu validasi Kabid.' 
+      });
+      toast.success('Investasi diteruskan ke Kabid BUPM!', { id: loadingToast });
+      setShowApprovalModal(false);
+      navigate('/admin/staff/bupm/data-investasi');
+    } catch (error: any) {
+      toast.error(error.message || 'Gagal menyetujui investasi.', { id: loadingToast });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="flex flex-col gap-6 w-full mx-auto pb-12">
-      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-bold text-[#185325] hover:underline self-start">
+    <div className="flex flex-col gap-6 w-full mx-auto pb-12 animate-in fade-in duration-300">
+      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-bold text-[#185325] hover:underline self-start cursor-pointer">
         <HiOutlineChevronLeft className="w-4 h-4" strokeWidth={2.5} /> Kembali
       </button>
 
-        <h1 className="text-2xl font-bold text-gray-800 mb-8">
-          {isKonfirmasiMode ? 'Konfirmasi Pembuatan Investasi Baru' : 'Detail Data Investasi'}
-        </h1>
-        
-        <div className="flex flex-col md:flex-row gap-6 mb-8">
-          <img src={projectData.image} alt="Project" className="w-full md:w-64 h-40 object-cover rounded-xl shadow-sm" />
-          <div className="flex flex-col justify-center gap-2 text-sm">
-            <h2 className="text-xl font-bold text-gray-800">{projectData.title}</h2>
-            <div className="grid grid-cols-[140px_auto] gap-y-2 mt-2 font-medium">
-              <span className="text-gray-500">KTH</span>
-              <span className="text-[#185325] font-bold">: {projectData.kth}</span>
-              <span className="text-gray-500">Target Funding</span>
-              <span className="text-[#185325] font-bold">: {projectData.targetFunding}</span>
-              <span className="text-gray-500">Persentase Keuntungan</span>
-              <span className="text-gray-800">: {projectData.persentase}</span>
-              <span className="text-gray-500">Tenggat Waktu</span>
-              <span className="text-orange-500">: {projectData.tenggatWaktu}</span>
-            </div>
+      <h1 className="text-2xl font-bold text-gray-800 mb-8">
+        {isKonfirmasiMode ? 'Konfirmasi Pembuatan Investasi Baru' : 'Detail Data Investasi'}
+      </h1>
+      
+      <div className="flex flex-col md:flex-row gap-6 mb-8">
+        <img src={projectData.image} alt="Project" className="w-full md:w-64 h-40 object-cover rounded-xl shadow-sm border border-gray-200" />
+        <div className="flex flex-col justify-center gap-2 text-sm w-full">
+          <h2 className="text-xl font-bold text-gray-800">{projectData.title}</h2>
+          <div className="grid grid-cols-[160px_auto] gap-y-2 mt-2 font-medium">
+            <span className="text-gray-500">KTH</span>
+            <span className="text-[#185325] font-bold">: {projectData.kth}</span>
+            <span className="text-gray-500">Target Funding</span>
+            <span className="text-[#185325] font-bold">: {projectData.targetFunding}</span>
+            <span className="text-gray-500">Persentase Keuntungan</span>
+            <span className="text-gray-800">: {projectData.persentase}</span>
+            <span className="text-gray-500">Tenggat Waktu</span>
+            <span className="text-orange-500 font-bold">: {projectData.tenggatWaktu}</span>
           </div>
         </div>
+      </div>
 
-        <p className="text-sm text-gray-500 text-justify leading-relaxed mb-8">
+      <div className="mb-8">
+        <h4 className="font-bold text-gray-800 mb-2 text-xs uppercase tracking-wider">Deskripsi Proyek</h4>
+        <p className="text-sm text-gray-600 leading-relaxed text-justify bg-gray-50 p-4 rounded-xl border border-gray-100">
           {projectData.deskripsiUmum}
         </p>
+      </div>
 
-        <div className="mb-8">
-          <h3 className="font-bold text-gray-800 mb-2">Pembagian Keuntungan</h3>
-          <p className="text-sm text-gray-500 text-justify leading-relaxed mb-4">
-            {projectData.deskripsiUmum} 
-          </p>
-          <div className="text-sm font-bold text-gray-800 space-y-2">
-            <div className="flex"><span className="w-24 text-gray-500 font-medium">KTH</span> <span>: {projectData.pembagianKeuntungan.kth}</span></div>
-            <div className="flex"><span className="w-24 text-gray-500 font-medium">Investor</span> <span>: {projectData.pembagianKeuntungan.investor}</span></div>
-          </div>
+      <div className="mb-8">
+        <h3 className="font-bold text-gray-800 mb-2">Pembagian Keuntungan</h3>
+        <div className="text-sm font-bold text-gray-800 space-y-2 bg-gray-50 p-4 rounded-xl border border-gray-100">
+          <div className="flex"><span className="w-28 text-gray-500 font-medium">KTH</span> <span>: {projectData.pembagianKeuntungan.kth}</span></div>
+          <div className="flex"><span className="w-28 text-gray-500 font-medium">Investor</span> <span>: {projectData.pembagianKeuntungan.investor}</span></div>
         </div>
+      </div>
 
-        <MilestoneSection milestones={projectData.milestones} />
+      <MilestoneSection milestones={projectData.milestones} />
 
-        <div className="mb-12">
-          <h3 className="font-bold text-gray-800 mb-4">Dokumen Pendukung</h3>
-          <div className="text-sm space-y-3">
-            {projectData.dokumen.map((doc, idx) => (
-              <div key={idx} className="flex">
-                <span className="w-56 shrink-0 text-gray-500">{doc.label}</span>
-                <span className="w-4 shrink-0">:</span>
-                <span className="font-bold underline text-gray-800 cursor-pointer hover:text-[#185325]">
-                  {doc.file}
-                </span>
-              </div>
-            ))}
-          </div>
+      <div className="mb-12">
+        <h3 className="font-bold text-gray-800 mb-4">Dokumen Pendukung</h3>
+        <div className="text-sm space-y-3">
+          {projectData.dokumen.map((doc: any, idx: number) => (
+            <div key={idx} className="flex">
+              <span className="w-56 shrink-0 text-gray-500">{doc.label}</span>
+              <span className="w-4 shrink-0">:</span>
+              <span className="font-bold underline text-gray-800 cursor-pointer hover:text-[#185325]">
+                {doc.file}
+              </span>
+            </div>
+          ))}
         </div>
+      </div>
 
-        {isKonfirmasiMode && (
-          <div className="flex flex-col sm:flex-row gap-4 border-t border-gray-100 pt-8 mt-8">
-            <button 
-              onClick={() => setShowRevisionModal(true)}
-              className="flex-1 py-3.5 bg-[#FF0000] hover:bg-red-700 text-white font-bold rounded-full transition-colors shadow-sm"
-            >
-              Tolak dan Revisi
-            </button>
-            <button 
-              onClick={() => setShowApprovalModal(true)}
-              className="flex-1 py-3.5 bg-[#185325] hover:bg-[#123d1c] text-white font-bold rounded-full transition-colors shadow-sm"
-            >
-              Konfirmasi Investasi Baru
-            </button>
-          </div>
-        )}
-
+      {isKonfirmasiMode && (
+        <div className="flex flex-col sm:flex-row gap-4 border-t border-gray-100 pt-8 mt-8">
+          <button 
+            disabled={isSubmitting}
+            onClick={() => setShowRevisionModal(true)}
+            className="flex-1 py-3.5 bg-[#FF0000] hover:bg-red-700 text-white font-bold rounded-full transition-colors shadow-sm cursor-pointer disabled:opacity-50"
+          >
+            Tolak dan Revisi
+          </button>
+          <button 
+            disabled={isSubmitting}
+            onClick={() => setShowApprovalModal(true)}
+            className="flex-1 py-3.5 bg-[#185325] hover:bg-[#123d1c] text-white font-bold rounded-full transition-colors shadow-sm cursor-pointer disabled:opacity-50"
+          >
+            Konfirmasi Investasi Baru
+          </button>
+        </div>
+      )}
 
       {isKonfirmasiMode && (
         <>
@@ -142,7 +175,6 @@ const DetailInvestasi: React.FC = () => {
           />
         </>
       )}
-
     </div>
   );
 };
