@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  HiOutlineMagnifyingGlass, 
-  HiOutlineAdjustmentsHorizontal,
-  HiOutlineEye
-} from 'react-icons/hi2';
+import { HiOutlineMagnifyingGlass, HiOutlineAdjustmentsHorizontal, HiOutlineEye } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 import { getProgramApbdsAPI } from '@/services/program-apbd.service';
 import { getProgramCsrsAPI } from '@/services/program-csr.service';
@@ -19,31 +15,40 @@ const RiwayatRehabilitasiSTAFF: React.FC = () => {
     const fetchAllPrograms = async () => {
       setIsLoading(true);
       try {
-        // Fetch dari kedua API secara paralel
         const [apbdRes, csrRes] = await Promise.all([
           getProgramApbdsAPI().catch(() => []),
           getProgramCsrsAPI().catch(() => [])
         ]);
 
-        const mappedApbd = apbdRes.map((item: any) => ({
-          id: `APBD-${item.id}`,
-          nama: item.nama_program,
-          pendanaan: 'APBD',
-          mitra: 'Dinas Kehutanan Jabar', 
-          anggaran: Number(item.anggaran) || 0,
-          status: item.status,
-          created_at: item.created_at
-        }));
+        const mappedApbd = apbdRes.map((item: any) => {
+          const year = item.created_at ? new Date(item.created_at).getFullYear() : new Date().getFullYear();
+          const paddedId = String(item.id).padStart(3, '0');
+          return {
+            uid: `APBD-${item.id}`,
+            formattedId: `P-APBD-${year}-${paddedId}`,
+            nama: item.nama_program,
+            pendanaan: 'APBD',
+            mitra: 'Dinas Kehutanan Jabar', 
+            anggaran: Number(item.anggaran) || 0,
+            status: item.status,
+            created_at: item.created_at
+          };
+        });
 
-        const mappedCsr = csrRes.map((item: any) => ({
-          id: `CSR-${item.id}`,
-          nama: item.nama_program,
-          pendanaan: 'CSR',
-          mitra: item.rekomendasi_mitra || 'Mitra CSR',
-          anggaran: Number(item.anggaran) || 0,
-          status: item.status,
-          created_at: item.created_at
-        }));
+        const mappedCsr = csrRes.map((item: any) => {
+          const year = item.created_at ? new Date(item.created_at).getFullYear() : new Date().getFullYear();
+          const paddedId = String(item.id).padStart(3, '0');
+          return {
+            uid: `CSR-${item.id}`,
+            formattedId: `P-CSR-${year}-${paddedId}`,
+            nama: item.nama_program,
+            pendanaan: 'CSR',
+            mitra: item.rekomendasi_mitra || 'Mitra CSR',
+            anggaran: Number(item.anggaran) || 0,
+            status: item.status,
+            created_at: item.created_at
+          };
+        });
 
         const combinedData = [...mappedApbd, ...mappedCsr].sort(
           (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -74,7 +79,7 @@ const RiwayatRehabilitasiSTAFF: React.FC = () => {
 
   const filteredData = data.filter((item) => 
     item.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.id.toLowerCase().includes(searchTerm.toLowerCase())
+    item.formattedId.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -108,7 +113,7 @@ const RiwayatRehabilitasiSTAFF: React.FC = () => {
           <table className="w-full text-left whitespace-nowrap">
             <thead className="bg-[#DCECE0] text-[#3A4D3F] text-[11px] font-bold uppercase tracking-wider">
               <tr>
-                <th className="px-6 py-4">ID</th>
+                <th className="px-6 py-4">ID Program</th>
                 <th className="px-6 py-4">Nama Program</th>
                 <th className="px-6 py-4">Pendanaan</th>
                 <th className="px-6 py-4">Mitra</th>
@@ -127,8 +132,8 @@ const RiwayatRehabilitasiSTAFF: React.FC = () => {
                 </tr>
               ) : filteredData.length > 0 ? (
                 filteredData.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 font-semibold text-gray-800">{item.id}</td>
+                  <tr key={item.uid} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 font-semibold text-gray-800">{item.formattedId}</td>
                     <td className="px-6 py-4 text-gray-700 font-medium">{item.nama}</td>
                     <td className="px-6 py-4 text-gray-700">{item.pendanaan}</td>
                     <td className="px-6 py-4 text-gray-700">{item.mitra}</td>
@@ -140,7 +145,7 @@ const RiwayatRehabilitasiSTAFF: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 flex justify-center items-center">
                       <button 
-                        onClick={() => navigate(`/admin/staff/rehabilitasi/riwayat-rehabilitasi/detail/${item.id}`)}
+                        onClick={() => navigate(`/admin/staff/rehabilitasi/riwayat-rehabilitasi/detail/${item.uid}`)}
                         className="text-gray-500 hover:text-[#185325] p-1.5 rounded-full hover:bg-gray-200 transition-colors cursor-pointer"
                       >
                         <HiOutlineEye className="w-5 h-5" />
@@ -159,7 +164,6 @@ const RiwayatRehabilitasiSTAFF: React.FC = () => {
           </table>
         </div>
       </div>
-      
     </div>
   );
 };

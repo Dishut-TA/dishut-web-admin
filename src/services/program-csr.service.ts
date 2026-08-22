@@ -43,6 +43,21 @@ export const createProgramCsrAPI = async (formData: FormData) => {
   return json;
 };
 
+export const updateProgramCsrAPI = async (id: string | number, formData: FormData) => {
+  formData.append('_method', 'PUT');
+
+  const res = await fetch(`${API_URL}/program-csrs/${id}`, {
+    method: "POST", 
+    headers: getFormHeaders(),
+    body: formData,
+  });
+  
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || "Gagal memperbarui pengajuan CSR");
+  
+  return json;
+};
+
 export const updateProgramCsrStatusAPI = async (id: string | number, payload: any) => {
   const res = await fetch(`${API_URL}/program-csrs/${id}`, {
     method: "PUT",

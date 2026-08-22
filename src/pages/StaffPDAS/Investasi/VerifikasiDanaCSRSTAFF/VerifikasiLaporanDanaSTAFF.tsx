@@ -77,7 +77,7 @@ const VerifikasiLaporanDanaSTAFF: React.FC = () => {
           <table className="w-full text-left border-collapse min-w-max">
             <thead>
               <tr className="bg-[#DCECE0] text-[#3A4D3F] text-[11px] uppercase tracking-wider font-bold border-b border-gray-200">
-                <th className="px-6 py-4 whitespace-nowrap">ID</th>
+                <th className="px-6 py-4 whitespace-nowrap">ID Program</th>
                 <th className="px-6 py-4 whitespace-nowrap">Nama Program</th>
                 <th className="px-6 py-4 whitespace-nowrap">Tahap</th>
                 <th className="px-6 py-4 whitespace-nowrap">Sumber Dana</th>
@@ -95,40 +95,47 @@ const VerifikasiLaporanDanaSTAFF: React.FC = () => {
                   </td>
                 </tr>
               ) : filteredData.length > 0 ? (
-                filteredData.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4 text-sm font-bold text-gray-800 whitespace-nowrap">
-                      #{item.sumber_dana}-{item.id}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">
-                      {item.nama_program}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">
-                      {item.tahap}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">
-                      {item.sumber_dana}
-                    </td>
-                    <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
-                      {formatRupiah(item.dana_disalurkan)}
-                    </td>
-                    <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
-                      {formatRupiah(item.dana_direalisasikan)}
-                    </td>
-                    <td className="px-6 py-4 text-center whitespace-nowrap">
-                      {renderStatusBadge(item.status)}
-                    </td>
-                    <td className="px-6 py-4 flex justify-center whitespace-nowrap">
-                      <button 
-                        onClick={() => navigate(`/admin/staff/rehabilitasi/verifikasi-dana/detail/${item.id}`)}
-                        className="p-1.5 text-gray-600 hover:text-[#185325] border border-transparent hover:border-[#185325] rounded-full transition-all cursor-pointer"
-                        title="Tinjau Laporan"
-                      >
-                        <HiOutlineEye className="w-5 h-5" />
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                filteredData.map((item) => {
+                  const year = item.created_at ? new Date(item.created_at).getFullYear() : new Date().getFullYear();
+                  const paddedId = String(item.program_id || item.id).padStart(3, '0');
+                  const formattedId = `P-${item.sumber_dana}-${year}-${paddedId}`;
+
+                  return (
+                    <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-6 py-4 text-sm font-bold text-gray-800 whitespace-nowrap">
+                        {formattedId}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">
+                        {item.nama_program}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">
+                        {item.tahap}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">
+                        {item.sumber_dana}
+                      </td>
+                      <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
+                        {formatRupiah(item.dana_disalurkan)}
+                      </td>
+                      <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
+                        {formatRupiah(item.dana_direalisasikan)}
+                      </td>
+                      <td className="px-6 py-4 text-center whitespace-nowrap">
+                        {renderStatusBadge(item.status)}
+                      </td>
+                      <td className="px-6 py-4 flex justify-center whitespace-nowrap">
+                        {/* URL Navigasi tetap merujuk ke ID tabel agar gampang dipanggil di useEffect page detail */}
+                        <button 
+                          onClick={() => navigate(`/admin/staff/rehabilitasi/verifikasi-dana/detail/${item.id}`)}
+                          className="p-1.5 text-gray-600 hover:text-[#185325] border border-transparent hover:border-[#185325] rounded-full transition-all cursor-pointer"
+                          title="Tinjau Laporan"
+                        >
+                          <HiOutlineEye className="w-5 h-5" />
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })
               ) : (
                 <tr>
                   <td colSpan={8} className="px-6 py-12 text-center text-gray-500">

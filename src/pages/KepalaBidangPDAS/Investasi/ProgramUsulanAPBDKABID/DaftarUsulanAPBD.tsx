@@ -1,9 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  HiOutlineMagnifyingGlass,
-  HiOutlineArrowRight
-} from 'react-icons/hi2';
+import { HiOutlineMagnifyingGlass, HiOutlineArrowRight } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 import { getProgramApbdsAPI } from '@/services/program-apbd.service';
 
@@ -18,9 +15,12 @@ const DaftarUsulanAPBD: React.FC = () => {
       try {
         const response = await getProgramApbdsAPI();
         const sortedData = response.sort((a: any, b: any) => {
-          if (a.status === 'Menunggu Persetujuan' && b.status !== 'Menunggu Persetujuan') return -1;
-          if (a.status !== 'Menunggu Persetujuan' && b.status === 'Menunggu Persetujuan') return 1;
-          return 0;
+          const priority = (status: string) => {
+            if (status === 'Menunggu Persetujuan') return 1;
+            if (status === 'Aktif') return 2;
+            return 3;
+          };
+          return priority(a.status) - priority(b.status);
         });
         setData(sortedData);
       } catch (error: any) {
@@ -42,15 +42,25 @@ const DaftarUsulanAPBD: React.FC = () => {
     item.kth?.nama?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const getStatusBadge = (status: string) => {
+  const renderStatusBadge = (status: string) => {
+    const baseStyle = "px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap inline-block";
     switch (status) {
-      case 'Terverifikasi': 
-        return <span className="inline-block px-4 py-1.5 bg-green-100 text-green-700 rounded-full text-[11px] font-bold">Terverifikasi</span>;
-      case 'Ditolak': 
-        return <span className="inline-block px-4 py-1.5 bg-red-100 text-red-700 rounded-full text-[11px] font-bold">Ditolak</span>;
-      case 'Menunggu Persetujuan': 
+      case 'Menunggu Verifikasi':
+      case 'Menunggu Persetujuan':
+        return <span className={`${baseStyle} bg-amber-100 text-amber-800`}>{status}</span>;
+      case 'Terverifikasi':
+        return <span className={`${baseStyle} bg-emerald-100 text-emerald-800 border border-emerald-200`}>{status}</span>;
+      case 'Selesai':
+      case 'Disetujui':
+        return <span className={`${baseStyle} bg-emerald-600 text-white`}>{status}</span>;
+      case 'Aktif':
+      case 'Berjalan':
+        return <span className={`${baseStyle} bg-blue-100 text-blue-800 border border-blue-200`}>{status}</span>;
+      case 'Ditolak':
+      case 'Revisi':
+        return <span className={`${baseStyle} bg-red-100 text-red-700 border border-red-200`}>{status}</span>;
       default:
-        return <span className="inline-block px-4 py-1.5 bg-[#FDE68A] text-yellow-800 rounded-full text-[11px] font-bold">Menunggu Persetujuan</span>;
+        return <span className={`${baseStyle} bg-gray-100 text-gray-700`}>{status || 'Menunggu'}</span>;
     }
   };
 
@@ -80,13 +90,13 @@ const DaftarUsulanAPBD: React.FC = () => {
           <table className="w-full text-left border-collapse min-w-225">
             <thead className="bg-[#DCECE0] text-[#3A4D3F] text-[11px] uppercase tracking-wider font-bold">
               <tr>
-                <th className="px-6 py-4 whitespace-nowrap">ID</th>
+                <th className="px-6 py-4 whitespace-nowrap">ID PROGRAM</th>
                 <th className="px-6 py-4 whitespace-nowrap">NAMA PROGRAM</th>
                 <th className="px-6 py-4 whitespace-nowrap">KTH PENERIMA</th>
                 <th className="px-6 py-4 whitespace-nowrap">LOKASI</th>
-                <th className="px-6 py-4 whitespace-nowrap">Anggaran</th>
-                <th className="px-6 py-4 whitespace-nowrap text-center">Status</th>
-                <th className="px-6 py-4 whitespace-nowrap text-center">Aksi</th>
+                <th className="px-6 py-4 whitespace-nowrap">ANGGARAN</th>
+                <th className="px-6 py-4 whitespace-nowrap text-center">STATUS</th>
+                <th className="px-6 py-4 whitespace-nowrap text-center">AKSI</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -97,36 +107,42 @@ const DaftarUsulanAPBD: React.FC = () => {
                   </td>
                 </tr>
               ) : filteredData.length > 0 ? (
-                filteredData.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4">
-                      <span className="text-sm font-bold text-gray-800">APBD-{item.id}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-sm font-bold text-gray-800">{item.nama_program}</span>
-                    </td>
-                    <td className="px-6 py-4 text-sm font-bold text-gray-700 whitespace-nowrap">
-                      {item.kth?.nama || '-'}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                      {item.kth?.desa_kelurahan ? `${item.kth.desa_kelurahan}, ${item.kth.kabupaten_kota}` : '-'}
-                    </td>
-                    <td className="px-6 py-4 text-sm font-bold text-gray-800 whitespace-nowrap">
-                      {formatRupiah(item.anggaran)}
-                    </td>
-                    <td className="px-6 py-4 text-center whitespace-nowrap">
-                      {getStatusBadge(item.status)}
-                    </td>
-                    <td className="px-6 py-4 flex justify-center whitespace-nowrap">
-                      <button 
-                        onClick={() => navigate(`/admin/kabid/rehabilitasi/program-apbd/verifikasi/${item.id}`)}
-                        className="flex items-center gap-2 px-4 py-1.5 bg-white border border-[#185325] text-[#185325] hover:bg-[#f0f9f3] text-xs font-bold rounded-full transition-colors"
-                      >
-                        Periksa Berkas <HiOutlineArrowRight className="w-3 h-3" />
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                filteredData.map((item) => {
+                  const year = item.created_at ? new Date(item.created_at).getFullYear() : new Date().getFullYear();
+                  const paddedId = String(item.id).padStart(3, '0');
+                  const formattedId = `P-APBD-${year}-${paddedId}`;
+
+                  return (
+                    <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-6 py-4">
+                        <span className="text-sm font-bold text-gray-800">{formattedId}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-sm font-bold text-gray-800">{item.nama_program}</span>
+                      </td>
+                      <td className="px-6 py-4 text-sm font-bold text-gray-700 whitespace-nowrap">
+                        {item.kth?.nama || '-'}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                        {item.kth?.desa_kelurahan ? `${item.kth.desa_kelurahan}, ${item.kth.kabupaten_kota}` : '-'}
+                      </td>
+                      <td className="px-6 py-4 text-sm font-bold text-gray-800 whitespace-nowrap">
+                        {formatRupiah(item.anggaran)}
+                      </td>
+                      <td className="px-6 py-4 text-center whitespace-nowrap">
+                        {renderStatusBadge(item.status)}
+                      </td>
+                      <td className="px-6 py-4 flex justify-center whitespace-nowrap">
+                        <button 
+                          onClick={() => navigate(`/admin/kabid/rehabilitasi/program-apbd/verifikasi/${item.id}`)}
+                          className="flex items-center gap-2 px-4 py-1.5 bg-white border border-[#185325] text-[#185325] hover:bg-[#f0f9f3] text-xs font-bold rounded-full transition-colors cursor-pointer"
+                        >
+                          Periksa Berkas <HiOutlineArrowRight className="w-3 h-3" />
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })
               ) : (
                 <tr>
                   <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
@@ -138,7 +154,6 @@ const DaftarUsulanAPBD: React.FC = () => {
           </table>
         </div>
       </div>
-
     </div>
   );
 };

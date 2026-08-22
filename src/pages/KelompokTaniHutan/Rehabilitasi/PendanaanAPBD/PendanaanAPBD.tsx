@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { HiOutlineMagnifyingGlass, HiOutlineEye } from 'react-icons/hi2';
-import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
-import { getProgramApbdsAPI } from '@/services/program-apbd.service';
+import React, { useState, useEffect } from "react";
+import { HiOutlineMagnifyingGlass, HiOutlineEye } from "react-icons/hi2";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { getProgramApbdsAPI } from "@/services/program-apbd.service";
 
 const PendanaanAPBD: React.FC = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [data, setData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -14,13 +14,7 @@ const PendanaanAPBD: React.FC = () => {
     const fetchPenugasan = async () => {
       try {
         const response = await getProgramApbdsAPI();
-        
-        // Ubah 'Berjalan' menjadi 'Aktif' sesuai Figma
-        const validPrograms = response.filter((item: any) => 
-          ['Terverifikasi', 'Aktif', 'Selesai'].includes(item.status)
-        );
-        
-        setData(validPrograms);
+        setData(response);
       } catch (error: any) {
         toast.error("Gagal memuat daftar penugasan.");
       } finally {
@@ -31,33 +25,57 @@ const PendanaanAPBD: React.FC = () => {
   }, []);
 
   const formatRupiah = (angka: number) => {
-    if (!angka) return 'Rp 0';
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(angka));
+    if (!angka) return "Rp 0";
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      maximumFractionDigits: 0,
+    }).format(Number(angka));
   };
 
-  const filteredData = data.filter(item => 
-    item.nama_program?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.kth?.desa_kelurahan?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredData = data.filter(
+    (item) =>
+      item.nama_program?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.kth?.desa_kelurahan
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()),
   );
+
+  const getStatusStyle = (status: string) => {
+    switch (status) {
+      case "Terverifikasi":
+        return "bg-gray-200 text-gray-700";
+      case "Aktif":
+        return "bg-blue-100 text-blue-700 border border-blue-200";
+      case "Ditolak":
+        return "bg-red-100 text-red-700 border border-red-200";
+      default:
+        return "bg-green-100 text-green-700";
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8 px-4 sm:px-0 animate-in fade-in duration-300">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div className="flex items-start">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Daftar Penugasan Program APBD</h1>
-            <p className="text-sm text-gray-500">Daftar penugasan program rehabilitasi pendanaan APBD</p>
+            <h1 className="text-2xl font-bold text-gray-800">
+              Daftar Penugasan Program APBD
+            </h1>
+            <p className="text-sm text-gray-500">
+              Daftar penugasan program rehabilitasi pendanaan APBD
+            </p>
           </div>
         </div>
-        
+
         <div className="relative w-full sm:w-72">
           <HiOutlineMagnifyingGlass className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-          <input 
-            type="text" 
-            placeholder="Cari Proposal.." 
+          <input
+            type="text"
+            placeholder="Cari Proposal.."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-transparent border border-gray-400 rounded-lg text-sm focus:ring-1 focus:ring-[#185325] focus:border-[#185325] outline-none transition-all" 
+            className="w-full pl-10 pr-4 py-2.5 bg-transparent border border-gray-400 rounded-lg text-sm focus:ring-1 focus:ring-[#185325] focus:border-[#185325] outline-none transition-all"
           />
         </div>
       </div>
@@ -84,35 +102,55 @@ const PendanaanAPBD: React.FC = () => {
                 </tr>
               ) : filteredData.length > 0 ? (
                 filteredData.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-5 font-bold text-gray-800 text-sm">APBD-{item.id}</td>
-                    <td className="px-6 py-5 text-sm text-gray-700">{item.nama_program}</td>
+                  <tr
+                    key={item.id}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
                     <td className="px-6 py-5 text-sm text-gray-700">
-                      {item.kth?.desa_kelurahan ? `${item.kth.desa_kelurahan}, ${item.kth.kabupaten_kota}` : '-'}
+                      P-APBD-{new Date(item.created_at).getFullYear()}-
+                      {String(item.id).padStart(3, "0")}
                     </td>
-                    <td className="px-6 py-5 text-sm font-bold text-[#185325]">{formatRupiah(item.anggaran)}</td>
+                    <td className="px-6 py-5 text-sm text-gray-700">
+                      {item.nama_program}
+                    </td>
+                    <td className="px-6 py-5 text-sm text-gray-700">
+                      {item.kth?.desa_kelurahan
+                        ? `${item.kth.desa_kelurahan}, ${item.kth.kabupaten_kota}`
+                        : "-"}
+                    </td>
+                    <td className="px-6 py-5 text-sm font-bold text-[#185325]">
+                      {formatRupiah(item.anggaran)}
+                    </td>
                     <td className="px-6 py-5 text-center">
-                      <span className={`px-4 py-1.5 rounded-full text-xs font-bold ${
-                        item.status === 'Terverifikasi' ? 'bg-gray-200 text-gray-700' : 
-                        item.status === 'Aktif' ? 'bg-blue-100 text-blue-700 border border-blue-200' : // Warna untuk 'Aktif'
-                        'bg-green-100 text-green-700'
-                      }`}>
-                        {item.status === 'Terverifikasi' ? 'Menunggu Konfirmasi' : item.status}
+                      <span
+                        className={`px-4 py-1.5 rounded-full text-xs font-bold ${getStatusStyle(item.status)}`}
+                      >
+                        {item.status === "Terverifikasi"
+                          ? "Menunggu Konfirmasi"
+                          : item.status}
                       </span>
                     </td>
-                    
+
                     <td className="px-6 py-5 flex justify-center items-center h-full">
-                      {item.status === 'Terverifikasi' ? (
-                        <button 
-                          onClick={() => navigate(`/admin/kth/rehabilitasi/pendanaan-apbd/detail/${item.id}`)} 
-                          className="bg-[#185325] hover:bg-[#123d1c] text-white px-5 py-2 rounded-full text-xs font-bold transition-colors shadow-sm active:scale-95"
+                      {item.status === "Terverifikasi" ? (
+                        <button
+                          onClick={() =>
+                            navigate(
+                              `/admin/kth/rehabilitasi/pendanaan-apbd/detail/${item.id}`,
+                            )
+                          }
+                          className="bg-[#185325] hover:bg-[#123d1c] text-white px-5 py-2 rounded-full text-xs font-bold transition-colors shadow-sm active:scale-95 cursor-pointer"
                         >
                           Konfirmasi
                         </button>
                       ) : (
-                        <button 
-                          onClick={() => navigate(`/admin/kth/rehabilitasi/pendanaan-apbd/detail/${item.id}`)}
-                          className="text-gray-600 hover:text-[#185325] p-2 rounded-full hover:bg-gray-100 transition-colors"
+                        <button
+                          onClick={() =>
+                            navigate(
+                              `/admin/kth/rehabilitasi/pendanaan-apbd/detail/${item.id}`,
+                            )
+                          }
+                          className="text-gray-600 hover:text-[#185325] p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
                         >
                           <HiOutlineEye className="w-5 h-5" />
                         </button>
@@ -122,7 +160,10 @@ const PendanaanAPBD: React.FC = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                  <td
+                    colSpan={6}
+                    className="px-6 py-12 text-center text-gray-500"
+                  >
                     Belum ada penugasan program APBD untuk Anda.
                   </td>
                 </tr>
@@ -131,7 +172,6 @@ const PendanaanAPBD: React.FC = () => {
           </table>
         </div>
       </div>
-      
     </div>
   );
 };

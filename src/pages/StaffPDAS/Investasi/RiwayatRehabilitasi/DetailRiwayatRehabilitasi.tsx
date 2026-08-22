@@ -10,7 +10,7 @@ const STORAGE_BASE_URL = "http://127.0.0.1:8000/storage/";
 
 const DetailRiwayatRehabilitasiSTAFF: React.FC = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); // Format: "CSR-1" atau "APBD-1"
+  const { id } = useParams(); 
   
   const [programData, setProgramData] = useState<any>(null);
   const [reports, setReports] = useState<any[]>([]);
@@ -22,9 +22,8 @@ const DetailRiwayatRehabilitasiSTAFF: React.FC = () => {
       setIsLoading(true);
 
       try {
-        const [tipePendanaan, dbId] = id.split('-'); // Memecah 'CSR-1' menjadi 'CSR' dan '1'
+        const [tipePendanaan, dbId] = id.split('-');
 
-        // 1. Ambil Informasi Program (APBD / CSR)
         let progData;
         if (tipePendanaan === 'APBD') {
           const res = await getProgramApbdByIdAPI(dbId);
@@ -36,17 +35,15 @@ const DetailRiwayatRehabilitasiSTAFF: React.FC = () => {
 
         setProgramData({
           ...progData,
-          tipe_pendanaan: tipePendanaan, // Tambahkan marker ke state
+          tipe_pendanaan: tipePendanaan, 
         });
 
-        // 2. Ambil Semua Laporan Dana, lalu filter berdasarkan ID dan Tipe Program
         const allReports = await getLaporanDanasAPI();
         const filteredReports = allReports.filter((r: any) => 
           String(r.program_id) === String(dbId) && 
           r.sumber_dana?.toUpperCase() === tipePendanaan
         );
 
-        // Urutkan laporan agar Tahap 1 muncul duluan, lalu Tahap 2, dst.
         filteredReports.sort((a: any, b: any) => a.id - b.id);
         setReports(filteredReports);
 
@@ -94,12 +91,10 @@ const DetailRiwayatRehabilitasiSTAFF: React.FC = () => {
     return <div className="text-center text-gray-500 py-10">Data tidak ditemukan.</div>;
   }
 
-  // Kalkulasi Dana
   const danaDisalurkan = Number(programData.anggaran) || 0;
   const totalRealisasi = reports.reduce((sum, rep) => sum + Number(rep.dana_direalisasikan), 0);
   const sisaDana = danaDisalurkan - totalRealisasi;
 
-  // Cek Status Laporan Tahapan untuk "Progress Tahapan"
   const isTahap1Selesai = reports.some(r => r.tahap?.includes('1'));
   const isTahap2Selesai = reports.some(r => r.tahap?.includes('2'));
   const isTahap3Selesai = reports.some(r => r.tahap?.includes('3'));
@@ -120,6 +115,10 @@ const DetailRiwayatRehabilitasiSTAFF: React.FC = () => {
     </div>
   );
 
+  const year = programData.created_at ? new Date(programData.created_at).getFullYear() : new Date().getFullYear();
+  const paddedId = String(programData.id).padStart(3, '0');
+  const formattedId = `P-${programData.tipe_pendanaan}-${year}-${paddedId}`;
+
   return (
     <div className="flex flex-col gap-6 w-full mx-auto pb-12 text-gray-800 px-4 sm:px-0 animate-in fade-in duration-300">
       <div>
@@ -138,7 +137,7 @@ const DetailRiwayatRehabilitasiSTAFF: React.FC = () => {
 
         <div className="mb-10">
           <h3 className="text-base font-bold text-gray-800 mb-4">Informasi Program</h3>
-          <InfoRow label="ID" value={id!} />
+          <InfoRow label="ID Program" value={formattedId} />
           <InfoRow label="Nama Program" value={programData.nama_program} />
           <InfoRow label="Lokasi" value={programData.lokasi || 'Tidak ada data lokasi'} />
           <InfoRow label="KTH" value={programData.kth?.nama || 'KTH Rimba'} />
@@ -151,7 +150,6 @@ const DetailRiwayatRehabilitasiSTAFF: React.FC = () => {
           <InfoRow label="Status" value={programData.status} isStatus />
         </div>
 
-        {/* Progress Tahapan */}
         <div className="mb-10">
           <h3 className="text-base font-bold text-gray-800 mb-4">Progress Tahapan</h3>
           <InfoRow label="Persiapan Lahan" value={getTahapStatus(isTahap1Selesai, isDihentikan)} isStatus />
@@ -159,7 +157,6 @@ const DetailRiwayatRehabilitasiSTAFF: React.FC = () => {
           <InfoRow label="Perawatan & Pemeliharaan" value={getTahapStatus(isTahap3Selesai, isDihentikan)} isStatus />
         </div>
 
-        {/* ALASAN DIHENTIKAN */}
         {isDihentikan && (
           <div className="mb-10">
             <h3 className="text-base font-bold text-gray-800 mb-4">Alasan Program Dihentikan</h3>
@@ -167,7 +164,6 @@ const DetailRiwayatRehabilitasiSTAFF: React.FC = () => {
           </div>
         )}
 
-        {/* TABEL RINCIAN BERDASARKAN LAPORAN (Sama persis seperti desain detail laporan keuangan) */}
         {reports.length > 0 ? reports.map((report) => (
           <div key={report.id} className="mb-8">
             <h3 className="text-sm font-bold text-gray-800 mb-4 bg-gray-100/50 py-2 border-b border-gray-200">
@@ -218,7 +214,6 @@ const DetailRiwayatRehabilitasiSTAFF: React.FC = () => {
           </div>
         )}
 
-        {/* KOTAK REKAPITULASI (Jika ada report) */}
         {reports.length > 0 && (
           <div className="bg-[#DCECE0]/70 rounded-xl p-6 md:p-8 mt-10">
             <h3 className="text-sm font-bold text-gray-800 mb-4 border-b border-[#b2d6bc] pb-2">Rekapitulasi Total</h3>
@@ -239,7 +234,6 @@ const DetailRiwayatRehabilitasiSTAFF: React.FC = () => {
             </div>
           </div>
         )}
-
       </div>
     </div>
   );

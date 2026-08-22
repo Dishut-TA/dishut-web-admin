@@ -47,6 +47,7 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
                 { name: 'Dashboard CPI', path: `${basePath}/analisis-cpi/dashboard` },
                 { name: 'Data KTH', path: `${basePath}/analisis-cpi/kth` },
                 { name: 'Data Peta', path: `${basePath}/analisis-cpi/peta` },
+                { name: 'Rencana Rehabilitasi', path: `${basePath}/analisis-cpi/rencana` },
                 // { name: 'Data Zonasi', path: `${basePath}/analisis-cpi/zonasi` },
             ],
         },

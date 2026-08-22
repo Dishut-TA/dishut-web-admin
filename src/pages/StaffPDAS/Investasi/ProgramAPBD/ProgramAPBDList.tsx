@@ -85,32 +85,38 @@ const ProgramAPBDList: React.FC = () => {
                   <td colSpan={6} className="px-6 py-12 text-center text-gray-500 font-medium">Memuat data...</td>
                 </tr>
               ) : data.length > 0 ? (
-                data.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4">
-                      <span className="text-sm font-semibold text-gray-800">APBD-{item.id}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-sm font-semibold text-gray-800">{item.nama_program}</span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {item.kth?.nama || 'Belum ditugaskan'}
-                    </td>
-                    <td className="px-6 py-4 text-sm font-bold text-[#2E7D32] text-center whitespace-nowrap">
-                      {formatRupiah(item.anggaran)} 
-                    </td>
-                    <td className="px-6 py-4 text-center whitespace-nowrap">
-                      {getStatusBadge(item.status)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center justify-center gap-2">
-                        <button onClick={() => navigate(`/admin/staff/rehabilitasi/program-apbd/detail/${item.id}`)} title="Lihat Detail" className="p-1.5 text-gray-400 hover:text-[#2E7D32] transition-colors">
-                          <HiOutlineEye className="w-5 h-5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                data.map((item) => {
+                  const year = item.created_at ? new Date(item.created_at).getFullYear() : new Date().getFullYear();
+                  const paddedId = String(item.id).padStart(3, '0');
+                  const formattedId = `P-APBD-${year}-${paddedId}`;
+
+                  return (
+                    <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-6 py-4">
+                        <span className="text-sm font-semibold text-gray-800">{formattedId}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-sm font-semibold text-gray-800">{item.nama_program}</span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600">
+                        {item.kth?.nama || 'Belum ditugaskan'}
+                      </td>
+                      <td className="px-6 py-4 text-sm font-bold text-[#2E7D32] text-center whitespace-nowrap">
+                        {formatRupiah(item.anggaran)} 
+                      </td>
+                      <td className="px-6 py-4 text-center whitespace-nowrap">
+                        {getStatusBadge(item.status)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center justify-center gap-2">
+                          <button onClick={() => navigate(`/admin/staff/rehabilitasi/program-apbd/detail/${item.id}`)} title="Lihat Detail" className="p-1.5 text-gray-400 hover:text-[#2E7D32] transition-colors cursor-pointer">
+                            <HiOutlineEye className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })
               ) : (
                 <tr>
                   <td colSpan={6} className="px-6 py-16 text-center">

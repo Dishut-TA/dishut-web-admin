@@ -13,14 +13,14 @@ const BibitToolbar: React.FC<BibitToolbarProps> = ({
   searchTerm, setSearchTerm, filterTinggi, setFilterTinggi, onAddClick
 }) => {
   return (
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-5">
       <div>
         <h1 className="text-2xl font-bold text-gray-800">Manajemen Data Stok Bibit & Harga</h1>
         <p className="text-sm text-gray-500 mt-1">Kelola master data dan pantau ketersediaan stok bibit tanaman.</p>
       </div>
       
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative w-full sm:w-56">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full xl:w-auto">
+        <div className="relative w-full sm:w-56 shrink-0">
           <HiOutlineMagnifyingGlass className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input
             type="text"
@@ -31,7 +31,7 @@ const BibitToolbar: React.FC<BibitToolbarProps> = ({
           />
         </div>
 
-        <div className="relative w-full sm:w-40">
+        <div className="relative w-full sm:w-40 shrink-0">
           <HiOutlineFunnel className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none w-4 h-4" />
           <select
             value={filterTinggi}
@@ -48,10 +48,11 @@ const BibitToolbar: React.FC<BibitToolbarProps> = ({
 
         <button
           onClick={onAddClick}
-          className="bg-primary text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-[#123d1c] hover:shadow-lg hover:-translate-y-0.5 transition-all w-full sm:w-auto"
+          className="bg-primary text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-[#123d1c] shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all w-full sm:w-auto shrink-0"
         >
           <HiOutlinePlus className="w-4 h-4" strokeWidth={2.5} /> Tambah Bibit Baru
         </button>
+
       </div>
     </div>
   );

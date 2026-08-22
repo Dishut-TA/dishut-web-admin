@@ -75,6 +75,10 @@ const DetailVerifikasiLaporanDanaSTAFF: React.FC = () => {
 
   const isMenunggu = data.status === 'Menunggu Verifikasi';
 
+  const year = data.created_at ? new Date(data.created_at).getFullYear() : new Date().getFullYear();
+  const paddedId = String(data.program_id || data.id).padStart(3, '0');
+  const formattedId = `P-${data.sumber_dana}-${year}-${paddedId}`;
+
   return (
     <div className="flex flex-col gap-6 w-full mx-auto pb-12 px-4 sm:px-0 animate-in fade-in duration-300">
       <button 
@@ -87,7 +91,7 @@ const DetailVerifikasiLaporanDanaSTAFF: React.FC = () => {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10">
         <div className="mb-10">
           <h1 className="text-2xl font-bold text-gray-800 inline-block pb-1">
-            Detail Verifikasi #{data.sumber_dana}-{data.id}
+            Detail Verifikasi {formattedId}
           </h1>
         </div>
 

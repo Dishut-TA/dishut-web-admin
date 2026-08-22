@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { HiOutlineChevronLeft, HiCheck, HiPrinter } from 'react-icons/hi2';
+import { HiOutlineChevronLeft, HiPrinter } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 import { getProgramApbdByIdAPI } from '@/services/program-apbd.service';
 import { getProgramCsrByIdAPI } from '@/services/program-csr.service';
@@ -66,14 +66,6 @@ const DetailRiwayatRehabilitasiKABID: React.FC = () => {
     return new Date(dateString).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
 
-  const getStatusColor = (status: string) => {
-    const s = status?.toLowerCase() || '';
-    if (s.includes('selesai')) return 'text-[#2E7D32]';
-    if (s.includes('berjalan') || s.includes('aktif')) return 'text-orange-500';
-    if (s.includes('dihentikan') || s.includes('ditolak')) return 'text-red-600';
-    return 'text-gray-800';
-  };
-
   const handlePrint = () => {
     window.print();
   };
@@ -101,17 +93,48 @@ const DetailRiwayatRehabilitasiKABID: React.FC = () => {
 
   const getTahapStatus = (isSelesai: boolean, isProgramDihentikan: boolean) => {
     if (isSelesai) return 'Selesai';
-    if (isProgramDihentikan) return 'Program dihentikan pada tahap ini';
+    if (isProgramDihentikan) return 'Dihentikan';
     return 'Belum Mulai';
   };
 
   const isDihentikan = programData.status?.toLowerCase().includes('dihentikan');
 
+  const year = programData.created_at ? new Date(programData.created_at).getFullYear() : new Date().getFullYear();
+  const paddedId = String(programData.id).padStart(3, '0');
+  const formattedId = `P-${programData.tipe_pendanaan}-${year}-${paddedId}`;
+
+  const renderStatusBadge = (status: string) => {
+    const baseStyle = "px-4 py-1 rounded-full text-[10px] font-bold whitespace-nowrap inline-block";
+    switch (status) {
+      case 'Menunggu Verifikasi':
+      case 'Menunggu Persetujuan':
+        return <span className={`${baseStyle} bg-amber-100 text-amber-800`}>{status}</span>;
+      case 'Terverifikasi':
+        return <span className={`${baseStyle} bg-emerald-100 text-emerald-800 border border-emerald-200`}>{status}</span>;
+      case 'Selesai':
+      case 'Disetujui':
+        return <span className={`${baseStyle} bg-emerald-600 text-white`}>{status}</span>;
+      case 'Aktif':
+      case 'Berjalan':
+        return <span className={`${baseStyle} bg-blue-100 text-blue-800 border border-blue-200`}>{status}</span>;
+      case 'Ditolak':
+      case 'Dihentikan':
+      case 'Revisi':
+        return <span className={`${baseStyle} bg-red-100 text-red-700 border border-red-200`}>{status}</span>;
+      default:
+        return <span className={`${baseStyle} bg-gray-100 text-gray-700`}>{status || '-'}</span>;
+    }
+  };
+
   const InfoRow = ({ label, value, isStatus = false }: { label: string, value: string | number, isStatus?: boolean }) => (
     <div className="grid grid-cols-[160px_20px_1fr] md:grid-cols-[200px_20px_1fr] mb-3 text-sm">
-      <span className="text-gray-500">{label}</span>
+      <span className="text-gray-500 font-medium">{label}</span>
       <span className="text-gray-500">:</span>
-      <span className={`font-semibold ${isStatus ? getStatusColor(String(value)) : 'text-gray-800'}`}>{value}</span>
+      {isStatus ? (
+        <span className="flex-1">{renderStatusBadge(String(value))}</span>
+      ) : (
+        <span className="font-bold text-gray-800">{value}</span>
+      )}
     </div>
   );
 
@@ -133,7 +156,7 @@ const DetailRiwayatRehabilitasiKABID: React.FC = () => {
 
         <div className="mb-10">
           <h3 className="text-base font-bold text-gray-800 mb-4">Informasi Program</h3>
-          <InfoRow label="ID" value={id!} />
+          <InfoRow label="ID Program" value={formattedId} />
           <InfoRow label="Nama Program" value={programData.nama_program} />
           <InfoRow label="Lokasi" value={programData.lokasi || 'Tidak ada data lokasi'} />
           <InfoRow label="KTH" value={programData.kth?.nama || 'KTH Rimba'} />
@@ -195,7 +218,9 @@ const DetailRiwayatRehabilitasiKABID: React.FC = () => {
                         <span className="text-gray-400">-</span>
                       )}
                     </td>
-                    <td className="py-4 text-[#2E7D32] text-center"><HiCheck className="w-5 h-5 mx-auto" /></td>
+                    <td className="py-4 text-center">
+                      {renderStatusBadge(report.status)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -230,7 +255,6 @@ const DetailRiwayatRehabilitasiKABID: React.FC = () => {
             </div>
           </div>
         )}
-
       </div>
     </div>
   );
