@@ -1,22 +1,16 @@
 import React from 'react';
 
 interface DashboardHeaderProps {
-  isVerified: boolean;
   periode: string;
   setPeriode: (val: string) => void;
 }
 
-const DashboardHeader: React.FC<DashboardHeaderProps> = ({ isVerified, periode, setPeriode }) => {
+const DashboardHeader: React.FC<DashboardHeaderProps> = ({ periode, setPeriode }) => {
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-800">Dashboard Analisis CPI</h1>
-        <div className="flex items-center gap-2 mt-1">
-          <span className="text-sm font-semibold text-gray-600">Status Analisis :</span>
-          <span className={`text-sm font-bold ${isVerified ? 'text-green-600' : 'text-red-500'}`}>
-            {isVerified ? 'Sudah Ter Verifikasi' : 'Belum Ter Verifikasi'}
-          </span>
-        </div>
+        <p className="text-sm text-gray-500 mt-1">Pantau dan verifikasi hasil analisis lahan kritis secara spasial.</p>
       </div>
 
       <div className="flex items-center gap-3">

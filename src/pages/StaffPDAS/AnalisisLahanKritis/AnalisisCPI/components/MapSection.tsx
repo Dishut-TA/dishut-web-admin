@@ -1,5 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { HiOutlinePlus, HiOutlineDocumentArrowDown } from 'react-icons/hi2';
+import { 
+  HiOutlinePlus, 
+  HiOutlineDocumentArrowDown, 
+  HiOutlineMapPin, 
+  HiOutlineUsers, 
+  HiOutlineArrowTopRightOnSquare 
+} from 'react-icons/hi2';
 import { MapContainer, TileLayer, GeoJSON, Marker, Popup, useMap } from 'react-leaflet';
 import { pdf } from '@react-pdf/renderer';
 import { toJpeg } from 'html-to-image';
@@ -19,9 +25,6 @@ let DefaultIcon = L.icon({
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
-// =========================================================================
-// KOMPONEN HELPER: AUTO ZOOM & FIT BOUNDS KE AREA GEOJSON
-// =========================================================================
 const FitBoundsToGeoJSON = ({ geoData }: { geoData: any }) => {
   const map = useMap();
 
@@ -39,8 +42,6 @@ const FitBoundsToGeoJSON = ({ geoData }: { geoData: any }) => {
   return null;
 };
 
-// =========================================================================
-
 interface MapSectionProps {
   geoData: any;
   isLoading: boolean;
@@ -55,36 +56,19 @@ const MapSection: React.FC<MapSectionProps> = ({ geoData, isLoading, onOpenInput
 
   const getFeatureStyle = (feature: any) => {
     const status = feature.properties?.status_lahan_kritis?.toLowerCase() || feature.properties?.status?.toLowerCase() || '';
-    if (status.includes('sangat kritis')) return { color: '#EF4444', fillColor: '#ef4444', fillOpacity: 0.9, weight: 1 };
-    if (status.includes('kritis')) return { color: '#F59E0B', fillColor: '#facc15', fillOpacity: 0.9, weight: 1 };
-    return { color: '#10B981', fillColor: '#4ade80', fillOpacity: 0.9, weight: 1 };
+    if (status.includes('sangat kritis')) return { color: '#EF4444', fillColor: '#ef4444', fillOpacity: 0.8, weight: 1.5 };
+    if (status.includes('kritis')) return { color: '#F59E0B', fillColor: '#facc15', fillOpacity: 0.8, weight: 1.5 };
+    return { color: '#10B981', fillColor: '#4ade80', fillOpacity: 0.8, weight: 1.5 };
   };
 
   const onEachFeatureHandler = (feature: any, layer: any) => {
     const props = feature.properties || {};
     const desa = props.desa_kelurahan || props.desa || 'Desa Tidak Diketahui';
-    const status = props.status_lahan_kritis || props.status || 'Tidak Diketahui';
-    const skorCpi = props.skor_cpi_rata2 || props.cpi || '-';
-    const luas = props.luas_ha || props.luas || '-';
 
-    const statusLower = status.toLowerCase();
-    let badgeStyle = 'bg-green-100 text-green-700 border-green-200';
-    if (statusLower.includes('sangat kritis')) badgeStyle = 'bg-red-100 text-red-700 border-red-200';
-    else if (statusLower.includes('kritis')) badgeStyle = 'bg-yellow-100 text-yellow-700 border-yellow-200';
-
-    const popupContent = `
-      <div class="font-sans min-w-55 -m-1">
-        <div class="border-b border-gray-100 pb-3 mb-3">
-          <h3 class="font-bold text-gray-800 text-sm mb-1.5 leading-tight">${desa}</h3>
-          <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${badgeStyle}">${status}</span>
-        </div>
-        <div class="flex flex-col gap-2 text-xs text-gray-600">
-          <div class="flex justify-between items-center"><span class="text-gray-500">Skor CPI</span><span class="font-bold text-[#185325]">${skorCpi}</span></div>
-          <div class="flex justify-between items-center"><span class="text-gray-500">Luas Lahan</span><span class="font-semibold text-gray-700">${luas} Ha</span></div>
-        </div>
-      </div>
-    `;
-    layer.bindPopup(popupContent);
+    layer.bindTooltip(`<div class="font-bold text-xs text-gray-800 font-sans">Desa ${desa}</div>`, {
+      sticky: true,
+      className: 'bg-white/90 backdrop-blur-sm border border-gray-100 shadow-sm rounded-md py-1 px-2'
+    });
   };
 
   const handleExportPDF = async () => {
@@ -94,25 +78,18 @@ const MapSection: React.FC<MapSectionProps> = ({ geoData, isLoading, onOpenInput
     try {
       let mapImageBase64 = null;
 
-      // Menggunakan html-to-image
       if (mapContainerRef.current) {
         mapImageBase64 = await toJpeg(mapContainerRef.current, { 
           quality: 0.8,
-          pixelRatio: 2, // Di-set 2 agar screenshot peta lebih tajam/HD
-          style: {
-            transform: 'scale(1)' // Mencegah bug pergeseran posisi
-          }
+          pixelRatio: 2,
+          style: { transform: 'scale(1)' } 
         });
       }
 
-      // Siapkan dokumen PDF
       const doc = <ReportPDF data={tableData} projectName={petaFilter} mapImage={mapImageBase64} />;
-      
-      // Render ke dalam format Blob secara asinkron
       const asPdf = pdf(doc);
       const blob = await asPdf.toBlob();
 
-      // Picu unduhan ke browser pengguna
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -120,7 +97,6 @@ const MapSection: React.FC<MapSectionProps> = ({ geoData, isLoading, onOpenInput
       document.body.appendChild(link);
       link.click();
       
-      // Bersihkan memori
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
@@ -133,7 +109,38 @@ const MapSection: React.FC<MapSectionProps> = ({ geoData, isLoading, onOpenInput
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-4 md:p-6 border border-gray-100 mb-6">
+    <div className="bg-white rounded-xl shadow-sm p-4 md:p-6 border border-gray-100 mb-6 relative">
+      
+      {/* CSS CUSTOM POPUP MODERN */}
+      <style>{`
+        .modern-popup .leaflet-popup-content-wrapper {
+          padding: 0 !important;
+          overflow: hidden;
+          border-radius: 1rem !important; /* 16px border-radius */
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+          border: 1px solid #f3f4f6;
+        }
+        .modern-popup .leaflet-popup-content {
+          margin: 0 !important;
+          width: 280px !important;
+        }
+        .modern-popup .leaflet-popup-close-button {
+          color: #9ca3af !important;
+          padding: 12px 12px 0 0 !important;
+          z-index: 20;
+          transition: color 0.2s;
+        }
+        .modern-popup .leaflet-popup-close-button:hover {
+          color: #1f2937 !important;
+          background: transparent !important;
+        }
+        .modern-popup .leaflet-popup-tip {
+          background: #f9fafb !important; /* Warna sesuai body bg-gray-50 */
+          border-left: 1px solid #e5e7eb;
+          border-top: 1px solid #e5e7eb;
+        }
+      `}</style>
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
         <div>
           <h2 className="text-sm font-bold text-gray-800">Peta Prioritas Rehabilitasi Jawa Barat:</h2>
@@ -141,7 +148,7 @@ const MapSection: React.FC<MapSectionProps> = ({ geoData, isLoading, onOpenInput
         </div>
         <button
           onClick={onOpenInputModal}
-          className="w-full sm:w-auto bg-[#185325] hover:bg-[#113d1b] text-white px-5 py-2.5 rounded-full text-xs font-bold transition-colors flex items-center justify-center gap-2 shadow-sm active:scale-95"
+          className="w-full sm:w-auto bg-[#185325] hover:bg-[#113d1b] text-white px-5 py-2.5 rounded-full text-xs font-bold transition-colors flex items-center justify-center gap-2 shadow-sm active:scale-95 cursor-pointer"
         >
           Input File <HiOutlinePlus className="w-4 h-4 stroke-2" />
         </button>
@@ -156,41 +163,116 @@ const MapSection: React.FC<MapSectionProps> = ({ geoData, isLoading, onOpenInput
         ) : geoData ? (
           <MapContainer center={[-6.9204, 107.6046]} zoom={9} style={{ height: '100%', width: '100%' }}>
             
-            {/* INI DIA KOMPONEN AUTO ZOOM NYA! */}
             <FitBoundsToGeoJSON geoData={geoData} />
             
             <TileLayer
               attribution='&copy; OpenStreetMap contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
+            
             <GeoJSON
               key={geoData.projectId || Math.random()}
               data={geoData}
               style={getFeatureStyle}
               onEachFeature={onEachFeatureHandler}
             />
+            
             {geoData.features?.map((feature: any, index: number) => {
               try {
                 const centroid = turf.centerOfMass(feature);
                 const [lng, lat] = centroid.geometry.coordinates;
                 const props = feature.properties || {};
-                const desa = props.desa_kelurahan || props.desa || '-';
+                const desa = props.desa_kelurahan || props.desa || 'Tidak Diketahui';
+                const status = props.status_lahan_kritis || props.status || 'Tidak Diketahui';
+                const skorCpi = props.skor_cpi_rata2 || props.cpi || '-';
+                const luas = props.luas_ha || props.luas || '-';
                 const kth = props.nama_kelompok || 'Belum ada data KTH';
                 const ketua = props.ketua_kelompok || '-';
                 const cdk = props.cdk || '-';
 
+                const statusLower = status.toLowerCase();
+                let badgeStyle = 'bg-emerald-100 text-emerald-800 border-emerald-200';
+                if (statusLower.includes('sangat kritis')) {
+                  badgeStyle = 'bg-red-100 text-red-800 border-red-200';
+                } else if (statusLower.includes('kritis')) {
+                  badgeStyle = 'bg-yellow-100 text-yellow-800 border-yellow-200';
+                }
+
                 return (
                   <Marker key={`marker-${index}`} position={[lat, lng]}>
-                    <Popup>
-                      <div className="font-sans text-xs min-w-48 p-1">
-                        <span className="bg-[#185325]/10 text-[#185325] font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wider mb-1.5 inline-block">{cdk}</span>
-                        <strong className="block text-sm text-gray-800 mb-2 pb-1 border-b">Desa {desa}</strong>
-                        <div className="mb-2 bg-gray-50 p-1.5 rounded border border-gray-100 text-[11px] text-gray-600 font-mono">
-                          <div>Lat: {lat.toFixed(5)}</div>
-                          <div>Lng: {lng.toFixed(5)}</div>
+                    <Popup className="modern-popup" closeButton={true}>
+                      <div className="font-sans animate-in zoom-in-95 fade-in duration-300">
+                        
+                        {/* HEADER POPUP */}
+                        <div className="relative bg-white p-4 pb-3 border-b border-gray-100 z-10">
+                          <div className="pr-5">
+                            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">
+                              {cdk}
+                            </span>
+                            <h3 className="font-bold text-gray-800 text-base leading-tight mb-2">
+                              Desa {desa}
+                            </h3>
+                            <span className={`inline-block px-2.5 py-1 rounded text-[9px] font-bold uppercase tracking-wider border ${badgeStyle}`}>
+                              {status}
+                            </span>
+                          </div>
                         </div>
-                        <div className="mb-1"><span className="text-gray-500">KTH:</span> <span className="font-bold text-[#185325]">{kth}</span></div>
-                        <div><span className="text-gray-500">Ketua:</span> <span className="font-bold text-gray-700">{ketua}</span></div>
+                        
+                        {/* BODY POPUP */}
+                        <div className="p-4 bg-gray-50/80 flex flex-col gap-4">
+                          
+                          {/* Statistik (CPI & Luas) */}
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-white p-2.5 rounded-xl border border-gray-100 shadow-sm text-center transition-transform hover:-translate-y-0.5 hover:shadow-md">
+                              <span className="block text-[10px] text-gray-400 font-bold uppercase mb-0.5">Skor CPI</span>
+                              <span className="font-bold text-primary text-lg">{skorCpi}</span>
+                            </div>
+                            <div className="bg-white p-2.5 rounded-xl border border-gray-100 shadow-sm text-center transition-transform hover:-translate-y-0.5 hover:shadow-md">
+                              <span className="block text-[10px] text-gray-400 font-bold uppercase mb-0.5">Luas Lahan</span>
+                              <span className="font-bold text-[#185325] text-lg">{luas} <span className="text-[10px] font-semibold text-gray-500">Ha</span></span>
+                            </div>
+                          </div>
+
+                          {/* Info Kelembagaan (KTH & Ketua) */}
+                          <div className="bg-white rounded-xl border border-gray-100 p-3 shadow-sm">
+                            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                               <HiOutlineUsers className="w-3.5 h-3.5"/> Info Kelompok Tani
+                            </p>
+                            <div className="flex flex-col gap-2 text-xs">
+                              <div className="flex justify-between items-center border-b border-gray-50 pb-2">
+                                 <span className="text-gray-500">KTH:</span> 
+                                 <span className="font-bold text-[#185325] text-right truncate max-w-30">{kth}</span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                 <span className="text-gray-500">Ketua:</span> 
+                                 <span className="font-semibold text-gray-700 text-right truncate max-w-30">{ketua}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex justify-between items-center bg-green-50 text-green-700 p-2.5 rounded-xl border border-green-100">
+                             <div className="flex items-center gap-2">
+                               <div className="bg-green-100 p-1.5 rounded-lg">
+                                 <HiOutlineMapPin className="w-4 h-4 shrink-0 text-green-600" />
+                               </div>
+                               <div className="flex flex-col text-[9px] font-mono font-medium gap-0.5">
+                                 <span>Lat: {lat.toFixed(5)}</span>
+                                 <span>Lng: {lng.toFixed(5)}</span>
+                               </div>
+                             </div>
+                             <button 
+                               title="Buka di Google Maps"
+                               onClick={(e) => {
+                                 e.stopPropagation();
+                                 window.open(`https://www.google.com/maps?q=${lat},${lng}`, '_blank');
+                               }}
+                               className="bg-white p-2 rounded-lg text-green-600 hover:bg-green-600 hover:text-white transition-colors border border-green-200 cursor-pointer shadow-sm active:scale-95"
+                             >
+                                <HiOutlineArrowTopRightOnSquare className="w-3.5 h-3.5" />
+                             </button>
+                          </div>
+
+                        </div>
                       </div>
                     </Popup>
                   </Marker>
@@ -205,7 +287,7 @@ const MapSection: React.FC<MapSectionProps> = ({ geoData, isLoading, onOpenInput
         )}
 
         {geoData && !isLoading && (
-          <div className="absolute top-4 right-4 z-[400] bg-white px-3 py-2 rounded-lg shadow-sm border border-gray-100 flex gap-3 text-[10px] font-bold tracking-wide uppercase">
+          <div className="absolute top-4 right-4 z-400 bg-white px-3 py-2 rounded-lg shadow-sm border border-gray-100 flex gap-3 text-[10px] font-bold tracking-wide uppercase">
             <div className="flex items-center gap-1.5"><div className="w-3 h-2 bg-[#4ade80] rounded-full"></div> Tidak Kritis</div>
             <div className="flex items-center gap-1.5"><div className="w-3 h-2 bg-[#facc15] rounded-full"></div> Kritis</div>
             <div className="flex items-center gap-1.5"><div className="w-3 h-2 bg-[#ef4444] rounded-full"></div> Sangat Kritis</div>
@@ -218,7 +300,7 @@ const MapSection: React.FC<MapSectionProps> = ({ geoData, isLoading, onOpenInput
           <button 
             onClick={handleExportPDF}
             disabled={isGeneratingPDF}
-            className={`bg-[#185325] text-white px-6 py-2.5 rounded-full text-xs font-bold flex items-center gap-2 transition-colors shadow-sm active:scale-95 ${isGeneratingPDF ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#123d1c]'}`}
+            className={`bg-[#185325] text-white px-6 py-2.5 rounded-full text-xs font-bold flex items-center gap-2 transition-colors shadow-sm active:scale-95 ${isGeneratingPDF ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#123d1c] cursor-pointer'}`}
           >
             <HiOutlineDocumentArrowDown className="w-4 h-4 stroke-2" /> 
             {isGeneratingPDF ? 'Memproses PDF...' : 'Ekspor Laporan'}
@@ -232,7 +314,6 @@ const MapSection: React.FC<MapSectionProps> = ({ geoData, isLoading, onOpenInput
           </button>
         )}
       </div>
-
     </div>
   );
 };
