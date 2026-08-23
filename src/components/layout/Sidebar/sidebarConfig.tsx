@@ -89,7 +89,7 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
                 { name: 'Dashboard Evaluasi', path: `${basePath}/evaluasi/dashboard` },
                 { name: 'Penugasan Evaluasi', path: `${basePath}/evaluasi/penugasan` },
                 { name: 'Perhitungan Hasil Evaluasi', path: `${basePath}/evaluasi/hasil` },
-                { name: 'Laporan Evaluasi', path: `${basePath}/evaluasi/laporan` },
+                // { name: 'Laporan Evaluasi', path: `${basePath}/evaluasi/laporan` },
             ],
         },
         ...(canManageAccounts(user) ? [menuManajemenAkun] : [])
@@ -129,10 +129,10 @@ export const getSidebarMenus = (basePath: string, userRole: string, user: any) =
             icon: <HiOutlineComputerDesktop className="w-5 h-5" />,
             items: [
                 { name: 'Dashboard', path: `${basePath}/monitoring/dashboard` },
-                { name: 'Penugasan Kegiatan Rehabilitasi ', path: `${basePath}/monitoring/penugasan-pelaksanaan` },
+                // { name: 'Penugasan Kegiatan Rehabilitasi ', path: `${basePath}/monitoring/penugasan-pelaksanaan` },
                 // { name: 'Pelaksanaan Kegiatan Rehabilitasi', path: `${basePath}/monitoring/kegiatan` },
                 // { name: 'Hasil Validasi Lokasi', path: `${basePath}/monitoring/hasil-validasi-lokasi` },
-                { name: 'Monitoring Program Rehabilitasi', path: `${basePath}/monitoring/verifikasi` },
+                // { name: 'Monitoring Program Rehabilitasi', path: `${basePath}/monitoring/verifikasi` },
             ],
         },
         {

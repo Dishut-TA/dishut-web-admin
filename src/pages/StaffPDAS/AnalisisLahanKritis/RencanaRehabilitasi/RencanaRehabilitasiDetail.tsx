@@ -259,9 +259,9 @@ const RencanaRehabilitasiDetail: React.FC = () => {
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-600 mb-2">Target Petak Ukur (PU)</label>
+                <label className="block text-xs font-bold text-gray-600 mb-2">Jumlah Petak Ukur (PU)</label>
                 <div className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-[#185325] font-bold text-sm shadow-sm cursor-not-allowed text-center">
-                  {jumlahPU > 0 ? `PU-001 s/d PU-${String(jumlahPU).padStart(3, '0')}` : '-'}
+                  {jumlahPU > 0 ? `${String(jumlahPU).padStart(3, '0')}` : '-'}
                 </div>
               </div>
             </div>
