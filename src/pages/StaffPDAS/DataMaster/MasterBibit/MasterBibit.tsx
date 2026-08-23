@@ -134,7 +134,7 @@ const MasterBibit: React.FC = () => {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mt-2">
         <div className="overflow-x-auto w-full">
           <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-[#f8fbf9] text-gray-600 border-b border-gray-200">
+            <thead className="text-[#3A4D3F] bg-[#DCECE0] border-b border-gray-200">
               <tr>
                 <th className="px-6 py-4 font-bold w-12 text-center">No</th>
                 <th className="px-6 py-4 font-bold">Nama Bibit</th>

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   HiOutlineMagnifyingGlass, 
-  HiOutlineAdjustmentsHorizontal,
   HiOutlineMapPin,
   HiOutlineCheckCircle,
   HiOutlineXCircle,
@@ -45,11 +44,10 @@ const RencanaRehabilitasiIndex: React.FC = () => {
   return (
     <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8 animate-in fade-in duration-300">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">Rencana Rehabilitasi</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-gray-800">Rencana Rehabilitasi</h1>
         <p className="text-sm text-gray-500">Kelola rencana rehabilitasi berdasarkan hasil validasi lapangan.</p>
       </div>
 
-      {/* SUMMARY CARDS */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-center">
           <div className="flex items-center gap-2 text-gray-500 mb-2">
@@ -58,7 +56,6 @@ const RencanaRehabilitasiIndex: React.FC = () => {
           </div>
           <div className="flex items-end justify-between">
             <h2 className="text-3xl font-bold text-gray-800">32</h2>
-            <span className="text-xs text-gray-400 font-medium mb-1">Semua</span>
           </div>
         </div>
         
@@ -69,7 +66,7 @@ const RencanaRehabilitasiIndex: React.FC = () => {
           </div>
           <div className="flex items-end justify-between">
             <h2 className="text-3xl font-bold text-gray-800">18</h2>
-            <span className="text-xs text-emerald-600 font-bold mb-1 bg-emerald-50 px-2 py-0.5 rounded">56.25%</span>
+            <span className="text-xs text-emerald-600 font-bold mb-1 bg-emerald-50 px-2 py-0.5 rounded">Lokasi</span>
           </div>
         </div>
 
@@ -80,7 +77,7 @@ const RencanaRehabilitasiIndex: React.FC = () => {
           </div>
           <div className="flex items-end justify-between">
             <h2 className="text-3xl font-bold text-gray-800">7</h2>
-            <span className="text-xs text-red-600 font-bold mb-1 bg-red-50 px-2 py-0.5 rounded">21.88%</span>
+            <span className="text-xs text-red-600 font-bold mb-1 bg-red-50 px-2 py-0.5 rounded">Lokasi</span>
           </div>
         </div>
 
@@ -91,12 +88,11 @@ const RencanaRehabilitasiIndex: React.FC = () => {
           </div>
           <div className="flex items-end justify-between">
             <h2 className="text-3xl font-bold text-gray-800">7</h2>
-            <span className="text-xs text-amber-600 font-bold mb-1 bg-amber-50 px-2 py-0.5 rounded">21.88%</span>
+            <span className="text-xs text-amber-600 font-bold mb-1 bg-amber-50 px-2 py-0.5 rounded">Lokasi</span>
           </div>
         </div>
       </div>
 
-      {/* FILTER & SEARCH */}
       <div className="flex flex-col md:flex-row justify-between gap-4 mt-2">
         <div className="relative w-full md:w-80">
           <HiOutlineMagnifyingGlass className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -105,23 +101,20 @@ const RencanaRehabilitasiIndex: React.FC = () => {
             placeholder="Cari desa atau kecamatan..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-[#185325] focus:border-[#185325] outline-none transition-all shadow-sm"
+            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-full text-sm focus:ring-1 focus:ring-[#185325] focus:border-[#185325] outline-none transition-all shadow-sm"
           />
         </div>
         <div className="flex items-center gap-3">
           <select 
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#185325] cursor-pointer shadow-sm"
+            className="px-4 py-2.5 bg-white border border-gray-300 rounded-full text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#185325] cursor-pointer shadow-sm"
           >
             <option value="Semua">Status Kelayakan</option>
             <option value="Layak">Layak</option>
             <option value="Tidak Layak">Tidak Layak</option>
             <option value="Menunggu">Menunggu</option>
           </select>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-semibold transition-colors shadow-sm cursor-pointer">
-            <HiOutlineAdjustmentsHorizontal className="w-5 h-5" /> Filter
-          </button>
         </div>
       </div>
 

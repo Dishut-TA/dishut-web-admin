@@ -1,6 +1,12 @@
 // const API_URL = import.meta.env.VITE_API_MASTER_URL;
 const API_URL = import.meta.env.VITE_API_EXAMPLE;
 
+const getHeaders = () => ({
+  'Authorization': `Bearer ${localStorage.getItem("token")}`,
+  'Accept': 'application/json',
+  'Content-Type': 'application/json'
+});
+
 export const uploadDataGIS = async (formData: FormData) => {
   try {
     const token = localStorage.getItem("token");
@@ -37,4 +43,32 @@ export const uploadDataGIS = async (formData: FormData) => {
   } catch (error: any) {
     throw new Error(error.message || 'Gagal mengunggah data GIS');
   }
+};
+
+export const getLatestProjectAPI = async () => {
+  const res = await fetch(`${API_URL}/projects?status=completed&per_page=1`, { headers: getHeaders() });
+  if (!res.ok) throw new Error("Gagal mengambil project terbaru");
+  return res.json();
+};
+
+export const getTableCPIAPI = async (projectId: string | number) => {
+  const res = await fetch(`${API_URL}/projects/${projectId}/table`, { headers: getHeaders() });
+  if (!res.ok) throw new Error("Gagal mengambil data tabel");
+  return res.json();
+};
+
+export const getMapCPIAPI = async (projectId: string | number) => {
+  const res = await fetch(`${API_URL}/projects/${projectId}/map`, { headers: getHeaders() });
+  if (!res.ok) throw new Error("Gagal mengambil data peta");
+  return res.json();
+};
+
+export const verifyZoneAPI = async (zoneId: string | number) => {
+  const res = await fetch(`${API_URL}/zones/${zoneId}/verify`, {
+    method: 'PUT',
+    headers: getHeaders(),
+    body: JSON.stringify({ status_kelayakan: 'Layak' })
+  });
+  if (!res.ok) throw new Error("Gagal memverifikasi zona");
+  return res.json();
 };

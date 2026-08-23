@@ -14,8 +14,8 @@ const RencanaRehabilitasiDetail: React.FC = () => {
   const navigate = useNavigate();
   const [status, ] = useState<'Layak' | 'Tidak Layak' | 'Menunggu'>('Layak');
   const [luasLahanTotal, setLuasLahanTotal] = useState<number>(10);
-  const [panjangPU, setPanjangPU] = useState<number>(100); 
-  const [lebarPU, setLebarPU] = useState<number>(10); 
+  const [panjangPU, setPanjangPU] = useState<number>(4); 
+  const [lebarPU, setLebarPU] = useState<number>(5); 
 
   const luas1PU = (panjangPU * lebarPU) / 10000;
   const jumlahPU = luas1PU > 0 ? Math.floor(luasLahanTotal / luas1PU) : 0;
@@ -115,7 +115,7 @@ const RencanaRehabilitasiDetail: React.FC = () => {
         {/* KOLOM 2: Data Petak Ukur (HANYA MUNCUL JIKA STATUS LAYAK) */}
         {status === 'Layak' ? (
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <div className="flex items-center gap-2 mb-6 text-indigo-700">
+            <div className="flex items-center gap-2 mb-6 text-green-700">
               <HiOutlineInformationCircle className="w-5 h-5 stroke-2"/>
               <h3 className="font-bold text-base">Data Petak Ukur</h3>
             </div>
@@ -126,21 +126,23 @@ const RencanaRehabilitasiDetail: React.FC = () => {
                 <input 
                   type="number" 
                   value={luasLahanTotal}
+                  disabled
                   onChange={(e) => setLuasLahanTotal(Number(e.target.value))}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm transition-all"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 outline-none text-sm transition-all"
                 />
               </div>
               
-              <div className="bg-indigo-50/50 p-4 rounded-xl border border-indigo-50">
-                <p className="text-xs font-bold text-indigo-800 mb-3">Dimensi 1 Petak Ukur</p>
+              <div className="bg-green-50/50 p-4 rounded-xl border border-green-50">
+                <p className="text-xs font-bold text-green-800 mb-3">Dimensi 1 Petak Ukur</p>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-[11px] font-semibold text-gray-600 mb-1.5">Panjang (meter)</label>
                     <input 
                       type="number" 
                       value={panjangPU}
+                      disabled
                       onChange={(e) => setPanjangPU(Number(e.target.value))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm bg-white transition-all"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 outline-none text-sm bg-white transition-all"
                     />
                   </div>
                   <div>
@@ -148,15 +150,16 @@ const RencanaRehabilitasiDetail: React.FC = () => {
                     <input 
                       type="number" 
                       value={lebarPU}
+                      disabled
                       onChange={(e) => setLebarPU(Number(e.target.value))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm bg-white transition-all"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 outline-none text-sm bg-white transition-all"
                     />
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-gray-500 mb-1.5">Luas 1 Petak Ukur (Ha) <span className="text-indigo-500 italic font-normal">*Otomatis</span></label>
+                <label className="block text-[11px] font-semibold text-gray-500 mb-1.5">Luas 1 Petak Ukur (Ha) <span className="text-green-500 italic font-normal">*Otomatis</span></label>
                 <input 
                   type="text" 
                   value={luas1PU.toFixed(4).replace('.', ',')}
