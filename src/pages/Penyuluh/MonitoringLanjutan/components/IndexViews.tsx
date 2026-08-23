@@ -33,7 +33,7 @@ export const DataTable = ({ navigate }: { navigate: any }) => (
   <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm text-gray-600 whitespace-nowrap">
-        <thead className="text-xs text-gray-900 bg-gray-50/80 border-b border-gray-200 font-bold tracking-wide">
+        <thead className="text-xs text-[#3A4D3F] bg-[#DCECE0] font-bold tracking-wide">
           <tr>
             <th className="px-5 py-4">ID Program</th>
             <th className="px-5 py-4">Nama Program</th>

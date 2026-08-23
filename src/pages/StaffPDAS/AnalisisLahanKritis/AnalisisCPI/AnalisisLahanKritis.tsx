@@ -32,8 +32,8 @@ const AnalisisLahanKritis: React.FC = () => {
         });
         const json = await res.json();
         console.log("=== PROJECT TERBARU ===");
-console.log("Response projects:", json);
-console.log("Project pertama:", json.data?.[0]);
+        console.log("Response projects:", json);
+        console.log("Project pertama:", json.data?.[0]);
 
         if (json.data && json.data.length > 0) {
           loadHistoryData(json.data[0].id);
@@ -103,12 +103,10 @@ console.log("Project pertama:", json.data?.[0]);
                      let newLng = row.longitude;
                      let newLuas = row.luas;
 
-                     // Ambil luas dari properti peta jika di API tabel kosong
                      if (newLuas === '-') {
                          newLuas = props.luas_ha || props.luas || '-';
                      }
 
-                     // Hitung centroid otomatis menggunakan Turf (Sama seperti di MapSection)
                      if (newLat === '-' || newLng === '-') {
                          try {
                              const centroid = turf.centerOfMass(feature);
@@ -178,7 +176,6 @@ console.log("Project pertama:", json.data?.[0]);
       
       setGeoData(finalGeoData);
 
-      // LOGIKA PENTING: MENGGABUNGKAN DATA TITIK KOORDINAT SPASIAL KE TABEL PDF
       if (finalGeoData && finalGeoData.features) {
          mappedTableData = mappedTableData.map((row, idx) => {
              const feature = finalGeoData.features[idx]; 

@@ -25,7 +25,7 @@ const DetailLaporanEvaluasiKABID: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-4xl mx-auto pb-12 animate-in fade-in duration-300">
+    <div className="flex flex-col gap-6 w-full mx-auto pb-12 animate-in fade-in duration-300">
       
       <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-bold text-gray-700 hover:text-[#185325] self-start transition-colors">
         <HiOutlineChevronLeft className="w-4 h-4 stroke-2" /> Kembali ke Daftar Laporan
@@ -47,7 +47,7 @@ const DetailLaporanEvaluasiKABID: React.FC = () => {
 
           <button 
             onClick={handleCetakPDF}
-            className="flex items-center gap-2 px-6 py-3 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-xl shadow-md transition-colors active:scale-95 shrink-0"
+            className="flex items-center gap-2 px-6 py-3 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full shadow-md transition-colors active:scale-95 shrink-0"
           >
             <HiOutlinePrinter className="w-5 h-5" /> Cetak Berita Acara (PDF)
           </button>

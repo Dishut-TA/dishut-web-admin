@@ -25,7 +25,7 @@ const DetailPerhitunganHasilEvaluasiStaff: React.FC = () => {
     namaProyek: 'Rehabilitasi Lahan Kompensasi PT. Jawa Satu Power',
     lokasi: 'Hutan Lindung Desa Sudalarang, Kab. Garut',
     periode: 'Pemeliharaan II (P2)',
-    jenisProgram: 'APBD', // dummy data ini ntar ganti aja kalo mau testing jadi CSR
+    jenisProgram: 'APBD', 
     statusPendanaan: 'Dihentikan'
   };
 
@@ -162,7 +162,7 @@ const DetailPerhitunganHasilEvaluasiStaff: React.FC = () => {
                 <div className="flex items-start gap-2">
                   <span className="font-semibold text-gray-500 w-28 shrink-0">Periode</span>
                   <span className="font-semibold text-gray-500 shrink-0">:</span>
-                  <span className="font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-100/50">{infoTugas.periode}</span>
+                  <span className="font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100/50">{infoTugas.periode}</span>
                 </div>
                 
                 <div className="flex items-start gap-2 lg:col-span-2">
@@ -172,7 +172,6 @@ const DetailPerhitunganHasilEvaluasiStaff: React.FC = () => {
                 </div>
               </div>
             </div>
-            {/* END FIX */}
 
           </div>
         </div>

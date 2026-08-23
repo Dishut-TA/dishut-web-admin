@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HiOutlineMagnifyingGlass, HiOutlineEye, HiOutlineMapPin } from 'react-icons/hi2';
+import { HiOutlineMagnifyingGlass, HiOutlineEye } from 'react-icons/hi2';
 
 const PerhitunganHasilEvaluasiStaff: React.FC = () => {
   const navigate = useNavigate();
@@ -56,7 +56,7 @@ const PerhitunganHasilEvaluasiStaff: React.FC = () => {
             placeholder="Cari program atau periode (P1, P2)..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-1 focus:ring-[#185325] focus:border-[#185325] outline-none shadow-sm transition-all" 
+            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-full text-sm focus:ring-1 focus:ring-[#185325] focus:border-[#185325] outline-none shadow-sm transition-all" 
           />
         </div>
       </div>
@@ -89,7 +89,6 @@ const PerhitunganHasilEvaluasiStaff: React.FC = () => {
                   
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2 text-sm font-semibold text-gray-600">
-                      <HiOutlineMapPin className="w-4 h-4 text-gray-400 shrink-0" />
                       <span className="truncate max-w-50">{item.lokasi}</span>
                     </div>
                   </td>
@@ -107,10 +106,15 @@ const PerhitunganHasilEvaluasiStaff: React.FC = () => {
                   <td className="px-6 py-4 flex justify-center">
                     <button 
                       onClick={() => navigate(`/admin/staff/evaluasi/hasil/detail/${item.id}`)}
-                      className="flex items-center gap-2 px-2 py-2 text-xs font-bold text-white bg-primary border border-[#185325] hover:bg-[#103a19] rounded-full transition-all shadow-sm active:scale-95"
+                      className={`flex items-center justify-center gap-2 px-2 py-2 text-xs font-bold text-[#185325] border border-[#185325] hover:bg-[#185325] hover:text-white transition-all shadow-sm active:scale-95 ${
+                        item.status === 'SIAP DIHITUNG' ? 'rounded-full' : 'rounded-full min-w-9'
+                      }`}
                     >
-                      <HiOutlineEye className="w-4 h-4 stroke-2" />
-                      {item.status === 'SIAP DIHITUNG' ? 'Mulai Hitung' : ''}
+                      {item.status === 'SIAP DIHITUNG' ? (
+                        'Mulai Hitung'
+                      ) : (
+                        <HiOutlineEye className="w-4 h-4 stroke-2" />
+                      )}
                     </button>
                   </td>
                 </tr>
