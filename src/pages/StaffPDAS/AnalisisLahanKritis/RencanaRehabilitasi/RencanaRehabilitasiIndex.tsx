@@ -13,7 +13,7 @@ const MOCK_DATA = [
   { id: '1', desa: 'Cikole', kec: 'Lembang', pu: 100, luas: 10.00, intervensi: 'Rehabilitasi Vegetatif', status: 'Layak' },
   { id: '2', desa: 'Cibodas', kec: 'Lembang', pu: 80, luas: 8.00, intervensi: 'Rehabilitasi Vegetatif', status: 'Layak' },
   { id: '3', desa: 'Wangunsari', kec: 'Lembang', pu: 120, luas: 12.00, intervensi: 'Rehabilitasi Vegetatif', status: 'Menunggu' },
-  { id: '4', desa: 'Suntenjaya', kec: 'Lembang', pu: 60, luas: 6.00, intervensi: 'Agroforestri', status: 'Tidak Layak' },
+  { id: '4', desa: 'Suntenjaya', kec: 'Lembang', pu: 60, luas: 6.00, intervensi: 'Agroforestri', status: 'Menunggu' },
 ];
 
 const RencanaRehabilitasiIndex: React.FC = () => {

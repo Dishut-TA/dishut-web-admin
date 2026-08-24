@@ -12,7 +12,7 @@ import toast from 'react-hot-toast';
 
 const RencanaRehabilitasiDetail: React.FC = () => {
   const navigate = useNavigate();
-  const [status, ] = useState<'Layak' | 'Tidak Layak' | 'Menunggu'>('Layak');
+  const [status, ] = useState<'Valid' | 'Tidak Valid' | 'Menunggu'>('Valid');
   const [luasLahanTotal, setLuasLahanTotal] = useState<number>(10);
   const [panjangPU, setPanjangPU] = useState<number>(4); 
   const [lebarPU, setLebarPU] = useState<number>(5); 
@@ -43,12 +43,12 @@ const RencanaRehabilitasiDetail: React.FC = () => {
       {/* CARD STATUS KELAYAKAN */}
       <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-5">
-          <div className={`p-4 rounded-full ${status === 'Layak' ? 'bg-emerald-100 text-emerald-600' : status === 'Tidak Layak' ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'}`}>
-            {status === 'Layak' ? <HiOutlineCheckCircle className="w-10 h-10 stroke-2"/> : <HiOutlineXCircle className="w-10 h-10 stroke-2" />}
+          <div className={`p-4 rounded-full ${status === 'Valid' ? 'bg-emerald-100 text-emerald-600' : status === 'Tidak Valid' ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'}`}>
+            {status === 'Valid' ? <HiOutlineCheckCircle className="w-10 h-10 stroke-2"/> : <HiOutlineXCircle className="w-10 h-10 stroke-2" />}
           </div>
           <div>
             <p className="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-1">Status Kelayakan</p>
-            <h2 className={`text-2xl md:text-3xl font-bold ${status === 'Layak' ? 'text-emerald-700' : status === 'Tidak Layak' ? 'text-red-700' : 'text-amber-700'}`}>
+            <h2 className={`text-2xl md:text-3xl font-bold ${status === 'Valid' ? 'text-emerald-700' : status === 'Tidak Valid' ? 'text-red-700' : 'text-amber-700'}`}>
               {status}
             </h2>
             <p className="text-sm text-gray-600 mt-1">
@@ -112,8 +112,8 @@ const RencanaRehabilitasiDetail: React.FC = () => {
           </div>
         </div>
 
-        {/* KOLOM 2: Data Petak Ukur (HANYA MUNCUL JIKA STATUS LAYAK) */}
-        {status === 'Layak' ? (
+        {/* KOLOM 2: Data Petak Ukur (HANYA MUNCUL JIKA STATUS VALID) */}
+        {status === 'Valid' ? (
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <div className="flex items-center gap-2 mb-6 text-green-700">
               <HiOutlineInformationCircle className="w-5 h-5 stroke-2"/>
@@ -128,7 +128,7 @@ const RencanaRehabilitasiDetail: React.FC = () => {
                   value={luasLahanTotal}
                   disabled
                   onChange={(e) => setLuasLahanTotal(Number(e.target.value))}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 outline-none text-sm transition-all"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-full focus:ring-1 focus:ring-green-500 focus:border-green-500 outline-none text-sm transition-all"
                 />
               </div>
               
@@ -142,7 +142,7 @@ const RencanaRehabilitasiDetail: React.FC = () => {
                       value={panjangPU}
                       disabled
                       onChange={(e) => setPanjangPU(Number(e.target.value))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 outline-none text-sm bg-white transition-all"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-full focus:ring-1 focus:ring-green-500 focus:border-green-500 outline-none text-sm bg-white transition-all"
                     />
                   </div>
                   <div>
@@ -152,7 +152,7 @@ const RencanaRehabilitasiDetail: React.FC = () => {
                       value={lebarPU}
                       disabled
                       onChange={(e) => setLebarPU(Number(e.target.value))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 outline-none text-sm bg-white transition-all"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-full focus:ring-1 focus:ring-green-500 focus:border-green-500 outline-none text-sm bg-white transition-all"
                     />
                   </div>
                 </div>
@@ -164,12 +164,12 @@ const RencanaRehabilitasiDetail: React.FC = () => {
                   type="text" 
                   value={luas1PU.toFixed(4).replace('.', ',')}
                   disabled
-                  className="w-full px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-lg text-gray-600 font-semibold cursor-not-allowed text-sm"
+                  className="w-full px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-full text-gray-600 font-semibold cursor-not-allowed text-sm"
                 />
               </div>
 
               <div className="bg-[#F3F4F6] p-5 rounded-xl text-center border border-gray-200 mt-6">
-                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">Estimasi Jumlah Petak Ukur</p>
+                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">Jumlah Petak Ukur</p>
                 <p className="text-4xl font-bold text-[#185325] my-2">{jumlahPU} <span className="text-xl">PU</span></p>
                 <p className="text-[10px] text-gray-500 italic mt-2 bg-white px-2 py-1 rounded-md inline-block border border-gray-200">
                   Rumus: {luasLahanTotal} Ha ÷ {luas1PU.toFixed(4)} Ha
@@ -236,8 +236,8 @@ const RencanaRehabilitasiDetail: React.FC = () => {
 
       </div>
 
-      {/* SECTION BAWAH: RENCANA REHABILITASI (HANYA MUNCUL JIKA LAYAK) */}
-      {status === 'Layak' && (
+      {/* SECTION BAWAH: RENCANA REHABILITASI (HANYA MUNCUL JIKA VALID) */}
+      {status === 'Valid' && (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mt-2">
           <div className="p-6 border-b border-gray-100">
             <h3 className="font-bold text-lg text-gray-800">Penyusunan Rencana Final</h3>
@@ -248,19 +248,19 @@ const RencanaRehabilitasiDetail: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="block text-xs font-bold text-gray-600 mb-2">KTH (Kelompok Tani Hutan)</label>
-                <div className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-700 font-bold text-sm shadow-sm cursor-not-allowed">
+                <div className="w-full px-4 py-3 bg-white border border-gray-200 rounded-full shadow-xs text-gray-700 font-bold text-sm cursor-not-allowed">
                   KTH Cikole Lestari
                 </div>
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-600 mb-2">Rekomendasi Intervensi</label>
-                <div className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-700 font-bold text-sm shadow-sm cursor-not-allowed">
+                <div className="w-full px-4 py-3 bg-white border border-gray-200 rounded-full shadow-xs text-gray-700 font-bold text-sm cursor-not-allowed">
                   Rehabilitasi Vegetatif
                 </div>
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-600 mb-2">Jumlah Petak Ukur (PU)</label>
-                <div className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-[#185325] font-bold text-sm shadow-sm cursor-not-allowed text-center">
+                <div className="w-full px-4 py-3 bg-white border border-gray-200 rounded-full shadow-xs text-[#185325] font-bold text-sm cursor-not-allowed text-center">
                   {jumlahPU > 0 ? `${String(jumlahPU).padStart(3, '0')}` : '-'}
                 </div>
               </div>
