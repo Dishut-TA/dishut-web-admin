@@ -1,12 +1,14 @@
-import React, { useRef, useEffect } from 'react';
-import { HiOutlinePlus } from 'react-icons/hi2';
+import React, { useRef, useEffect, useState } from 'react';
+import { HiOutlinePlus, HiOutlineDocumentArrowDown } from 'react-icons/hi2';
 import { MapContainer, TileLayer, GeoJSON, Marker, Popup, useMap } from 'react-leaflet';
 import * as turf from '@turf/turf';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-import type { CPIDataRow } from '../types';
+import ReportPDF from './pdf/ReportPDF';
+import { pdf } from '@react-pdf/renderer';
+import { toJpeg } from 'html-to-image';
 
 let DefaultIcon = L.icon({
   iconUrl: icon,
@@ -38,7 +40,7 @@ interface MapSectionProps {
   geoData?: any;
   isLoading?: boolean;
   onOpenInputModal?: () => void;
-  tableData?: CPIDataRow[];
+  tableData?: any[]; // <- Ubah jadi any[] agar aman dari error TS
   petaFilter?: string;
 }
 
@@ -46,7 +48,10 @@ const MapSection: React.FC<MapSectionProps> = ({
   geoData, 
   isLoading = false, 
   onOpenInputModal, 
+  tableData,
+  petaFilter = 'Keseluruhan'
 }) => {
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
   const getFeatureStyle = (feature: any) => {
@@ -54,6 +59,44 @@ const MapSection: React.FC<MapSectionProps> = ({
     if (status.includes('sangat kritis')) return { color: '#EF4444', fillColor: '#ef4444', fillOpacity: 0.9, weight: 1 };
     if (status.includes('kritis')) return { color: '#F59E0B', fillColor: '#facc15', fillOpacity: 0.9, weight: 1 };
     return { color: '#10B981', fillColor: '#4ade80', fillOpacity: 0.9, weight: 1 };
+  };
+
+  // --- FUNGSI EXPORT PDF (Dipindahkan ke luar onEachFeatureHandler) ---
+  const handleExportPDF = async () => {
+    if (!tableData || tableData.length === 0) return;
+    setIsGeneratingPDF(true);
+
+    try {
+      let mapImageBase64 = null;
+
+      if (mapContainerRef.current) {
+        mapImageBase64 = await toJpeg(mapContainerRef.current, { 
+          quality: 0.8,
+          pixelRatio: 2,
+          style: { transform: 'scale(1)' } 
+        });
+      }
+
+      const doc = <ReportPDF data={tableData} projectName={petaFilter} mapImage={mapImageBase64} />;
+      const asPdf = pdf(doc);
+      const blob = await asPdf.toBlob();
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Laporan_CPI_${petaFilter}_${new Date().getTime()}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+    } catch (error) {
+      console.error("Gagal membuat PDF:", error);
+      alert("Terjadi kesalahan saat membuat laporan PDF. Silakan coba lagi.");
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
   const onEachFeatureHandler = (feature: any, layer: any) => {
@@ -84,14 +127,14 @@ const MapSection: React.FC<MapSectionProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-4 md:p-6 border border-gray-100 mb-6">
+    <div className="bg-white rounded-xl shadow-sm p-4 md:p-6 border border-gray-100 mb-6 relative">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
         <div>
           <h2 className="text-sm font-bold text-gray-800">Peta Prioritas Rehabilitasi Jawa Barat:</h2>
           <p className="text-xs text-gray-500">Conservation Priority Index (CPI)</p>
         </div>
         
-        {/* Tombol Input File hanya muncul jika fungsi onOpenInputModal dikirim (contoh: di Halaman Analisis KTH) */}
+        {/* Tombol Input File (Opsional) */}
         {onOpenInputModal && (
           <button
             onClick={onOpenInputModal}
@@ -165,6 +208,26 @@ const MapSection: React.FC<MapSectionProps> = ({
         )}
       </div>
 
+      {/* --- TOMBOL EKSPOR PDF KABID --- */}
+      <div className="flex justify-end mt-4">
+        {tableData && tableData.length > 0 ? (
+          <button 
+            onClick={handleExportPDF}
+            disabled={isGeneratingPDF}
+            className={`bg-[#185325] text-white px-6 py-2.5 rounded-full text-xs font-bold flex items-center gap-2 transition-colors shadow-sm active:scale-95 ${isGeneratingPDF ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#123d1c] cursor-pointer'}`}
+          >
+            <HiOutlineDocumentArrowDown className="w-4 h-4 stroke-2" /> 
+            {isGeneratingPDF ? 'Memproses PDF...' : 'Ekspor Laporan'}
+          </button>
+        ) : (
+          <button 
+            disabled
+            className="bg-gray-300 text-gray-500 px-6 py-2.5 rounded-full text-xs font-bold flex items-center gap-2 cursor-not-allowed"
+          >
+            <HiOutlineDocumentArrowDown className="w-4 h-4 stroke-2" /> Data Belum Tersedia
+          </button>
+        )}
+      </div>
     </div>
   );
 };

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  HiOutlineMagnifyingGlass, HiOutlinePlus, HiOutlineEye, 
-  HiOutlinePencil, HiOutlineChevronLeft, HiOutlineChevronRight 
+  HiOutlineMagnifyingGlass, HiOutlinePlus, HiOutlineChevronLeft, HiOutlineChevronRight 
 } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 import ModalInputKTH from './components/ModalInputKTH'; 

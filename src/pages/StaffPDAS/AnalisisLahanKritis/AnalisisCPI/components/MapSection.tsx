@@ -1,15 +1,14 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { 
   HiOutlinePlus, 
-  HiOutlineDocumentArrowDown, 
   HiOutlineMapPin, 
   HiOutlineUsers, 
   HiOutlineArrowTopRightOnSquare 
 } from 'react-icons/hi2';
 import { MapContainer, TileLayer, GeoJSON, Marker, Popup, useMap } from 'react-leaflet';
-import { pdf } from '@react-pdf/renderer';
-import { toJpeg } from 'html-to-image';
-import ReportPDF from './pdf/ReportPDF';
+// import { pdf } from '@react-pdf/renderer';
+// import { toJpeg } from 'html-to-image';
+// import ReportPDF from './pdf/ReportPDF';
 import * as turf from '@turf/turf';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -50,8 +49,7 @@ interface MapSectionProps {
   petaFilter: string;
 }
 
-const MapSection: React.FC<MapSectionProps> = ({ geoData, isLoading, onOpenInputModal, tableData, petaFilter }) => {
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+const MapSection: React.FC<MapSectionProps> = ({ geoData, isLoading, onOpenInputModal }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
   const getFeatureStyle = (feature: any) => {
@@ -69,43 +67,6 @@ const MapSection: React.FC<MapSectionProps> = ({ geoData, isLoading, onOpenInput
       sticky: true,
       className: 'bg-white/90 backdrop-blur-sm border border-gray-100 shadow-sm rounded-md py-1 px-2'
     });
-  };
-
-  const handleExportPDF = async () => {
-    if (!tableData || tableData.length === 0) return;
-    setIsGeneratingPDF(true);
-
-    try {
-      let mapImageBase64 = null;
-
-      if (mapContainerRef.current) {
-        mapImageBase64 = await toJpeg(mapContainerRef.current, { 
-          quality: 0.8,
-          pixelRatio: 2,
-          style: { transform: 'scale(1)' } 
-        });
-      }
-
-      const doc = <ReportPDF data={tableData} projectName={petaFilter} mapImage={mapImageBase64} />;
-      const asPdf = pdf(doc);
-      const blob = await asPdf.toBlob();
-
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `Laporan_CPI_${petaFilter}_${new Date().getTime()}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-    } catch (error) {
-      console.error("Gagal membuat PDF:", error);
-      alert("Terjadi kesalahan saat membuat laporan PDF. Silakan coba lagi.");
-    } finally {
-      setIsGeneratingPDF(false);
-    }
   };
 
   return (
@@ -292,26 +253,6 @@ const MapSection: React.FC<MapSectionProps> = ({ geoData, isLoading, onOpenInput
             <div className="flex items-center gap-1.5"><div className="w-3 h-2 bg-[#facc15] rounded-full"></div> Kritis</div>
             <div className="flex items-center gap-1.5"><div className="w-3 h-2 bg-[#ef4444] rounded-full"></div> Sangat Kritis</div>
           </div>
-        )}
-      </div>
-
-      <div className="flex justify-end mt-4">
-        {tableData && tableData.length > 0 ? (
-          <button 
-            onClick={handleExportPDF}
-            disabled={isGeneratingPDF}
-            className={`bg-[#185325] text-white px-6 py-2.5 rounded-full text-xs font-bold flex items-center gap-2 transition-colors shadow-sm active:scale-95 ${isGeneratingPDF ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#123d1c] cursor-pointer'}`}
-          >
-            <HiOutlineDocumentArrowDown className="w-4 h-4 stroke-2" /> 
-            {isGeneratingPDF ? 'Memproses PDF...' : 'Ekspor Laporan'}
-          </button>
-        ) : (
-          <button 
-            disabled
-            className="bg-gray-300 text-gray-500 px-6 py-2.5 rounded-full text-xs font-bold flex items-center gap-2 cursor-not-allowed"
-          >
-            <HiOutlineDocumentArrowDown className="w-4 h-4 stroke-2" /> Data Belum Tersedia
-          </button>
         )}
       </div>
     </div>
