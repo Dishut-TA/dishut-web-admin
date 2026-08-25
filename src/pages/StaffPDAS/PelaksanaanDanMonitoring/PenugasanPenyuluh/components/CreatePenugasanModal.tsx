@@ -23,7 +23,7 @@ const ModalBuatPenugasan: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   const [tanggal, setTanggal] = useState('');
   const [periode, setPeriode] = useState(''); 
   const [catatan, setCatatan] = useState('');
-  const [penyuluhOptions, setPenyuluhOptions] = useState<Option[]>([]);
+  const [, setPenyuluhOptions] = useState<Option[]>([]);
   const [wilayahOptions, setWilayahOptions] = useState<Option[]>([]);
   const [lokasiOptions, setLokasiOptions] = useState<Option[]>([]);
   const [targetOptions, setTargetOptions] = useState<Option[]>([]);
@@ -208,15 +208,6 @@ const ModalBuatPenugasan: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
         <div className="p-6 overflow-y-auto custom-scrollbar">
           <form id="form-penugasan" onSubmit={handleSubmit} className="space-y-6">
-            
-            <AnimatedSelect
-              label="Pilih Penyuluh Pelaksana"
-              placeholder="-- Pilih Penyuluh --"
-              options={penyuluhOptions}
-              value={penyuluh}
-              onChange={setPenyuluh}
-              required
-            />
 
             <AnimatedSelect 
               label="Kategori Penugasan"
@@ -260,23 +251,7 @@ const ModalBuatPenugasan: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                     : 'Penyuluh akan memonitoring kegiatan penanaman bibit oleh KTH di lapangan.'}
                 </p>
               </div>
-            )}
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1.5">Tanggal Mulai <span className="text-red-500">*</span></label>
-                <input required type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-[#185325]" />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1.5">Batas Waktu (Deadline) <span className="text-red-500">*</span></label>
-                <input required type="date" value={periode} onChange={e => setPeriode(e.target.value)} className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-[#185325]" />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1.5">Catatan Arahan (Opsional)</label>
-              <textarea value={catatan} onChange={e => setCatatan(e.target.value)} placeholder="Masukkan instruksi khusus..." rows={3} className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-[#185325] resize-none"></textarea>
-            </div>
+            )}  
           </form>
         </div>
 

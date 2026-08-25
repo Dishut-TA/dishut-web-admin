@@ -21,6 +21,7 @@ const CreateProgramAPBD: React.FC = () => {
     namaKth: '',
     ketuaKth: '',
     namaProgram: '',
+    jumlah_bibit: '',
     pilihIntervensi: '',
     anggaran: '',
     deskripsi: ''
@@ -71,13 +72,14 @@ const CreateProgramAPBD: React.FC = () => {
         ketuaKth: firstZone?.ketua_kelompok || '-',
         kth_id: firstZone?.kth_id || '1', 
         namaProgram: foundProject.nama_project ? `Rehabilitasi Lahan Kritis - ${foundProject.nama_project}` : '',
+        jumlah_bibit: '', // Reset target bibit
         pilihIntervensi: firstZone?.rekomendasi_intervensi?.split(',')[0] || ''
       }));
     } else {
       setLokasiWilayah('');
       setForm(prev => ({
         ...prev,
-        rekomendasi: '', luasLahan: '', namaKth: '', ketuaKth: '', kth_id: '', namaProgram: '', pilihIntervensi: ''
+        rekomendasi: '', luasLahan: '', namaKth: '', ketuaKth: '', kth_id: '', namaProgram: '', jumlah_bibit: '', pilihIntervensi: ''
       }));
     }
   };
@@ -97,6 +99,7 @@ const CreateProgramAPBD: React.FC = () => {
     const payload = {
       kth_id: form.kth_id,
       nama_program: form.namaProgram,
+      target_bibit: form.jumlah_bibit, // Dikirim ke API
       deskripsi_rencana: form.deskripsi,
       anggaran: form.anggaran,
       target_luas_lahan: form.luasLahan,
@@ -118,7 +121,7 @@ const CreateProgramAPBD: React.FC = () => {
     <div className="flex flex-col gap-6 w-full max-w-5xl mx-auto pb-12 animate-in fade-in duration-300">
       <button 
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-sm font-bold text-gray-800 hover:text-gray-600 self-start transition-colors"
+        className="flex items-center gap-2 text-sm font-bold text-gray-800 hover:text-gray-600 self-start transition-colors cursor-pointer"
       >
         <HiOutlineChevronLeft className="w-4 h-4 stroke-2" />
         Kembali ke Daftar Program
@@ -213,19 +216,36 @@ const CreateProgramAPBD: React.FC = () => {
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-gray-800 mb-2">
-              Nama Program <span className="text-red-500">*</span>
-            </label>
-            <input 
-              type="text" 
-              name="namaProgram"
-              required
-              value={form.namaProgram}
-              onChange={handleInputChange}
-              placeholder="Contoh: Rehabilitasi Lahan Kritis Citarum"
-              className="w-full bg-white border border-gray-400 rounded-full px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#185325] focus:border-[#185325] transition-all shadow-sm"
-            />
+          {/* GRID UNTUK NAMA PROGRAM DAN TARGET BIBIT */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-xs font-bold text-gray-800 mb-2">
+                Nama Program <span className="text-red-500">*</span>
+              </label>
+              <input 
+                type="text" 
+                name="namaProgram"
+                required
+                value={form.namaProgram}
+                onChange={handleInputChange}
+                placeholder="Contoh: Rehabilitasi Lahan Kritis Citarum"
+                className="w-full bg-white border border-gray-400 rounded-full px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#185325] focus:border-[#185325] transition-all shadow-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-800 mb-2">
+                Target Bibit (Pohon) <span className="text-red-500">*</span>
+              </label>
+              <input 
+                type="number" 
+                name="jumlah_bibit"
+                required
+                value={form.jumlah_bibit}
+                onChange={handleInputChange}
+                placeholder="Contoh: 5000"
+                className="w-full bg-white border border-gray-400 rounded-full px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#185325] focus:border-[#185325] transition-all shadow-sm appearance-none"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -287,14 +307,14 @@ const CreateProgramAPBD: React.FC = () => {
             <button 
               type="button"
               onClick={() => navigate(-1)}
-              className="px-10 py-3 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 text-sm font-bold rounded-full transition-colors active:scale-95 shadow-sm"
+              className="px-10 py-3 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 text-sm font-bold rounded-full transition-colors active:scale-95 shadow-sm cursor-pointer"
             >
               Batal
             </button>
             <button 
               type="submit"
               disabled={isLoading}
-              className="flex items-center gap-2 px-10 py-3 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors active:scale-95 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-10 py-3 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors active:scale-95 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
             >
               {isLoading && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>}
               Kirim ke Kepala PDAS

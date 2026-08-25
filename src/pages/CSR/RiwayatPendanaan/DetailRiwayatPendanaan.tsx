@@ -68,7 +68,7 @@ const DetailRiwayatPendanaan: React.FC = () => {
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-10">
         <div className="mb-8 border-b border-gray-100 pb-8">
           <span className="inline-block px-3 py-1 bg-[#DCECE0] text-[#185325] text-xs font-bold rounded mb-3">
-            CSR-{data.id}
+            {`P-CSR-${new Date(data.created_at).getFullYear()}-${String(data.id).padStart(3, '0')}`}
           </span>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Riwayat Program Pendanaan</h1>
         </div>
