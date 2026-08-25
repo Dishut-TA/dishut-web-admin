@@ -80,7 +80,7 @@ const SUMMARY_CARDS = [
 const SumberBadge = ({ text }: { text: string }) => {
   const isCPI = text === 'Analisis CPI';
   return (
-    <span className={`px-2.5 py-1 text-xs font-semibold rounded ${isCPI ? 'bg-blue-50 text-blue-600' : 'bg-orange-50 text-orange-500'}`}>
+    <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${isCPI ? 'bg-blue-50 text-blue-600' : 'bg-orange-50 text-orange-500'}`}>
       {text}
     </span>
   );
@@ -92,7 +92,7 @@ const StatusBadge = ({ status }: { status: string }) => {
     'Selesai': 'bg-emerald-50 text-emerald-600',
   };
   return (
-    <span className={`px-2.5 py-1 text-xs font-semibold rounded ${styles[status]}`}>
+    <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${styles[status]}`}>
       {status}
     </span>
   );
@@ -132,14 +132,14 @@ const FilterSection = () => (
       <input 
         type="text" 
         placeholder="Cari ID penugasan, lokasi, desa, CDK..." 
-        className="w-full pl-4 pr-10 py-2.5 text-sm font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[#008A4B]" 
+        className="w-full pl-4 pr-10 py-2.5 text-sm font-medium border border-slate-200 rounded-full focus:outline-none focus:border-[#008A4B]" 
       />
       <HiOutlineMagnifyingGlass className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
     </div>
 
     <div className="relative w-full md:w-56">
       <div className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-500">Status</div>
-      <select className="w-full pl-14 pr-8 py-2.5 text-sm font-semibold border border-slate-200 rounded-lg appearance-none bg-white focus:outline-none focus:border-[#008A4B]">
+      <select className="w-full pl-14 pr-8 py-2.5 text-sm font-semibold border border-slate-200 rounded-full appearance-none bg-white focus:outline-none focus:border-[#008A4B]">
         <option>Semua</option>
       </select>
       <HiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -148,13 +148,13 @@ const FilterSection = () => (
     <div className="relative w-full md:w-64">
       <div className="absolute left-10 top-1.5 text-[10px] font-medium text-slate-400">Periode Penugasan</div>
       <HiOutlineCalendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-      <select className="w-full pl-10 pr-8 pt-4 pb-1 text-sm font-semibold border border-slate-200 rounded-lg appearance-none bg-white focus:outline-none focus:border-[#008A4B]">
+      <select className="w-full pl-10 pr-8 pt-4 pb-1 text-sm font-semibold border border-slate-200 rounded-full appearance-none bg-white focus:outline-none focus:border-[#008A4B]">
         <option>Semua Periode</option>
       </select>
       <HiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
     </div>
 
-    <button className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#008A4B] text-white text-sm font-semibold rounded-lg hover:bg-emerald-800 transition-colors shadow-sm">
+    <button className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#008A4B] text-white text-sm font-semibold rounded-full hover:bg-emerald-800 transition-colors shadow-sm">
       <HiOutlineFunnel className="w-4 h-4" /> Filter
     </button>
   </div>
@@ -166,7 +166,7 @@ const ValidasiTable = ({ data, navigate }: { data: TugasValidasi[], navigate: an
       <h3 className="text-sm font-bold text-slate-800">Daftar Validasi Lokasi</h3>
     </div>
     <table className="w-full text-left text-sm text-slate-600 whitespace-nowrap">
-      <thead className="bg-[#DCECE0]/50 text-[#3A4D3F] text-xs font-bold uppercase border-b border-gray-100">
+      <thead className="bg-[#DCECE0] text-[#3A4D3F] text-xs uppercase tracking-wider font-bold">
         <tr>
           <th className="px-4 py-4 font-bold">No</th>
           <th className="px-4 py-4 font-bold">ID Penugasan</th>

@@ -47,7 +47,7 @@ const RencanaRehabilitasiDetail: React.FC = () => {
             {status === 'Valid' ? <HiOutlineCheckCircle className="w-10 h-10 stroke-2"/> : <HiOutlineXCircle className="w-10 h-10 stroke-2" />}
           </div>
           <div>
-            <p className="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-1">Status Kelayakan</p>
+            <p className="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-1">Status Validasi</p>
             <h2 className={`text-2xl md:text-3xl font-bold ${status === 'Valid' ? 'text-emerald-700' : status === 'Tidak Valid' ? 'text-red-700' : 'text-amber-700'}`}>
               {status}
             </h2>

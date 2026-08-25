@@ -243,14 +243,14 @@ const FilterSection = () => (
       <input 
         type="text" 
         placeholder="Cari ID penugasan, program, lokasi, KTH..." 
-        className="w-full pl-4 pr-10 py-2.5 text-sm font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[#008A4B]" 
+        className="w-full pl-4 pr-10 py-2.5 text-sm font-medium border border-slate-200 rounded-full focus:outline-none focus:border-[#008A4B]" 
       />
       <HiOutlineMagnifyingGlass className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
     </div>
 
     <div className="relative w-full md:w-56">
       <div className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-500">Status</div>
-      <select className="w-full pl-16 pr-8 py-2.5 text-sm font-semibold border border-slate-200 rounded-lg appearance-none bg-white focus:outline-none focus:border-[#008A4B]">
+      <select className="w-full pl-16 pr-8 py-2.5 text-sm font-semibold border border-slate-200 rounded-full appearance-none bg-white focus:outline-none focus:border-[#008A4B]">
         <option>Semua Status</option>
       </select>
       <HiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -259,13 +259,13 @@ const FilterSection = () => (
     <div className="relative w-full md:w-64">
       <div className="absolute left-10 top-1.5 text-[10px] font-medium text-slate-400">Periode Pelaksanaan</div>
       <HiOutlineCalendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-      <select className="w-full pl-10 pr-8 pt-4 pb-1 text-sm font-semibold border border-slate-200 rounded-lg appearance-none bg-white focus:outline-none focus:border-[#008A4B]">
+      <select className="w-full pl-10 pr-8 pt-4 pb-1 text-sm font-semibold border border-slate-200 rounded-full appearance-none bg-white focus:outline-none focus:border-[#008A4B]">
         <option>Semua Periode</option>
       </select>
       <HiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
     </div>
 
-    <button className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#008A4B] text-white text-sm font-semibold rounded-lg hover:bg-emerald-800 transition-colors shadow-sm">
+    <button className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#008A4B] text-white text-sm font-semibold rounded-full hover:bg-emerald-800 transition-colors shadow-sm">
       <HiOutlineFunnel className="w-4 h-4" /> Filter
     </button>
   </div>
@@ -277,7 +277,7 @@ const KegiatanTable = ({ data, navigate }: { data: ProgramData[], navigate: any 
       <h3 className="text-sm font-bold text-slate-800">Daftar Penugasan Kegiatan</h3>
     </div>
     <table className="w-full text-left text-sm text-slate-600 whitespace-nowrap">
-      <thead className="text-xs text-slate-800 bg-[#F8FAFC] border-b border-slate-200">
+      <thead className="bg-[#DCECE0] text-[#3A4D3F] text-xs uppercase tracking-wider font-bold">
         <tr>
           <th className="px-5 py-4 font-bold">No</th>
           <th className="px-5 py-4 font-bold flex items-center gap-1 cursor-pointer hover:text-slate-900">ID Penugasan <HiChevronUpDown className="w-4 h-4 text-slate-400"/></th>
@@ -359,9 +359,9 @@ const Pagination = () => (
   <div className="flex items-center justify-between text-xs text-slate-500 px-5 py-4 border-t border-slate-100">
     <span className="font-medium">Menampilkan 1 - 6 dari 6 data</span>
     <div className="flex items-center gap-2">
-      <button className="p-1.5 rounded-md border border-slate-200 bg-white text-slate-400 hover:bg-slate-50 disabled:opacity-50"><HiChevronLeft className="w-4 h-4" /></button>
-      <button className="px-3 py-1.5 rounded-md bg-[#008A4B] text-white font-semibold">1</button>
-      <button className="p-1.5 rounded-md border border-slate-200 bg-white text-slate-400 hover:bg-slate-50 disabled:opacity-50"><HiChevronRight className="w-4 h-4" /></button>
+      <button className="p-1.5 rounded-full border border-slate-200 bg-white text-slate-400 hover:bg-slate-50 disabled:opacity-50"><HiChevronLeft className="w-4 h-4" /></button>
+      <button className="px-3 py-1.5 rounded-full bg-[#008A4B] text-white font-semibold">1</button>
+      <button className="p-1.5 rounded-full border border-slate-200 bg-white text-slate-400 hover:bg-slate-50 disabled:opacity-50"><HiChevronRight className="w-4 h-4" /></button>
     </div>
   </div>
 );

@@ -112,7 +112,7 @@ const InputProgresPage: React.FC = () => {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-6 divide-x divide-slate-100">
             <div>
               <p className="text-xs text-slate-500 mb-2">Status Penugasan</p>
-              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold ${getBadgeStyle(data.status)}`}>
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${getBadgeStyle(data.status)}`}>
                 <HiCheckCircle className="w-4 h-4" /> {data.status}
               </span>
             </div>
@@ -126,7 +126,7 @@ const InputProgresPage: React.FC = () => {
             </div>
             <div className="pl-6">
               <p className="text-xs text-slate-500 mb-2">Sumber Lokasi</p>
-              <span className="px-2.5 py-1 text-xs font-bold rounded bg-blue-50 text-blue-600">{data.sumberLokasi}</span>
+              <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-blue-50 text-blue-600">{data.sumberLokasi}</span>
             </div>
             <div className="pl-6">
               <p className="text-xs text-slate-500 mb-2">Periode Pelaksanaan</p>
@@ -197,7 +197,7 @@ const InputProgresPage: React.FC = () => {
                   <div className="flex gap-8">
                     <div>
                       <p className="text-xs text-slate-500 mb-1 font-medium">Hasil Validasi</p>
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-md text-xs font-bold">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-bold">
                         <HiCheckCircle className="w-4 h-4" /> {data.hasilValidasi}
                       </span>
                     </div>

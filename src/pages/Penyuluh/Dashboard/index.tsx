@@ -62,7 +62,7 @@ const StatusBadge = ({ status }: { status: string }) => {
 const ActionButton = ({ action }: { action: string }) => {
   const isLanjutkan = action === 'Lanjutkan';
   return (
-    <button className={`px-3 py-1.5 text-xs font-medium rounded-md border transition-colors ${
+    <button className={`px-3 py-1.5 text-xs font-medium rounded-full border transition-colors ${
       isLanjutkan 
         ? 'border-emerald-500 text-emerald-600 hover:bg-emerald-50' 
         : 'border-gray-300 text-gray-600 hover:bg-gray-50'
@@ -114,7 +114,7 @@ const DashboardPenyuluh: React.FC = () => {
         
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-gray-600">
-            <thead className="text-xs text-[#3A4D3F] bg-[#DCECE0] border-b border-gray-100">
+            <thead className="bg-[#DCECE0] text-[#3A4D3F] text-xs uppercase tracking-wider font-bold">
               <tr>
                 <th className="px-5 py-3 font-semibold">No</th>
                 <th className="px-5 py-3 font-semibold">ID Program</th>

@@ -6,7 +6,8 @@ import {
   HiOutlineCheckCircle,
   HiOutlineXCircle,
   HiOutlineClock,
-  HiOutlineEye
+  HiOutlineEye,
+  HiOutlinePencilSquare 
 } from 'react-icons/hi2';
 
 const MOCK_DATA = [
@@ -145,13 +146,24 @@ const RencanaRehabilitasiIndex: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-700 font-medium">{row.intervensi}</td>
                     <td className="px-6 py-4">{getStatusBadge(row.status)}</td>
-                    <td className={`px-6 py-4 text-center ${isLast ? 'rounded-br-xl' : ''}`}>
-                      <button 
-                        onClick={() => navigate(`/admin/staff/analisis-cpi/rencana/detail/${row.id}`)}
-                        className="inline-flex items-center justify-center gap-1.5 px-2 py-2 border border-gray-300 text-gray-700 bg-white rounded-full hover:bg-gray-50 hover:text-[#185325] hover:border-[#185325] text-xs font-bold transition-all shadow-sm cursor-pointer"
-                      >
-                        <HiOutlineEye className="w-3.5 h-3.5 stroke-2" />
-                      </button>
+                    <td className={`px-6 py-4 flex justify-center ${isLast ? 'rounded-br-xl' : ''}`}>
+                      {/* KONDISIONAL TOMBOL BERDASARKAN STATUS */}
+                      {row.status === 'Menunggu' ? (
+                        <button 
+                          onClick={() => navigate(`/admin/staff/analisis-cpi/rencana/detail/${row.id}`)}
+                          className="inline-flex items-center justify-center gap-1.5 px-4 py-1.5 bg-[#185325] hover:bg-[#123d1c] text-white rounded-full text-[11px] font-bold transition-all shadow-sm cursor-pointer active:scale-95"
+                        >
+                          <HiOutlinePencilSquare className="w-3.5 h-3.5" /> Lengkapi
+                        </button>
+                      ) : (
+                        <button 
+                          onClick={() => navigate(`/admin/staff/analisis-cpi/rencana/detail/${row.id}`)}
+                          title="Lihat Detail"
+                          className="inline-flex items-center justify-center p-2 border border-gray-300 text-gray-700 bg-white rounded-full hover:bg-gray-50 hover:text-[#185325] hover:border-[#185325] transition-all shadow-sm cursor-pointer"
+                        >
+                          <HiOutlineEye className="w-4 h-4 stroke-2" />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 );
