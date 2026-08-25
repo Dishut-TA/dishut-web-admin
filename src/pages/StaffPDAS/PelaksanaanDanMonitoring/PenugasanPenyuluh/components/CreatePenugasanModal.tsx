@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { HiXMark } from 'react-icons/hi2';
+import { HiXMark, HiOutlineInformationCircle } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 import type { Option } from './AnimatedSelect';
 import AnimatedSelect from './AnimatedSelect';
+import { getAllUsers } from '@/services/authService';
+import { getLatestProjectAPI } from '@/services/gisService';
+
+const API_URL = import.meta.env.VITE_API_PELAKSANAAN_URL || 'http://127.0.0.1:8000/api';
 
 interface ModalProps {
   isOpen: boolean;
@@ -13,88 +17,185 @@ const ModalBuatPenugasan: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [penyuluh, setPenyuluh] = useState('');
   const [kategori, setKategori] = useState('');
-  const [jenisProgram, setJenisProgram] = useState('');
-  const [wilayah, setWilayah] = useState('');
-  const [lokasi, setLokasi] = useState('');
+  const [wilayah, setWilayah] = useState(''); 
+  const [lokasi, setLokasi] = useState('');   
+  const [lokasiAtauProgram, setLokasiAtauProgram] = useState(''); 
   const [tanggal, setTanggal] = useState('');
-  const [periode, setPeriode] = useState('');
+  const [periode, setPeriode] = useState(''); 
   const [catatan, setCatatan] = useState('');
+  const [penyuluhOptions, setPenyuluhOptions] = useState<Option[]>([]);
+  const [wilayahOptions, setWilayahOptions] = useState<Option[]>([]);
+  const [lokasiOptions, setLokasiOptions] = useState<Option[]>([]);
+  const [targetOptions, setTargetOptions] = useState<Option[]>([]);
+  const [rawCpiData, setRawCpiData] = useState<any[]>([]);
 
+  const kategoriOptions: Option[] = [
+    { value: 'validasi', label: 'Validasi Lokasi (Analisis CPI)' },
+    { value: 'pelaksanaan', label: 'Pelaksanaan Penanaman (P0)' },
+  ];
+
+  // 1. Reset Modal
   useEffect(() => {
     if (!isOpen) {
-      setPenyuluh(''); setKategori(''); setJenisProgram(''); 
-      setWilayah(''); setLokasi(''); setTanggal(''); 
-      setPeriode(''); setCatatan('');
+      setPenyuluh(''); setKategori(''); setWilayah(''); setLokasi(''); 
+      setLokasiAtauProgram(''); setTanggal(''); setPeriode(''); setCatatan('');
+      setWilayahOptions([]); setLokasiOptions([]); setTargetOptions([]);
     }
-  }, [isOpen]);
-
-  useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : 'unset';
     return () => { document.body.style.overflow = 'unset'; };
   }, [isOpen]);
 
+  // 2. Fetch Penyuluh
   useEffect(() => {
-    if (jenisProgram === 'apbd') {
-      setWilayah('cimanuk');
-      setLokasi('hulu');
-    } else if (jenisProgram === 'csr') {
-      setWilayah('citarum');
-      setLokasi('purwakarta');
-    } else if (jenisProgram === 'donasi') {
-      setWilayah('ciujung');
-      setLokasi('serang');
-    } else {
-      // Kosongkan jika belum memilih program
-      setWilayah('');
-      setLokasi('');
+    if (isOpen) {
+      getAllUsers().then(users => {
+        const dataPenyuluh = users.filter((u: any) => 
+          u.peran && u.peran.some((p: any) => p.nama.toLowerCase().includes('penyuluh'))
+        );
+        setPenyuluhOptions(dataPenyuluh.map((p: any) => ({
+          value: p.id.toString(),
+          label: p.nama_pengguna,
+          badgeText: 'Penyuluh',
+          badgeColor: 'bg-emerald-100 text-emerald-700'
+        })));
+      }).catch(() => toast.error("Gagal memuat data penyuluh"));
     }
-  }, [jenisProgram]);
+  }, [isOpen]);
 
-  const penyuluhOptions: Option[] = [
-    { value: 'andi', label: 'Andi Permana', badgeText: '2/5 Tugas', badgeColor: 'bg-blue-100 text-blue-700' },
-    { value: 'budi', label: 'Budi Santoso', badgeText: '1/5 Tugas', badgeColor: 'bg-blue-100 text-blue-700' },
-    { value: 'siti', label: 'Siti Nurhaliza', disabled: true, badgeText: 'Penuh (5/5 Tugas)', badgeColor: 'bg-red-100 text-red-700' }, // Contoh Disable karena overload
-  ];
+  // 3. Fetch Data Awal Berdasarkan Kategori
+  useEffect(() => {
+    if (!kategori) {
+      setWilayah(''); setLokasi(''); setLokasiAtauProgram('');
+      return;
+    }
 
-  const programOptions: Option[] = [
-    { value: 'apbd', label: 'APBD - Rehabilitasi DAS Cimanuk' },
-    { value: 'csr', label: 'CSR - Penghijauan Citarum Harum' },
-    { value: 'donasi', label: 'Donasi - Penanaman Mangrove' },
-  ];
+    const fetchTargetData = async () => {
+      try {
+        if (kategori === 'validasi') {
+          const res = await getLatestProjectAPI();
+          const projectData = res.payload?.[0] || res.data?.[0];
+          
+          if (projectData && projectData.hasil?.pratinjau_tabel) {
+            const tableRows = projectData.hasil.pratinjau_tabel;
+            setRawCpiData(tableRows);
 
-  const kategoriOptions: Option[] = [
-    { value: 'validasi', label: 'Validasi Lokasi' },
-    { value: 'pelaksanaan', label: 'Pelaksanaan Kegiatan' },
-    { value: 'monitoring', label: 'Monitoring / Evaluasi' },
-  ];
+            const uniqueWilayah = Array.from(new Set(tableRows.map((d: any) => d.kota_kabupaten || d.kabupaten)));
+            setWilayahOptions(uniqueWilayah.map((w: any) => ({ value: w, label: w })));
+          }
+        } else if (kategori === 'pelaksanaan') {
+          const token = localStorage.getItem('token');
+          const res = await fetch(`${API_URL}/program`, { 
+            headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+          });
+          const json = await res.json();
+          const list = json.data || json.payload || [];
+          
+          setTargetOptions(list.map((item: any) => ({
+            value: item.id.toString(),
+            label: `[Program] ${item.nama_program}`
+          })));
+        }
+      } catch (error) {
+        toast.error("Gagal memuat data referensi");
+      }
+    };
+    fetchTargetData();
+  }, [kategori]);
 
-  const wilayahOptions: Option[] = [
-    { value: 'cimanuk', label: 'DAS Cimanuk' },
-    { value: 'citarum', label: 'DAS Citarum' },
-    { value: 'ciujung', label: 'DAS Ciujung' },
-  ];
+  // 4. Cascade Filter: Wilayah -> Kecamatan
+  useEffect(() => {
+    if (kategori === 'validasi' && wilayah) {
+      const filtered = rawCpiData.filter(d => (d.kota_kabupaten || d.kabupaten) === wilayah);
+      const uniqueKecamatan = Array.from(new Set(filtered.map(d => d.kecamatan)));
+      
+      setLokasiOptions(uniqueKecamatan.map((k: any) => ({ value: k, label: k })));
+      setLokasi(''); setLokasiAtauProgram(''); setTargetOptions([]); 
+    }
+  }, [wilayah, kategori, rawCpiData]);
 
-  const lokasiOptions: Option[] = [
-    { value: 'hulu', label: 'Hulu DAS Cimanuk (Garut)' },
-    { value: 'purwakarta', label: 'Kabupaten Purwakarta' },
-    { value: 'serang', label: 'Kabupaten Serang' },
-    { value: 'bandung', label: 'Bandung Raya' },
-  ];
+  // 5. Cascade Filter & SORTING KEKRITISAN: Kecamatan -> Target (Desa)
+  useEffect(() => {
+    if (kategori === 'validasi' && lokasi && wilayah) {
+      let filtered = rawCpiData.filter(d => 
+        d.kecamatan === lokasi && (d.kota_kabupaten || d.kabupaten) === wilayah
+      );
+      
+      // LOGIKA SORTING KEKRITISAN
+      const priority: Record<string, number> = {
+        'Sangat Kritis': 1,
+        'Kritis': 2,
+        'Tidak Kritis': 3
+      };
 
-  const handleSubmit = (e: React.FormEvent) => {
+      filtered.sort((a, b) => {
+        const valA = priority[a.status_lahan_kritis] || 99;
+        const valB = priority[b.status_lahan_kritis] || 99;
+        return valA - valB; // Ascending (1 paling atas)
+      });
+      
+      // Mapping ke Options dengan tambahan label status
+      setTargetOptions(filtered.map(d => ({ 
+        value: d.zone_id.toString(), 
+        label: `[Zona ${d.zone_id}] Desa ${d.desa_kelurahan || d.desa} (${d.status_lahan_kritis})` 
+      })));
+      
+      setLokasiAtauProgram(''); 
+    }
+  }, [lokasi, kategori, wilayah, rawCpiData]);
+
+  // 6. Handle Submit
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!penyuluh || !kategori || !lokasiAtauProgram || !tanggal || !periode) {
+      return toast.error("Mohon lengkapi semua kolom wajib!");
+    }
+
     setIsLoading(true);
-    setTimeout(() => {
-      toast.success('Penugasan baru berhasil dibuat!');
-      setIsLoading(false);
+    const loadingId = toast.loading("Menyimpan penugasan...");
+
+    try {
+      const token = localStorage.getItem('token');
+      const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+      
+      if (kategori === 'pelaksanaan') {
+        const payload = {
+          penyuluh_id: parseInt(penyuluh),
+          tanggal_mulai: tanggal,
+          batas_waktu: periode,
+          arahan: catatan
+        };
+        const res = await fetch(`${API_URL}/pelaksanaan/${lokasiAtauProgram}/penugasan`, {
+          method: 'POST', headers, body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error("Gagal menyimpan penugasan pelaksanaan");
+      } else {
+        const payloadValidasi = {
+          zone_id: parseInt(lokasiAtauProgram),
+          penyuluh_id: parseInt(penyuluh),
+          tanggal_mulai: tanggal,
+          batas_waktu: periode,
+          arahan: catatan
+        };
+        const res = await fetch(`${API_URL}/field-validations/assign`, {
+          method: 'POST', headers, body: JSON.stringify(payloadValidasi)
+        });
+        if (!res.ok) throw new Error("Gagal menyimpan penugasan validasi");
+      }
+
+      toast.success('Penugasan berhasil dibuat!', { id: loadingId });
       onClose();
-    }, 1000);
+      window.location.reload(); // Refresh halaman agar tabel terupdate
+    } catch (error: any) {
+      toast.error(error.message, { id: loadingId });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
       <div className="relative bg-white rounded-2xl w-full max-w-xl shadow-2xl flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
         
@@ -107,87 +208,83 @@ const ModalBuatPenugasan: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
         <div className="p-6 overflow-y-auto custom-scrollbar">
           <form id="form-penugasan" onSubmit={handleSubmit} className="space-y-6">
+            
             <AnimatedSelect
               label="Pilih Penyuluh Pelaksana"
-              placeholder="Pilih Penyuluh"
+              placeholder="-- Pilih Penyuluh --"
               options={penyuluhOptions}
               value={penyuluh}
               onChange={setPenyuluh}
               required
             />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <AnimatedSelect 
-                label="Kategori Penugasan"
-                placeholder="Pilih Kategori"
-                options={kategoriOptions}
-                value={kategori}
-                onChange={setKategori}
-                required
-              />
-              
-              <AnimatedSelect 
-                label="Jenis Program"
-                placeholder="Pilih Program"
-                options={programOptions}
-                value={jenisProgram}
-                onChange={setJenisProgram}
-                required
-              />
-            </div>
+            <AnimatedSelect 
+              label="Kategori Penugasan"
+              placeholder="-- Pilih Kategori --"
+              options={kategoriOptions}
+              value={kategori}
+              onChange={(val) => { setKategori(val); setWilayah(''); setLokasi(''); setLokasiAtauProgram(''); }}
+              required
+            />
 
-            <div className="bg-secondary/50 p-4 rounded-xl space-y-5">
-              <h3 className="text-xs font-bold text-primary uppercase tracking-wide flex items-center gap-2">
-                Detail Lokasi <span className="text-[10px] font-medium normal-case bg-secondary px-2 py-0.5 rounded text-black">(Terisi Otomatis)</span>
-              </h3>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <AnimatedSelect 
-                  label="Wilayah PDAS"
-                  placeholder="Pilih Wilayah"
-                  options={wilayahOptions}
-                  value={wilayah}
-                  onChange={setWilayah}
-                  required
-                />
-
-                <AnimatedSelect 
-                  label="Lokasi / Kecamatan"
-                  placeholder="Pilih Lokasi"
-                  options={lokasiOptions}
-                  value={lokasi}
-                  onChange={setLokasi}
-                  required
-                />
+            {kategori === 'validasi' && (
+              <div className="bg-blue-50/50 p-4 rounded-xl space-y-5 border border-blue-100">
+                <h3 className="text-xs font-bold text-blue-700 uppercase tracking-wide flex items-center gap-2">
+                  Detail Lokasi <span className="text-[10px] font-medium bg-white border border-blue-200 px-2 py-0.5 rounded text-blue-600 normal-case">(Dari Modul CPI)</span>
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <AnimatedSelect label="Wilayah (Kabupaten/Kota)" placeholder="-- Pilih Wilayah --" options={wilayahOptions} value={wilayah} onChange={setWilayah} required />
+                  <AnimatedSelect label="Lokasi (Kecamatan)" placeholder="-- Pilih Kecamatan --" options={lokasiOptions} value={lokasi} onChange={setLokasi} required disabled={!wilayah} />
+                </div>
               </div>
-            </div>
+            )}
+
+            {kategori && (
+              <AnimatedSelect 
+                label={kategori === 'validasi' ? 'Target Lokasi / Desa (Zona)' : 'Target Program'}
+                placeholder={kategori === 'validasi' ? (lokasi ? '-- Pilih Desa --' : '-- Pilih Kecamatan Dahulu --') : '-- Pilih Program --'}
+                options={targetOptions}
+                value={lokasiAtauProgram}
+                onChange={setLokasiAtauProgram}
+                required
+                disabled={kategori === 'validasi' && !lokasi}
+              />
+            )}
+
+            {kategori && (
+              <div className="px-4 py-3 rounded-lg flex items-start gap-3 border bg-gray-50 border-gray-200 text-gray-700">
+                <HiOutlineInformationCircle className="w-5 h-5 shrink-0 mt-0.5 text-emerald-600" />
+                <p className="text-xs font-medium leading-relaxed">
+                  {kategori === 'validasi' 
+                    ? 'Penyuluh akan mengecek kesesuaian koordinat dan lahan kritis hasil analisis CPI.' 
+                    : 'Penyuluh akan memonitoring kegiatan penanaman bibit oleh KTH di lapangan.'}
+                </p>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1.5">Tanggal Penugasan</label>
-                <input required type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#185325]/20 focus:border-[#185325] transition-all text-gray-700" />
+                <label className="block text-sm font-bold text-gray-700 mb-1.5">Tanggal Mulai <span className="text-red-500">*</span></label>
+                <input required type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-[#185325]" />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1.5">Periode Validasi</label>
-                <input required type="date" value={periode} onChange={e => setPeriode(e.target.value)} className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#185325]/20 focus:border-[#185325] transition-all text-gray-700" />
+                <label className="block text-sm font-bold text-gray-700 mb-1.5">Batas Waktu (Deadline) <span className="text-red-500">*</span></label>
+                <input required type="date" value={periode} onChange={e => setPeriode(e.target.value)} className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-[#185325]" />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1.5">Catatan (Opsional)</label>
-              <textarea value={catatan} onChange={e => setCatatan(e.target.value)} placeholder="Masukkan catatan atau instruksi khusus..." rows={3} className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#185325]/20 focus:border-[#185325] transition-all resize-none bg-white"></textarea>
+              <label className="block text-sm font-bold text-gray-700 mb-1.5">Catatan Arahan (Opsional)</label>
+              <textarea value={catatan} onChange={e => setCatatan(e.target.value)} placeholder="Masukkan instruksi khusus..." rows={3} className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-[#185325] resize-none"></textarea>
             </div>
           </form>
         </div>
 
         <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 rounded-b-2xl z-10">
-          <button type="button" onClick={onClose} className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 text-sm font-bold rounded-xl hover:bg-gray-100 transition-colors">
+          <button type="button" onClick={onClose} className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 text-sm font-bold rounded-xl hover:bg-gray-100">
             Batal
           </button>
-          <button type="submit" form="form-penugasan" disabled={isLoading} className="px-8 py-2.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-xl transition-all disabled:opacity-70 flex items-center gap-2 shadow-lg shadow-[#185325]/20">
-            {isLoading ? (
-              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-            ) : null}
+          <button type="submit" form="form-penugasan" disabled={isLoading} className="px-8 py-2.5 bg-[#185325] text-white text-sm font-bold rounded-xl hover:bg-[#123d1c] disabled:opacity-70 flex items-center gap-2">
             {isLoading ? 'Menyimpan...' : 'Simpan Penugasan'}
           </button>
         </div>
@@ -196,5 +293,4 @@ const ModalBuatPenugasan: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     </div>
   );
 };
-
 export default ModalBuatPenugasan;

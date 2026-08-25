@@ -96,7 +96,6 @@ const DataInvestasi: React.FC = () => {
                       {new Date(item.batas_waktu_pengumpulan).toLocaleDateString('id-ID')}
                     </td>
                     <td className="px-6 py-4 text-center whitespace-nowrap">
-                      {/* Render Badge Status Di Sini */}
                       {renderStatusBadge(item.status)}
                     </td>
                     <td className="px-6 py-4 flex justify-center whitespace-nowrap">

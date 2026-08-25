@@ -32,11 +32,29 @@ import {
 } from 'react-icons/hi2';
 import { PiLeaf, PiPlant, PiTree } from 'react-icons/pi';
 import { BiMapAlt } from 'react-icons/bi';
+import toast from 'react-hot-toast';
+
+// --- IMPORT REACT LEAFLET ---
+import { MapContainer, TileLayer, Polygon, CircleMarker, useMapEvents } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+
+// Komponen penangkap klik peta
+const MapEvents = ({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) => {
+  useMapEvents({
+    click(e) {
+      onMapClick(e.latlng.lat, e.latlng.lng);
+    },
+  });
+  return null;
+};
 
 const PelaksanaanWizard: React.FC = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<number>(2);
   const [isAgreed, setIsAgreed] = useState<boolean>(false);
+
+  // STATE UNTUK GAMBAR POLIGON DI PETA
+  const [polygonPoints, setPolygonPoints] = useState<[number, number][]>([]);
 
   const nextStep = () => {
     if (currentStep < 5) setCurrentStep(currentStep + 1);
@@ -49,6 +67,24 @@ const PelaksanaanWizard: React.FC = () => {
 
   const handleSubmit = () => {
     navigate('/admin/penyuluh/pelaksanaan-penanaman');
+  };
+
+  // FUNGSI KONTROL POLIGON
+  const handleMapClick = (lat: number, lng: number) => {
+    setPolygonPoints(prev => [...prev, [lat, lng]]);
+  };
+
+  const handleClearPolygon = () => {
+    setPolygonPoints([]);
+  };
+
+  const handleSavePolygon = () => {
+    if (polygonPoints.length < 3) {
+      toast.error('Minimal 3 titik untuk membentuk poligon PU');
+      return;
+    }
+    toast.success('PU berhasil disimpan!');
+    // Logika simpan PU ke Backend bisa ditambahkan di sini
   };
 
   const renderStepper = () => {
@@ -134,36 +170,50 @@ const PelaksanaanWizard: React.FC = () => {
         </div>
       </div>
 
-      {/* TENGAH: Peta Lokasi Kegiatan */}
+      {/* TENGAH: Peta Lokasi Kegiatan ASLI (Leaflet) */}
       <div className="lg:col-span-6 space-y-4">
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
           <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-white">
             <h3 className="font-bold text-slate-900">Peta Lokasi Kegiatan</h3>
             <BiMapAlt className="w-5 h-5 text-slate-400" />
           </div>
-          <div className="w-full h-100 bg-slate-100 relative bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=800')] bg-cover bg-center">
-            {/* Dark Overlay for map */}
-            <div className="absolute inset-0 bg-black/20"></div>
-            
-            {/* Mock Polygon */}
-            <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
-               <polygon points="150,80 350,120 400,250 250,350 100,250" fill="rgba(16, 185, 129, 0.4)" stroke="white" strokeWidth="2" strokeDasharray="5,5" />
-               <circle cx="150" cy="80" r="6" fill="#10B981" stroke="white" strokeWidth="2" />
-               <circle cx="350" cy="120" r="6" fill="#10B981" stroke="white" strokeWidth="2" />
-               <circle cx="400" cy="250" r="6" fill="#10B981" stroke="white" strokeWidth="2" />
-               <circle cx="250" cy="350" r="6" fill="#10B981" stroke="white" strokeWidth="2" />
-               <circle cx="100" cy="250" r="6" fill="#10B981" stroke="white" strokeWidth="2" />
-            </svg>
+          
+          <div className="w-full h-100 relative bg-slate-100">
+            <MapContainer 
+              center={[-7.6321456, 107.6587921]} 
+              zoom={15} 
+              style={{ width: '100%', height: '100%', zIndex: 10 }}
+              zoomControl={false}
+            >
+              <TileLayer 
+                url="https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}" 
+                subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
+                maxZoom={20}
+              />
+              <MapEvents onMapClick={handleMapClick} />
+              {polygonPoints.length > 0 && (
+                <Polygon 
+                  positions={polygonPoints} 
+                  pathOptions={{ color: '#10B981', fillColor: '#10B981', fillOpacity: 0.4, weight: 2, dashArray: '5,5' }} 
+                />
+              )}
+              {polygonPoints.map((pos, idx) => (
+                <CircleMarker 
+                  key={idx} 
+                  center={pos} 
+                  radius={5} 
+                  pathOptions={{ color: 'white', weight: 2, fillColor: '#10B981', fillOpacity: 1 }} 
+                />
+              ))}
+            </MapContainer>
 
-            {/* Info tooltip on map */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-900/80 backdrop-blur text-white p-3 rounded-lg text-center z-20 shadow-lg border border-slate-700/50">
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-slate-900/80 backdrop-blur text-white p-3 rounded-lg text-center z-1000 shadow-lg border border-slate-700/50 pointer-events-none">
                <p className="font-bold text-sm mb-0.5">PU 1</p>
                <p className="text-[10px] text-orange-400 font-semibold mb-1">Sedang dibuat</p>
-               <p className="text-[10px]">Perkiraan luas: 0,18 ha</p>
+               <p className="text-[10px]">Titik koordinat: {polygonPoints.length}</p>
             </div>
 
-            {/* Map Controls */}
-            <div className="absolute right-4 top-4 flex flex-col gap-2 z-20">
+            <div className="absolute right-4 top-4 flex flex-col gap-2 z-1000">
               <div className="bg-white rounded shadow-sm flex flex-col overflow-hidden">
                 <button className="p-2 border-b border-slate-100 hover:bg-slate-50 text-slate-700 font-bold">+</button>
                 <button className="p-2 hover:bg-slate-50 text-slate-700 font-bold">-</button>
@@ -176,14 +226,13 @@ const PelaksanaanWizard: React.FC = () => {
               </button>
             </div>
 
-            {/* Actions on Map */}
-            <div className="absolute bottom-4 right-4 flex gap-2 z-20">
-               <button className="bg-white text-slate-700 px-4 py-2 rounded-lg text-xs font-bold shadow hover:bg-slate-50">Batalkan PU</button>
-               <button className="bg-[#008A4B] text-white px-4 py-2 rounded-lg text-xs font-bold shadow hover:bg-emerald-800">Simpan PU 1</button>
+            <div className="absolute bottom-4 right-4 flex gap-2 z-1000">
+               <button onClick={handleClearPolygon} className="bg-white text-slate-700 px-4 py-2 rounded-lg text-xs font-bold shadow hover:bg-slate-50 transition-colors">Batalkan PU</button>
+               <button onClick={handleSavePolygon} className="bg-[#008A4B] text-white px-4 py-2 rounded-lg text-xs font-bold shadow hover:bg-emerald-800 transition-colors">Simpan PU 1</button>
             </div>
             
-            <div className="absolute bottom-4 left-4 text-white text-[10px] font-medium drop-shadow-md">
-               50 m | 
+            <div className="absolute bottom-4 left-4 text-white text-[10px] font-medium drop-shadow-md z-1000 pointer-events-none">
+               50 m | Skala Peta
             </div>
           </div>
           
@@ -193,14 +242,13 @@ const PelaksanaanWizard: React.FC = () => {
                 <div><div className="w-10 h-10 bg-emerald-50 text-emerald-600 mx-auto rounded mb-1 flex items-center justify-center"><HiOutlineMapPin className="w-5 h-5"/></div>1. Klik pada peta untuk menambahkan titik awal</div>
                 <div><div className="w-10 h-10 bg-emerald-50 text-emerald-600 mx-auto rounded mb-1 flex items-center justify-center"><PiTree className="w-5 h-5"/></div>2. Klik titik berikutnya untuk membentuk sisi poligon</div>
                 <div><div className="w-10 h-10 bg-emerald-50 text-emerald-600 mx-auto rounded mb-1 flex items-center justify-center"><HiOutlineAdjustmentsHorizontal className="w-5 h-5"/></div>3. Minimal 3 titik untuk membentuk poligon</div>
-                <div><div className="w-10 h-10 bg-emerald-50 text-emerald-600 mx-auto rounded mb-1 flex items-center justify-center"><HiOutlineCheckCircle className="w-5 h-5"/></div>4. Klik titik awal untuk menutup poligon</div>
-                <div><div className="w-10 h-10 bg-emerald-50 text-emerald-600 mx-auto rounded mb-1 flex items-center justify-center"><HiOutlineDocumentArrowDown className="w-5 h-5"/></div>5. Simpan PU yang telah dibuat</div>
+                <div><div className="w-10 h-10 bg-emerald-50 text-emerald-600 mx-auto rounded mb-1 flex items-center justify-center"><HiOutlineCheckCircle className="w-5 h-5"/></div>4. Poligon akan otomatis tertutup</div>
+                <div><div className="w-10 h-10 bg-emerald-50 text-emerald-600 mx-auto rounded mb-1 flex items-center justify-center"><HiOutlineDocumentArrowDown className="w-5 h-5"/></div>5. Klik Simpan PU jika sudah sesuai</div>
              </div>
           </div>
         </div>
       </div>
 
-      {/* KANAN: Daftar PU */}
       <div className="lg:col-span-3">
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col h-145">
            <div className="p-4 border-b border-slate-100">
@@ -213,7 +261,6 @@ const PelaksanaanWizard: React.FC = () => {
               <HiOutlineInformationCircle className="w-4 h-4 text-slate-400" />
            </div>
            <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
-              {/* Item PU 1 Sedang Dibuat */}
               <div className="flex items-center justify-between p-3 bg-orange-50 border border-orange-100 rounded-lg">
                  <div className="flex items-center gap-3">
                     <HiOutlineBars3 className="w-4 h-4 text-slate-400" />
@@ -225,7 +272,6 @@ const PelaksanaanWizard: React.FC = () => {
                     <HiOutlinePencil className="w-4 h-4 text-slate-500 cursor-pointer hover:text-slate-800" />
                  </div>
               </div>
-              {/* Items PU Belum Dibuat */}
               {[2,3,4,5,6,7,8,9,10,11,12].map(num => (
                 <div key={num} className="flex items-center justify-between p-3 hover:bg-slate-50 rounded-lg border border-transparent border-b-slate-100 last:border-b-transparent">
                    <div className="flex items-center gap-3">
@@ -953,7 +999,7 @@ const PelaksanaanWizard: React.FC = () => {
               <button
                 onClick={handleSubmit} 
                 disabled={!isAgreed}
-                className={`px-8 py-2.5 font-bold text-sm rounded-full flex items-center gap-2 shadow-sm transition-colors ${isAgreed ? 'bg-primary text-white hover:bg-emerald-800' : 'bg-emerald-200 text-emerald-50 cursor-not-allowed'}`}
+                className={`px-8 py-2.5 font-bold text-sm rounded-full flex items-center gap-2 shadow-sm transition-colors ${isAgreed ? 'bg-[#008A4B] text-white hover:bg-emerald-800' : 'bg-emerald-200 text-emerald-50 cursor-not-allowed'}`}
               >
                 Kirim Hasil Pelaksanaan <HiOutlineArrowRight className="w-4 h-4 stroke-2" />
               </button>

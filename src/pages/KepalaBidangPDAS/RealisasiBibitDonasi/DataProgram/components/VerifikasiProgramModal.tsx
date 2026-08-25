@@ -55,7 +55,7 @@ const VerifikasiProgramModal: React.FC<VerifikasiProgramModalProps> = ({
               <span className="block text-xs font-bold text-gray-500 uppercase mb-2">Jenis Bibit Disetujui</span>
               <div className="flex flex-wrap gap-1.5">
                  {program.jenisBibit?.map((bibit: any, idx: number) => (
-                    <span key={idx} className="px-2 py-1 bg-white border border-gray-200 text-gray-600 rounded-md text-xs font-semibold shadow-sm">
+                    <span key={idx} className="px-2 py-1 bg-white border border-gray-200 text-gray-600 rounded-full text-xs font-semibold shadow-sm">
                       {bibit.nama || bibit}
                     </span>
                  ))}
@@ -66,7 +66,7 @@ const VerifikasiProgramModal: React.FC<VerifikasiProgramModalProps> = ({
           <div className="flex flex-col gap-3">
             <button 
               onClick={() => onSetuju(program.id)}
-              className="flex items-center justify-center gap-2 w-full py-3.5 bg-[#009262] hover:bg-[#007a52] text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-[#009262]/20 active:scale-95 cursor-pointer"
+              className="flex items-center justify-center gap-2 w-full py-3.5 bg-[#009262] hover:bg-[#007a52] text-white text-sm font-bold rounded-full transition-all shadow-md shadow-[#009262]/20 active:scale-95 cursor-pointer"
             >
               <HiCheckCircle className="w-5 h-5" />
               Setujui (Program Sesuai Ketentuan)
@@ -74,7 +74,7 @@ const VerifikasiProgramModal: React.FC<VerifikasiProgramModalProps> = ({
 
             <button 
               onClick={() => onTolak(program.id)}
-              className="flex items-center justify-center gap-2 w-full py-3.5 bg-red-50 hover:bg-red-100 border border-red-100 text-red-600 text-sm font-bold rounded-xl transition-all active:scale-95 cursor-pointer"
+              className="flex items-center justify-center gap-2 w-full py-3.5 bg-red-50 hover:bg-red-100 border border-red-100 text-red-600 text-sm font-bold rounded-full transition-all active:scale-95 cursor-pointer"
             >
               <HiXCircle className="w-5 h-5" />
               Tolak (Program Tidak Sesuai Ketentuan)
