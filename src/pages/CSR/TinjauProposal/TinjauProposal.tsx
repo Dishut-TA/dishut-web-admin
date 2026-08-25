@@ -64,8 +64,8 @@ const TinjauProposal: React.FC = () => {
             <tbody className="divide-y divide-gray-200/60 bg-transparent">
               {data.map((item) => (
                 <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4">
-                    <span className="text-sm font-bold text-gray-800">CSR-{item.id}</span>
+                  <td className="px-6 py-4 text-sm text-gray-700">
+                        P-CSR-{new Date(item.created_at).getFullYear()}-{String(item.id).padStart(3, '0')}
                   </td>
                   <td className="px-6 py-4">
                     <span className="text-sm font-bold text-gray-800">{item.nama_program}</span>

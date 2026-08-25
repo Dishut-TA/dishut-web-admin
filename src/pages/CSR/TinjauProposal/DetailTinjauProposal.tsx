@@ -74,7 +74,7 @@ const DetailTinjauProposal: React.FC = () => {
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 md:p-10 flex flex-col">
         <div className="mb-8">
-          <span className="inline-block px-3 py-1 bg-[#DCECE0] text-[#185325] text-xs font-bold rounded-md mb-3">CSR-{data.id}</span>
+          <span className="inline-block px-3 py-1 bg-[#DCECE0] text-[#185325] text-xs font-bold rounded-md mb-3">P-CSR-{new Date(data.created_at).getFullYear()}-{String(data.id).padStart(3, '0')}</span>
           <h1 className="text-2xl font-bold text-gray-800 uppercase">Tinjau Pengajuan CSR</h1>
         </div>
 

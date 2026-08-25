@@ -84,9 +84,9 @@ const RiwayatPendanaan: React.FC = () => {
               ) : data.length > 0 ? (
                 data.map((item) => (
                   <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4 text-sm font-bold text-gray-800 whitespace-nowrap">
-                      CSR-{item.id}
-                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-700">
+                        P-CSR-{new Date(item.created_at).getFullYear()}-{String(item.id).padStart(3, '0')}
+                      </td>
                     <td className="px-6 py-4 text-sm font-medium text-gray-700 whitespace-nowrap">
                       {formatDate(item.created_at)}
                     </td>

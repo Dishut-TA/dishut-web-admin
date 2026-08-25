@@ -154,8 +154,8 @@ const PendanaanCSR: React.FC = () => {
                       className="hover:bg-gray-50 transition-colors"
                     >
                       <td className="px-6 py-4 text-sm text-gray-700">
-  P-CSR-{new Date(item.created_at).getFullYear()}-{String(item.id).padStart(3, '0')}
-</td>
+                        P-CSR-{new Date(item.created_at).getFullYear()}-{String(item.id).padStart(3, '0')}
+                      </td>
                       <td className="px-6 py-4 text-sm text-gray-700">
                         {item.nama_program}
                       </td>
