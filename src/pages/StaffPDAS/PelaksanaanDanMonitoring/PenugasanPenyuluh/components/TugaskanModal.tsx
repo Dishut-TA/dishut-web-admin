@@ -21,9 +21,10 @@ interface TugaskanModalProps {
   isOpen: boolean;
   onClose: () => void;
   data: any | null; 
+  onSuccess?: () => void;
 }
 
-const TugaskanModal: React.FC<TugaskanModalProps> = ({ isOpen, onClose, data }) => {
+const TugaskanModal: React.FC<TugaskanModalProps> = ({ isOpen, onClose, data, onSuccess }) => {
   const [formData, setFormData] = useState({
     penyuluh: '',
     tanggal: '',
@@ -33,17 +34,80 @@ const TugaskanModal: React.FC<TugaskanModalProps> = ({ isOpen, onClose, data }) 
     kth: 'kth1' // Default value for locked select
   });
 
+  const [penyuluhList, setPenyuluhList] = useState<any[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // State untuk mengontrol Modal Detail Rencana PO
   const [isDetailPOOpen, setIsDetailPOOpen] = useState(false);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      const fetchPenyuluh = async () => {
+        try {
+          const API_URL = import.meta.env.VITE_API_PELAKSANAAN_URL || 'http://127.0.0.1:8000/api';
+          const res = await fetch(`${API_URL}/users`);
+          const json = await res.json();
+          // Assuming user roles can be checked or just listing all users for now
+          if (json.payload) {
+            setPenyuluhList(json.payload.filter((u: any) => 
+              u.peran && u.peran.some((r: any) => r.nama.toLowerCase() === 'penyuluh')
+            ));
+          }
+        } catch (e) {
+          console.error("Gagal mengambil data penyuluh:", e);
+        }
+      };
+      fetchPenyuluh();
+    }
+  }, [isOpen]);
 
   if (!isOpen || !data) return null;
 
   const isValidasi = data.jenisKegiatan === 'Validasi Lokasi';
 
-  const handleSimpan = (e: React.FormEvent) => {
+  const handleSimpan = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Data Penugasan:", formData, "Tipe:", data.jenisKegiatan);
-    onClose();
+    if (!formData.penyuluh) return alert('Silakan pilih penyuluh');
+
+    setIsSubmitting(true);
+    try {
+      const token = localStorage.getItem('token');
+      const API_URL = import.meta.env.VITE_API_PELAKSANAAN_URL || 'http://127.0.0.1:8000/api';
+      
+      const payload = {
+        penyuluh_id: parseInt(formData.penyuluh, 10),
+        source_type: data.source_type || 'App\\Models\\AnalysisResultZone',
+        source_id: data.original_id || (typeof data.id === 'string' ? parseInt(data.id, 10) : data.id),
+        jenis_kegiatan: data.jenisKegiatan,
+        tanggal_mulai: formData.tanggal || null,
+        batas_waktu: formData.batasWaktu || null,
+        arahan: formData.catatan || null
+      };
+
+      const res = await fetch(`${API_URL}/penugasan`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        console.error('API Error Response:', errorData);
+        throw new Error('Gagal menyimpan penugasan');
+      }
+      
+      if (onSuccess) onSuccess();
+      else onClose();
+    } catch (error: any) {
+      console.error(error);
+      alert('Terjadi kesalahan saat menyimpan penugasan. Periksa console untuk detail.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -93,12 +157,12 @@ const TugaskanModal: React.FC<TugaskanModalProps> = ({ isOpen, onClose, data }) 
                   </>
                 ) : (
                   <>
-                    <div className="flex items-start"><span className="w-32 text-gray-500 shrink-0">ID Program</span><span className="font-bold text-gray-900">: PRG-2026-0021</span></div>
+                    <div className="flex items-start"><span className="w-32 text-gray-500 shrink-0">ID Program</span><span className="font-bold text-gray-900">: {data.id}</span></div>
                     <div className="flex items-start"><span className="w-32 text-gray-500 shrink-0">Jenis Kegiatan</span><span className="font-bold text-gray-900">: Penanaman</span></div>
                     <div className="flex items-start"><span className="w-32 text-gray-500 shrink-0">Nama Program</span><span className="font-bold text-gray-900">: {data.program}</span></div>
-                    <div className="flex items-start"><span className="w-32 text-gray-500 shrink-0">Lokasi Program</span><span className="font-bold text-gray-900 whitespace-pre-line">: {data.lokasi.replace('\n', ' ')}</span></div>
-                    <div className="flex items-start"><span className="w-32 text-gray-500 shrink-0">Sumber Dana</span><span className="font-bold text-gray-900">: APBD</span></div>
-                    <div className="flex items-start"><span className="w-32 text-gray-500 shrink-0">Target Kegiatan</span><span className="font-bold text-gray-900">: 500 tanaman</span></div>
+                    <div className="flex items-start"><span className="w-32 text-gray-500 shrink-0">Lokasi Program</span><span className="font-bold text-gray-900">: {data.lokasi.replace('\n', ' ')}</span></div>
+                    <div className="flex items-start"><span className="w-32 text-gray-500 shrink-0">Sumber Dana</span><span className="font-bold text-gray-900">: {data.source_type === 'App\\Models\\DonationProgram' ? 'Donasi' : data.source_type === 'App\\Models\\ProgramApbd' ? 'APBD' : 'CSR'}</span></div>
+                    <div className="flex items-start"><span className="w-32 text-gray-500 shrink-0">Target Kegiatan</span><span className="font-bold text-gray-900">: {data.detail?.total_seeds_collected || data.detail?.jumlah_bibit || '-'} Tanaman</span></div>
                   </>
                 )}
               </div>
@@ -116,20 +180,20 @@ const TugaskanModal: React.FC<TugaskanModalProps> = ({ isOpen, onClose, data }) 
                     <label className="block text-sm font-bold text-gray-700 mb-2">KTH Terlibat</label>
                     <select 
                       disabled
-                      value={formData.kth} 
+                      value="kth1" 
                       className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-500 cursor-not-allowed focus:outline-none"
                     >
-                      <option value="kth1">KTH Tani Maju (Telah ditetapkan CPI)</option>
+                      <option value="kth1">{data.detail?.kth?.name || data.detail?.kth?.nama || 'KTH Tidak Ditemukan'} (Telah ditetapkan)</option>
                     </select>
                     <p className="text-[11px] mt-2 font-medium text-emerald-700">KTH akan menerima informasi penugasan setelah disimpan.</p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Rencana / Periode Penanaman (PO)</label>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Rencana / Periode Penanaman (P0)</label>
                     <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-bold text-gray-900">PO - Rencana Penanaman Awal</p>
-                        <p className="text-[11px] text-gray-500 mt-1">Target: 500 tanaman | Periode Pelaksanaan: 01 Jul 2026 - 31 Jul 2026</p>
+                        <p className="text-sm font-bold text-gray-900">P0 - Rencana Penanaman Awal</p>
+                        <p className="text-[11px] text-gray-500 mt-1">Target: {data.detail?.total_seeds_collected || data.detail?.jumlah_bibit || '-'} tanaman | Periode Pelaksanaan: {data.detail?.start_date || data.detail?.tanggal_mulai || '-'} - {data.detail?.end_date || data.detail?.tanggal_selesai || '-'}</p>
                       </div>
                       <button 
                         type="button" 
@@ -157,10 +221,18 @@ const TugaskanModal: React.FC<TugaskanModalProps> = ({ isOpen, onClose, data }) 
                     <select 
                       value={formData.penyuluh} onChange={(e) => setFormData({...formData, penyuluh: e.target.value})}
                       className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-gray-700"
+                      required
                     >
                       <option value="">-- Pilih Penyuluh --</option>
-                      <option value="Ahmad">Ahmad Fauzi</option>
-                      <option value="Siti">Siti Nurhaliza</option>
+                      {penyuluhList.map(p => (
+                        <option key={p.id} value={p.id}>{p.username || p.nama_pengguna}</option>
+                      ))}
+                      {penyuluhList.length === 0 && (
+                        <>
+                          <option value="1">Admin (Fallback)</option>
+                          <option value="2">Penyuluh 1 (Fallback)</option>
+                        </>
+                      )}
                     </select>
                   </div>
                   <div>
@@ -225,8 +297,8 @@ const TugaskanModal: React.FC<TugaskanModalProps> = ({ isOpen, onClose, data }) 
               <button type="button" onClick={onClose} className="w-full sm:w-auto px-6 py-2.5 border border-gray-300 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-50 transition-colors">
                 Batal
               </button>
-              <button type="submit" className="w-full sm:w-auto px-6 py-2.5 bg-[#1F7A4D] hover:bg-emerald-800 text-white text-sm font-bold rounded-lg transition-colors shadow-sm">
-                Kirim Penugasan
+              <button type="submit" disabled={isSubmitting} className="w-full sm:w-auto px-6 py-2.5 bg-[#1F7A4D] hover:bg-emerald-800 text-white text-sm font-bold rounded-lg transition-colors shadow-sm disabled:opacity-50">
+                {isSubmitting ? 'Menyimpan...' : 'Kirim Penugasan'}
               </button>
             </div>
 
@@ -237,6 +309,7 @@ const TugaskanModal: React.FC<TugaskanModalProps> = ({ isOpen, onClose, data }) 
       <DetailRencanaPOModal
         isOpen={isDetailPOOpen} 
         onClose={() => setIsDetailPOOpen(false)} 
+        data={data}
       />
     </>
   );

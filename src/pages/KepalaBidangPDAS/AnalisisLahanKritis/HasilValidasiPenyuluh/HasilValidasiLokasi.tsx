@@ -1,26 +1,27 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HiOutlineEye } from 'react-icons/hi2'; 
+import toast from 'react-hot-toast';
+import { hasilValidasiService } from '@/services/hasilValidasi.service';
 
 const HasilValidasiLokasi: React.FC = () => {
   const navigate = useNavigate();
+  const [data, setData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // MOCK DATA: Status disederhanakan menjadi 2 jenis saja
-  const mockData = [
-    { id: 1, lokasi: 'Hulu DAS Sungai Mamberamo', sumber: 'Analisis CPI', penyuluh: 'Siti Nurhaliza', tanggal: '20 Mei 2025 10:23', status: 'Sudah Validasi' },
-    { id: 2, lokasi: 'Bukit Harapan Jaya', sumber: 'Proposal CSR', penyuluh: 'Budi Santoso', tanggal: '19 Mei 2025 16:45', status: 'Belum Validasi' },
-    { id: 3, lokasi: 'Lereng Gunung Nusa Indah', sumber: 'Analisis CPI', penyuluh: 'Andi Wijaya', tanggal: '19 Mei 2025 09:12', status: 'Sudah Validasi' },
-    { id: 4, lokasi: 'DAS Way Seputih Hulu', sumber: 'Analisis CPI', penyuluh: 'Rina Marlina', tanggal: '18 Mei 2025 14:30', status: 'Belum Validasi' },
-    { id: 5, lokasi: 'Bukit Sumber Makmur', sumber: 'Proposal CSR', penyuluh: 'Agus Setiawan', tanggal: '17 Mei 2025 11:05', status: 'Sudah Validasi' },
-    { id: 6, lokasi: 'Hutan Lindung Sungai Batu', sumber: 'Analisis CPI', penyuluh: 'Siti Nurhaliza', tanggal: '16 Mei 2025 13:20', status: 'Belum Validasi' },
-  ];
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-  // UPDATE STYLE: Warna badge disesuaikan dengan 2 status baru
-  const getStatusStyle = (status: string) => {
-    switch (status) {
-      case 'Sudah Validasi': return 'bg-emerald-50 text-[#185325] border border-emerald-200';
-      case 'Belum Validasi': return 'bg-orange-50 text-orange-600 border border-orange-200';
-      default: return 'bg-gray-100 text-gray-700';
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      const res = await hasilValidasiService.getAll();
+      setData(res.data);
+    } catch (err: any) {
+      toast.error(err.message || 'Terjadi kesalahan saat memuat data.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -46,42 +47,50 @@ const HasilValidasiLokasi: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {mockData.map((item, index) => (
-                <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4 text-sm text-gray-500 font-medium">{index + 1}</td>
-                  <td className="px-6 py-4 text-sm font-bold text-gray-800">{item.lokasi}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{item.sumber}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{item.penyuluh}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{item.tanggal}</td>
-                  
-                  <td className="px-6 py-4 text-center">
-                    <span className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${getStatusStyle(item.status)}`}>
-                      {item.status}
-                    </span>
-                  </td>
-                  
-                  <td className="px-6 py-4 flex justify-center items-center">
-                    {/* LOGIKA KONDISI TOMBOL AKSI */}
-                    {item.status === 'Sudah Validasi' ? (
-                      <button 
-                        onClick={() => navigate(`/admin/kabid/analisis-cpi/hasil-validasi-lokasi/detail/${item.id}`)}
-                        title="Lihat Detail Validasi"
-                        className="p-2 text-gray-500 hover:text-[#185325] hover:bg-[#EBF8F1] rounded-lg transition-colors active:scale-95"
-                      >
-                        <HiOutlineEye className="w-5 h-5 stroke-2" />
-                      </button>
-                    ) : (
-                      <button 
-                        onClick={() => navigate(`/admin/kabid/analisis-cpi/hasil-validasi-lokasi/detail/${item.id}`)}
-                        className="px-5 py-2 bg-[#185325] hover:bg-[#123d1c] text-white text-xs font-bold rounded-full transition-all shadow-sm active:scale-95 flex items-center justify-center"
-                      >
-                        Validasi
-                      </button>
-                    )}
-                  </td>
-                  
+              {isLoading ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-8 text-center text-gray-500 text-sm">Memuat data...</td>
                 </tr>
-              ))}
+              ) : data.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-8 text-center text-gray-500 text-sm">Belum ada data validasi dari penyuluh.</td>
+                </tr>
+              ) : (
+                data.map((item, index) => (
+                  <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-6 py-4 text-sm text-gray-500 font-medium">{index + 1}</td>
+                    <td className="px-6 py-4 text-sm font-bold text-gray-800">{item.nama_lokasi}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{item.sumber_lokasi || 'Analisis CPI'}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{item.nama_penyuluh}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{new Date(item.created_at).toLocaleString('id-ID')}</td>
+                    
+                    <td className="px-6 py-4 text-center">
+                      <span className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${item.status_verifikasi === 'Belum' ? 'bg-orange-50 text-orange-600 border border-orange-200' : 'bg-emerald-50 text-[#185325] border border-emerald-200'}`}>
+                        {item.status_verifikasi === 'Belum' ? 'Belum Validasi' : 'Sudah Validasi'}
+                      </span>
+                    </td>
+                    
+                    <td className="px-6 py-4 flex justify-center items-center">
+                      {item.status_verifikasi !== 'Belum' ? (
+                        <button 
+                          onClick={() => navigate(`/admin/kabid/analisis-cpi/hasil-validasi-lokasi/detail/${item.id}`, { state: { data: item } })}
+                          title="Lihat Detail Validasi"
+                          className="p-2 text-gray-500 hover:text-[#185325] hover:bg-[#EBF8F1] rounded-lg transition-colors active:scale-95"
+                        >
+                          <HiOutlineEye className="w-5 h-5 stroke-2" />
+                        </button>
+                      ) : (
+                        <button 
+                          onClick={() => navigate(`/admin/kabid/analisis-cpi/hasil-validasi-lokasi/detail/${item.id}`, { state: { data: item } })}
+                          className="px-5 py-2 bg-[#185325] hover:bg-[#123d1c] text-white text-xs font-bold rounded-full transition-all shadow-sm active:scale-95 flex items-center justify-center"
+                        >
+                          Validasi
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

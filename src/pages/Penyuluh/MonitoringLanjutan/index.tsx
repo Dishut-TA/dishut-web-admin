@@ -2,10 +2,32 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { type TabStatus, TABS } from './constants'; 
 import { HeaderAndFilter, DataTable, BottomBanner } from './components/IndexViews';
+import { getMyPenugasanAPI } from '../../../services/penugasan.service';
 
 const MonitoringLanjutanIndex: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabStatus>('Semua Program');
+  const [data, setData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  React.useEffect(() => {
+    const fetchPenugasan = async () => {
+      try {
+        setIsLoading(true);
+        const res = await getMyPenugasanAPI();
+        // Filter only monitoring
+        console.log(res);
+        
+        const monitoringData = res.data.filter((p: any) => p.jenis_kegiatan && p.jenis_kegiatan.toLowerCase().includes('monitoring'));
+        setData(monitoringData);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchPenugasan();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#f8faf9] pb-12 w-full font-sans">
@@ -31,7 +53,7 @@ const MonitoringLanjutanIndex: React.FC = () => {
         ))}
       </div>
 
-      <DataTable navigate={navigate} />
+      <DataTable navigate={navigate} data={data} isLoading={isLoading} activeTab={activeTab} />
       <BottomBanner />
 
       <style dangerouslySetInnerHTML={{__html: `

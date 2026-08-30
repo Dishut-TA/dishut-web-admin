@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useReactToPrint } from 'react-to-print';
-import { TemplateBeritaAcaraPDF } from './components/TemplateBeritaAcaraPDF';
+// import { TemplateBeritaAcaraPDF } from './components/TemplateBeritaAcaraPDF';
 import { HiOutlineChevronLeft, HiOutlinePrinter, HiOutlineCheckBadge } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 
@@ -72,7 +72,7 @@ const DetailLaporanEvaluasiStaff: React.FC = () => {
 
       </div>
 
-      <TemplateBeritaAcaraPDF ref={contentRef} />
+      {/* <TemplateBeritaAcaraPDF ref={contentRef} /> */}
 
     </div>
   );

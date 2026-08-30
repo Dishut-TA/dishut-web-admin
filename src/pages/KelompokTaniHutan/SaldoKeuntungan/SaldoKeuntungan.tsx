@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   HiEye, 
@@ -8,6 +8,8 @@ import {
   HiOutlineArrowRight 
 } from 'react-icons/hi2';
 import TransactionItem from './components/TransactionItem';
+import { getKthWalletAPI } from '@/services/investasi.service';
+import toast from 'react-hot-toast';
 
 const mockTransactions = [
   { id: 1, type: 'Transfer Bank', date: '10/09/2024 - 10.00', amount: -1000000, bank: 'Bank BCA' },
@@ -19,7 +21,23 @@ const mockTransactions = [
 const SaldoKeuntungan = () => {
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(true);
-  const totalBalance = 3750000;
+  const [totalBalance, setTotalBalance] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchWallet = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getKthWalletAPI();
+        setTotalBalance(data.saldo || 0);
+      } catch (error: any) {
+        toast.error(error.message || 'Gagal memuat saldo');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchWallet();
+  }, []);
 
   const formatRupiah = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -33,7 +51,7 @@ const SaldoKeuntungan = () => {
         <h2 className="text-primary font-bold text-lg md:text-xl mb-2">Saldo Keuntungan</h2>
         <div className="flex items-center justify-center gap-3">
           <h1 className="text-3xl font-bold text-[#9C6644] tracking-tight transition-all">
-            {isVisible ? "Rp. *******" : formatRupiah(totalBalance)}
+            {isLoading ? "Memuat..." : (isVisible ? "Rp. *******" : formatRupiah(totalBalance))}
           </h1>
           <button 
             onClick={() => setIsVisible(!isVisible)} 

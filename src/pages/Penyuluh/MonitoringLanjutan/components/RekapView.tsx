@@ -1,15 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { NavigateFunction } from 'react-router-dom';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 import { HiOutlineMapPin, HiOutlineCamera, HiOutlineArrowLeft, HiOutlinePaperAirplane, HiOutlineInformationCircle } from 'react-icons/hi2';
 import { PiPlant, PiTree, PiLeaf } from 'react-icons/pi';
 import type { ProgramData, ViewMode } from '../types';
-import { MOCK_REKAP_DATA } from '../constants';
 
 interface RekapViewProps {
   activeId: string;
   activeProgram: ProgramData;
   isTindakLanjut: boolean;
   setViewMode: (mode: ViewMode) => void;
+  setSelectedPuId: (id: any) => void;
   navigate: NavigateFunction;
 }
 
@@ -18,14 +20,45 @@ export const RekapView: React.FC<RekapViewProps> = ({
   activeProgram,
   isTindakLanjut,
   setViewMode,
+  setSelectedPuId,
   navigate
 }) => {
-  const isAllComplete = MOCK_REKAP_DATA.every(row => row.status === 'Lengkap');
-  const MOCK_REKAP_PENYULAMAN = [
-    { pu: 'PU-01', perlu: 5, sudah: 2, belum: 3, bibit: 35, status: 'Lengkap', update: '27 Mei 2026 10:30' },
-    { pu: 'PU-03', perlu: 7, sudah: 1, belum: 6, bibit: 50, status: 'Lengkap', update: '27 Mei 2026 10:40' },
-    { pu: 'PU-04', perlu: 6, sudah: 3, belum: 3, bibit: 35, status: 'Lengkap', update: '27 Mei 2026 10:45' }
-  ];
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const petakUkurs = (activeProgram?.petak_ukurs || activeProgram?.petakUkurs || []) as any[];
+  
+  // const isAllComplete = petakUkurs.every((pu: any) => {
+  //   let puTotal = 0;
+  //   let puBelum = 0;
+  //   (pu.dataTanamans || pu.data_tanamans || []).forEach((t: any) => {
+  //     puTotal += t.jumlah || 0;
+  //     const kondisi = t.kondisi_tanaman?.toLowerCase() || '';
+  //     if (!kondisi.includes('hidup') && !kondisi.includes('sehat') && !kondisi.includes('baik') && !kondisi.includes('mati') && !kondisi.includes('rusak') && !kondisi.includes('sakit')) {
+  //       puBelum += t.jumlah || 0;
+  //     }
+  //   });
+  //   return puBelum === 0 && puTotal > 0;
+  // });
+
+  // Hitung total keseluruhan
+  let totalTanaman = 0;
+  let tanamanHidup = 0;
+  let tanamanMati = 0;
+  let belumMonitoring = 0;
+
+  petakUkurs.forEach((pu: any) => {
+    (pu.dataTanamans || pu.data_tanamans || []).forEach((t: any) => {
+      totalTanaman += t.jumlah || 0;
+      const kondisi = t.kondisi_tanaman?.toLowerCase() || '';
+      if (kondisi.includes('hidup') || kondisi.includes('sehat') || kondisi.includes('baik')) {
+        tanamanHidup += t.jumlah || 0;
+      } else if (kondisi.includes('mati') || kondisi.includes('rusak') || kondisi.includes('sakit')) {
+        tanamanMati += t.jumlah || 0;
+      } else {
+        belumMonitoring += t.jumlah || 0;
+      }
+    });
+  });
 
   return (
     <div className="min-h-screen bg-[#f8faf9] text-gray-800 font-sans w-full pb-24">
@@ -46,11 +79,11 @@ export const RekapView: React.FC<RekapViewProps> = ({
           </div>
           <div>
             <p className="text-[10px] text-slate-500 font-medium mb-1">Nama Program</p>
-            <p className="text-sm font-bold text-slate-900">{activeProgram.nama}</p>
+            <p className="text-sm font-bold text-slate-900">{activeProgram.nama || activeProgram.nama_program || '-'}</p>
           </div>
           <div>
             <p className="text-[10px] text-slate-500 font-medium mb-1">Sumber Dana</p>
-            <p className="text-sm font-bold text-slate-900">APBD</p>
+            <p className="text-sm font-bold text-slate-900">{activeProgram.sumber_dana || '-'}</p>
           </div>
           <div>
             <p className="text-[10px] text-slate-500 font-medium mb-1">Periode Monitoring</p>
@@ -58,11 +91,11 @@ export const RekapView: React.FC<RekapViewProps> = ({
           </div>
           <div>
             <p className="text-[10px] text-slate-500 font-medium mb-1">Lokasi</p>
-            <p className="text-sm font-bold text-slate-900 leading-snug whitespace-pre-line">{activeProgram.lokasi}</p>
+            <p className="text-sm font-bold text-slate-900 leading-snug whitespace-pre-line">{activeProgram.lokasi || '-'}</p>
           </div>
           <div>
             <p className="text-[10px] text-slate-500 font-medium mb-1">Ketua KTH</p>
-            <p className="text-sm font-bold text-slate-900">Ahmad Fauzi</p>
+            <p className="text-sm font-bold text-slate-900">{activeProgram.kth || '-'}</p>
           </div>
           <div className="col-span-2 md:col-span-3">
             <p className="text-[10px] text-slate-500 font-medium mb-1">Tanggal Monitoring</p>
@@ -94,41 +127,43 @@ export const RekapView: React.FC<RekapViewProps> = ({
             <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mb-2 md:mb-0"><HiOutlineMapPin className="w-5 h-5" /></div>
             <div className="text-center md:text-left">
               <p className="text-[10px] text-slate-500 font-semibold mb-0.5">Total PU</p>
-              <h3 className="text-xl font-bold text-slate-900">{isTindakLanjut ? '3' : '5'}</h3>
+              <h3 className="text-xl font-bold text-slate-900">{petakUkurs.length}</h3>
             </div>
           </div>
           <div className="border border-slate-100 bg-white rounded-xl p-4 shadow-sm flex items-center justify-center flex-col md:flex-row md:justify-start gap-3">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 mb-2 md:mb-0 ${isTindakLanjut ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-600'}`}>
+            <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mb-2 md:mb-0">
               <PiPlant className="w-5 h-5" />
             </div>
             <div className="text-center md:text-left">
               <p className="text-[10px] text-slate-500 font-semibold mb-0.5">{isTindakLanjut ? 'Total Titik Perlu Disulam' : 'Total Tanaman'}</p>
-              <h3 className="text-xl font-bold text-slate-900">{isTindakLanjut ? '18' : '2.530'}</h3>
+              <h3 className="text-xl font-bold text-slate-900">{isTindakLanjut ? tanamanMati : totalTanaman}</h3>
             </div>
           </div>
           <div className="border border-slate-100 bg-white rounded-xl p-4 shadow-sm flex items-center justify-center flex-col md:flex-row md:justify-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mb-2 md:mb-0"><PiLeaf className="w-5 h-5" /></div>
-            <div className="text-center md:text-left">
-              <p className="text-[10px] text-slate-500 font-semibold mb-0.5">{isTindakLanjut ? 'Sudah Disulam' : 'Hidup'}</p>
-              <h3 className="text-xl font-bold text-slate-900">{isTindakLanjut ? '6' : '2.200'}</h3>
-            </div>
-          </div>
-          <div className="border border-slate-100 bg-white rounded-xl p-4 shadow-sm flex items-center justify-center flex-col md:flex-row md:justify-start gap-3">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 mb-2 md:mb-0 ${isTindakLanjut ? 'bg-orange-50 text-orange-500' : 'bg-red-50 text-red-500'}`}>
+            <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mb-2 md:mb-0">
               <PiTree className="w-5 h-5" />
             </div>
             <div className="text-center md:text-left">
-              <p className="text-[10px] text-slate-500 font-semibold mb-0.5">{isTindakLanjut ? 'Belum Disulam' : 'Mati'}</p>
-              <h3 className="text-xl font-bold text-slate-900">{isTindakLanjut ? '12' : '180'}</h3>
+              <p className="text-[10px] text-slate-500 font-semibold mb-0.5">{isTindakLanjut ? 'Sudah Disulam' : 'Hidup'}</p>
+              <h3 className="text-xl font-bold text-slate-900">{isTindakLanjut ? 0 : tanamanHidup}</h3>
             </div>
           </div>
           <div className="border border-slate-100 bg-white rounded-xl p-4 shadow-sm flex items-center justify-center flex-col md:flex-row md:justify-start gap-3">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 mb-2 md:mb-0 ${isTindakLanjut ? 'bg-blue-50 text-blue-500' : 'bg-orange-50 text-orange-500'}`}>
+            <div className="w-10 h-10 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center shrink-0 mb-2 md:mb-0">
+              <PiLeaf className="w-5 h-5" />
+            </div>
+            <div className="text-center md:text-left">
+              <p className="text-[10px] text-slate-500 font-semibold mb-0.5">{isTindakLanjut ? 'Belum Disulam' : 'Mati'}</p>
+              <h3 className="text-xl font-bold text-slate-900">{isTindakLanjut ? tanamanMati : tanamanMati}</h3>
+            </div>
+          </div>
+          <div className="border border-slate-100 bg-white rounded-xl p-4 shadow-sm flex items-center justify-center flex-col md:flex-row md:justify-start gap-3">
+            <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mb-2 md:mb-0">
               <PiPlant className="w-5 h-5" />
             </div>
             <div className="text-center md:text-left">
-              <p className="text-[10px] text-slate-500 font-semibold mb-0.5">{isTindakLanjut ? 'Total Bibit Sulam' : 'Perlu Perawatan'}</p>
-              <h3 className="text-xl font-bold text-slate-900">{isTindakLanjut ? '120' : '150'}</h3>
+              <p className="text-[10px] text-slate-500 font-semibold mb-0.5">{isTindakLanjut ? 'Total Bibit Sulam' : 'Perlu Perawatan / Belum Monitoring'}</p>
+              <h3 className="text-xl font-bold text-slate-900">{isTindakLanjut ? tanamanMati : belumMonitoring}</h3>
             </div>
           </div>
         </div>
@@ -154,35 +189,62 @@ export const RekapView: React.FC<RekapViewProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-              {(isTindakLanjut ? MOCK_REKAP_PENYULAMAN : MOCK_REKAP_DATA).map((row: any, idx: number) => (
-                <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                  <td className="py-3 px-4 text-left font-bold text-slate-700">{row.pu}</td>
-                  <td className={`py-3 px-4 font-bold ${isTindakLanjut ? 'text-red-500' : ''}`}>{isTindakLanjut ? row.perlu : row.total}</td>
-                  <td className="py-3 px-4 text-emerald-600 font-bold">{isTindakLanjut ? row.sudah : `${row.hidup} (${row.pctHidup}%)`}</td>
-                  <td className={`py-3 px-4 font-bold ${isTindakLanjut ? 'text-orange-500' : 'text-red-500'}`}>{isTindakLanjut ? row.belum : `${row.mati} (${row.pctMati}%)`}</td>
-                  <td className={`py-3 px-4 font-bold ${isTindakLanjut ? 'text-blue-600' : 'text-orange-500'}`}>{isTindakLanjut ? `${row.bibit} bibit` : `${row.rawat} (${row.pctRawat}%)`}</td>
-                  {!isTindakLanjut && <td className="py-3 px-4 text-slate-600 flex items-center justify-center gap-1.5"><HiOutlineCamera className="w-4 h-4"/> {row.foto}</td>}
-                  <td className="py-3 px-4">
-                    <span className="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-full font-bold text-[10px]">{row.status}</span>
-                  </td>
-                  <td className="py-3 px-4 text-slate-500">{row.update}</td>
-                  <td className="py-3 px-4 text-center">
-                    <button 
-                      onClick={() => setViewMode('table')}
-                      className="px-4 py-1.5 border border-[#008A4B] text-[#008A4B] bg-white rounded-full font-bold hover:bg-emerald-50 transition-colors text-xs cursor-pointer"
-                    >
-                      Tambah Data
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {petakUkurs.map((pu: any, idx: number) => {
+                let puTotal = 0;
+                let puHidup = 0;
+                let puMati = 0;
+                let puBelum = 0;
+                
+                (pu.dataTanamans || pu.data_tanamans || []).forEach((t: any) => {
+                  puTotal += t.jumlah || 0;
+                  const kondisi = t.kondisi_tanaman?.toLowerCase() || '';
+                  if (kondisi.includes('hidup') || kondisi.includes('sehat') || kondisi.includes('baik')) {
+                    puHidup += t.jumlah || 0;
+                  } else if (kondisi.includes('mati') || kondisi.includes('rusak') || kondisi.includes('sakit')) {
+                    puMati += t.jumlah || 0;
+                  } else {
+                    puBelum += t.jumlah || 0;
+                  }
+                });
+
+                const pctHidup = puTotal > 0 ? Math.round((puHidup / puTotal) * 100) : 0;
+                const pctMati = puTotal > 0 ? Math.round((puMati / puTotal) * 100) : 0;
+                const pctBelum = puTotal > 0 ? Math.round((puBelum / puTotal) * 100) : 0;
+                const puStatus = puBelum === 0 && puTotal > 0 ? 'Lengkap' : 'Belum Lengkap';
+
+                return (
+                  <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                    <td className="py-3 px-4 text-left font-bold text-slate-700">{pu.nama || `PU-${idx + 1}`}</td>
+                    <td className={`py-3 px-4 font-bold ${isTindakLanjut ? 'text-red-500' : ''}`}>{isTindakLanjut ? puMati : puTotal}</td>
+                    <td className="py-3 px-4 text-emerald-600 font-bold">{isTindakLanjut ? 0 : `${puHidup} (${pctHidup}%)`}</td>
+                    <td className={`py-3 px-4 font-bold ${isTindakLanjut ? 'text-orange-500' : 'text-red-500'}`}>{isTindakLanjut ? puMati : `${puMati} (${pctMati}%)`}</td>
+                    <td className={`py-3 px-4 font-bold ${isTindakLanjut ? 'text-blue-600' : 'text-orange-500'}`}>{isTindakLanjut ? `${puMati} bibit` : `${puBelum} (${pctBelum}%)`}</td>
+                    {!isTindakLanjut && <td className="py-3 px-4 text-slate-600 flex items-center justify-center gap-1.5"><HiOutlineCamera className="w-4 h-4"/> -</td>}
+                    <td className="py-3 px-4">
+                      <span className={`${puStatus === 'Lengkap' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-orange-50 text-orange-700 border-orange-100'} border px-2.5 py-1 rounded-full font-bold text-[10px]`}>{puStatus}</span>
+                    </td>
+                    <td className="py-3 px-4 text-slate-500">-</td>
+                    <td className="py-3 px-4 text-center">
+                      <button 
+                        onClick={() => {
+                          setSelectedPuId(pu.id || idx);
+                          setViewMode('table');
+                        }}
+                        className="px-4 py-1.5 border border-[#008A4B] text-[#008A4B] bg-white rounded-full font-bold hover:bg-emerald-50 transition-colors text-xs cursor-pointer"
+                      >
+                        Tambah Data
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
               <tr className="bg-slate-50/50 font-bold border-t-2 border-slate-200">
                 <td className="py-4 px-4 text-left text-blue-700">Total</td>
-                <td className={`py-4 px-4 font-bold ${isTindakLanjut ? 'text-red-500' : 'text-blue-700'}`}>{isTindakLanjut ? '18' : '2.530'}</td>
-                <td className="py-4 px-4 text-emerald-600">{isTindakLanjut ? '6' : '2.200 (87%)'}</td>
-                <td className={`py-4 px-4 font-bold ${isTindakLanjut ? 'text-orange-500' : 'text-red-500'}`}>{isTindakLanjut ? '12' : '180 (7%)'}</td>
-                <td className={`py-4 px-4 font-bold ${isTindakLanjut ? 'text-blue-600' : 'text-orange-500'}`}>{isTindakLanjut ? '120 bibit' : '150 (6%)'}</td>
-                {!isTindakLanjut && <td className="py-4 px-4 text-blue-700 flex items-center justify-center gap-1.5"><HiOutlineCamera className="w-4 h-4"/> 50</td>}
+                <td className={`py-4 px-4 font-bold ${isTindakLanjut ? 'text-red-500' : 'text-blue-700'}`}>{isTindakLanjut ? tanamanMati : totalTanaman}</td>
+                <td className="py-4 px-4 text-emerald-600">{isTindakLanjut ? 0 : `${tanamanHidup} (${totalTanaman > 0 ? Math.round((tanamanHidup / totalTanaman) * 100) : 0}%)`}</td>
+                <td className={`py-4 px-4 font-bold ${isTindakLanjut ? 'text-orange-500' : 'text-red-500'}`}>{isTindakLanjut ? tanamanMati : `${tanamanMati} (${totalTanaman > 0 ? Math.round((tanamanMati / totalTanaman) * 100) : 0}%)`}</td>
+                <td className={`py-4 px-4 font-bold ${isTindakLanjut ? 'text-blue-600' : 'text-orange-500'}`}>{isTindakLanjut ? `${tanamanMati} bibit` : `${belumMonitoring} (${totalTanaman > 0 ? Math.round((belumMonitoring / totalTanaman) * 100) : 0}%)`}</td>
+                {!isTindakLanjut && <td className="py-4 px-4 text-blue-700 flex items-center justify-center gap-1.5"><HiOutlineCamera className="w-4 h-4"/> -</td>}
                 <td className="py-4 px-4 text-slate-400">-</td>
                 <td className="py-4 px-4 text-slate-400">-</td>
                 <td className="py-4 px-4 text-slate-400">-</td>
@@ -201,12 +263,28 @@ export const RekapView: React.FC<RekapViewProps> = ({
         <button onClick={() => navigate(-1)} className="px-6 py-2.5 border border-slate-300 text-slate-700 bg-white rounded-full text-sm font-bold flex items-center gap-2 shadow-sm transition-colors cursor-pointer hover:bg-slate-50">
           <HiOutlineArrowLeft className="w-4 h-4 stroke-2" /> Kembali
         </button>
-        <button 
-          disabled={!isAllComplete} 
-          onClick={() => navigate(-1)}
-          className={`px-8 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 shadow-sm transition-colors ${isAllComplete ? 'bg-[#008A4B] text-white hover:bg-emerald-800 cursor-pointer' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+        <button
+          disabled={isSubmitting}
+          onClick={async () => {
+            try {
+              setIsSubmitting(true);
+              const token = localStorage.getItem('token');
+              const API_URL = import.meta.env.VITE_API_PELAKSANAAN_URL || 'http://127.0.0.1:8000/api';
+              await axios.post(`${API_URL}/penugasan/${activeId}/submit-monitoring`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+              });
+              toast.success(`Hasil ${isTindakLanjut ? 'Penyulaman' : 'Monitoring'} berhasil dikirim!`);
+              navigate('/penyuluh/monitoring-program');
+            } catch (err) {
+              console.error(err);
+              toast.error('Gagal mengirim hasil monitoring.');
+            } finally {
+              setIsSubmitting(false);
+            }
+          }}
+          className={`px-8 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 shadow-sm transition-colors ${!isSubmitting ? 'bg-[#008A4B] text-white hover:bg-emerald-800 cursor-pointer' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
         >
-          <HiOutlinePaperAirplane className="w-4 h-4 -rotate-45" /> Kirim Hasil {isTindakLanjut ? `Penyulaman ${activeProgram.periode}` : `Monitoring ${activeProgram.periode}`}
+          <HiOutlinePaperAirplane className="w-4 h-4 -rotate-45" /> {isSubmitting ? 'Mengirim...' : `Kirim Hasil ${isTindakLanjut ? `Penyulaman ${activeProgram.periode}` : `Monitoring ${activeProgram.periode}`}`}
         </button>
       </div>
     </div>

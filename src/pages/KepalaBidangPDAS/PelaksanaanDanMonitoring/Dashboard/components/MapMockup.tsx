@@ -1,6 +1,6 @@
 import { HiOutlineMapPin, HiOutlineSquares2X2, HiOutlineInformationCircle } from 'react-icons/hi2';
 
-export default function MapMockup() {
+export default function MapMockup({ }: { locations?: any[] }) {
   return (
     <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex flex-col">
       <div className="flex justify-between items-center mb-4">

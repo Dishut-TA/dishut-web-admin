@@ -1,23 +1,32 @@
 import React, { useState } from 'react';
 import { 
-  HiOutlineDocumentText, HiOutlineDocumentCheck, HiOutlineMapPin, HiOutlinePlus, HiXMark, HiOutlineArrowLeft, HiOutlinePaperAirplane 
+  HiOutlineDocumentText, HiOutlineDocumentCheck, HiOutlineMapPin, HiOutlinePlus, HiXMark, HiOutlineArrowLeft, HiOutlinePaperAirplane, HiOutlineBars3BottomLeft, HiOutlineCalendar, HiOutlineUser, HiOutlineInformationCircle 
 } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
-import { type ValidasiData, INFO_DATA } from '../data/mockData';
 import { PageHeader, InfoItem, RadioStatus } from './SharedComponents';
 
-export const FormValidasiView = ({ data, navigate }: { data: ValidasiData, navigate: any }) => {
+export const FormValidasiView = ({ data, navigate }: { data: any, navigate: any }) => {
   const [formData, setFormData] = useState({
-    tanggal: data.tanggalValidasi || '',
-    koordinat: data.lintang && data.bujur ? `${data.lintang}, ${data.bujur}` : '',
-    kesesuaian: data.kesesuaian || 'Sesuai dengan penugasan', 
-    kondisiUmum: data.kondisiUmum || '',
-    catatan: data.catatan || '',
-    status: data.hasilValidasi || '' 
+    tanggal: '',
+    koordinat: '',
+    kesesuaian: 'Sesuai dengan penugasan', 
+    kondisiUmum: '',
+    catatan: '',
+    status: '' 
   });
   
   const [isGettingLocation, setIsGettingLocation] = useState(false);
-  const [uploadedPhotos, setUploadedPhotos] = useState<string[]>(data.foto || []);
+  const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const INFO_DATA = [
+    { id: 1, icon: HiOutlineDocumentText, label: 'ID Penugasan', value: data.displayId || data.id },
+    { id: 2, icon: HiOutlineBars3BottomLeft, label: 'Sumber Lokasi', value: data.sumber || '-', isBadge: true, badgeClass: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
+    { id: 3, icon: HiOutlineMapPin, label: 'Lokasi Penugasan', value: data.lokasi || '-' },
+    { id: 4, icon: HiOutlineCalendar, label: 'Batas Waktu Validasi', value: data.batasWaktu || '-' },
+    { id: 5, icon: HiOutlineUser, label: 'Penyuluh', value: data.raw_data?.penyuluh?.username || 'Penyuluh' },
+    { id: 6, icon: HiOutlineInformationCircle, label: 'Status Saat Ini', value: data.status || 'Ditugaskan', isBadge: true, badgeClass: 'bg-yellow-50 text-yellow-600 border-yellow-100' },
+  ];
 
   const handleGetLocation = () => {
     if (!("geolocation" in navigator)) {
@@ -42,14 +51,49 @@ export const FormValidasiView = ({ data, navigate }: { data: ValidasiData, navig
     );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.koordinat || !formData.kondisiUmum || !formData.status || !formData.tanggal) {
       toast.error('Mohon lengkapi semua kolom yang wajib diisi (*)');
       return;
     }
-    toast.success('Data validasi lapangan berhasil dikirim!');
-    navigate(-1);
+    
+    setIsSubmitting(true);
+    const API_URL = import.meta.env.VITE_API_PELAKSANAAN_URL || 'http://127.0.0.1:8000/api';
+    const token = localStorage.getItem("token");
+    let userName = data.raw_data?.penyuluh?.username || 'Penyuluh';
+
+    const payload = {
+      zone_id: data.zone_id,
+      nama_lokasi: data.lokasi,
+      nama_penyuluh: userName,
+      kondisi_lahan: formData.kondisiUmum,
+      titik_koordinat_gps: formData.koordinat,
+      catatan_peninjauan: formData.catatan,
+      kendala_lapangan: formData.status === 'Tidak Sesuai' ? formData.kesesuaian : ''
+    };
+
+    try {
+      const res = await fetch(`${API_URL}/field-validations`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      if (!res.ok) throw new Error('Gagal menyimpan data');
+      
+      toast.success('Data validasi lapangan berhasil dikirim!');
+      navigate('/admin/penyuluh/validasi-lokasi');
+    } catch(err) {
+      console.error(err);
+      toast.error('Gagal mengirim data validasi lapangan');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const removePhoto = (index: number) => setUploadedPhotos(prev => prev.filter((_, i) => i !== index));
@@ -150,8 +194,8 @@ export const FormValidasiView = ({ data, navigate }: { data: ValidasiData, navig
               <button className="w-full sm:w-auto px-5 py-2.5 bg-white border border-slate-300 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-50 flex items-center justify-center gap-2 shadow-sm transition-colors">
                 <HiOutlineDocumentText className="w-4 h-4" /> Simpan Draft
               </button>
-              <button type="submit" form="validasi-form" className="w-full sm:w-auto px-6 py-2.5 bg-[#008A4B] text-white text-xs font-bold rounded-lg hover:bg-emerald-800 flex items-center justify-center gap-2 shadow-sm transition-colors">
-                <HiOutlinePaperAirplane className="w-4 h-4 transform -rotate-45 mb-1" /> Kirim Hasil Validasi
+              <button type="submit" form="validasi-form" disabled={isSubmitting} className="w-full sm:w-auto px-6 py-2.5 bg-[#008A4B] text-white text-xs font-bold rounded-lg hover:bg-emerald-800 flex items-center justify-center gap-2 shadow-sm transition-colors disabled:opacity-70">
+                <HiOutlinePaperAirplane className="w-4 h-4 transform -rotate-45 mb-1" /> {isSubmitting ? 'Mengirim...' : 'Kirim Hasil Validasi'}
               </button>
             </div>
           </div>

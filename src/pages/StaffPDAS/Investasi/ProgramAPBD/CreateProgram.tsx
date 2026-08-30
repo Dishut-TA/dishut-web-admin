@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { HiOutlineChevronLeft, HiOutlinePlusCircle } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 import { createProgramApbdAPI } from '@/services/program-apbd.service';
+import { rehabilitasiService } from '@/services/rehabilitasi.service';
 
-const API_URL = "http://127.0.0.1:8000/api";
 
 const CreateProgramAPBD: React.FC = () => {
   const navigate = useNavigate();
@@ -32,14 +32,9 @@ const CreateProgramAPBD: React.FC = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const headers: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
-
-        const res = await fetch(`${API_URL}/projects?status=completed`, { headers });
-        const json = await res.json();
-        
-        const projList = json.payload || json.data || [];
-        setProjects(projList);
+        const res = await rehabilitasiService.getValidZones();
+        const validZones = (res.data || []).filter((z: any) => z.status_kelayakan === 'Layak');
+        setProjects(validZones);
       } catch (error) {
         toast.error('Gagal memuat daftar project lahan kritis.');
       } finally {
@@ -53,27 +48,24 @@ const CreateProgramAPBD: React.FC = () => {
     const selectedId = e.target.value;
     setSelectedProjectId(selectedId);
 
-    const foundProject = projects.find(p => String(p.id) === String(selectedId));
+    const foundZone = projects.find(p => String(p.id) === String(selectedId));
     
-    if (foundProject && foundProject.hasil) {
-      const firstZone = foundProject.hasil.pratinjau_tabel?.[0];
-      const geojsonProperties = foundProject.hasil.diagnostik?.geojson_first_properties;
-      const luasLahan = geojsonProperties?.luas_ha || 0;
-      const desa = firstZone?.desa_kelurahan || firstZone?.desa || '';
-      const kabupaten = firstZone?.kota_kabupaten || firstZone?.kabupaten || '';
+    if (foundZone) {
+      const validation = foundZone.field_validations?.length > 0 ? foundZone.field_validations[0] : null;
+      const lokasi = validation?.nama_lokasi || foundZone.result?.project?.project_code || 'Lokasi tidak diketahui';
       
-      setLokasiWilayah(desa && kabupaten ? `${desa}, ${kabupaten}` : foundProject.nama_project);
+      setLokasiWilayah(lokasi);
       
       setForm(prev => ({
         ...prev,
-        rekomendasi: firstZone?.rekomendasi_intervensi || 'Belum ada rekomendasi',
-        luasLahan: luasLahan, 
-        namaKth: firstZone?.nama_kelompok || 'Belum ada data KTH',
-        ketuaKth: firstZone?.ketua_kelompok || '-',
-        kth_id: firstZone?.kth_id || '1', 
-        namaProgram: foundProject.nama_project ? `Rehabilitasi Lahan Kritis - ${foundProject.nama_project}` : '',
+        rekomendasi: foundZone.rekomendasi_intervensi || 'Belum ada rekomendasi',
+        luasLahan: foundZone.luas_ha || 0, 
+        namaKth: foundZone.nama_kelompok || 'Belum ada data KTH',
+        ketuaKth: foundZone.ketua_kelompok || '-',
+        kth_id: foundZone.kth_id || '1', 
+        namaProgram: foundZone.result?.project?.nama_project ? `Rehabilitasi Lahan Kritis - ${foundZone.result?.project?.nama_project}` : `Program APBD - ${lokasi}`,
         jumlah_bibit: '', // Reset target bibit
-        pilihIntervensi: firstZone?.rekomendasi_intervensi?.split(',')[0] || ''
+        pilihIntervensi: foundZone.rekomendasi_intervensi?.split(',')[0] || ''
       }));
     } else {
       setLokasiWilayah('');
@@ -99,11 +91,12 @@ const CreateProgramAPBD: React.FC = () => {
     const payload = {
       kth_id: form.kth_id,
       nama_program: form.namaProgram,
-      target_bibit: form.jumlah_bibit, // Dikirim ke API
+      jumlah_bibit: form.jumlah_bibit, // Fix: use jumlah_bibit
       deskripsi_rencana: form.deskripsi,
       anggaran: form.anggaran,
       target_luas_lahan: form.luasLahan,
       pilihan_intervensi: form.pilihIntervensi,
+      analysis_result_zone_id: selectedProjectId // Keep track of the selected zone
     };
 
     try {
@@ -150,14 +143,16 @@ const CreateProgramAPBD: React.FC = () => {
               disabled={isFetchingProjects}
               className="w-full bg-white border border-gray-400 rounded-full px-4 py-3 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#185325] focus:border-[#185325] transition-all cursor-pointer shadow-sm appearance-none disabled:bg-gray-50"
             >
-              <option value="" disabled>
-                {isFetchingProjects ? 'Memuat lokasi...' : '-- Pilih Lokasi Prioritas --'}
-              </option>
-              {projects.map((proj) => (
-                <option key={proj.id} value={proj.id}>
-                  {proj.nama_project || proj.kode_project} ({proj.status})
-                </option>
-              ))}
+              <option value="">-- Pilih Lokasi Prioritas --</option>
+              {projects.map((proj) => {
+                const validation = proj.field_validations?.length > 0 ? proj.field_validations[0] : null;
+                const lokasi = validation?.nama_lokasi || proj.result?.project?.project_code || 'Lokasi tidak diketahui';
+                return (
+                  <option key={proj.id} value={proj.id}>
+                    {lokasi}
+                  </option>
+                );
+              })}
             </select>
             {lokasiWilayah && <p className="text-[11px] text-gray-500 mt-2 ml-2">Area Terpilih: {lokasiWilayah}</p>}
           </div>

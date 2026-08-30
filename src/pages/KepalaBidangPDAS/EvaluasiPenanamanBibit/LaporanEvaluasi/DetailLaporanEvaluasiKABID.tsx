@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useReactToPrint } from 'react-to-print';
 import { HiOutlineChevronLeft, HiOutlinePrinter, HiOutlineCheckBadge } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
-import { TemplateBeritaAcaraPDF } from '@/pages/StaffPDAS/EvaluasiPenanamanBibit/LaporanEvaluasiStaffPDAS/components/TemplateBeritaAcaraPDF';
+import { TemplateBeritaAcaraPDF } from './components/TemplateBeritaAcaraPDF';
 
 const DetailLaporanEvaluasiKABID: React.FC = () => {
   const navigate = useNavigate();

@@ -6,7 +6,7 @@ import {
 
 export type ViewMode = 'rekap' | 'table' | 'input' | 'edit';
 export type MonitoringStatus = 'Siap Monitoring' | 'Berjalan' | 'Menunggu Evaluasi' | 'Tindak Lanjut' | 'Selesai' | 'Dihentikan';
-export type TabStatus = 'Semua Program' | 'Dalam Monitoring' | 'Menunggu Evaluasi' | 'Tindak Lanjut' | 'Selesai' | 'Dihentikan';
+export type TabStatus = 'Semua Program' | 'Siap Monitoring' | 'Dalam Monitoring' | 'Menunggu Evaluasi' | 'Tindak Lanjut' | 'Monitoring Selesai' | 'Dihentikan';
 
 export interface MonitoringRow {
   id: string;
@@ -92,10 +92,11 @@ export const MOCK_DATA: ProgramMonitoring[] = [
 
 export const TABS: { label: TabStatus; icon: React.ReactNode; activeColor: string; inactiveIconColor: string }[] = [
   { label: 'Semua Program', icon: <HiOutlineDocumentText className="w-4 h-4" />, activeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200', inactiveIconColor: 'text-emerald-600' },
+  { label: 'Siap Monitoring', icon: <HiOutlinePlayCircle className="w-4 h-4" />, activeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200', inactiveIconColor: 'text-emerald-500' },
   { label: 'Dalam Monitoring', icon: <HiOutlinePlayCircle className="w-4 h-4" />, activeColor: 'bg-blue-50 text-blue-700 border-blue-200', inactiveIconColor: 'text-blue-500' },
   { label: 'Menunggu Evaluasi', icon: <HiOutlineClock className="w-4 h-4" />, activeColor: 'bg-orange-50 text-orange-700 border-orange-200', inactiveIconColor: 'text-orange-500' },
   { label: 'Tindak Lanjut', icon: <HiOutlineExclamationCircle className="w-4 h-4" />, activeColor: 'bg-purple-50 text-purple-700 border-purple-200', inactiveIconColor: 'text-purple-500' },
-  { label: 'Selesai', icon: <HiOutlineCheckCircle className="w-4 h-4" />, activeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200', inactiveIconColor: 'text-emerald-500' },
+  { label: 'Monitoring Selesai', icon: <HiOutlineCheckCircle className="w-4 h-4" />, activeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200', inactiveIconColor: 'text-emerald-500' },
   { label: 'Dihentikan', icon: <HiOutlineXCircle className="w-4 h-4" />, activeColor: 'bg-gray-100 text-gray-700 border-gray-300', inactiveIconColor: 'text-gray-500' },
 ];
 

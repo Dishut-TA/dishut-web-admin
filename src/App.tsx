@@ -490,6 +490,7 @@ function App() {
                   <Route path="pelaksanaan-penanaman/create/:id" element={<InputProgresPage />} />
                   <Route path="pelaksanaan-penanaman/mulai/:id" element={<MulaiKegiatan />} />
                   <Route path="pelaksanaan-penanaman/input-data" element={<PelaksanaanWizard />} />
+                  <Route path="pelaksanaan-penanaman/input-data/:id" element={<PelaksanaanWizard />} />
                   <Route path="monitoring-program" element={<MonitoringProgramRehabilitasi />} />
                   <Route path="monitoring-program/detail/:id" element={<DetailMonitoringProgram />} />
                   <Route path="monitoring-lanjutan" element={<MonitoringLanjutanIndex />} />

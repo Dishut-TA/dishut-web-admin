@@ -1,6 +1,6 @@
 import type { CreateProgramInvestasiPayload, ProgramInvestasi } from "@/utils/interface";
 
-const API_URL = import.meta.env.VITE_API_EXAMPLE;
+const API_URL = import.meta.env.VITE_API_INVEST_URL;
 
 export const getKthProgramsAPI = async (): Promise<ProgramInvestasi[]> => {
   const token = localStorage.getItem('token');
@@ -77,5 +77,87 @@ export const verifyProgramBupmAPI = async (id: string, payload: { status: string
     throw new Error(result.message || 'Gagal memverifikasi program investasi.');
   }
 
+  return result.payload;
+};
+
+export const getKthWalletAPI = async () => {
+  const token = localStorage.getItem('token');
+  const userId = localStorage.getItem('user_id') || '1';
+
+  const response = await fetch(`${API_URL}/kth/wallet`, {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+      'X-User-Id': userId,
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    },
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || 'Gagal memuat saldo dompet KTH.');
+  }
+
+  return result.payload;
+};
+
+export const getLaporanProyekByIdAPI = async (id: string) => {
+  const token = localStorage.getItem('token');
+  const userId = localStorage.getItem('user_id') || '1';
+
+  const response = await fetch(`${API_URL}/kth/laporan-proyek/${id}`, {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+      'X-User-Id': userId,
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    },
+  });
+
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.message || 'Gagal memuat detail laporan proyek.');
+  
+  return result.payload;
+};
+
+export const getLaporanProyekAPI = async () => {
+  const token = localStorage.getItem('token');
+  const userId = localStorage.getItem('user_id') || '1';
+
+  const response = await fetch(`${API_URL}/kth/laporan-proyek`, {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+      'X-User-Id': userId,
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    },
+  });
+
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.message || 'Gagal memuat laporan proyek.');
+  
+  if (Array.isArray(result.payload)) return result.payload;
+  if (result.payload && Array.isArray(result.payload.data)) return result.payload.data;
+  return [];
+};
+
+export const createLaporanProyekAPI = async (payload: any) => {
+  const token = localStorage.getItem('token');
+  const userId = localStorage.getItem('user_id') || '1';
+
+  const response = await fetch(`${API_URL}/kth/laporan-proyek`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'X-User-Id': userId,
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.message || 'Gagal membuat laporan proyek.');
   return result.payload;
 };

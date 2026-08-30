@@ -21,6 +21,14 @@ export interface ProgramData {
   nama: string;
   lokasi: string;
   periode: string;
+  sumber_dana: string;
+  petak_ukurs: string;
+  petakUkurs: string;
+  kth: string;
+  penyuluh: {
+    name: string;
+  }
+  nama_program: string;
 }
 
 export interface RekapRow {

@@ -32,16 +32,18 @@ const Step4: React.FC<StepProps> = ({ data, onPrev }) => {
       const mappedDokumens = Object.values(data.dokumen)
   .filter((file) => file !== null)
   .map((file: any) => ({
-    tipe_dokumen: "PROPOSAL_BISNIS", 
+    tipe_dokumen: "Proposal", 
     file_url: file ? URL.createObjectURL(file) : "https://example.com/default-doc.pdf"
   }));
 
       const payload = {
+        gambar: data.coverFile ? URL.createObjectURL(data.coverFile) : "https://example.com/cover.jpg",
+        nama_kth: data.namaKTH || "Nama KTH",
         nama_program: data.namaInvestasi,
-        kategori_usaha: "Agroforestri",
+        kategori_usaha: "Kehutanan",
         target_dana: Number(data.targetFunding.replace(/\D/g, '')) || 0,
         persentase_keuntungan: parseFloat(data.persentase) || 0,
-        periode_kontrak_bulan: 24,
+        periode_kontrak_bulan: 12,
         batas_waktu_pengumpulan: data.batasWaktu,
         deskripsi: data.deskripsi,
         milestones: data.milestones.map(m => ({
@@ -50,7 +52,7 @@ const Step4: React.FC<StepProps> = ({ data, onPrev }) => {
           target_tanggal: m.batas
         })),
         dokumens: mappedDokumens.length > 0 ? mappedDokumens : [
-          { tipe_dokumen: "PROPOSAL_BISNIS", file_url: "https://example.com/proposal.pdf" }
+          { tipe_dokumen: "Proposal", file_url: "https://example.com/proposal.pdf" }
         ]
       };
 

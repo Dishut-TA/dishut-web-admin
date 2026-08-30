@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { TABLE_BERJALAN_DATA } from '../data/mockData';
 
-export default function TableBerjalan() {
+export default function TableBerjalan({ }: { programs?: any[] }) {
   const navigate = useNavigate();
 
   return (

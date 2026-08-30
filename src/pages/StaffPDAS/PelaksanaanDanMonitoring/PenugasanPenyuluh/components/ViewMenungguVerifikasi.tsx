@@ -244,7 +244,7 @@ const FormHasilPemeriksaan = ({ navigate }: { navigate: any }) => {
         <div className="md:col-span-3 h-full">
           <div className="h-full bg-[#f0fdf4] border border-[#dcfce7] rounded-xl p-6 flex flex-col items-center justify-center text-center">
             <p className="text-[10px] text-gray-500 mb-2">Data siap disetujui sebagai</p>
-            <h3 className="text-xl font-bold text-emerald-700 mb-4">PO SELESAI</h3>
+            <h3 className="text-xl font-bold text-emerald-700 mb-4">P0 SELESAI</h3>
             <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center border border-emerald-100 shadow-sm"><HiCheck className="w-6 h-6 text-emerald-300 stroke-3" /></div>
           </div>
         </div>

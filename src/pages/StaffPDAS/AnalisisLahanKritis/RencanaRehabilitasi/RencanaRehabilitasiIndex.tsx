@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   HiOutlineMagnifyingGlass, 
@@ -9,36 +9,57 @@ import {
   HiOutlineEye,
   HiOutlinePencilSquare 
 } from 'react-icons/hi2';
-
-const MOCK_DATA = [
-  { id: '1', desa: 'Cikole', kec: 'Lembang', pu: 100, luas: 10.00, intervensi: 'Rehabilitasi Vegetatif', status: 'Layak' },
-  { id: '2', desa: 'Cibodas', kec: 'Lembang', pu: 80, luas: 8.00, intervensi: 'Rehabilitasi Vegetatif', status: 'Layak' },
-  { id: '3', desa: 'Wangunsari', kec: 'Lembang', pu: 120, luas: 12.00, intervensi: 'Rehabilitasi Vegetatif', status: 'Menunggu' },
-  { id: '4', desa: 'Suntenjaya', kec: 'Lembang', pu: 60, luas: 6.00, intervensi: 'Agroforestri', status: 'Menunggu' },
-];
+import { rehabilitasiService } from '@/services/rehabilitasi.service';
+import toast from 'react-hot-toast';
 
 const RencanaRehabilitasiIndex: React.FC = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('Semua');
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredData = MOCK_DATA.filter(item => {
-    const matchSearch = item.desa.toLowerCase().includes(searchTerm.toLowerCase()) || item.kec.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchStatus = statusFilter === 'Semua' || item.status === statusFilter;
+  const fetchZones = async () => {
+    try {
+      setLoading(true);
+      const res = await rehabilitasiService.getValidZones();
+      setData(res.data || []);
+    } catch (err: any) {
+      toast.error('Gagal memuat data zona: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchZones();
+  }, []);
+
+  const filteredData = data.filter(item => {
+    const desa = item.result?.project?.project_code || 'Unknown';
+    const matchSearch = desa.toLowerCase().includes(searchTerm.toLowerCase());
+    // Di sini asumsi data 'Valid' = Menunggu untuk dilengkapinya.
+    // Jika 'Layak', maka sudah selesai. 
+    // Data yang ditarik dari getValidZones() saat ini hanya mengambil yang 'Valid'
+    // Tapi kita bisa saja menyesuaikan filter.
+    const itemStatus = item.status_kelayakan === 'Valid' ? 'Menunggu' : item.status_kelayakan;
+    const matchStatus = statusFilter === 'Semua' || itemStatus === statusFilter;
     return matchSearch && matchStatus;
   });
 
   const getStatusBadge = (status: string) => {
+    const displayStatus = status === 'Valid' ? 'Menunggu' : status;
     const baseStyle = "px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap inline-block";
-    switch (status) {
+    switch (displayStatus) {
       case 'Layak': 
-        return <span className={`${baseStyle} bg-emerald-100 text-emerald-700`}>{status}</span>;
+        return <span className={`${baseStyle} bg-emerald-100 text-emerald-700`}>{displayStatus}</span>;
       case 'Tidak Layak': 
-        return <span className={`${baseStyle} bg-red-100 text-red-700`}>{status}</span>;
+      case 'Tidak Valid':
+        return <span className={`${baseStyle} bg-red-100 text-red-700`}>{displayStatus}</span>;
       case 'Menunggu': 
-        return <span className={`${baseStyle} bg-amber-100 text-amber-700`}>{status}</span>;
+        return <span className={`${baseStyle} bg-amber-100 text-amber-700`}>{displayStatus}</span>;
       default: 
-        return <span className={`${baseStyle} bg-gray-100 text-gray-700`}>{status}</span>;
+        return <span className={`${baseStyle} bg-gray-100 text-gray-700`}>{displayStatus}</span>;
     }
   };
 
@@ -56,7 +77,7 @@ const RencanaRehabilitasiIndex: React.FC = () => {
             <span className="text-[10px] font-bold uppercase tracking-wider">Total Lokasi</span>
           </div>
           <div className="flex items-end justify-between">
-            <h2 className="text-3xl font-bold text-gray-800">32</h2>
+            <h2 className="text-3xl font-bold text-gray-800">{data.length}</h2>
           </div>
         </div>
         
@@ -66,7 +87,7 @@ const RencanaRehabilitasiIndex: React.FC = () => {
             <span className="text-[10px] font-bold uppercase tracking-wider">Layak</span>
           </div>
           <div className="flex items-end justify-between">
-            <h2 className="text-3xl font-bold text-gray-800">18</h2>
+            <h2 className="text-3xl font-bold text-gray-800">{data.filter(d => d.status_kelayakan === 'Layak').length}</h2>
             <span className="text-xs text-emerald-600 font-bold mb-1 bg-emerald-50 px-2 py-0.5 rounded">Lokasi</span>
           </div>
         </div>
@@ -77,7 +98,7 @@ const RencanaRehabilitasiIndex: React.FC = () => {
             <span className="text-[10px] font-bold uppercase tracking-wider">Tidak Layak</span>
           </div>
           <div className="flex items-end justify-between">
-            <h2 className="text-3xl font-bold text-gray-800">7</h2>
+            <h2 className="text-3xl font-bold text-gray-800">{data.filter(d => d.status_kelayakan === 'Tidak Layak').length}</h2>
             <span className="text-xs text-red-600 font-bold mb-1 bg-red-50 px-2 py-0.5 rounded">Lokasi</span>
           </div>
         </div>
@@ -88,7 +109,7 @@ const RencanaRehabilitasiIndex: React.FC = () => {
             <span className="text-[10px] font-bold uppercase tracking-wider">Menunggu</span>
           </div>
           <div className="flex items-end justify-between">
-            <h2 className="text-3xl font-bold text-gray-800">7</h2>
+            <h2 className="text-3xl font-bold text-gray-800">{data.filter(d => d.status_kelayakan === 'Valid').length}</h2>
             <span className="text-xs text-amber-600 font-bold mb-1 bg-amber-50 px-2 py-0.5 rounded">Lokasi</span>
           </div>
         </div>
@@ -124,40 +145,53 @@ const RencanaRehabilitasiIndex: React.FC = () => {
           <thead className="bg-[#DCECE0] text-[#3A4D3F] text-[11px] uppercase tracking-wider font-bold">
             <tr>
               <th className="px-6 py-4 rounded-tl-xl whitespace-nowrap">Lokasi</th>
-              <th className="px-6 py-4 whitespace-nowrap">Petak Ukur</th>
+              <th className="px-6 py-4 whitespace-nowrap">Petak Ukur & Luas</th>
               <th className="px-6 py-4 whitespace-nowrap">Intervensi</th>
               <th className="px-6 py-4 whitespace-nowrap">Status Kelayakan</th>
               <th className="px-6 py-4 rounded-tr-xl whitespace-nowrap text-center">Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 bg-white">
-            {filteredData.length > 0 ? (
+            {loading ? (
+              <tr>
+                <td colSpan={5} className="px-6 py-12 text-center text-gray-500 rounded-b-xl">
+                  Memuat data...
+                </td>
+              </tr>
+            ) : filteredData.length > 0 ? (
               filteredData.map((row, index) => {
                 const isLast = index === filteredData.length - 1;
+                // Coba ambil field validation terkait untuk nama lokasi
+                const validation = row.field_validations?.length > 0 ? row.field_validations[0] : null;
+                const lokasi = validation?.nama_lokasi || row.result?.project?.project_code || 'Lokasi tidak diketahui';
+                const intervensi = row.rekomendasi_intervensi || '-';
+                const luas = row.luas_ha || 0;
+                const pu = row.jumlah_pu || 0;
+
                 return (
                   <tr key={row.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className={`px-6 py-4 ${isLast ? 'rounded-bl-xl' : ''}`}>
-                      <p className="font-bold text-gray-800 text-sm">{row.desa}</p>
-                      <p className="text-gray-500 text-xs mt-0.5">{row.kec}</p>
+                      <p className="font-bold text-gray-800 text-sm">{lokasi}</p>
+                      <p className="text-gray-500 text-xs mt-0.5">Analisis CPI</p>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="font-bold text-gray-800 text-sm">{row.pu} PU</p>
-                      <p className="text-gray-500 text-xs mt-0.5">{row.luas.toFixed(2).replace('.', ',')} Ha</p>
+                      <p className="font-bold text-gray-800 text-sm">{pu} PU</p>
+                      <p className="text-gray-500 text-xs mt-0.5">{luas} Ha</p>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-700 font-medium">{row.intervensi}</td>
-                    <td className="px-6 py-4">{getStatusBadge(row.status)}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700 font-medium">{intervensi}</td>
+                    <td className="px-6 py-4">{getStatusBadge(row.status_kelayakan)}</td>
                     <td className={`px-6 py-4 flex justify-center ${isLast ? 'rounded-br-xl' : ''}`}>
                       {/* KONDISIONAL TOMBOL BERDASARKAN STATUS */}
-                      {row.status === 'Menunggu' ? (
+                      {row.status_kelayakan === 'Valid' ? (
                         <button 
-                          onClick={() => navigate(`/admin/staff/analisis-cpi/rencana/detail/${row.id}`)}
+                          onClick={() => navigate(`/admin/staff/analisis-cpi/rencana/detail/${row.id}`, { state: { data: row } })}
                           className="inline-flex items-center justify-center gap-1.5 px-4 py-1.5 bg-[#185325] hover:bg-[#123d1c] text-white rounded-full text-[11px] font-bold transition-all shadow-sm cursor-pointer active:scale-95"
                         >
                           <HiOutlinePencilSquare className="w-3.5 h-3.5" /> Lengkapi
                         </button>
                       ) : (
                         <button 
-                          onClick={() => navigate(`/admin/staff/analisis-cpi/rencana/detail/${row.id}`)}
+                          onClick={() => navigate(`/admin/staff/analisis-cpi/rencana/detail/${row.id}`, { state: { data: row } })}
                           title="Lihat Detail"
                           className="inline-flex items-center justify-center p-2 border border-gray-300 text-gray-700 bg-white rounded-full hover:bg-gray-50 hover:text-[#185325] hover:border-[#185325] transition-all shadow-sm cursor-pointer"
                         >

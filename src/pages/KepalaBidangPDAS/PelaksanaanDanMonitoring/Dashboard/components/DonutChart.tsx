@@ -1,4 +1,4 @@
-export default function DonutChart() {
+export default function DonutChart({ }: { stats?: any }) {
   return (
     <div className="lg:col-span-1 bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex flex-col">
       <h3 className="font-bold text-gray-900 mb-6 text-sm">Rekapitulasi Berdasarkan Sumber Program</h3>

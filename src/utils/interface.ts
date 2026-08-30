@@ -252,6 +252,8 @@ export interface ProgramInvestasi {
 }
 
 export interface CreateProgramInvestasiPayload {
+  gambar?: string;
+  nama_kth?: string;
   nama_program: string;
   kategori_usaha: string;
   target_dana: number;

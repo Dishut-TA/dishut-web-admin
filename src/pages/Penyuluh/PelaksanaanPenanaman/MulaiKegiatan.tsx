@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { 
   HiOutlineArrowLeft,
   HiOutlineDocumentText,
@@ -23,37 +23,29 @@ import {
 } from 'react-icons/hi2';
 
 // ==========================================
-// 1. MOCK DATA 
+// 1. DATA TYPES 
 // ==========================================
-const penugasanData = {
-  status: 'Ditugaskan',
-  idPenugasan: 'TGS-2026-018',
-  idProgram: 'PRG-2026-0021',
-  sumberLokasi: 'Analisis CPI',
-  periode: '18 Jun 2026 - 03 Jul 2026',
-  program: 'Rehabilitasi DAS Cimanuk',
-  kth: 'KTH Lestari',
-  rencanaKegiatan: 'Penanaman Mangrove',
-  jenisTanaman: 'Mangrove Rhizophora',
-  lokasi: 'Desa Mandalakasih,\nKec. Pameungpeuk,\nKab. Garut',
-  targetBibit: '600 bibit',
-  totalPu: 12,
-  targetPerPu: '50 bibit',
-  penyuluh: 'Rina Herlina, S.Hut.',
-  luasArea: '2,40 Ha',
-  estimasiPerPu: '±50 bibit',
-  
-  validasi: {
-    hasil: 'Sesuai',
-    tanggal: '18 Jun 2026',
-    koordinat: '-7.2145678, 107.8501234',
-    kondisiUmum: 'Lokasi sesuai untuk kegiatan penanaman. Akses menuju lokasi tergolong memadai.',
-    catatan: 'Area dinyatakan layak untuk pelaksanaan kegiatan.',
-    foto: ['/api/placeholder/400/300', '/api/placeholder/400/300', '/api/placeholder/400/300']
-  }
-};
+export interface PenugasanDataType {
+  id: string;
+  status: string;
+  idPenugasan: string;
+  idProgram: string;
+  sumberLokasi: string;
+  periode: string;
+  program: string;
+  kth: string;
+  rencanaKegiatan: string;
+  jenisTanaman: string;
+  lokasi: string;
+  targetBibit: string;
+  totalPu: number;
+  targetPerPu: string;
+  penyuluh: string;
+  luasArea: string;
+  estimasiPerPu: string;
+}
 
-const Step1DetailPenugasan = ({ onNext, navigate }: { onNext: () => void, navigate: any }) => (
+const Step1DetailPenugasan = ({ penugasanData, onNext, navigate }: { penugasanData: PenugasanDataType, onNext: () => void, navigate: any }) => (
   <div className="flex flex-col gap-6 w-full mx-auto pb-24 bg-[#f8faf9] min-h-screen font-sans">
     {/* Header & Breadcrumb */}
     <div>
@@ -136,7 +128,15 @@ const Step1DetailPenugasan = ({ onNext, navigate }: { onNext: () => void, naviga
         <button onClick={() => navigate(-1)} className="w-full px-6 py-2.5 bg-white border border-gray-300 text-gray-700 text-sm font-bold rounded-full hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
           <HiOutlineArrowLeft className="w-4 h-4" /> Kembali ke Daftar
         </button>
-        <button onClick={onNext} className="w-full px-8 py-2.5 bg-[#168a53] text-white text-sm font-bold rounded-full hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2">
+        <button onClick={() => {
+          // Call API to update status to 'Berjalan'
+          const token = localStorage.getItem('token');
+          const API_URL = import.meta.env.VITE_API_PELAKSANAAN_URL || 'http://127.0.0.1:8000/api';
+          fetch(`${API_URL}/penugasan/${penugasanData.id}/mulai`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+          }).then(() => onNext());
+        }} className="w-full px-8 py-2.5 bg-[#168a53] text-white text-sm font-bold rounded-full hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2">
           <HiOutlinePlayCircle className="w-5 h-5" /> Mulai Pelaksanaan
         </button>
       </div>
@@ -147,15 +147,66 @@ const Step1DetailPenugasan = ({ onNext, navigate }: { onNext: () => void, naviga
 // ==========================================
 // 3. KOMPONEN: LANGKAH 2 (Poligon PU)
 // ==========================================
-const Step2PoligonPU = ({ onNext, onPrev }: { onNext: () => void, onPrev: () => void, navigate: any }) => {
+const Step2PoligonPU = ({ penugasanData, onNext, onPrev }: { penugasanData: PenugasanDataType, onNext: () => void, onPrev: () => void, navigate: any }) => {
   const [isDrawingMode, setIsDrawingMode] = useState(false);
+  const [puList, setPuList] = useState<any[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Helper untuk rendering list PU
-  const puList = Array.from({ length: penugasanData.totalPu }, (_, i) => ({
-    id: i + 1,
-    status: isDrawingMode && i === 0 ? 'Sedang Dibuat' : 'Belum Dibuat',
-    luas: isDrawingMode && i === 0 ? '0,18 ha' : '-',
-  }));
+  useEffect(() => {
+    const fetchPU = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const API_URL = import.meta.env.VITE_API_PELAKSANAAN_URL || 'http://127.0.0.1:8000/api';
+        const res = await fetch(`${API_URL}/penugasan/${penugasanData.id}/petak-ukur`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const json = await res.json();
+        
+        const data = json.data || [];
+        
+        // Merge fetched data with placeholders
+        const updatedList = Array.from({ length: penugasanData.totalPu }, (_, i) => {
+          if (data[i]) {
+            return { id: i + 1, status: data[i].status, luas: `${data[i].luas} ha` };
+          }
+          return {
+            id: i + 1,
+            status: isDrawingMode && i === data.length ? 'Sedang Dibuat' : 'Belum Dibuat',
+            luas: isDrawingMode && i === data.length ? '0.18 ha' : '-',
+          };
+        });
+        setPuList(updatedList);
+      } catch (e) { console.error(e); }
+    };
+    fetchPU();
+  }, [penugasanData.id, isDrawingMode]);
+
+  const handleSavePU = async () => {
+    setIsSaving(true);
+    try {
+      const token = localStorage.getItem('token');
+      const API_URL = import.meta.env.VITE_API_PELAKSANAAN_URL || 'http://127.0.0.1:8000/api';
+      const createdPuCount = puList.filter(p => p.status === 'Selesai').length;
+      await fetch(`${API_URL}/petak-ukur`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({
+          penugasan_id: penugasanData.id,
+          nama: `PU ${createdPuCount + 1}`,
+          luas: 0.18,
+          polygon_data: [
+            {"lat": -7.214, "lng": 107.850},
+            {"lat": -7.215, "lng": 107.850}
+          ]
+        })
+      });
+      setIsDrawingMode(false);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="flex flex-col w-full mx-auto pb-24 bg-[#f8faf9] min-h-screen font-sans">
@@ -339,8 +390,8 @@ const Step2PoligonPU = ({ onNext, onPrev }: { onNext: () => void, onPrev: () => 
                      <button onClick={() => setIsDrawingMode(false)} className="bg-white px-4 py-2 rounded-lg shadow font-bold text-xs text-gray-700 hover:bg-gray-50 border border-gray-200">
                        Batalkan PU
                      </button>
-                     <button className="bg-[#168a53] text-white px-4 py-2 rounded-lg shadow font-bold text-xs hover:bg-emerald-700">
-                       Simpan PU 1
+                     <button onClick={handleSavePU} disabled={isSaving} className="bg-[#168a53] text-white px-4 py-2 rounded-lg shadow font-bold text-xs hover:bg-emerald-700 disabled:opacity-50">
+                       {isSaving ? 'Menyimpan...' : 'Simpan PU'}
                      </button>
                   </div>
                 </div>
@@ -476,12 +527,89 @@ const Step2PoligonPU = ({ onNext, onPrev }: { onNext: () => void, onPrev: () => 
 
 const MulaiKegiatan: React.FC = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
   const [currentStep, setCurrentStep] = useState<number>(1);
+  const [data, setData] = useState<PenugasanDataType | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const API_URL = import.meta.env.VITE_API_PELAKSANAAN_URL || 'http://127.0.0.1:8000/api';
+        const res = await fetch(`${API_URL}/penugasan/${id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const json = await res.json();
+        const p = json.data;
+        const detail = p.penugasanable || {};
+        
+        let programName = '-';
+        let location = '-';
+        let kth = '-';
+        let targetBibit = '0';
+        let totalPu = 1;
+        let luasArea = '-';
+
+        if (p.penugasanable_type === 'App\\Models\\DonationProgram') {
+          programName = detail.name || '-';
+          location = detail.location || '-';
+          kth = detail.kth?.name || '-';
+          targetBibit = detail.target_amount || '0';
+          totalPu = detail.analysis_result_zone?.jumlah_pu || 1;
+          luasArea = detail.analysis_result_zone?.luas_ha ? `${detail.analysis_result_zone.luas_ha} Ha` : '-';
+        } else if (p.penugasanable_type === 'App\\Models\\ProgramApbd' || p.penugasanable_type === 'App\\Models\\ProgramCsr') {
+          programName = detail.nama_program || '-';
+          location = detail.lokasi || (detail.kth ? `${detail.kth.desa_kelurahan}, ${detail.kth.kabupaten_kota}` : '-');
+          kth = detail.kth?.nama || '-';
+          targetBibit = detail.target_bibit || detail.jumlah_bibit || '0';
+          totalPu = detail.analysis_result_zone?.jumlah_pu || 1;
+          luasArea = detail.target_luas_lahan ? `${detail.target_luas_lahan} Ha` : '-';
+        }
+
+        setData({
+          id: String(p.id),
+          status: p.status,
+          idPenugasan: `TGS-${p.id}`,
+          idProgram: detail.id ? `PRG-${detail.id}` : '-',
+          sumberLokasi: p.penugasanable_type.includes('Apbd') ? 'APBD' : (p.penugasanable_type.includes('Csr') ? 'CSR' : 'Donasi'),
+          periode: `${p.tanggal_mulai ? new Date(p.tanggal_mulai).toLocaleDateString('id-ID') : '-'} - ${p.batas_waktu ? new Date(p.batas_waktu).toLocaleDateString('id-ID') : '-'}`,
+          program: programName,
+          kth: kth,
+          rencanaKegiatan: p.jenis_kegiatan,
+          jenisTanaman: 'Campuran', // Simplification, could be mapped if needed
+          lokasi: location,
+          targetBibit: `${targetBibit} bibit`,
+          totalPu: totalPu,
+          targetPerPu: `${Math.round(parseInt(targetBibit) / totalPu)} bibit`,
+          penyuluh: p.penyuluh ? (p.penyuluh.username || p.penyuluh.name) : '-',
+          luasArea: luasArea,
+          estimasiPerPu: `±${Math.round(parseInt(targetBibit) / totalPu)} bibit`,
+        });
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    if (id) {
+      fetchData();
+    }
+  }, [id]);
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
+
+  if (!data) {
+    return <div className="flex items-center justify-center min-h-screen">Data Penugasan Tidak Ditemukan</div>;
+  }
 
   return (
     <>
       {currentStep === 1 && (
         <Step1DetailPenugasan 
+          penugasanData={data}
           navigate={navigate} 
           onNext={() => setCurrentStep(2)} 
         />
@@ -489,6 +617,7 @@ const MulaiKegiatan: React.FC = () => {
       
       {currentStep === 2 && (
         <Step2PoligonPU 
+          penugasanData={data}
           navigate={navigate}
           onPrev={() => setCurrentStep(1)}
           onNext={() => setCurrentStep(3)} 

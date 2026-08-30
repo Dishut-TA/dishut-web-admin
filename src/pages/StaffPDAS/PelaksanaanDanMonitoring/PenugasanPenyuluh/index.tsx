@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  HiOutlinePlus,
   HiOutlineEye,
   HiOutlineMagnifyingGlass,
   HiOutlineMapPin,
@@ -13,7 +12,7 @@ import TugaskanModal from './components/TugaskanModal';
 import { useNavigate } from 'react-router-dom';
 
 type JenisKegiatan = 'Validasi Lokasi' | 'Pelaksanaan Penanaman';
-type StatusPenugasan = 'Menunggu Penugasan' | 'Berjalan' | 'Menunggu Verifikasi' | 'Selesai';
+type StatusPenugasan = 'Menunggu Penugasan' | 'Ditugaskan' | 'Berjalan' | 'Menunggu Verifikasi' | 'Selesai';
 
 interface PenugasanData {
   id: string;
@@ -25,18 +24,9 @@ interface PenugasanData {
   penyuluh: string;
   status: StatusPenugasan;
   tanggalPenugasan: string;
+  source_type: string;
+  penugasan_id?: string;
 }
-
-const NEW_MOCK_DATA: PenugasanData[] = [
-  { id: '1', program: 'Rehabilitasi DAS Cikapundung', lokasi: 'Desa Cibeusi,\nKec. Cileunyi', jenisKegiatan: 'Validasi Lokasi', wilayah: 'Kab. Bandung', rencanaPeriode: '-', penyuluh: '-', status: 'Menunggu Penugasan', tanggalPenugasan: '-' },
-  { id: '2', program: 'Rehabilitasi DAS Cilaki', lokasi: 'Desa Mekarsari,\nKec. Cilawu', jenisKegiatan: 'Pelaksanaan Penanaman', wilayah: 'Kab. Garut', rencanaPeriode: 'PO (Rencana\nPenanaman)', penyuluh: 'Rizky Febrian', status: 'Berjalan', tanggalPenugasan: '14/05/2026' },
-  { id: '3', program: 'Rehabilitasi DAS Cimanuk', lokasi: 'Desa Sukamaju,\nKec. Terisi', jenisKegiatan: 'Validasi Lokasi', wilayah: 'Kab. Indramayu', rencanaPeriode: '-', penyuluh: 'Andi Wijaya', status: 'Menunggu Verifikasi', tanggalPenugasan: '15/05/2026' },
-  { id: '4', program: 'Rehabilitasi DAS Citarum Hulu', lokasi: 'Desa Cikalong,\nKec. Cikalong Wetan', jenisKegiatan: 'Pelaksanaan Penanaman', wilayah: 'Kab. Purwakarta', rencanaPeriode: 'PO (Rencana\nPenanaman)', penyuluh: 'Siti Nurhaliza', status: 'Selesai', tanggalPenugasan: '16/05/2026' },
-  { id: '5', program: 'Rehabilitasi DAS Cisadane', lokasi: 'Desa Rangkas,\nKec. Maja', jenisKegiatan: 'Validasi Lokasi', wilayah: 'Kab. Lebak', rencanaPeriode: '-', penyuluh: 'Budi Santoso', status: 'Selesai', tanggalPenugasan: '10/05/2026' },
-  { id: '6', program: 'Rehabilitasi DAS Ciliwung', lokasi: 'Desa Bojong,\nKec. Nanggung', jenisKegiatan: 'Pelaksanaan Penanaman', wilayah: 'Kab. Bogor', rencanaPeriode: 'P1 (Periode 1)', penyuluh: 'Dewi Lestari', status: 'Menunggu Verifikasi', tanggalPenugasan: '18/05/2026' },
-  { id: '7', program: 'Rehabilitasi DAS Cisokan', lokasi: 'Desa Cimekar,\nKec. Cipeundeuy', jenisKegiatan: 'Pelaksanaan Penanaman', wilayah: 'Kab. Subang', rencanaPeriode: 'PO (Rencana\nPenanaman)', penyuluh: '-', status: 'Menunggu Penugasan', tanggalPenugasan: '-' },
-  { id: '8', program: 'Agroforestri Mandiri Cibodas', lokasi: 'Desa Cibodas,\nKec. Lembang', jenisKegiatan: 'Pelaksanaan Penanaman', wilayah: 'Kab. Bandung Barat', rencanaPeriode: 'P1 (Periode 1)', penyuluh: 'Ahmad Fauzi', status: 'Selesai', tanggalPenugasan: '01/05/2026' },
-];
 
 const SproutIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -46,18 +36,42 @@ const SproutIcon = ({ className }: { className?: string }) => (
 );
 
 const PenugasanPenyuluh: React.FC = () => {
-  const navigate = useNavigate(); 
+  const [penugasanData, setPenugasanData] = useState<PenugasanData[]>([]);
+  const [, setIsLoading] = useState(true);
+
   const [activeTab, setActiveTab] = useState('Semua');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isTugaskanModalOpen, setIsTugaskanModalOpen] = useState(false);
   const [selectedPenugasan, setSelectedPenugasan] = useState<PenugasanData | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    const fetchPenugasan = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const API_URL = import.meta.env.VITE_API_PELAKSANAAN_URL || 'http://127.0.0.1:8000/api';
+        const res = await fetch(`${API_URL}/penugasan`, {
+          headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+        });
+        const json = await res.json();
+        setPenugasanData(json.data || []);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchPenugasan();
+  }, [refreshKey]);
+  const navigate = useNavigate(); 
 
   const getStatusStyle = (status: StatusPenugasan) => {
     switch (status) {
       case 'Menunggu Penugasan': return 'bg-orange-50 text-orange-600 border-orange-100';
-      case 'Berjalan': return 'bg-blue-50 text-blue-600 border-blue-100';
+      case 'Ditugaskan': return 'bg-blue-50 text-blue-600 border-blue-100';
+      case 'Berjalan': return 'bg-emerald-50 text-emerald-600 border-emerald-100';
       case 'Menunggu Verifikasi': return 'bg-yellow-50 text-yellow-600 border-yellow-100';
-      case 'Selesai': return 'bg-emerald-50 text-emerald-600 border-emerald-100';
+      case 'Selesai': return 'bg-green-50 text-green-600 border-green-100';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
@@ -69,10 +83,12 @@ const PenugasanPenyuluh: React.FC = () => {
 
   // Navigasi ke Halaman Detail sambil MENGIRIMKAN STATUS
   const handleBukaDetail = (item: PenugasanData) => {
-    navigate(`/admin/staff/monitoring/penugasan-pelaksanaan/detail/${item.id}`, { 
+    const targetId = item.penugasan_id || item.id;
+    navigate(`/admin/staff/monitoring/penugasan-pelaksanaan/detail/${targetId}`, { 
       state: { 
         status: item.status,
-        jenisKegiatan: item.jenisKegiatan 
+        jenisKegiatan: item.jenisKegiatan,
+        data: item
       } 
     });
   };
@@ -86,12 +102,6 @@ const PenugasanPenyuluh: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-900 mb-1">Penugasan Kegiatan</h1>
           <p className="text-sm text-gray-500">Kelola penugasan penyuluh untuk kegiatan validasi lokasi dan pelaksanaan penanaman.</p>
         </div>
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="px-4 py-2.5 bg-[#008A4B] hover:bg-emerald-800 text-white font-bold rounded-full flex items-center gap-2 transition-colors text-sm shadow-sm cursor-pointer"
-        >
-          <HiOutlinePlus className="w-5 h-5" /> Buat Penugasan
-        </button>
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
@@ -155,7 +165,7 @@ const PenugasanPenyuluh: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {NEW_MOCK_DATA.map((item, index) => (
+              {penugasanData.map((item, index) => (
                 <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-4 py-4 text-xs">{index + 1}</td>
                   <td className="px-4 py-4 text-gray-900 font-medium min-w-45 leading-snug">{item.program}</td>
@@ -174,9 +184,9 @@ const PenugasanPenyuluh: React.FC = () => {
                   <td className="px-4 py-4 text-xs whitespace-nowrap">{item.wilayah}</td>
                   <td className="px-4 py-4 text-xs whitespace-pre-line text-gray-500 leading-snug min-w-30">{item.rencanaPeriode}</td>
                   <td className="px-4 py-4 text-xs font-medium text-gray-700 whitespace-nowrap">{item.penyuluh}</td>
-                  <td className="px-4 py-4">
-                    <span className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold border whitespace-nowrap ${getStatusStyle(item.status)}`}>
+                  <td className="px-4 py-4">                    <span className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold border whitespace-nowrap ${getStatusStyle(item.status)}`}>
                       {item.status}
+
                     </span>
                   </td>
                   <td className="px-4 py-4 text-xs text-gray-500 whitespace-nowrap">{item.tanggalPenugasan}</td>
@@ -192,7 +202,7 @@ const PenugasanPenyuluh: React.FC = () => {
                         </button>
                       )}
 
-                      {(item.status === 'Berjalan' || item.status === 'Menunggu Verifikasi' || item.status === 'Selesai') && (
+                      {(item.status === 'Berjalan' || item.status === 'Menunggu Verifikasi' || item.status === 'Selesai' || item.status === 'Ditugaskan') && (
                         <button 
                           onClick={() => handleBukaDetail(item)}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-[11px] font-bold rounded-full transition-colors shadow-sm cursor-pointer"
@@ -210,7 +220,15 @@ const PenugasanPenyuluh: React.FC = () => {
       </div>
 
       <ModalBuatPenugasan isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-      <TugaskanModal isOpen={isTugaskanModalOpen} onClose={() => setIsTugaskanModalOpen(false)} data={selectedPenugasan} />
+      <TugaskanModal 
+        isOpen={isTugaskanModalOpen} 
+        onClose={() => setIsTugaskanModalOpen(false)} 
+        data={selectedPenugasan} 
+        onSuccess={() => {
+          setIsTugaskanModalOpen(false);
+          setRefreshKey(prev => prev + 1);
+        }}
+      />
 
     </div>
   );

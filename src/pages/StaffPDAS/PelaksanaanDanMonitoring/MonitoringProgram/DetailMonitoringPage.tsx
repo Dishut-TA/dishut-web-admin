@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { 
+import {
   HiOutlineArrowLeft,
   HiOutlinePrinter,
   HiOutlineUserPlus,
@@ -19,23 +19,123 @@ import {
   HiOutlineDocument
 } from 'react-icons/hi2';
 import { PiPlant, PiTree, PiLeaf } from 'react-icons/pi';
+import { getPenugasanByIdAPI } from '../../../../services/penugasan.service';
 
-type MonitoringStatus = 'Siap Monitoring' | 'Berjalan' | 'Menunggu Evaluasi' | 'Tindak Lanjut' | 'Selesai' | 'Dihentikan';
+type MonitoringStatus = 'Siap Monitoring' | 'Berjalan' | 'Menunggu' | 'Menunggu Penugasan' | 'Menunggu Evaluasi' | 'Tindak Lanjut' | 'Selesai' | 'Dihentikan';
 
 const DetailMonitoringPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
-  
+
   // Membaca status secara dinamis dari tabel sebelumnya
   const currentStatus = (location.state?.status as MonitoringStatus) || 'Siap Monitoring';
 
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
+  const [programData, setProgramData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDetail = async () => {
+      try {
+        if (!id) return;
+        setIsLoading(true);
+        const res = await getPenugasanByIdAPI(id);
+        const penugasan = res.data;
+        const source = penugasan.penugasanable;
+
+        let pName = '-';
+        let pKth = '-';
+        let pLuas = '-';
+        let pLokasi = '-';
+        let pSumberDana = '-';
+
+        const zone = source.analysis_result_zone || source.analysisResultZone;
+        const zoneLokasi = zone && (zone.desa || zone.kecamatan || zone.kabupaten) ? [zone.desa, zone.kecamatan, zone.kabupaten].filter(Boolean).join(', ') : '-';
+        const zoneLuas = zone?.luas_ha ? `${zone.luas_ha} Ha` : '-';
+        const zoneKth = zone?.nama_kelompok || '-';
+
+        const kthObj = source?.kth || penugasan.penyuluh?.kth;
+        const kthLokasi = kthObj && kthObj.desa_kelurahan ? [kthObj.desa_kelurahan, kthObj.kabupaten_kota].filter(Boolean).join(', ') : '-';
+
+        if (penugasan.penugasanable_type === 'App\\Models\\DonationProgram') {
+          pName = source.name || source.nama_program || '-';
+          pKth = kthObj?.name || kthObj?.nama || (zoneKth !== '-' ? zoneKth : '-');
+          pLuas = zoneLuas !== '-' ? zoneLuas : (source.target_luas_lahan ? `${source.target_luas_lahan} Ha` : '-');
+          pLokasi = source.location || source.lokasi || (kthLokasi !== '-' ? kthLokasi : (zoneLokasi !== '-' ? zoneLokasi : '-'));
+          pSumberDana = 'Donasi';
+        } else if (penugasan.penugasanable_type === 'App\\Models\\ProgramApbd' || penugasan.penugasanable_type === 'App\\Models\\ProgramCsr') {
+          pName = source.nama_program || source.name || '-';
+          pKth = kthObj?.nama || kthObj?.name || (zoneKth !== '-' ? zoneKth : '-');
+          pLuas = zoneLuas !== '-' ? zoneLuas : (source.target_luas_lahan ? `${source.target_luas_lahan} Ha` : '-');
+          pLokasi = source.lokasi || source.location || (kthLokasi !== '-' ? kthLokasi : (zoneLokasi !== '-' ? zoneLokasi : '-'));
+          pSumberDana = penugasan.penugasanable_type.includes('Apbd') ? 'APBD' : 'CSR';
+        }
+
+        // Calculate monitoring results from petakUkurs
+        let tanamanHidup = 0;
+        let tanamanMati = 0;
+        let targetTanam = 0;
+        const petakUkurs = penugasan.petak_ukurs || penugasan.petakUkurs || [];
+        petakUkurs.forEach((pu: any) => {
+          (pu.data_tanamans || []).forEach((t: any) => {
+            targetTanam += t.jumlah || 0;
+            const kondisi = t.kondisi_tanaman?.toLowerCase() || '';
+            if (kondisi.includes('hidup') || kondisi.includes('sehat') || kondisi.includes('baik')) {
+              tanamanHidup += t.jumlah || 0;
+            } else if (kondisi.includes('mati') || kondisi.includes('rusak') || kondisi.includes('sakit')) {
+              tanamanMati += t.jumlah || 0;
+            } else {
+              tanamanHidup += t.jumlah || 0; // Default if not specified
+            }
+          });
+        });
+        const totalTanaman = tanamanHidup + tanamanMati;
+        const persentaseHidup = totalTanaman > 0 ? ((tanamanHidup / totalTanaman) * 100).toFixed(2) : 0;
+        const countGeotag = petakUkurs.length;
+        const countDokumentasi = (penugasan.dokumentasi || []).length;
+
+        setProgramData({
+          id: penugasan.id,
+          sourceId: id,
+          programName: pName,
+          kth: pKth,
+          luas: pLuas,
+          lokasi: pLokasi,
+          sumberDana: pSumberDana,
+          penyuluh: penugasan.penyuluh?.username || penugasan.penyuluh?.name || penugasan.penyuluh?.nama_pengguna || '-',
+          tanggal_penugasan: penugasan.tanggal_penugasan,
+          batas_waktu: penugasan.batas_waktu,
+          jenis_kegiatan: penugasan.jenis_kegiatan,
+          periode_monitoring: penugasan.periode_monitoring || penugasan.jenis_kegiatan || '-',
+          stats: {
+            tanamanHidup,
+            tanamanMati,
+            targetTanam,
+            persentaseHidup,
+            countGeotag,
+            countDokumentasi
+          }
+        });
+      } catch (error) {
+        console.error("Gagal mengambil data detail:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchDetail();
+  }, [id]);
+
+  if (isLoading) {
+    return <div className="p-8 text-center text-slate-500">Memuat data...</div>;
+  }
 
   const getBadgeColor = (status: string) => {
     switch (status) {
       case 'Siap Monitoring': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-      case 'Berjalan': return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'Berjalan':
+      case 'Menunggu':
+      case 'Menunggu Penugasan': return 'bg-blue-50 text-blue-700 border-blue-200';
       case 'Menunggu Evaluasi': return 'bg-orange-50 text-orange-700 border-orange-200';
       case 'Tindak Lanjut': return 'bg-orange-50 text-orange-700 border-orange-200';
       case 'Selesai': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
@@ -47,8 +147,8 @@ const DetailMonitoringPage: React.FC = () => {
   const renderHeader = () => {
     let title = 'Detail Program Monitoring';
     let subtitle = '';
-    
-    if (currentStatus === 'Berjalan') {
+
+    if (currentStatus === 'Berjalan' || currentStatus === 'Menunggu' || currentStatus === 'Menunggu Penugasan') {
       title = 'Tinjau Hasil Monitoring P2';
       subtitle = 'Meninjau hasil monitoring periode P2 yang telah dilakukan oleh penyuluh.';
     } else if (currentStatus === 'Menunggu Evaluasi') {
@@ -73,7 +173,7 @@ const DetailMonitoringPage: React.FC = () => {
           </div>
           {subtitle && <p className="text-sm text-slate-500">{subtitle}</p>}
         </div>
-        
+
         <div className="flex items-center gap-3">
           {currentStatus === 'Selesai' ? (
             <>
@@ -114,15 +214,15 @@ const DetailMonitoringPage: React.FC = () => {
             <PiPlant className="w-7 h-7 text-[#008A4B]" />
           </div>
           <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-y-5 gap-x-4">
-            <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">ID Program</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">{id || 'PRG-2026-0007'}</span></div>
-            <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">KTH</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">KTH Karangsong Lestari</span></div>
+            <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">ID Program</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">{programData?.sourceId || id || 'PRG-2026-0007'}</span></div>
+            <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">KTH</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">{programData?.kth || 'KTH Karangsong Lestari'}</span></div>
             <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">Jenis Program</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">Rehabilitasi Mangrove</span></div>
-            <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">Penyuluh</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">Ahmad Fauzi</span></div>
-            <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">Lokasi</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold leading-relaxed">Desa Karangsong, Kec. Indramayu,<br/>Kab. Indramayu</span></div>
+            <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">Penyuluh</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">{programData?.penyuluh || 'Ahmad Fauzi'}</span></div>
+            <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">Lokasi</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold leading-relaxed">{programData?.lokasi || 'Desa Karangsong, Kec. Indramayu'}</span></div>
             <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">Periode Aktif</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">P2</span></div>
-            <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">Luas Area</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">4,2 Ha</span></div>
+            <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">Luas Area</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">{programData?.luas || '4,2 Ha'}</span></div>
             <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">Jadwal Monitoring</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">10 Mei 2026 – 27 Mei 2026</span></div>
-            <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">Sumber Dana</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">APBD</span></div>
+            <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">Sumber Dana</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">{programData?.sumberDana || 'APBD'}</span></div>
             <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">Target Monitoring</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">Monitoring tahap kedua</span></div>
           </div>
           <div className="w-full lg:w-64 h-28 shrink-0 bg-slate-100 rounded-lg relative overflow-hidden bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=400')] bg-cover bg-center border border-slate-200">
@@ -140,27 +240,27 @@ const DetailMonitoringPage: React.FC = () => {
             </div>
             <div className="p-5 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               <div className="flex flex-col gap-2">
-                <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center border border-emerald-100"><PiPlant className="w-5 h-5 text-emerald-600"/></div>
+                <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center border border-emerald-100"><PiPlant className="w-5 h-5 text-emerald-600" /></div>
                 <div><p className="text-[10px] text-slate-500 font-semibold mb-0.5">Target Tanam</p><p className="text-base font-bold text-slate-900">2.500 <span className="text-[10px] font-normal text-slate-500">pohon</span></p></div>
               </div>
               <div className="flex flex-col gap-2">
-                <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center border border-emerald-100"><HiOutlineCheckCircle className="w-5 h-5 text-emerald-600"/></div>
+                <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center border border-emerald-100"><HiOutlineCheckCircle className="w-5 h-5 text-emerald-600" /></div>
                 <div><p className="text-[10px] text-slate-500 font-semibold mb-0.5">Realisasi Tanam</p><p className="text-base font-bold text-slate-900">2.500 <span className="text-[10px] font-normal text-slate-500">pohon</span></p></div>
               </div>
               <div className="flex flex-col gap-2">
-                <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center border border-emerald-100"><PiLeaf className="w-5 h-5 text-emerald-600"/></div>
+                <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center border border-emerald-100"><PiLeaf className="w-5 h-5 text-emerald-600" /></div>
                 <div><p className="text-[10px] text-slate-500 font-semibold mb-0.5">Tanaman Hidup</p><p className="text-base font-bold text-slate-900">2.180</p></div>
               </div>
               <div className="flex flex-col gap-2">
-                <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center border border-orange-100"><PiTree className="w-5 h-5 text-orange-500"/></div>
+                <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center border border-orange-100"><PiTree className="w-5 h-5 text-orange-500" /></div>
                 <div><p className="text-[10px] text-slate-500 font-semibold mb-0.5">Tanaman Mati</p><p className="text-base font-bold text-slate-900">220</p></div>
               </div>
               <div className="flex flex-col gap-2">
-                <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center border border-purple-100"><HiOutlineMapPin className="w-5 h-5 text-purple-600"/></div>
+                <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center border border-purple-100"><HiOutlineMapPin className="w-5 h-5 text-purple-600" /></div>
                 <div><p className="text-[10px] text-slate-500 font-semibold mb-0.5">Titik Geotag</p><p className="text-base font-bold text-slate-900">18 <span className="text-[10px] font-normal text-slate-500">titik</span></p></div>
               </div>
               <div className="flex flex-col gap-2">
-                <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center border border-amber-100"><HiOutlineDocumentText className="w-5 h-5 text-amber-600"/></div>
+                <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center border border-amber-100"><HiOutlineDocumentText className="w-5 h-5 text-amber-600" /></div>
                 <div><p className="text-[10px] text-slate-500 font-semibold mb-0.5">Dokumentasi</p><p className="text-base font-bold text-slate-900">42 <span className="text-[10px] font-normal text-slate-500">foto</span></p></div>
               </div>
             </div>
@@ -183,7 +283,7 @@ const DetailMonitoringPage: React.FC = () => {
                     <td className="p-4 font-semibold text-slate-500">Realisasi Tanam</td>
                     <td className="p-4 text-slate-900">2.500 pohon</td>
                     <td className="p-4 font-semibold text-slate-500">Lokasi Penanaman</td>
-                    <td className="p-4 text-slate-900">Desa Karangsong, Kec. Indramayu,<br/>Kab. Indramayu</td>
+                    <td className="p-4 text-slate-900">Desa Karangsong, Kec. Indramayu,<br />Kab. Indramayu</td>
                   </tr>
                   <tr>
                     <td className="p-4 font-semibold text-slate-500">Persentase Hidup</td>
@@ -222,7 +322,7 @@ const DetailMonitoringPage: React.FC = () => {
               </div>
               <div className="flex flex-col gap-2">
                 <div className="grid grid-cols-4 gap-2 flex-1">
-                  {[1,2,3,4].map(i => <div key={i} className="bg-slate-200 rounded-lg h-full w-full bg-[url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?q=80&w=150')] bg-cover border border-slate-200"></div>)}
+                  {[1, 2, 3, 4].map(i => <div key={i} className="bg-slate-200 rounded-lg h-full w-full bg-[url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?q=80&w=150')] bg-cover border border-slate-200"></div>)}
                 </div>
                 <div className="mt-1">
                   <button className="text-[11px] font-bold text-blue-600 hover:text-blue-700 transition-colors cursor-pointer">Lihat semua dokumentasi →</button>
@@ -273,7 +373,7 @@ const DetailMonitoringPage: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="lg:col-span-4 space-y-6">
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="px-5 py-4 border-b border-slate-100">
@@ -281,39 +381,39 @@ const DetailMonitoringPage: React.FC = () => {
             </div>
             <div className="p-5 space-y-3.5 text-xs">
               <div className="grid grid-cols-[130px_10px_1fr] items-center">
-                <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineClock className="w-4 h-4"/> Status Saat Ini</span>
+                <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineClock className="w-4 h-4" /> Status Saat Ini</span>
                 <span className="text-slate-500">:</span>
                 <span>
                   <span className={`px-2 py-0.5 rounded-full border ${getBadgeColor(currentStatus)} font-bold text-[10px]`}>{currentStatus}</span>
                 </span>
               </div>
               <div className="grid grid-cols-[130px_10px_1fr] items-start">
-                <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineCalendar className="w-4 h-4"/> Periode</span>
+                <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineCalendar className="w-4 h-4" /> Periode</span>
                 <span className="text-slate-500">:</span>
                 <span className="text-slate-900 font-semibold">P2</span>
               </div>
               <div className="grid grid-cols-[130px_10px_1fr] items-start">
-                <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineUserPlus className="w-4 h-4"/> KTH</span>
+                <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineUserPlus className="w-4 h-4" /> KTH</span>
                 <span className="text-slate-500">:</span>
                 <span className="text-slate-900 font-semibold">KTH Karangsong Lestari</span>
               </div>
               <div className="grid grid-cols-[130px_10px_1fr] items-start">
-                <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineUserPlus className="w-4 h-4"/> Penyuluh</span>
+                <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineUserPlus className="w-4 h-4" /> Penyuluh</span>
                 <span className="text-slate-500">:</span>
                 <span className="text-slate-900 font-semibold">Ahmad Fauzi</span>
               </div>
               <div className="grid grid-cols-[130px_10px_1fr] items-start">
-                <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineDocumentText className="w-4 h-4"/> Kabupaten</span>
+                <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineDocumentText className="w-4 h-4" /> Kabupaten</span>
                 <span className="text-slate-500">:</span>
                 <span className="text-slate-900 font-semibold">Indramayu</span>
               </div>
               <div className="grid grid-cols-[130px_10px_1fr] items-start">
-                <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineMapPin className="w-4 h-4"/> Luas Area</span>
+                <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineMapPin className="w-4 h-4" /> Luas Area</span>
                 <span className="text-slate-500">:</span>
                 <span className="text-slate-900 font-semibold">4,2 Ha</span>
               </div>
               <div className="grid grid-cols-[130px_10px_1fr] items-start">
-                <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineCalendar className="w-4 h-4"/> Jadwal</span>
+                <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineCalendar className="w-4 h-4" /> Jadwal</span>
                 <span className="text-slate-500">:</span>
                 <span className="text-slate-900 font-semibold">10 Mei 2026 – 27 Mei 2026</span>
               </div>
@@ -341,8 +441,8 @@ const DetailMonitoringPage: React.FC = () => {
             <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Jenis Program</p><p className="text-xs font-bold text-slate-900">Rehabilitasi Mangrove</p></div>
             <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Luas Area</p><p className="text-xs font-bold text-slate-900">25,40 Ha</p></div>
             <div className="col-span-2">
-              <p className="text-[10px] text-slate-500 font-semibold mb-1 flex items-center gap-1"><HiOutlineMapPin className="w-3.5 h-3.5 text-green-600"/> Lokasi</p>
-              <p className="text-xs font-bold text-slate-900 leading-relaxed">Desa Karangsong, Kec. Indramayu<br/>Kabupaten Indramayu, Jawa Barat</p>
+              <p className="text-[10px] text-slate-500 font-semibold mb-1 flex items-center gap-1"><HiOutlineMapPin className="w-3.5 h-3.5 text-green-600" /> Lokasi</p>
+              <p className="text-xs font-bold text-slate-900 leading-relaxed">Desa Karangsong, Kec. Indramayu<br />Kabupaten Indramayu, Jawa Barat</p>
             </div>
             <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Penyuluh Pendamping</p><p className="text-xs font-bold text-slate-900">Ahmad Fauzi, SP</p></div>
             <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Tanggal Monitoring P2</p><p className="text-xs font-bold text-slate-900">22 Mei 2026</p></div>
@@ -354,8 +454,8 @@ const DetailMonitoringPage: React.FC = () => {
             <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Periode P2</p><p className="text-xs font-bold text-slate-900">10 Mei 2026 – 27 Mei 2026</p></div>
           </div>
           <div className="w-full lg:w-72 shrink-0">
-             <p className="text-[10px] text-slate-500 font-semibold mb-2">Lokasi Program</p>
-             <div className="w-full h-32 bg-slate-100 rounded-lg bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=400')] bg-cover bg-center border border-slate-200"></div>
+            <p className="text-[10px] text-slate-500 font-semibold mb-2">Lokasi Program</p>
+            <div className="w-full h-32 bg-slate-100 rounded-lg bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=400')] bg-cover bg-center border border-slate-200"></div>
           </div>
         </div>
       </div>
@@ -370,40 +470,36 @@ const DetailMonitoringPage: React.FC = () => {
             <button className="pb-3 text-slate-500 font-medium hover:text-slate-700 cursor-pointer">Catatan Penyuluh</button>
           </div>
         </div>
-        
+
         <div className="p-6">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
             <div className="border border-slate-200 rounded-xl p-4 flex flex-col justify-center shadow-sm">
               <p className="text-[10px] text-slate-500 font-semibold mb-1">Tanaman Hidup</p>
               <div className="flex items-end justify-between">
-                <div><h3 className="text-2xl font-bold text-slate-900 leading-none">13.210</h3><p className="text-[10px] text-slate-400 mt-1">Batang</p></div>
-                <span className="text-[10px] font-bold text-emerald-600">↑ 1.250</span>
+                <div><h3 className="text-2xl font-bold text-slate-900 leading-none">{programData?.stats?.tanamanHidup || 0}</h3><p className="text-[10px] text-slate-400 mt-1">Batang</p></div>
               </div>
             </div>
             <div className="border border-slate-200 rounded-xl p-4 flex flex-col justify-center shadow-sm">
               <p className="text-[10px] text-slate-500 font-semibold mb-1">Tanaman Mati</p>
               <div className="flex items-end justify-between">
-                <div><h3 className="text-2xl font-bold text-slate-900 leading-none">1.150</h3><p className="text-[10px] text-slate-400 mt-1">Batang</p></div>
-                <span className="text-[10px] font-bold text-red-500">↑ 160</span>
+                <div><h3 className="text-2xl font-bold text-slate-900 leading-none">{programData?.stats?.tanamanMati || 0}</h3><p className="text-[10px] text-slate-400 mt-1">Batang</p></div>
               </div>
             </div>
             <div className="border border-slate-200 rounded-xl p-4 flex flex-col justify-center shadow-sm">
               <p className="text-[10px] text-slate-500 font-semibold mb-1">Persentase Hidup</p>
-              <h3 className="text-2xl font-bold text-slate-900 leading-none mb-1">92,01%</h3>
-              <div className="mt-auto"><span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] font-bold px-2 py-0.5 rounded">Baik</span></div>
+              <h3 className="text-2xl font-bold text-slate-900 leading-none mb-1">{programData?.stats?.persentaseHidup || 0}%</h3>
+              <div className="mt-auto"><span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] font-bold px-2 py-0.5 rounded">Aktual</span></div>
             </div>
             <div className="border border-slate-200 rounded-xl p-4 flex flex-col justify-center shadow-sm">
-              <p className="text-[10px] text-slate-500 font-semibold mb-1">Titik Geotag</p>
+              <p className="text-[10px] text-slate-500 font-semibold mb-1">Titik Geotag (PU)</p>
               <div className="flex items-end justify-between">
-                <div><h3 className="text-2xl font-bold text-slate-900 leading-none">118</h3><p className="text-[10px] text-slate-400 mt-1">Titik</p></div>
-                <span className="text-[10px] font-bold text-orange-500">↓ 2</span>
+                <div><h3 className="text-2xl font-bold text-slate-900 leading-none">{programData?.stats?.countGeotag || 0}</h3><p className="text-[10px] text-slate-400 mt-1">Titik</p></div>
               </div>
             </div>
             <div className="border border-slate-200 rounded-xl p-4 flex flex-col justify-center shadow-sm">
               <p className="text-[10px] text-slate-500 font-semibold mb-1">Dokumentasi</p>
               <div className="flex items-end justify-between">
-                <div><h3 className="text-2xl font-bold text-slate-900 leading-none">36</h3><p className="text-[10px] text-slate-400 mt-1">Foto</p></div>
-                <span className="text-[10px] font-bold text-orange-500">↓ 12</span>
+                <div><h3 className="text-2xl font-bold text-slate-900 leading-none">{programData?.stats?.countDokumentasi || 0}</h3><p className="text-[10px] text-slate-400 mt-1">Foto</p></div>
               </div>
             </div>
           </div>
@@ -423,7 +519,7 @@ const DetailMonitoringPage: React.FC = () => {
               <tr><td className="py-3 px-4 font-bold text-slate-800">Dokumentasi</td><td className="py-3 px-4">48 Foto</td><td className="py-3 px-4">36 Foto</td><td className="py-3 px-4">-12</td><td className="py-3 px-4">75,00%</td><td className="py-3 px-4"><span className="text-yellow-700 bg-yellow-50 px-2 py-0.5 rounded font-bold text-[10px]">Cukup</span></td></tr>
             </tbody>
           </table>
-          
+
           <div className="mt-4 bg-blue-50 border border-blue-100 rounded-lg p-3 flex gap-2 items-center">
             <HiOutlineInformationCircle className="w-4 h-4 text-blue-600 shrink-0" />
             <p className="text-[11px] text-blue-800">Penilaian kriteria berdasarkan capaian terhadap target P0 dan perubahan dari periode sebelumnya.</p>
@@ -436,7 +532,7 @@ const DetailMonitoringPage: React.FC = () => {
   const renderViewMenungguEvaluasi = () => (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
       <div className="lg:col-span-8 space-y-6">
-        
+
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
           <h3 className="text-sm font-bold text-slate-900 mb-4">Ringkasan Program</h3>
           <div className="flex flex-col lg:flex-row gap-6">
@@ -449,16 +545,16 @@ const DetailMonitoringPage: React.FC = () => {
               <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Penyuluh</p><p className="text-xs font-bold text-slate-900">Ahmad Fauzi</p></div>
               <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Jenis Program</p><p className="text-xs font-bold text-slate-900">Rehabilitasi Mangrove</p></div>
               <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Periode Monitoring</p><p className="text-xs font-bold text-slate-900">P2</p></div>
-              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Lokasi</p><p className="text-xs font-bold text-slate-900 leading-snug">Desa Karangsong, Kec. Indramayu,<br/>Kab. Indramayu</p></div>
+              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Lokasi</p><p className="text-xs font-bold text-slate-900 leading-snug">Desa Karangsong, Kec. Indramayu,<br />Kab. Indramayu</p></div>
               <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Tanggal Monitoring</p><p className="text-xs font-bold text-slate-900">22 Mei 2026</p></div>
               <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Luas Area</p><p className="text-xs font-bold text-slate-900">25,40 Ha</p></div>
               <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Sumber Dana</p><p className="text-xs font-bold text-slate-900">APBD</p></div>
             </div>
             <div className="w-full md:hidden lg:block lg:w-48 shrink-0">
-               <div className="w-full h-24 bg-slate-100 rounded-lg relative overflow-hidden bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=400')] bg-cover bg-center border border-slate-200">
-                  <div className="absolute inset-0 flex items-center justify-center"><HiOutlineMapPin className="w-6 h-6 text-green-500 drop-shadow" /></div>
-               </div>
-               <button className="text-[10px] font-bold text-blue-600 mt-1.5 flex items-center gap-1 hover:text-blue-700 cursor-pointer">Lihat di Peta <HiOutlineMapPin className="w-3 h-3"/></button>
+              <div className="w-full h-24 bg-slate-100 rounded-lg relative overflow-hidden bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=400')] bg-cover bg-center border border-slate-200">
+                <div className="absolute inset-0 flex items-center justify-center"><HiOutlineMapPin className="w-6 h-6 text-green-500 drop-shadow" /></div>
+              </div>
+              <button className="text-[10px] font-bold text-blue-600 mt-1.5 flex items-center gap-1 hover:text-blue-700 cursor-pointer">Lihat di Peta <HiOutlineMapPin className="w-3 h-3" /></button>
             </div>
           </div>
         </div>
@@ -468,34 +564,34 @@ const DetailMonitoringPage: React.FC = () => {
           <h3 className="text-sm font-bold text-slate-900 mb-4">Ringkasan Hasil Monitoring P2</h3>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             <div className="border border-emerald-100 bg-emerald-50/30 rounded-xl p-4 shadow-sm flex flex-col items-center text-center">
-               <PiPlant className="w-6 h-6 text-emerald-600 mb-1.5"/>
-               <p className="text-[9px] text-slate-500 font-semibold leading-tight">Persentase Keberhasilan</p>
-               <h3 className="text-lg font-bold text-slate-900 mt-1">92,01%</h3>
-               <span className="text-[9px] text-emerald-700 font-bold mt-1">Baik</span>
+              <PiPlant className="w-6 h-6 text-emerald-600 mb-1.5" />
+              <p className="text-[9px] text-slate-500 font-semibold leading-tight">Persentase Keberhasilan</p>
+              <h3 className="text-lg font-bold text-slate-900 mt-1">{programData?.stats?.persentaseHidup || 0}%</h3>
+              <span className="text-[9px] text-emerald-700 font-bold mt-1">Aktual</span>
             </div>
             <div className="border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col items-center text-center">
-               <PiLeaf className="w-6 h-6 text-emerald-600 mb-1.5"/>
-               <p className="text-[9px] text-slate-500 font-semibold leading-tight">Jumlah Tanaman Hidup</p>
-               <h3 className="text-lg font-bold text-slate-900 mt-1">13.210</h3>
-               <p className="text-[9px] text-slate-400">Batang</p>
+              <PiLeaf className="w-6 h-6 text-emerald-600 mb-1.5" />
+              <p className="text-[9px] text-slate-500 font-semibold leading-tight">Jumlah Tanaman Hidup</p>
+              <h3 className="text-lg font-bold text-slate-900 mt-1">{programData?.stats?.tanamanHidup || 0}</h3>
+              <p className="text-[9px] text-slate-400">Batang</p>
             </div>
             <div className="border border-orange-100 bg-orange-50/30 rounded-xl p-4 shadow-sm flex flex-col items-center text-center">
-               <PiTree className="w-6 h-6 text-orange-500 mb-1.5"/>
-               <p className="text-[9px] text-slate-500 font-semibold leading-tight">Jumlah Tanaman Mati</p>
-               <h3 className="text-lg font-bold text-slate-900 mt-1">1.150</h3>
-               <p className="text-[9px] text-slate-400">Batang</p>
+              <PiTree className="w-6 h-6 text-orange-500 mb-1.5" />
+              <p className="text-[9px] text-slate-500 font-semibold leading-tight">Jumlah Tanaman Mati</p>
+              <h3 className="text-lg font-bold text-slate-900 mt-1">{programData?.stats?.tanamanMati || 0}</h3>
+              <p className="text-[9px] text-slate-400">Batang</p>
             </div>
             <div className="border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col items-center text-center">
-               <HiOutlineMapPin className="w-6 h-6 text-purple-600 mb-1.5"/>
-               <p className="text-[9px] text-slate-500 font-semibold leading-tight">Jumlah Titik Geotag</p>
-               <h3 className="text-lg font-bold text-slate-900 mt-1">118</h3>
-               <p className="text-[9px] text-slate-400">Titik</p>
+              <HiOutlineMapPin className="w-6 h-6 text-purple-600 mb-1.5" />
+              <p className="text-[9px] text-slate-500 font-semibold leading-tight">Jumlah Titik Geotag (PU)</p>
+              <h3 className="text-lg font-bold text-slate-900 mt-1">{programData?.stats?.countGeotag || 0}</h3>
+              <p className="text-[9px] text-slate-400">Titik</p>
             </div>
             <div className="border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col items-center text-center">
-               <HiOutlineDocumentText className="w-6 h-6 text-amber-500 mb-1.5"/>
-               <p className="text-[9px] text-slate-500 font-semibold leading-tight">Dokumentasi & Periode</p>
-               <h3 className="text-lg font-bold text-slate-900 mt-1">36 <span className="text-[10px] font-normal text-slate-500">Foto</span></h3>
-               <span className="bg-blue-50 text-blue-600 text-[9px] px-2 py-0.5 rounded mt-1 font-bold">P2</span>
+              <HiOutlineDocumentText className="w-6 h-6 text-amber-500 mb-1.5" />
+              <p className="text-[9px] text-slate-500 font-semibold leading-tight">Dokumentasi & Periode</p>
+              <h3 className="text-lg font-bold text-slate-900 mt-1">{programData?.stats?.countDokumentasi || 0} <span className="text-[10px] font-normal text-slate-500">Foto</span></h3>
+              <span className="bg-blue-50 text-blue-600 text-[9px] px-2 py-0.5 rounded mt-1 font-bold">{programData?.periode_monitoring || '-'}</span>
             </div>
           </div>
         </div>
@@ -524,16 +620,16 @@ const DetailMonitoringPage: React.FC = () => {
 
         {/* Peta & Dokumen */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-             <h3 className="text-sm font-bold text-gray-900 mb-3">Peta Lokasi Monitoring</h3>
-             <div className="h-32 bg-gray-100 rounded-lg bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=400')] bg-cover bg-center"></div>
-           </div>
-           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-             <h3 className="text-sm font-bold text-gray-900 mb-3">Dokumentasi Foto</h3>
-             <div className="flex gap-2">
-               {[1,2,3,4].map(i => <div key={i} className="flex-1 bg-gray-200 rounded h-20 bg-[url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?q=80&w=150')] bg-cover"></div>)}
-             </div>
-           </div>
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+            <h3 className="text-sm font-bold text-gray-900 mb-3">Peta Lokasi Monitoring</h3>
+            <div className="h-32 bg-gray-100 rounded-lg bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=400')] bg-cover bg-center"></div>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+            <h3 className="text-sm font-bold text-gray-900 mb-3">Dokumentasi Foto</h3>
+            <div className="flex gap-2">
+              {[1, 2, 3, 4].map(i => <div key={i} className="flex-1 bg-gray-200 rounded h-20 bg-[url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?q=80&w=150')] bg-cover"></div>)}
+            </div>
+          </div>
         </div>
 
       </div>
@@ -541,57 +637,57 @@ const DetailMonitoringPage: React.FC = () => {
       <div className="lg:col-span-4 space-y-6">
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col items-center text-center">
           <div className="w-16 h-16 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mb-3">
-             <HiOutlineClock className="w-8 h-8"/>
+            <HiOutlineClock className="w-8 h-8" />
           </div>
           <h2 className="text-xl font-bold mb-2 text-orange-600">Menunggu Evaluasi</h2>
           <p className="text-xs text-gray-500">
-             Hasil monitoring telah dikirim dan sedang menunggu proses evaluasi oleh Tim Evaluasi.
+            Hasil monitoring telah dikirim dan sedang menunggu proses evaluasi oleh Tim Evaluasi.
           </p>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="px-5 py-4 border-b border-slate-100">
-              <h3 className="text-sm font-bold text-slate-800">Ringkasan Status</h3>
+          <div className="px-5 py-4 border-b border-slate-100">
+            <h3 className="text-sm font-bold text-slate-800">Ringkasan Status</h3>
+          </div>
+          <div className="p-5 space-y-3.5 text-xs">
+            <div className="grid grid-cols-[130px_10px_1fr] items-center">
+              <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineClock className="w-4 h-4" /> Status Saat Ini</span>
+              <span className="text-slate-500">:</span>
+              <span>
+                <span className={`px-2 py-0.5 rounded-full border ${getBadgeColor(currentStatus)} font-bold text-[10px]`}>{currentStatus}</span>
+              </span>
             </div>
-            <div className="p-5 space-y-3.5 text-xs">
-              <div className="grid grid-cols-[130px_10px_1fr] items-center">
-                <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineClock className="w-4 h-4"/> Status Saat Ini</span>
-                <span className="text-slate-500">:</span>
-                <span>
-                  <span className={`px-2 py-0.5 rounded-full border ${getBadgeColor(currentStatus)} font-bold text-[10px]`}>{currentStatus}</span>
-                </span>
-              </div>
-              <div className="grid grid-cols-[130px_10px_1fr] items-start">
-                <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineCalendar className="w-4 h-4"/> Periode</span>
-                <span className="text-slate-500">:</span>
-                <span className="text-slate-900 font-semibold">P2</span>
-              </div>
-              <div className="grid grid-cols-[130px_10px_1fr] items-start">
-                <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineUserPlus className="w-4 h-4"/> KTH</span>
-                <span className="text-slate-500">:</span>
-                <span className="text-slate-900 font-semibold">KTH Karangsong Lestari</span>
-              </div>
-              <div className="grid grid-cols-[130px_10px_1fr] items-start">
-                <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineUserPlus className="w-4 h-4"/> Penyuluh</span>
-                <span className="text-slate-500">:</span>
-                <span className="text-slate-900 font-semibold">Ahmad Fauzi</span>
-              </div>
-              <div className="grid grid-cols-[130px_10px_1fr] items-start">
-                <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineDocumentText className="w-4 h-4"/> Kabupaten</span>
-                <span className="text-slate-500">:</span>
-                <span className="text-slate-900 font-semibold">Indramayu</span>
-              </div>
-              <div className="grid grid-cols-[130px_10px_1fr] items-start">
-                <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineMapPin className="w-4 h-4"/> Luas Area</span>
-                <span className="text-slate-500">:</span>
-                <span className="text-slate-900 font-semibold">4,2 Ha</span>
-              </div>
-              <div className="grid grid-cols-[130px_10px_1fr] items-start">
-                <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineCalendar className="w-4 h-4"/> Jadwal</span>
-                <span className="text-slate-500">:</span>
-                <span className="text-slate-900 font-semibold">10 Mei 2026 – 27 Mei 2026</span>
-              </div>
+            <div className="grid grid-cols-[130px_10px_1fr] items-start">
+              <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineCalendar className="w-4 h-4" /> Periode</span>
+              <span className="text-slate-500">:</span>
+              <span className="text-slate-900 font-semibold">P2</span>
             </div>
+            <div className="grid grid-cols-[130px_10px_1fr] items-start">
+              <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineUserPlus className="w-4 h-4" /> KTH</span>
+              <span className="text-slate-500">:</span>
+              <span className="text-slate-900 font-semibold">KTH Karangsong Lestari</span>
+            </div>
+            <div className="grid grid-cols-[130px_10px_1fr] items-start">
+              <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineUserPlus className="w-4 h-4" /> Penyuluh</span>
+              <span className="text-slate-500">:</span>
+              <span className="text-slate-900 font-semibold">Ahmad Fauzi</span>
+            </div>
+            <div className="grid grid-cols-[130px_10px_1fr] items-start">
+              <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineDocumentText className="w-4 h-4" /> Kabupaten</span>
+              <span className="text-slate-500">:</span>
+              <span className="text-slate-900 font-semibold">Indramayu</span>
+            </div>
+            <div className="grid grid-cols-[130px_10px_1fr] items-start">
+              <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineMapPin className="w-4 h-4" /> Luas Area</span>
+              <span className="text-slate-500">:</span>
+              <span className="text-slate-900 font-semibold">4,2 Ha</span>
+            </div>
+            <div className="grid grid-cols-[130px_10px_1fr] items-start">
+              <span className="text-slate-500 font-medium flex items-center gap-2"><HiOutlineCalendar className="w-4 h-4" /> Jadwal</span>
+              <span className="text-slate-500">:</span>
+              <span className="text-slate-900 font-semibold">10 Mei 2026 – 27 Mei 2026</span>
+            </div>
+          </div>
         </div>
 
         {/* Timeline Program (Mirip Siap Monitoring) */}
@@ -611,7 +707,7 @@ const DetailMonitoringPage: React.FC = () => {
                 <p className="text-[10px] text-gray-500">10 Mei 2026</p>
               </div>
             </div>
-            
+
             <div className="flex gap-4 relative">
               <div className="absolute left-2.75 top-7 bottom-6 w-0.5 bg-green-200"></div>
               <div className="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center shrink-0 z-10 shadow-sm border-2 border-white">
@@ -651,7 +747,7 @@ const DetailMonitoringPage: React.FC = () => {
                 <p className="text-[10px] text-gray-400">Jul 2026</p>
               </div>
             </div>
-            
+
             <div className="flex gap-4 relative">
               <div className="w-6 h-6 rounded-full bg-white border-2 border-gray-300 flex items-center justify-center shrink-0 z-10"></div>
               <div className="flex-1">
@@ -671,7 +767,7 @@ const DetailMonitoringPage: React.FC = () => {
 
   const renderViewTindakLanjut = () => (
     <div className="space-y-6">
-      
+
       {/* Ringkasan Program Card */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
         <h3 className="text-sm font-bold text-slate-900 mb-4">Ringkasan Program</h3>
@@ -683,13 +779,13 @@ const DetailMonitoringPage: React.FC = () => {
             <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">Penyuluh</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">Ahmad Fauzi</span></div>
             <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">Jenis Program</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">Rehabilitasi Mangrove</span></div>
             <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">Periode Monitoring</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">P2</span></div>
-            <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">Lokasi</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold leading-relaxed">Desa Karangsong, Kec. Indramayu,<br/>Kab. Indramayu</span></div>
+            <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">Lokasi</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold leading-relaxed">Desa Karangsong, Kec. Indramayu,<br />Kab. Indramayu</span></div>
             <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">Tanggal Monitoring</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">22 Mei 2026</span></div>
             <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">Luas Area</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">25,40 Ha</span></div>
             <div className="grid grid-cols-[100px_10px_1fr] items-start text-xs"><span className="text-slate-500 font-medium">Sumber Dana</span><span className="text-slate-500">:</span><span className="text-slate-900 font-semibold">APBD</span></div>
           </div>
           <div className="w-full md:w-64 h-24 shrink-0 bg-slate-100 rounded-lg relative overflow-hidden bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=400')] bg-cover bg-center border border-slate-200">
-             <HiOutlineMapPin className="w-7 h-7 text-green-600 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 drop-shadow-md" />
+            <HiOutlineMapPin className="w-7 h-7 text-green-600 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 drop-shadow-md" />
           </div>
         </div>
       </div>
@@ -699,42 +795,42 @@ const DetailMonitoringPage: React.FC = () => {
         <h3 className="text-sm font-bold text-slate-900 mb-4">Ringkasan Hasil Monitoring P2</h3>
         <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
           <div className="col-span-2 md:col-span-1 border border-emerald-100 bg-emerald-50/30 rounded-xl p-3 shadow-sm flex flex-col items-center justify-center text-center">
-             <p className="text-[9px] text-slate-500 font-semibold mb-1">Persentase Keberhasilan</p>
-             <div className="flex items-center gap-2">
-               <HiOutlineCheckCircle className="w-5 h-5 text-emerald-600"/>
-               <h3 className="text-lg font-bold text-slate-900">92,01%</h3>
-             </div>
-             <span className="text-[9px] bg-emerald-100 text-emerald-700 font-bold mt-1 px-2 py-0.5 rounded">Baik</span>
+            <p className="text-[9px] text-slate-500 font-semibold mb-1">Persentase Keberhasilan</p>
+            <div className="flex items-center gap-2">
+              <HiOutlineCheckCircle className="w-5 h-5 text-emerald-600" />
+              <h3 className="text-lg font-bold text-slate-900">{programData?.stats?.persentaseHidup || 0}%</h3>
+            </div>
+            <span className="text-[9px] bg-emerald-100 text-emerald-700 font-bold mt-1 px-2 py-0.5 rounded">Aktual</span>
           </div>
           <div className="border border-slate-200 rounded-xl p-3 shadow-sm flex flex-col items-center justify-center text-center">
-             <PiLeaf className="w-5 h-5 text-emerald-600 mb-1"/>
-             <p className="text-[9px] text-slate-500 font-semibold mb-0.5">Jumlah Tanaman Hidup</p>
-             <h3 className="text-lg font-bold text-slate-900">13.210</h3>
-             <p className="text-[8px] text-slate-400">Batang</p>
+            <PiLeaf className="w-5 h-5 text-emerald-600 mb-1" />
+            <p className="text-[9px] text-slate-500 font-semibold mb-0.5">Jumlah Tanaman Hidup</p>
+            <h3 className="text-lg font-bold text-slate-900">{programData?.stats?.tanamanHidup || 0}</h3>
+            <p className="text-[8px] text-slate-400">Batang</p>
           </div>
           <div className="border border-red-100 bg-red-50/30 rounded-xl p-3 shadow-sm flex flex-col items-center justify-center text-center relative overflow-hidden">
-             <div className="absolute inset-x-0 top-0 h-1 bg-red-400"></div>
-             <PiTree className="w-5 h-5 text-red-500 mb-1"/>
-             <p className="text-[9px] text-slate-500 font-semibold mb-0.5">Jumlah Tanaman Mati</p>
-             <h3 className="text-lg font-bold text-slate-900">1.150</h3>
-             <p className="text-[8px] text-slate-400">Batang</p>
+            <div className="absolute inset-x-0 top-0 h-1 bg-red-400"></div>
+            <PiTree className="w-5 h-5 text-red-500 mb-1" />
+            <p className="text-[9px] text-slate-500 font-semibold mb-0.5">Jumlah Tanaman Mati</p>
+            <h3 className="text-lg font-bold text-slate-900">{programData?.stats?.tanamanMati || 0}</h3>
+            <p className="text-[8px] text-slate-400">Batang</p>
           </div>
           <div className="border border-slate-200 rounded-xl p-3 shadow-sm flex flex-col items-center justify-center text-center">
-             <HiOutlineMapPin className="w-5 h-5 text-blue-500 mb-1"/>
-             <p className="text-[9px] text-slate-500 font-semibold mb-0.5">Jumlah Titik Geotag</p>
-             <h3 className="text-lg font-bold text-slate-900">118</h3>
-             <p className="text-[8px] text-slate-400">Titik</p>
+            <HiOutlineMapPin className="w-5 h-5 text-blue-500 mb-1" />
+            <p className="text-[9px] text-slate-500 font-semibold mb-0.5">Jumlah Titik Geotag (PU)</p>
+            <h3 className="text-lg font-bold text-slate-900">{programData?.stats?.countGeotag || 0}</h3>
+            <p className="text-[8px] text-slate-400">Titik</p>
           </div>
           <div className="border border-slate-200 rounded-xl p-3 shadow-sm flex flex-col items-center justify-center text-center">
-             <HiOutlineDocumentText className="w-5 h-5 text-emerald-600 mb-1"/>
-             <p className="text-[9px] text-slate-500 font-semibold mb-0.5">Dokumentasi</p>
-             <h3 className="text-lg font-bold text-slate-900">36</h3>
-             <p className="text-[8px] text-slate-400">Foto</p>
+            <HiOutlineDocumentText className="w-5 h-5 text-emerald-600 mb-1" />
+            <p className="text-[9px] text-slate-500 font-semibold mb-0.5">Dokumentasi</p>
+            <h3 className="text-lg font-bold text-slate-900">{programData?.stats?.countDokumentasi || 0}</h3>
+            <p className="text-[8px] text-slate-400">Foto</p>
           </div>
           <div className="border border-slate-200 rounded-xl p-3 shadow-sm flex flex-col items-center justify-center text-center bg-slate-50">
-             <HiOutlineCalendar className="w-5 h-5 text-blue-500 mb-1"/>
-             <p className="text-[9px] text-slate-500 font-semibold mb-0.5">Periode Monitoring</p>
-             <h3 className="text-xl font-bold text-slate-900">P2</h3>
+            <HiOutlineCalendar className="w-5 h-5 text-blue-500 mb-1" />
+            <p className="text-[9px] text-slate-500 font-semibold mb-0.5">Periode Monitoring</p>
+            <h3 className="text-xl font-bold text-slate-900">P2</h3>
           </div>
         </div>
       </div>
@@ -795,107 +891,107 @@ const DetailMonitoringPage: React.FC = () => {
 
       {/* Informasi Tindak Lanjut Card */}
       <div className="bg-[#F0FDF4] rounded-xl shadow-sm border border-[#BBF7D0] p-6">
-         <div className="flex items-center gap-2 mb-4">
-           <HiOutlineDocumentText className="w-5 h-5 text-emerald-700" />
-           <h3 className="text-sm font-bold text-emerald-900">Informasi Tindak Lanjut</h3>
-         </div>
-         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-            <div className="space-y-4">
-              <div className="grid grid-cols-[140px_10px_1fr] items-start text-xs">
-                <span className="text-emerald-800 font-medium">Jenis Tindak Lanjut</span><span className="text-emerald-800">:</span><span className="text-emerald-900 font-bold">Penyulaman</span>
-              </div>
-              <div className="grid grid-cols-[140px_10px_1fr] items-start text-xs">
-                <span className="text-emerald-800 font-medium">Status Tindak Lanjut</span><span className="text-emerald-800">:</span><span className="text-orange-600 font-bold">Penyulaman Berjalan</span>
-              </div>
-              <div className="grid grid-cols-[140px_10px_1fr] items-start text-xs">
-                <span className="text-emerald-800 font-medium">Tanggal Penugasan</span><span className="text-emerald-800">:</span><span className="text-emerald-900 font-medium">28 Mei 2026</span>
-              </div>
-              <div className="grid grid-cols-[140px_10px_1fr] items-start text-xs">
-                <span className="text-emerald-800 font-medium">Target Penyelesaian</span><span className="text-emerald-800">:</span><span className="text-emerald-900 font-medium">25 Juni 2026</span>
-              </div>
+        <div className="flex items-center gap-2 mb-4">
+          <HiOutlineDocumentText className="w-5 h-5 text-emerald-700" />
+          <h3 className="text-sm font-bold text-emerald-900">Informasi Tindak Lanjut</h3>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+          <div className="space-y-4">
+            <div className="grid grid-cols-[140px_10px_1fr] items-start text-xs">
+              <span className="text-emerald-800 font-medium">Jenis Tindak Lanjut</span><span className="text-emerald-800">:</span><span className="text-emerald-900 font-bold">Penyulaman</span>
             </div>
-            <div className="space-y-4">
-              <div className="grid grid-cols-[150px_10px_1fr] items-start text-xs">
-                <span className="text-emerald-800 font-medium">Penyuluh Penanggung Jawab</span><span className="text-emerald-800">:</span><span className="text-emerald-900 font-medium">Ahmad Fauzi</span>
-              </div>
-              <div className="grid grid-cols-[150px_10px_1fr] items-start text-xs">
-                <span className="text-emerald-800 font-medium">KTH Pelaksana</span><span className="text-emerald-800">:</span><span className="text-emerald-900 font-medium">KTH Karangsong Lestari</span>
-              </div>
-              <div className="grid grid-cols-[150px_10px_1fr] items-start text-xs">
-                <span className="text-emerald-800 font-medium">Jumlah Titik Penyulaman</span><span className="text-emerald-800">:</span><span className="text-emerald-900 font-medium">5 Titik</span>
-              </div>
-              <div className="grid grid-cols-[150px_10px_1fr] items-start text-xs">
-                <span className="text-emerald-800 font-medium">Catatan Sistem</span><span className="text-emerald-800">:</span><span className="text-emerald-900 font-medium leading-relaxed">Penugasan penyulaman telah dikirim otomatis berdasarkan hasil evaluasi.</span>
-              </div>
+            <div className="grid grid-cols-[140px_10px_1fr] items-start text-xs">
+              <span className="text-emerald-800 font-medium">Status Tindak Lanjut</span><span className="text-emerald-800">:</span><span className="text-orange-600 font-bold">Penyulaman Berjalan</span>
             </div>
-         </div>
+            <div className="grid grid-cols-[140px_10px_1fr] items-start text-xs">
+              <span className="text-emerald-800 font-medium">Tanggal Penugasan</span><span className="text-emerald-800">:</span><span className="text-emerald-900 font-medium">28 Mei 2026</span>
+            </div>
+            <div className="grid grid-cols-[140px_10px_1fr] items-start text-xs">
+              <span className="text-emerald-800 font-medium">Target Penyelesaian</span><span className="text-emerald-800">:</span><span className="text-emerald-900 font-medium">25 Juni 2026</span>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div className="grid grid-cols-[150px_10px_1fr] items-start text-xs">
+              <span className="text-emerald-800 font-medium">Penyuluh Penanggung Jawab</span><span className="text-emerald-800">:</span><span className="text-emerald-900 font-medium">Ahmad Fauzi</span>
+            </div>
+            <div className="grid grid-cols-[150px_10px_1fr] items-start text-xs">
+              <span className="text-emerald-800 font-medium">KTH Pelaksana</span><span className="text-emerald-800">:</span><span className="text-emerald-900 font-medium">KTH Karangsong Lestari</span>
+            </div>
+            <div className="grid grid-cols-[150px_10px_1fr] items-start text-xs">
+              <span className="text-emerald-800 font-medium">Jumlah Titik Penyulaman</span><span className="text-emerald-800">:</span><span className="text-emerald-900 font-medium">5 Titik</span>
+            </div>
+            <div className="grid grid-cols-[150px_10px_1fr] items-start text-xs">
+              <span className="text-emerald-800 font-medium">Catatan Sistem</span><span className="text-emerald-800">:</span><span className="text-emerald-900 font-medium leading-relaxed">Penugasan penyulaman telah dikirim otomatis berdasarkan hasil evaluasi.</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-            <h3 className="text-sm font-bold text-slate-900 mb-3">Peta Titik Penyulaman</h3>
-            <div className="flex gap-4">
-              <div className="flex-1 h-32 bg-slate-100 rounded-lg relative overflow-hidden bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=400')] bg-cover bg-center border border-slate-200">
-                <div className="absolute inset-0 flex flex-wrap items-center justify-center gap-4 pointer-events-none p-4">
-                   <div className="relative"><HiOutlineMapPin className="w-6 h-6 text-red-600 drop-shadow"/><span className="absolute top-1 left-1/2 -translate-x-1/2 text-[8px] font-bold text-white">3</span></div>
-                   <div className="relative"><HiOutlineMapPin className="w-6 h-6 text-orange-500 drop-shadow"/><span className="absolute top-1 left-1/2 -translate-x-1/2 text-[8px] font-bold text-white">7</span></div>
-                   <div className="relative"><HiOutlineMapPin className="w-6 h-6 text-red-600 drop-shadow"/><span className="absolute top-1 left-1/2 -translate-x-1/2 text-[8px] font-bold text-white">5</span></div>
-                   <div className="relative"><HiOutlineMapPin className="w-6 h-6 text-green-500 drop-shadow"/><span className="absolute top-1 left-1/2 -translate-x-1/2 text-[8px] font-bold text-white">11</span></div>
-                </div>
-              </div>
-              <div className="w-32 shrink-0">
-                <p className="text-[10px] font-bold text-slate-700 mb-2">Legenda</p>
-                <div className="space-y-1.5 text-[9px] font-medium text-slate-600">
-                  <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-red-600"></span> Prioritas Tinggi</div>
-                  <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-orange-500"></span> Prioritas Sedang</div>
-                  <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500"></span> Prioritas Rendah</div>
-                </div>
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+          <h3 className="text-sm font-bold text-slate-900 mb-3">Peta Titik Penyulaman</h3>
+          <div className="flex gap-4">
+            <div className="flex-1 h-32 bg-slate-100 rounded-lg relative overflow-hidden bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=400')] bg-cover bg-center border border-slate-200">
+              <div className="absolute inset-0 flex flex-wrap items-center justify-center gap-4 pointer-events-none p-4">
+                <div className="relative"><HiOutlineMapPin className="w-6 h-6 text-red-600 drop-shadow" /><span className="absolute top-1 left-1/2 -translate-x-1/2 text-[8px] font-bold text-white">3</span></div>
+                <div className="relative"><HiOutlineMapPin className="w-6 h-6 text-orange-500 drop-shadow" /><span className="absolute top-1 left-1/2 -translate-x-1/2 text-[8px] font-bold text-white">7</span></div>
+                <div className="relative"><HiOutlineMapPin className="w-6 h-6 text-red-600 drop-shadow" /><span className="absolute top-1 left-1/2 -translate-x-1/2 text-[8px] font-bold text-white">5</span></div>
+                <div className="relative"><HiOutlineMapPin className="w-6 h-6 text-green-500 drop-shadow" /><span className="absolute top-1 left-1/2 -translate-x-1/2 text-[8px] font-bold text-white">11</span></div>
               </div>
             </div>
-         </div>
-         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-            <h3 className="text-sm font-bold text-slate-900 mb-3">Dokumentasi Foto</h3>
-            <div className="grid grid-cols-4 gap-2 mb-2">
-               {[1,2,3,4].map(i => <div key={i} className="bg-slate-200 rounded h-20 bg-[url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?q=80&w=150')] bg-cover border border-slate-200"></div>)}
+            <div className="w-32 shrink-0">
+              <p className="text-[10px] font-bold text-slate-700 mb-2">Legenda</p>
+              <div className="space-y-1.5 text-[9px] font-medium text-slate-600">
+                <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-red-600"></span> Prioritas Tinggi</div>
+                <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-orange-500"></span> Prioritas Sedang</div>
+                <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500"></span> Prioritas Rendah</div>
+              </div>
             </div>
-            <button className="text-[11px] font-bold text-blue-600 hover:text-blue-700 flex items-center justify-center w-full mt-2">Lihat semua dokumentasi (36 foto) <HiArrowRight className="w-3 h-3 ml-1"/></button>
-         </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+          <h3 className="text-sm font-bold text-slate-900 mb-3">Dokumentasi Foto</h3>
+          <div className="grid grid-cols-4 gap-2 mb-2">
+            {[1, 2, 3, 4].map(i => <div key={i} className="bg-slate-200 rounded h-20 bg-[url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?q=80&w=150')] bg-cover border border-slate-200"></div>)}
+          </div>
+          <button className="text-[11px] font-bold text-blue-600 hover:text-blue-700 flex items-center justify-center w-full mt-2">Lihat semua dokumentasi (36 foto) <HiArrowRight className="w-3 h-3 ml-1" /></button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-           <h3 className="text-sm font-bold text-slate-900 mb-4">Daftar Titik Penyulaman</h3>
-           <div className="overflow-x-auto">
-             <table className="w-full text-left text-[10px]">
-               <thead className="bg-[#F8FAFC] text-slate-600 font-bold border-b border-slate-200">
-                 <tr><th className="py-2 px-2">No.</th><th className="py-2 px-2">Titik</th><th className="py-2 px-2">Kondisi</th><th className="py-2 px-2">Koordinat</th><th className="py-2 px-2">Prioritas</th></tr>
-               </thead>
-               <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-                 <tr><td className="py-2 px-2">1</td><td className="py-2 px-2">Titik 3</td><td className="py-2 px-2">Sebagian tanaman mati</td><td className="py-2 px-2 text-slate-500">6.363315° S, 108.283721° E</td><td className="py-2 px-2"><span className="text-red-600 border border-red-200 bg-red-50 px-1.5 py-0.5 rounded">Prioritas Tinggi</span></td></tr>
-                 <tr><td className="py-2 px-2">2</td><td className="py-2 px-2">Titik 5</td><td className="py-2 px-2">Banyak tanaman mati</td><td className="py-2 px-2 text-slate-500">6.363521° S, 108.284102° E</td><td className="py-2 px-2"><span className="text-red-600 border border-red-200 bg-red-50 px-1.5 py-0.5 rounded">Prioritas Tinggi</span></td></tr>
-                 <tr><td className="py-2 px-2">3</td><td className="py-2 px-2">Titik 7</td><td className="py-2 px-2">Tanaman belum tumbuh</td><td className="py-2 px-2 text-slate-500">6.364001° S, 108.283950° E</td><td className="py-2 px-2"><span className="text-orange-600 border border-orange-200 bg-orange-50 px-1.5 py-0.5 rounded">Prioritas Sedang</span></td></tr>
-                 <tr><td className="py-2 px-2">4</td><td className="py-2 px-2">Titik 11</td><td className="py-2 px-2">Pertumbuhan kurang optimal</td><td className="py-2 px-2 text-slate-500">6.364512° S, 108.284301° E</td><td className="py-2 px-2"><span className="text-emerald-600 border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 rounded">Prioritas Rendah</span></td></tr>
-                 <tr><td className="py-2 px-2">5</td><td className="py-2 px-2">Titik 14</td><td className="py-2 px-2">Sebagian tanaman mati</td><td className="py-2 px-2 text-slate-500">6.364889° S, 108.284789° E</td><td className="py-2 px-2"><span className="text-orange-600 border border-orange-200 bg-orange-50 px-1.5 py-0.5 rounded">Prioritas Sedang</span></td></tr>
-               </tbody>
-             </table>
-           </div>
-         </div>
-         
-         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-           <h3 className="text-sm font-bold text-slate-900 mb-4">Riwayat Monitoring</h3>
-           <div className="overflow-x-auto">
-             <table className="w-full text-left text-[11px]">
-               <thead className="bg-[#F8FAFC] text-slate-600 font-bold border-b border-slate-200">
-                 <tr><th className="py-2.5 px-3">Periode</th><th className="py-2.5 px-3">Tanggal Monitoring</th><th className="py-2.5 px-3">Penyuluh</th><th className="py-2.5 px-3">Persentase Hidup</th><th className="py-2.5 px-3">Status</th></tr>
-               </thead>
-               <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-                 <tr><td className="py-2.5 px-3 font-bold text-slate-800">P0</td><td className="py-2.5 px-3">10 Mei 2026</td><td className="py-2.5 px-3">Ahmad Fauzi</td><td className="py-2.5 px-3">93,33%</td><td className="py-2.5 px-3"><span className="text-emerald-700 border border-emerald-200 bg-emerald-50 px-2 py-0.5 rounded font-bold text-[9px]">Selesai</span></td></tr>
-                 <tr><td className="py-2.5 px-3 font-bold text-slate-800">P1</td><td className="py-2.5 px-3">12 Mei 2026</td><td className="py-2.5 px-3">Ahmad Fauzi</td><td className="py-2.5 px-3">93,31%</td><td className="py-2.5 px-3"><span className="text-emerald-700 border border-emerald-200 bg-emerald-50 px-2 py-0.5 rounded font-bold text-[9px]">Selesai</span></td></tr>
-                 <tr><td className="py-2.5 px-3 font-bold text-slate-800">P2</td><td className="py-2.5 px-3">22 Mei 2026</td><td className="py-2.5 px-3">Ahmad Fauzi</td><td className="py-2.5 px-3">92,01%</td><td className="py-2.5 px-3"><span className="text-orange-700 border border-orange-200 bg-orange-50 px-2 py-0.5 rounded font-bold text-[9px] leading-tight block w-30">Menunggu Penyulaman /<br/>Tindak Lanjut</span></td></tr>
-               </tbody>
-             </table>
-           </div>
-         </div>
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+          <h3 className="text-sm font-bold text-slate-900 mb-4">Daftar Titik Penyulaman</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-[10px]">
+              <thead className="bg-[#F8FAFC] text-slate-600 font-bold border-b border-slate-200">
+                <tr><th className="py-2 px-2">No.</th><th className="py-2 px-2">Titik</th><th className="py-2 px-2">Kondisi</th><th className="py-2 px-2">Koordinat</th><th className="py-2 px-2">Prioritas</th></tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+                <tr><td className="py-2 px-2">1</td><td className="py-2 px-2">Titik 3</td><td className="py-2 px-2">Sebagian tanaman mati</td><td className="py-2 px-2 text-slate-500">6.363315° S, 108.283721° E</td><td className="py-2 px-2"><span className="text-red-600 border border-red-200 bg-red-50 px-1.5 py-0.5 rounded">Prioritas Tinggi</span></td></tr>
+                <tr><td className="py-2 px-2">2</td><td className="py-2 px-2">Titik 5</td><td className="py-2 px-2">Banyak tanaman mati</td><td className="py-2 px-2 text-slate-500">6.363521° S, 108.284102° E</td><td className="py-2 px-2"><span className="text-red-600 border border-red-200 bg-red-50 px-1.5 py-0.5 rounded">Prioritas Tinggi</span></td></tr>
+                <tr><td className="py-2 px-2">3</td><td className="py-2 px-2">Titik 7</td><td className="py-2 px-2">Tanaman belum tumbuh</td><td className="py-2 px-2 text-slate-500">6.364001° S, 108.283950° E</td><td className="py-2 px-2"><span className="text-orange-600 border border-orange-200 bg-orange-50 px-1.5 py-0.5 rounded">Prioritas Sedang</span></td></tr>
+                <tr><td className="py-2 px-2">4</td><td className="py-2 px-2">Titik 11</td><td className="py-2 px-2">Pertumbuhan kurang optimal</td><td className="py-2 px-2 text-slate-500">6.364512° S, 108.284301° E</td><td className="py-2 px-2"><span className="text-emerald-600 border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 rounded">Prioritas Rendah</span></td></tr>
+                <tr><td className="py-2 px-2">5</td><td className="py-2 px-2">Titik 14</td><td className="py-2 px-2">Sebagian tanaman mati</td><td className="py-2 px-2 text-slate-500">6.364889° S, 108.284789° E</td><td className="py-2 px-2"><span className="text-orange-600 border border-orange-200 bg-orange-50 px-1.5 py-0.5 rounded">Prioritas Sedang</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+          <h3 className="text-sm font-bold text-slate-900 mb-4">Riwayat Monitoring</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-[11px]">
+              <thead className="bg-[#F8FAFC] text-slate-600 font-bold border-b border-slate-200">
+                <tr><th className="py-2.5 px-3">Periode</th><th className="py-2.5 px-3">Tanggal Monitoring</th><th className="py-2.5 px-3">Penyuluh</th><th className="py-2.5 px-3">Persentase Hidup</th><th className="py-2.5 px-3">Status</th></tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+                <tr><td className="py-2.5 px-3 font-bold text-slate-800">P0</td><td className="py-2.5 px-3">10 Mei 2026</td><td className="py-2.5 px-3">Ahmad Fauzi</td><td className="py-2.5 px-3">93,33%</td><td className="py-2.5 px-3"><span className="text-emerald-700 border border-emerald-200 bg-emerald-50 px-2 py-0.5 rounded font-bold text-[9px]">Selesai</span></td></tr>
+                <tr><td className="py-2.5 px-3 font-bold text-slate-800">P1</td><td className="py-2.5 px-3">12 Mei 2026</td><td className="py-2.5 px-3">Ahmad Fauzi</td><td className="py-2.5 px-3">93,31%</td><td className="py-2.5 px-3"><span className="text-emerald-700 border border-emerald-200 bg-emerald-50 px-2 py-0.5 rounded font-bold text-[9px]">Selesai</span></td></tr>
+                <tr><td className="py-2.5 px-3 font-bold text-slate-800">P2</td><td className="py-2.5 px-3">22 Mei 2026</td><td className="py-2.5 px-3">Ahmad Fauzi</td><td className="py-2.5 px-3">92,01%</td><td className="py-2.5 px-3"><span className="text-orange-700 border border-orange-200 bg-orange-50 px-2 py-0.5 rounded font-bold text-[9px] leading-tight block w-30">Menunggu Penyulaman /<br />Tindak Lanjut</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -904,32 +1000,32 @@ const DetailMonitoringPage: React.FC = () => {
   const renderViewSelesai = () => (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
       <div className="lg:col-span-8 space-y-6">
-        
+
         {/* Informasi Program (Selesai Layout) */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
           <h3 className="text-sm font-bold text-slate-900 mb-4">Informasi Program</h3>
           <div className="flex flex-col lg:flex-row gap-6">
             <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-y-5 gap-x-4">
-              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Nama Program</p><p className="text-xs font-bold text-slate-900 leading-snug">Rehabilitasi Mangrove<br/>Karangsong</p></div>
-              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">ID Program</p><p className="text-xs font-bold text-slate-900">{id || 'PRG-2026-0007'}</p></div>
-              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Jenis Program</p><p className="text-xs font-bold text-slate-900">Rehabilitasi Mangrove</p></div>
-              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Luas Area</p><p className="text-xs font-bold text-slate-900">25,40 Ha</p></div>
+              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Nama Program</p><p className="text-xs font-bold text-slate-900 leading-snug">{programData?.programName || '-'}</p></div>
+              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">ID Program</p><p className="text-xs font-bold text-slate-900">{programData?.id || id || '-'}</p></div>
+              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Jenis Program</p><p className="text-xs font-bold text-slate-900">{programData?.programName || '-'}</p></div>
+              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Luas Area</p><p className="text-xs font-bold text-slate-900">{programData?.luas || '-'}</p></div>
               <div className="col-span-2">
-                <p className="text-[10px] text-slate-500 font-semibold mb-1 flex items-center gap-1"><HiOutlineMapPin className="w-3.5 h-3.5 text-green-600"/> Lokasi Program</p>
-                <p className="text-xs font-bold text-slate-900 leading-relaxed">Desa Karangsong, Kec. Indramayu<br/>Kabupaten Indramayu, Jawa Barat</p>
+                <p className="text-[10px] text-slate-500 font-semibold mb-1 flex items-center gap-1"><HiOutlineMapPin className="w-3.5 h-3.5 text-green-600" /> Lokasi Program</p>
+                <p className="text-xs font-bold text-slate-900 leading-relaxed">{programData?.lokasi || '-'}</p>
               </div>
-              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Penyuluh Pendamping</p><p className="text-xs font-bold text-slate-900">Ahmad Fauzi, SP</p></div>
-              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">KTH Pelaksana</p><p className="text-xs font-bold text-slate-900">KTH Karangsong Lestari</p></div>
+              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Penyuluh Pendamping</p><p className="text-xs font-bold text-slate-900">{programData?.penyuluh || '-'}</p></div>
+              <div><p className="text-[10px] text-slate-500 font-semibold mb-1">KTH Pelaksana</p><p className="text-xs font-bold text-slate-900">{programData?.kth || '-'}</p></div>
               <div className="col-span-4 border-t border-slate-100 pt-4 grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
-                <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Periode Monitoring</p><p className="text-xs font-bold text-slate-900">P0 – P4</p></div>
-                <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Tanggal Monitoring Awal</p><p className="text-xs font-bold text-slate-900">10 Mei 2026</p></div>
-                <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Tanggal Monitoring Akhir</p><p className="text-xs font-bold text-slate-900">12 Mei 2027</p></div>
-                <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Total Durasi Monitoring</p><p className="text-xs font-bold text-slate-900">12 Bulan</p></div>
+                <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Periode Monitoring</p><p className="text-xs font-bold text-slate-900">{programData?.periode_monitoring || '-'}</p></div>
+                <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Tanggal Monitoring Awal</p><p className="text-xs font-bold text-slate-900">{programData?.tanggal_penugasan ? new Date(programData.tanggal_penugasan).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}</p></div>
+                <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Tanggal Monitoring Akhir</p><p className="text-xs font-bold text-slate-900">{programData?.batas_waktu ? new Date(programData.batas_waktu).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}</p></div>
+                <div><p className="text-[10px] text-slate-500 font-semibold mb-1">Total Durasi Monitoring</p><p className="text-xs font-bold text-slate-900">-</p></div>
               </div>
             </div>
             <div className="w-full md:hidden lg:block lg:w-48 shrink-0">
-               <p className="text-[10px] text-slate-500 font-semibold mb-2">Lokasi Program</p>
-               <div className="w-full h-32 bg-slate-100 rounded-lg relative overflow-hidden bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=400')] bg-cover bg-center border border-slate-200"></div>
+              <p className="text-[10px] text-slate-500 font-semibold mb-2">Lokasi Program</p>
+              <div className="w-full h-32 bg-slate-100 rounded-lg relative overflow-hidden bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=400')] bg-cover bg-center border border-slate-200"></div>
             </div>
           </div>
         </div>
@@ -939,148 +1035,148 @@ const DetailMonitoringPage: React.FC = () => {
           <h3 className="text-sm font-bold text-slate-900 mb-4">Ringkasan Hasil Akhir (P4)</h3>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div className="border border-emerald-100 rounded-xl p-4 shadow-sm relative overflow-hidden">
-               <PiPlant className="w-6 h-6 text-emerald-600 mb-2"/>
-               <p className="text-[10px] text-slate-500 font-semibold">Tanaman Hidup</p>
-               <h3 className="text-xl font-bold text-slate-900 my-1">16.820 <span className="text-[10px] font-normal text-slate-500">batang</span></h3>
-               <p className="text-[10px] font-bold text-emerald-600">94,55% dari P0</p>
+              <PiPlant className="w-6 h-6 text-emerald-600 mb-2" />
+              <p className="text-[10px] text-slate-500 font-semibold">Tanaman Hidup</p>
+              <h3 className="text-xl font-bold text-slate-900 my-1">{programData?.stats?.tanamanHidup || 0} <span className="text-[10px] font-normal text-slate-500">batang</span></h3>
+              <p className="text-[10px] font-bold text-emerald-600">{programData?.stats?.persentaseHidup || 0}% Aktual</p>
             </div>
             <div className="border border-red-100 rounded-xl p-4 shadow-sm relative overflow-hidden">
-               <PiTree className="w-6 h-6 text-red-500 mb-2"/>
-               <p className="text-[10px] text-slate-500 font-semibold">Tanaman Mati</p>
-               <h3 className="text-xl font-bold text-slate-900 my-1">910 <span className="text-[10px] font-normal text-slate-500">batang</span></h3>
-               <p className="text-[10px] font-bold text-red-500">5,11% dari P0</p>
+              <PiTree className="w-6 h-6 text-red-500 mb-2" />
+              <p className="text-[10px] text-slate-500 font-semibold">Tanaman Mati</p>
+              <h3 className="text-xl font-bold text-slate-900 my-1">{programData?.stats?.tanamanMati || 0} <span className="text-[10px] font-normal text-slate-500">batang</span></h3>
+              <p className="text-[10px] font-bold text-red-500">{(100 - (programData?.stats?.persentaseHidup || 0)).toFixed(2)}% Aktual</p>
             </div>
             <div className="border border-slate-200 rounded-xl p-4 shadow-sm">
-               <HiOutlineMapPin className="w-6 h-6 text-blue-500 mb-2"/>
-               <p className="text-[10px] text-slate-500 font-semibold">Titik Geotag</p>
-               <h3 className="text-xl font-bold text-slate-900 my-1">118 <span className="text-[10px] font-normal text-slate-500">titik</span></h3>
-               <p className="text-[10px] font-bold text-emerald-600">100% terverifikasi</p>
+              <HiOutlineMapPin className="w-6 h-6 text-blue-500 mb-2" />
+              <p className="text-[10px] text-slate-500 font-semibold">Titik Geotag (PU)</p>
+              <h3 className="text-xl font-bold text-slate-900 my-1">{programData?.stats?.countGeotag || 0} <span className="text-[10px] font-normal text-slate-500">titik</span></h3>
+              <p className="text-[10px] font-bold text-emerald-600">100% terverifikasi</p>
             </div>
             <div className="border border-slate-200 rounded-xl p-4 shadow-sm">
-               <HiOutlineDocumentText className="w-6 h-6 text-purple-500 mb-2"/>
-               <p className="text-[10px] text-slate-500 font-semibold">Dokumentasi</p>
-               <h3 className="text-xl font-bold text-slate-900 my-1">42 <span className="text-[10px] font-normal text-slate-500">foto</span></h3>
-               <p className="text-[10px] font-bold text-emerald-600">100% lengkap</p>
+              <HiOutlineDocumentText className="w-6 h-6 text-purple-500 mb-2" />
+              <p className="text-[10px] text-slate-500 font-semibold">Dokumentasi</p>
+              <h3 className="text-xl font-bold text-slate-900 my-1">{programData?.stats?.countDokumentasi || 0} <span className="text-[10px] font-normal text-slate-500">foto</span></h3>
+              <p className="text-[10px] font-bold text-emerald-600">Lengkap</p>
             </div>
             <div className="border border-slate-200 rounded-xl p-4 shadow-sm bg-slate-50/50">
-               <HiOutlineCalendar className="w-6 h-6 text-blue-500 mb-2"/>
-               <p className="text-[10px] text-slate-500 font-semibold">Periode Monitoring</p>
-               <h3 className="text-xs font-bold text-slate-900 my-1 leading-snug">10 Mei 2026 –<br/>12 Mei 2027</h3>
-               <p className="text-[10px] font-bold text-slate-600 mt-1">5 periode selesai</p>
+              <HiOutlineCalendar className="w-6 h-6 text-blue-500 mb-2" />
+              <p className="text-[10px] text-slate-500 font-semibold">Periode Monitoring</p>
+              <h3 className="text-xs font-bold text-slate-900 my-1 leading-snug">{programData?.periode_monitoring || '-'}</h3>
+              <p className="text-[10px] font-bold text-slate-600 mt-1">Selesai</p>
             </div>
           </div>
         </div>
 
         {/* Charts / Perbandingan Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col">
-             <h3 className="text-sm font-bold text-slate-900 mb-4">Perkembangan Persentase Hidup (P0 – P4)</h3>
-             {/* Mock Chart Area */}
-             <div className="flex-1 bg-linear-to-b from-emerald-50 to-white border-x border-t border-slate-100 rounded-t-lg relative mt-4 min-h-35">
-                {/* Y-Axis mock */}
-                <div className="absolute left-2 top-0 bottom-0 flex flex-col justify-between text-[8px] text-slate-400 py-2">
-                  <span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span>
-                </div>
-                {/* Data points mock */}
-                <div className="absolute left-10 right-4 top-4 bottom-8 flex justify-between items-end">
-                   {/* P0 */} <div className="flex flex-col items-center gap-1 w-full"><span className="text-[9px] font-bold text-emerald-800 absolute top-2">93,33%</span><div className="w-2 h-2 rounded-full bg-emerald-600 z-10"></div></div>
-                   {/* P1 */} <div className="flex flex-col items-center gap-1 w-full"><span className="text-[9px] font-bold text-emerald-800 absolute top-0">95,20%</span><div className="w-2 h-2 rounded-full bg-emerald-600 z-10 mb-2"></div></div>
-                   {/* P2 */} <div className="flex flex-col items-center gap-1 w-full"><span className="text-[9px] font-bold text-emerald-800 absolute top-3">92,01%</span><div className="w-2 h-2 rounded-full bg-emerald-600 z-10 -mb-1"></div></div>
-                   {/* P3 */} <div className="flex flex-col items-center gap-1 w-full"><span className="text-[9px] font-bold text-emerald-800 absolute top-1.5">93,17%</span><div className="w-2 h-2 rounded-full bg-emerald-600 z-10 mb-1"></div></div>
-                   {/* P4 */} <div className="flex flex-col items-center gap-1 w-full"><span className="text-[9px] font-bold text-emerald-800 absolute top-px">94,55%</span><div className="w-2 h-2 rounded-full bg-emerald-600 z-10 mb-3"></div></div>
-                </div>
-                {/* Mock Line */}
-                <div className="absolute left-10 right-10 top-8 h-px bg-emerald-600"></div>
-                {/* X-Axis labels */}
-                <div className="absolute left-10 right-4 bottom-2 flex justify-between text-[8px] text-slate-500 font-medium">
-                  <div className="text-center">P0<br/><span className="text-[7px]">10 Mei 2026</span></div>
-                  <div className="text-center">P1<br/><span className="text-[7px]">12 Jun 2026</span></div>
-                  <div className="text-center">P2<br/><span className="text-[7px]">12 Mei 2026</span></div>
-                  <div className="text-center">P3<br/><span className="text-[7px]">20 Jul 2026</span></div>
-                  <div className="text-center">P4<br/><span className="text-[7px]">12 Mei 2027</span></div>
-                </div>
-             </div>
-             <div className="text-center mt-3"><span className="inline-flex items-center gap-1 text-[9px] font-semibold text-slate-600"><span className="w-2 h-2 rounded-full bg-emerald-600"></span>Persentase Hidup</span></div>
-           </div>
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col">
+            <h3 className="text-sm font-bold text-slate-900 mb-4">Perkembangan Persentase Hidup (P0 – P4)</h3>
+            {/* Mock Chart Area */}
+            <div className="flex-1 bg-linear-to-b from-emerald-50 to-white border-x border-t border-slate-100 rounded-t-lg relative mt-4 min-h-35">
+              {/* Y-Axis mock */}
+              <div className="absolute left-2 top-0 bottom-0 flex flex-col justify-between text-[8px] text-slate-400 py-2">
+                <span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span>
+              </div>
+              {/* Data points mock */}
+              <div className="absolute left-10 right-4 top-4 bottom-8 flex justify-between items-end">
+                {/* P0 */} <div className="flex flex-col items-center gap-1 w-full"><span className="text-[9px] font-bold text-emerald-800 absolute top-2">93,33%</span><div className="w-2 h-2 rounded-full bg-emerald-600 z-10"></div></div>
+                {/* P1 */} <div className="flex flex-col items-center gap-1 w-full"><span className="text-[9px] font-bold text-emerald-800 absolute top-0">95,20%</span><div className="w-2 h-2 rounded-full bg-emerald-600 z-10 mb-2"></div></div>
+                {/* P2 */} <div className="flex flex-col items-center gap-1 w-full"><span className="text-[9px] font-bold text-emerald-800 absolute top-3">92,01%</span><div className="w-2 h-2 rounded-full bg-emerald-600 z-10 -mb-1"></div></div>
+                {/* P3 */} <div className="flex flex-col items-center gap-1 w-full"><span className="text-[9px] font-bold text-emerald-800 absolute top-1.5">93,17%</span><div className="w-2 h-2 rounded-full bg-emerald-600 z-10 mb-1"></div></div>
+                {/* P4 */} <div className="flex flex-col items-center gap-1 w-full"><span className="text-[9px] font-bold text-emerald-800 absolute top-px">94,55%</span><div className="w-2 h-2 rounded-full bg-emerald-600 z-10 mb-3"></div></div>
+              </div>
+              {/* Mock Line */}
+              <div className="absolute left-10 right-10 top-8 h-px bg-emerald-600"></div>
+              {/* X-Axis labels */}
+              <div className="absolute left-10 right-4 bottom-2 flex justify-between text-[8px] text-slate-500 font-medium">
+                <div className="text-center">P0<br /><span className="text-[7px]">10 Mei 2026</span></div>
+                <div className="text-center">P1<br /><span className="text-[7px]">12 Jun 2026</span></div>
+                <div className="text-center">P2<br /><span className="text-[7px]">12 Mei 2026</span></div>
+                <div className="text-center">P3<br /><span className="text-[7px]">20 Jul 2026</span></div>
+                <div className="text-center">P4<br /><span className="text-[7px]">12 Mei 2027</span></div>
+              </div>
+            </div>
+            <div className="text-center mt-3"><span className="inline-flex items-center gap-1 text-[9px] font-semibold text-slate-600"><span className="w-2 h-2 rounded-full bg-emerald-600"></span>Persentase Hidup</span></div>
+          </div>
 
-           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col">
-             <h3 className="text-sm font-bold text-slate-900 mb-4">Perbandingan Awal dan Akhir</h3>
-             <div className="flex items-center gap-3 mb-4 flex-1">
-                <div className="flex-1 bg-slate-50 border border-slate-200 rounded-lg p-3 text-center">
-                   <p className="text-[10px] font-bold text-slate-600 mb-2">Kondisi Awal (P0)</p>
-                   <h4 className="text-base font-bold text-slate-900">13.860 <span className="text-[9px] font-normal text-slate-500">batang</span></h4>
-                   <p className="text-[9px] text-slate-500 mb-2">Tanaman Hidup</p>
-                   <span className="text-lg font-bold text-emerald-600">93,33%</span>
-                </div>
-                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0 border border-slate-200">
-                   <HiArrowRight className="w-4 h-4 text-slate-400" />
-                </div>
-                <div className="flex-1 bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-center relative overflow-hidden">
-                   <p className="text-[10px] font-bold text-emerald-800 mb-2">Kondisi Akhir (P4)</p>
-                   <h4 className="text-base font-bold text-slate-900">16.820 <span className="text-[9px] font-normal text-slate-500">batang</span></h4>
-                   <p className="text-[9px] text-slate-500 mb-2">Tanaman Hidup</p>
-                   <span className="text-lg font-bold text-emerald-600">94,55%</span>
-                   <PiPlant className="w-12 h-12 text-emerald-200 absolute -bottom-2 -right-2 opacity-50" />
-                </div>
-             </div>
-             <div className="bg-[#f0fdf4] border border-[#bbf7d0] rounded-lg p-3 flex items-center gap-3">
-                <div className="bg-emerald-100 p-1.5 rounded-md"><HiArrowTrendingUp className="w-4 h-4 text-emerald-700"/></div>
-                <div>
-                   <p className="text-[10px] text-emerald-800 font-semibold mb-0.5">Peningkatan Tanaman Hidup</p>
-                   <p className="text-sm font-bold text-emerald-700">+ 2.960 batang (+1,22%)</p>
-                </div>
-             </div>
-           </div>
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col">
+            <h3 className="text-sm font-bold text-slate-900 mb-4">Perbandingan Awal dan Akhir</h3>
+            <div className="flex items-center gap-3 mb-4 flex-1">
+              <div className="flex-1 bg-slate-50 border border-slate-200 rounded-lg p-3 text-center">
+                <p className="text-[10px] font-bold text-slate-600 mb-2">Kondisi Awal (P0)</p>
+                <h4 className="text-base font-bold text-slate-900">13.860 <span className="text-[9px] font-normal text-slate-500">batang</span></h4>
+                <p className="text-[9px] text-slate-500 mb-2">Tanaman Hidup</p>
+                <span className="text-lg font-bold text-emerald-600">93,33%</span>
+              </div>
+              <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0 border border-slate-200">
+                <HiArrowRight className="w-4 h-4 text-slate-400" />
+              </div>
+              <div className="flex-1 bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-center relative overflow-hidden">
+                <p className="text-[10px] font-bold text-emerald-800 mb-2">Kondisi Akhir (P4)</p>
+                <h4 className="text-base font-bold text-slate-900">16.820 <span className="text-[9px] font-normal text-slate-500">batang</span></h4>
+                <p className="text-[9px] text-slate-500 mb-2">Tanaman Hidup</p>
+                <span className="text-lg font-bold text-emerald-600">94,55%</span>
+                <PiPlant className="w-12 h-12 text-emerald-200 absolute -bottom-2 -right-2 opacity-50" />
+              </div>
+            </div>
+            <div className="bg-[#f0fdf4] border border-[#bbf7d0] rounded-lg p-3 flex items-center gap-3">
+              <div className="bg-emerald-100 p-1.5 rounded-md"><HiArrowTrendingUp className="w-4 h-4 text-emerald-700" /></div>
+              <div>
+                <p className="text-[10px] text-emerald-800 font-semibold mb-0.5">Peningkatan Tanaman Hidup</p>
+                <p className="text-sm font-bold text-emerald-700">+ 2.960 batang (+1,22%)</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Bottom Row Selesai */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-             <div className="flex justify-between items-center mb-3">
-               <h3 className="text-sm font-bold text-slate-900">Dokumentasi Kegiatan</h3>
-               <span className="text-[10px] font-bold text-blue-600 hover:text-blue-700 cursor-pointer">Lihat Semua (42)</span>
-             </div>
-             <div className="grid grid-cols-4 gap-2">
-               {[1,2,3,4].map(i => <div key={i} className="bg-slate-200 rounded h-16 bg-[url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?q=80&w=150')] bg-cover border border-slate-200"></div>)}
-             </div>
-           </div>
-           
-           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-             <h3 className="text-sm font-bold text-slate-900 mb-3">Evaluasi Akhir Program</h3>
-             <div className="flex gap-3 items-start">
-                <div className="mt-1"><HiOutlineDocumentCheck className="w-6 h-6 text-[#008A4B]" /></div>
-                <div>
-                  <h4 className="text-xs font-bold text-[#008A4B] mb-1">Program dinyatakan berhasil.</h4>
-                  <p className="text-[10px] text-slate-600 leading-relaxed mb-2">Persentase hidup tanaman mangrove telah mencapai target ({'>'}80%) dan tidak terdapat indikasi kegagalan signifikan.</p>
-                  <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded text-[9px] font-bold">Memenuhi Kriteria</span>
-                </div>
-             </div>
-           </div>
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-sm font-bold text-slate-900">Dokumentasi Kegiatan</h3>
+              <span className="text-[10px] font-bold text-blue-600 hover:text-blue-700 cursor-pointer">Lihat Semua (42)</span>
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+              {[1, 2, 3, 4].map(i => <div key={i} className="bg-slate-200 rounded h-16 bg-[url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?q=80&w=150')] bg-cover border border-slate-200"></div>)}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+            <h3 className="text-sm font-bold text-slate-900 mb-3">Evaluasi Akhir Program</h3>
+            <div className="flex gap-3 items-start">
+              <div className="mt-1"><HiOutlineDocumentCheck className="w-6 h-6 text-[#008A4B]" /></div>
+              <div>
+                <h4 className="text-xs font-bold text-[#008A4B] mb-1">Program dinyatakan berhasil.</h4>
+                <p className="text-[10px] text-slate-600 leading-relaxed mb-2">Persentase hidup tanaman mangrove telah mencapai target ({'>'}80%) dan tidak terdapat indikasi kegagalan signifikan.</p>
+                <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded text-[9px] font-bold">Memenuhi Kriteria</span>
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>
 
       <div className="lg:col-span-4 space-y-6">
-        
+
         {/* Status Selesai Card */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 text-center">
           <h3 className="text-sm font-bold text-slate-500 mb-4 text-left border-b border-slate-100 pb-3 w-full">Status Program</h3>
           <div className="flex justify-center mb-4 mt-2">
-             <div className="w-16 h-16 rounded-full bg-emerald-50 border-2 border-emerald-100 flex items-center justify-center">
-               <HiOutlineCheckCircle className="w-8 h-8 text-emerald-500" />
-             </div>
+            <div className="w-16 h-16 rounded-full bg-emerald-50 border-2 border-emerald-100 flex items-center justify-center">
+              <HiOutlineCheckCircle className="w-8 h-8 text-emerald-500" />
+            </div>
           </div>
           <h2 className="text-xl font-bold text-emerald-600 mb-2">Monitoring Selesai</h2>
           <p className="text-[11px] text-slate-600 leading-relaxed mb-6 px-2">Seluruh periode monitoring (P0 – P4) telah selesai dilaksanakan. Data dan dokumentasi telah diverifikasi.</p>
           <div className="bg-slate-50 border border-slate-100 rounded-lg p-3 text-left space-y-2">
-             <div className="flex justify-between items-center text-[10px]">
-               <span className="text-slate-500 flex items-center gap-1.5"><HiOutlineCalendar className="w-3.5 h-3.5 text-emerald-600"/> Tanggal Selesai Monitoring Akhir</span>
-               <span className="font-bold text-slate-900">12 Mei 2027</span>
-             </div>
-             <div className="flex justify-between items-center text-[10px] border-t border-slate-200 pt-2">
-               <span className="text-slate-500 flex items-center gap-1.5"><HiOutlineUserPlus className="w-3.5 h-3.5 text-emerald-600"/> Dievaluasi Oleh</span>
-               <span className="font-bold text-slate-900">Tim Evaluasi PDAS Citarum</span>
-             </div>
+            <div className="flex justify-between items-center text-[10px]">
+              <span className="text-slate-500 flex items-center gap-1.5"><HiOutlineCalendar className="w-3.5 h-3.5 text-emerald-600" /> Tanggal Selesai Monitoring Akhir</span>
+              <span className="font-bold text-slate-900">12 Mei 2027</span>
+            </div>
+            <div className="flex justify-between items-center text-[10px] border-t border-slate-200 pt-2">
+              <span className="text-slate-500 flex items-center gap-1.5"><HiOutlineUserPlus className="w-3.5 h-3.5 text-emerald-600" /> Dievaluasi Oleh</span>
+              <span className="font-bold text-slate-900">Tim Evaluasi PDAS Citarum</span>
+            </div>
           </div>
         </div>
 
@@ -1096,7 +1192,7 @@ const DetailMonitoringPage: React.FC = () => {
                 <p className="text-[10px] text-slate-500">10 Mei 2026</p>
               </div>
             </div>
-            
+
             <div className="flex gap-4 relative">
               <div className="absolute left-2.75 top-7 bottom-6 w-0.5 bg-emerald-200"></div>
               <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 z-10 shadow-sm border-2 border-white"><HiOutlineCheckCircle className="w-4 h-4" /></div>
@@ -1132,7 +1228,7 @@ const DetailMonitoringPage: React.FC = () => {
                 <p className="text-[10px] text-slate-500">10 Mei 2026 – 12 Mei 2027</p>
               </div>
             </div>
-            
+
             <div className="flex gap-4 relative bg-emerald-50 -mx-6 p-4 rounded-b-xl border-t border-emerald-100">
               <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 z-10 shadow-sm border-2 border-white ml-2"><HiOutlineCheckCircle className="w-4 h-4" /></div>
               <div className="flex-1">
@@ -1152,12 +1248,12 @@ const DetailMonitoringPage: React.FC = () => {
 
   return (
     <div className="w-full bg-[#F8FAFC] min-h-screen font-sans text-slate-800 pb-12">
-      
+
       {/* Tampilan Content Berubah Sepenuhnya Sesuai Status */}
       <div className="max-w-[1600px] mx-auto">
         {renderHeader()}
         {currentStatus === 'Siap Monitoring' && renderViewSiapMonitoring()}
-        {currentStatus === 'Berjalan' && renderViewBerjalan()}
+        {(currentStatus === 'Berjalan' || currentStatus === 'Menunggu' || currentStatus === 'Menunggu Penugasan') && renderViewBerjalan()}
         {currentStatus === 'Menunggu Evaluasi' && renderViewMenungguEvaluasi()}
         {currentStatus === 'Tindak Lanjut' && renderViewTindakLanjut()}
         {currentStatus === 'Selesai' && renderViewSelesai()}
@@ -1168,7 +1264,7 @@ const DetailMonitoringPage: React.FC = () => {
       {isDownloadModalOpen && (
         <div className="fixed inset-0 z-70 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl flex flex-col max-h-[90vh] overflow-hidden">
-            
+
             {/* Modal Header */}
             <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-start bg-white">
               <div>
@@ -1176,8 +1272,8 @@ const DetailMonitoringPage: React.FC = () => {
                   {currentStatus === 'Selesai' ? 'Unduh Ringkasan Akhir' : 'Cetak Ringkasan Monitoring'}
                 </h2>
                 <p className="text-sm text-slate-500 mt-1">
-                  {currentStatus === 'Selesai' 
-                    ? 'Unduh ringkasan akhir monitoring program dalam format dokumen resmi.' 
+                  {currentStatus === 'Selesai'
+                    ? 'Unduh ringkasan akhir monitoring program dalam format dokumen resmi.'
                     : 'Unduh ringkasan progres monitoring program dalam format dokumen resmi.'}
                 </p>
               </div>
@@ -1188,7 +1284,7 @@ const DetailMonitoringPage: React.FC = () => {
 
             {/* Modal Body */}
             <div className="p-6 overflow-y-auto bg-white flex-1 space-y-8">
-              
+
               {/* Info Program Box */}
               <div className="border border-slate-200 rounded-xl p-4 flex items-center gap-5">
                 <div className="w-14 h-14 bg-emerald-50 rounded-full flex items-center justify-center border border-emerald-100 shrink-0">
@@ -1197,8 +1293,8 @@ const DetailMonitoringPage: React.FC = () => {
                 <div className="flex-1">
                   <h3 className="font-bold text-slate-900 text-base">Rehabilitasi Mangrove Karangsong</h3>
                   <div className="flex items-center gap-2 mt-1 mb-1.5">
-                     <span className="text-xs font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">{id || 'PRG-2026-0007'}</span>
-                     <span className="text-[11px] text-slate-500">Desa Karangsong, Kec. Indramayu, Kab. Indramayu</span>
+                    <span className="text-xs font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">{id || 'PRG-2026-0007'}</span>
+                    <span className="text-[11px] text-slate-500">Desa Karangsong, Kec. Indramayu, Kab. Indramayu</span>
                   </div>
                 </div>
                 <span className={`hidden sm:inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${getBadgeColor(currentStatus)}`}>
@@ -1207,7 +1303,7 @@ const DetailMonitoringPage: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                
+
                 {/* Kolom Kiri: Rincian Info */}
                 <div className="space-y-8">
                   <div>
@@ -1277,28 +1373,28 @@ const DetailMonitoringPage: React.FC = () => {
 
                 {/* Kolom Kanan: Preview Dokumen Cover Mockup */}
                 <div className="flex items-center justify-center">
-                   <div className="w-full max-w-70 aspect-[1/1.4] bg-white border border-slate-200 rounded-lg shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex flex-col relative overflow-hidden">
-                     {/* Kop Surat Header Mockup */}
-                     <div className="p-4 flex items-center gap-3 border-b border-slate-100">
-                        <div className="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center"><PiPlant className="text-white w-4 h-4"/></div>
-                        <div>
-                          <p className="text-[8px] font-bold text-slate-800 leading-tight">BPDAS Citarum</p>
-                          <p className="text-[6px] text-slate-500">Sistem Informasi Jabar</p>
-                        </div>
-                     </div>
-                     {/* Title Dokumen Mockup */}
-                     <div className="px-6 py-8">
-                       <h3 className="text-[#0f172a] font-bold text-xl leading-tight mb-2">Ringkasan {currentStatus === 'Selesai' ? 'Akhir' : 'Monitoring'}</h3>
-                       <h3 className="text-[#0f172a] font-bold text-xl leading-tight mb-4">Program Rehabilitasi</h3>
-                       <div className="w-12 h-1 bg-[#008A4B] mb-4"></div>
-                       <p className="text-xs font-bold text-slate-600">Rehabilitasi Mangrove Karangsong</p>
-                     </div>
-                     {/* Ilustrasi Bawah Mockup */}
-                     <div className="mt-auto h-32 bg-[url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?q=80&w=400')] bg-cover bg-center opacity-80 relative">
-                        <div className="absolute inset-0 bg-linear-to-t from-white via-white/40 to-transparent"></div>
-                        <p className="absolute bottom-4 left-6 text-[10px] font-bold text-slate-500">Mei 2027</p>
-                     </div>
-                   </div>
+                  <div className="w-full max-w-70 aspect-[1/1.4] bg-white border border-slate-200 rounded-lg shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex flex-col relative overflow-hidden">
+                    {/* Kop Surat Header Mockup */}
+                    <div className="p-4 flex items-center gap-3 border-b border-slate-100">
+                      <div className="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center"><PiPlant className="text-white w-4 h-4" /></div>
+                      <div>
+                        <p className="text-[8px] font-bold text-slate-800 leading-tight">BPDAS Citarum</p>
+                        <p className="text-[6px] text-slate-500">Sistem Informasi Jabar</p>
+                      </div>
+                    </div>
+                    {/* Title Dokumen Mockup */}
+                    <div className="px-6 py-8">
+                      <h3 className="text-[#0f172a] font-bold text-xl leading-tight mb-2">Ringkasan {currentStatus === 'Selesai' ? 'Akhir' : 'Monitoring'}</h3>
+                      <h3 className="text-[#0f172a] font-bold text-xl leading-tight mb-4">Program Rehabilitasi</h3>
+                      <div className="w-12 h-1 bg-[#008A4B] mb-4"></div>
+                      <p className="text-xs font-bold text-slate-600">Rehabilitasi Mangrove Karangsong</p>
+                    </div>
+                    {/* Ilustrasi Bawah Mockup */}
+                    <div className="mt-auto h-32 bg-[url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?q=80&w=400')] bg-cover bg-center opacity-80 relative">
+                      <div className="absolute inset-0 bg-linear-to-t from-white via-white/40 to-transparent"></div>
+                      <p className="absolute bottom-4 left-6 text-[10px] font-bold text-slate-500">Mei 2027</p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -1313,8 +1409,8 @@ const DetailMonitoringPage: React.FC = () => {
             </div>
 
             <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-3 bg-slate-50/50 rounded-b-2xl">
-              <button 
-                onClick={() => setIsDownloadModalOpen(false)} 
+              <button
+                onClick={() => setIsDownloadModalOpen(false)}
                 className="px-6 py-2.5 text-sm font-bold text-slate-600 border border-slate-300 rounded-lg hover:bg-white hover:text-slate-900 transition-colors cursor-pointer"
               >
                 Batal

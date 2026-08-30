@@ -4,13 +4,9 @@ import {
   HiOutlineArrowLeft,
   HiOutlineDocumentText,
   HiOutlineMapPin,
-  HiOutlineBookOpen,
-  HiOutlineInformationCircle,
-  HiOutlineCalendar,
   HiCheckCircle,
   HiChevronRight,
   HiOutlineEye,
-  HiOutlineClock
 } from 'react-icons/hi2';
 
 // --- CUSTOM ICONS ---
@@ -26,67 +22,87 @@ const TargetIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const PuIcon = ({ className }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
-  </svg>
-);
-
-const SeedlingIcon = ({ className }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 21v-8m0 0a4 4 0 10-8 0v4a4 4 0 008 0zm0 0a4 4 0 118 0v4a4 4 0 01-8 0z" />
-  </svg>
-);
-
 // ==========================================
 // 1. DATA MOCKUP LENGKAP
 // ==========================================
-const mockDatabase: Record<string, any> = {
-  '1': {
-    id: '1', status: 'Ditugaskan', idPenugasan: 'TGS-2026-021', idProgram: 'PRG-2026-0021',
-    sumberLokasi: 'Analisis CPI', periodeMulai: '20 Jun 2026', periodeSelesai: '05 Jul 2026',
-    namaProgram: 'Rehabilitasi DAS Cimanuk', lokasi: 'Desa Sukamukti, Kec. Pacet,\nKab. Cianjur',
-    penyuluh: 'Rina Herlina, S.Hut.', kth: 'KTH Mekar Jaya', targetBibit: '500 bibit',
-    luasArea: '10 Ha', rencanaKegiatan: 'Penanaman Mangrove', totalPu: '10 PU',
-    estimasiPerPu: '±50 bibit', hasilValidasi: 'Sesuai', tanggalValidasi: '18 Jun 2026',
-    koordinat: '-7.2145678, 107.8501234',
-    kondisiUmum: 'Lokasi sesuai untuk kegiatan penanaman. Akses menuju lokasi tergolong memadai dan masyarakat sekitar mendukung rencana pelaksanaan kegiatan.',
-    catatan: 'Penanaman direkomendasikan pada awal musim hujan agar pertumbuhan optimal. Area dinyatakan layak untuk pelaksanaan kegiatan.'
-  },
-  '2': {
-    id: '2', status: 'Berjalan', idPenugasan: 'TGS-2026-018', idProgram: 'PRG-2026-0018',
-    sumberLokasi: 'Proposal CSR', periodeMulai: '18 Jun 2026', periodeSelesai: '03 Jul 2026',
-    namaProgram: 'Rehabilitasi DAS Cisangkuy', lokasi: 'Desa Mandalakasih, Kec. Pameungpeuk,\nKab. Garut',
-    penyuluh: 'Ahmad Fauzi, SP', kth: 'KTH Lestari', targetBibit: '600 bibit',
-    luasArea: '12 Ha', rencanaKegiatan: 'Penanaman Mangrove', totalPu: '12 PU',
-    estimasiPerPu: '±50 bibit', hasilValidasi: 'Sesuai', tanggalValidasi: '15 Jun 2026',
-    koordinat: '-7.6321456, 107.6587921',
-    kondisiUmum: 'Kondisi lahan berpasir, perlu penyesuaian jenis bibit yang ditanam. Masyarakat antusias.',
-    catatan: 'Telah divalidasi dan siap untuk dibentuk poligon PU.'
-  },
-  '4': {
-    id: '4', status: 'Selesai', idPenugasan: 'TGS-2026-014', idProgram: 'PRG-2026-0012',
-    sumberLokasi: 'Analisis CPI', periodeMulai: '01 Jun 2026', periodeSelesai: '15 Jun 2026',
-    namaProgram: 'Rehabilitasi DAS Cidurian', lokasi: 'Desa Mekarsari, Kec. Ibun,\nKab. Bandung',
-    penyuluh: 'Budi Santoso, S.Hut.', kth: 'KTH Suka Alam', targetBibit: '700 bibit',
-    luasArea: '14 Ha', rencanaKegiatan: 'Penanaman Mangrove', totalPu: '14 PU',
-    estimasiPerPu: '±50 bibit', hasilValidasi: 'Sesuai', tanggalValidasi: '28 Mei 2026',
-    koordinat: '-7.102345, 107.452312',
-    kondisiUmum: 'Lokasi telah ditanami seluruhnya sesuai dengan target PU.',
-    catatan: 'Kegiatan penanaman selesai 100% tanpa kendala.'
-  }
-};
 
 // ==========================================
 // 2. KOMPONEN HALAMAN DETAIL UTAMA
 // ==========================================
+import { useState, useEffect } from 'react';
+
 const InputProgresPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  
+  const [data, setData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Ambil data berdasarkan ID (fallback ke '1' jika tidak ada)
-  const activeId = id && mockDatabase[id] ? id : '1';
-  const data = mockDatabase[activeId];
+  useEffect(() => {
+    const fetchPenugasan = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const API_URL = import.meta.env.VITE_API_PELAKSANAAN_URL || 'http://127.0.0.1:8000/api';
+        const res = await fetch(`${API_URL}/penugasan/${id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const json = await res.json();
+        const d = json.data;
+        
+        let programName = '-';
+        let location = '-';
+        let kth = '-';
+        let targetBibit = '0';
+        let totalPu = '-';
+        let luasArea = '-';
+        
+        if (d.penugasanable_type === 'App\\Models\\DonationProgram') {
+          programName = d.penugasanable?.name || '-';
+          location = d.penugasanable?.location || '-';
+          kth = d.penugasanable?.kth?.name || '-';
+          targetBibit = d.penugasanable?.target_amount || '0';
+          totalPu = (d.penugasanable?.analysis_result_zone || d.penugasanable?.analysisResultZone)?.jumlah_pu || '-';
+          luasArea = (d.penugasanable?.analysis_result_zone || d.penugasanable?.analysisResultZone)?.luas_ha ? `${(d.penugasanable?.analysis_result_zone || d.penugasanable?.analysisResultZone)?.luas_ha} Ha` : '-';
+        } else if (d.penugasanable_type === 'App\\Models\\ProgramApbd' || d.penugasanable_type === 'App\\Models\\ProgramCsr') {
+          programName = d.penugasanable?.nama_program || '-';
+          location = d.penugasanable?.lokasi || (d.penugasanable?.kth ? `${d.penugasanable.kth.desa_kelurahan}, ${d.penugasanable.kth.kabupaten_kota}` : '-');
+          kth = d.penugasanable?.kth?.nama_kelompok || d.penugasanable?.kth?.nama || '-';
+          targetBibit = d.penugasanable?.target_bibit || d.penugasanable?.jumlah_bibit || '0';
+          totalPu = (d.penugasanable?.analysis_result_zone || d.penugasanable?.analysisResultZone)?.jumlah_pu || '-';
+          luasArea = d.penugasanable?.target_luas_lahan ? `${d.penugasanable.target_luas_lahan} Ha` : ((d.penugasanable?.analysis_result_zone || d.penugasanable?.analysisResultZone)?.luas_ha ? `${(d.penugasanable?.analysis_result_zone || d.penugasanable?.analysisResultZone)?.luas_ha} Ha` : '-');
+        }
+
+        setData({
+          id: d.id,
+          status: d.status,
+          idPenugasan: `TGS-${d.id}`,
+          idProgram: d.penugasanable?.id ? `PRG-${d.penugasanable.id}` : '-',
+          sumberLokasi: d.penugasanable_type.includes('Apbd') ? 'APBD' : d.penugasanable_type.includes('Csr') ? 'CSR' : 'Donasi',
+          periodeMulai: d.tanggal_mulai ? new Date(d.tanggal_mulai).toLocaleDateString('id-ID') : '-',
+          periodeSelesai: d.batas_waktu ? new Date(d.batas_waktu).toLocaleDateString('id-ID') : '-',
+          namaProgram: programName,
+          lokasi: location,
+          penyuluh: d.penyuluh?.username || '-',
+          kth: kth,
+          targetBibit: targetBibit + ' bibit',
+          luasArea: luasArea,
+          rencanaKegiatan: d.jenis_kegiatan,
+          totalPu: totalPu ? `${totalPu} PU` : '-',
+          estimasiPerPu: '±50 bibit', // Mock
+          hasilValidasi: 'Sesuai',
+          tanggalValidasi: '-',
+          koordinat: '-',
+          kondisiUmum: '-',
+          catatan: '-'
+        });
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    if (id) fetchPenugasan();
+  }, [id]);
 
   // Helper Warna Status Badge Atas
   const getBadgeStyle = (status: string) => {
@@ -96,8 +112,11 @@ const InputProgresPage: React.FC = () => {
     return 'bg-slate-50 text-slate-600';
   };
 
+  if (isLoading) return <div className="p-8 text-center">Loading...</div>;
+  if (!data) return <div className="p-8 text-center text-red-500">Data penugasan tidak ditemukan</div>;
+
   return (
-    <div className="w-full bg-[#F8FAFC] min-h-screen font-sans text-slate-800 pb-24">
+    <div className="w-full bg-[#F8FAFC] min-h-screen font-sans text-slate-800">
 
       <div className="max-w-[1600px] mx-auto">
 
@@ -136,7 +155,7 @@ const InputProgresPage: React.FC = () => {
         </div>
 
         {/* MAIN CONTENT GRID */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 gap-6">
 
           {/* KOLOM KIRI (Informasi Utama) */}
           <div className="lg:col-span-8 space-y-6">
@@ -271,72 +290,6 @@ const InputProgresPage: React.FC = () => {
             </div>
 
           </div>
-
-          {/* KOLOM KANAN (Sidebar) */}
-          <div className="lg:col-span-4 space-y-6">
-
-            {/* Ringkasan Target */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <h3 className="text-sm font-bold text-emerald-800 flex items-center gap-2 mb-6">
-                <TargetIcon className="w-5 h-5 text-[#008A4B]" /> Ringkasan Target
-              </h3>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center pb-4 border-b border-slate-100">
-                  <div className="flex items-center gap-3 text-slate-600">
-                    <PuIcon className="w-5 h-5 text-slate-400" />
-                    <span className="text-sm font-medium">Total PU</span>
-                  </div>
-                  <span className="text-sm font-bold text-slate-900">{parseInt(data.totalPu)}</span>
-                </div>
-                <div className="flex justify-between items-center pb-4 border-b border-slate-100">
-                  <div className="flex items-center gap-3 text-slate-600">
-                    <SeedlingIcon className="w-5 h-5 text-slate-400" />
-                    <span className="text-sm font-medium">Target Bibit</span>
-                  </div>
-                  <span className="text-sm font-bold text-slate-900">{parseInt(data.targetBibit)}</span>
-                </div>
-                <div className="flex justify-between items-center pb-4 border-b border-slate-100">
-                  <div className="flex items-center gap-3 text-slate-600">
-                    <HiOutlineClock className="w-5 h-5 text-slate-400" />
-                    <span className="text-sm font-medium">Perkiraan per PU</span>
-                  </div>
-                  <span className="text-sm font-bold text-slate-900">50 bibit</span>
-                </div>
-                <div className="flex justify-between items-center pt-1">
-                  <div className="flex items-center gap-3 text-slate-600">
-                    <HiOutlineCalendar className="w-5 h-5 text-slate-400" />
-                    <span className="text-sm font-medium">Deadline</span>
-                  </div>
-                  <span className="text-sm font-bold text-slate-900">{data.periodeSelesai}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Panduan Singkat */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <h3 className="text-sm font-bold text-emerald-800 flex items-center gap-2 mb-4">
-                <HiOutlineBookOpen className="w-5 h-5 text-[#008A4B]" /> Panduan Singkat
-              </h3>
-              <ul className="text-xs text-slate-600 space-y-4 list-disc pl-4 font-medium leading-relaxed">
-                <li>Periksa kembali informasi penugasan.</li>
-                <li>Pastikan lokasi hasil validasi sesuai kondisi lapangan.</li>
-                <li>Lanjutkan ke pembentukan poligon PU sebelum input realisasi.</li>
-                <li>Siapkan dokumentasi pelaksanaan kegiatan.</li>
-              </ul>
-            </div>
-
-            {/* Informasi */}
-            <div className="bg-[#eff6ff] rounded-xl p-5 border border-[#bfdbfe]">
-              <div className="flex gap-3 mb-2">
-                <HiOutlineInformationCircle className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
-                <h4 className="text-sm font-bold text-blue-900">Informasi</h4>
-              </div>
-              <p className="text-xs text-blue-800 leading-relaxed font-medium pl-8">
-                Pelaksanaan kegiatan dimulai dengan pembentukan poligon PU sebagai dasar pencatatan realisasi per area kerja.
-              </p>
-            </div>
-
-          </div>
         </div>
       </div>
       <div className="flex justify-end items-end gap-4 z-40 mt-6">
@@ -353,9 +306,16 @@ const InputProgresPage: React.FC = () => {
         <div className="flex items-center justify-center gap-3">
           {data.status === 'Ditugaskan' && (
             <button
-              onClick={() =>
-                navigate('/admin/penyuluh/pelaksanaan-penanaman/input-data')
-              }
+              onClick={() => {
+                const token = localStorage.getItem('token');
+                const API_URL = import.meta.env.VITE_API_PELAKSANAAN_URL || 'http://127.0.0.1:8000/api';
+                fetch(`${API_URL}/penugasan/${id}/mulai`, {
+                  method: 'POST',
+                  headers: { 'Authorization': `Bearer ${token}` }
+                }).then(() => {
+                  navigate(`/admin/penyuluh/pelaksanaan-penanaman/input-data/${id}`);
+                });
+              }}
               className="px-6 py-2.5 bg-[#008A4B] text-white font-bold text-sm hover:bg-emerald-800 rounded-full w-full flex items-center gap-2 shadow-sm transition-colors"
             >
               <PlayIcon className="w-4 h-4" />
@@ -366,7 +326,7 @@ const InputProgresPage: React.FC = () => {
           {data.status === 'Berjalan' && (
             <button
               onClick={() =>
-                navigate('/admin/penyuluh/pelaksanaan-penanaman/input-data')
+                navigate(`/admin/penyuluh/pelaksanaan-penanaman/input-data/${id}`)
               }
               className="px-6 py-2.5 bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 rounded-full w-full flex items-center gap-2 shadow-sm transition-colors"
             >
@@ -378,7 +338,7 @@ const InputProgresPage: React.FC = () => {
           {data.status === 'Selesai' && (
             <button
               onClick={() =>
-                navigate('/admin/penyuluh/pelaksanaan-penanaman/input-data')
+                navigate(`/admin/penyuluh/pelaksanaan-penanaman/input-data/${id}`)
               }
               className="px-6 py-2.5 bg-white border border-[#008A4B] text-[#008A4B] font-bold text-sm hover:bg-emerald-50 rounded-full flex items-center gap-2 shadow-sm transition-colors"
             >

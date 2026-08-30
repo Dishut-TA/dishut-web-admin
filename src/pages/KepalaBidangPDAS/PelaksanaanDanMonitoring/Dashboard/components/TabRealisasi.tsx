@@ -1,6 +1,6 @@
 import { TABLE_REALISASI_DATA } from '../data/mockData';
 
-export default function TableRealisasi() {
+export default function TableRealisasi({}: { programs?: any[] }) {
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 overflow-hidden flex flex-col">
       <div className="flex justify-between items-center mb-4">

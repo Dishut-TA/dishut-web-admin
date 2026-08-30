@@ -5,14 +5,16 @@ import {
   HiOutlineMagnifyingGlass, HiOutlineClock
 } from 'react-icons/hi2';
 import { PiPlant } from 'react-icons/pi';
-import type { ProgramData, MonitoringRow } from '../types';
+import toast from 'react-hot-toast';
+import type { ProgramData } from '../types';
 
 interface InputEditViewProps {
   activeId: string;
   activeProgram: ProgramData;
   isTindakLanjut: boolean;
   isEdit: boolean;
-  selectedRow: MonitoringRow | null;
+  selectedRow: any;
+  selectedPu?: any;
   handleBackToTable: () => void;
 }
 
@@ -22,8 +24,59 @@ export const InputEditView: React.FC<InputEditViewProps> = ({
   isTindakLanjut,
   isEdit,
   selectedRow,
+  selectedPu,
   handleBackToTable
 }) => {
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [form, setForm] = React.useState({
+    kondisiTanaman: selectedRow?.kondisi_tanaman || '',
+    catatan: selectedRow?.keterangan || '',
+    fotoUrl: selectedRow?.foto_url || '',
+    status: (selectedRow?.kondisi_tanaman || '').toLowerCase().includes('hidup') || (selectedRow?.kondisi_tanaman || '').toLowerCase().includes('sehat') || (selectedRow?.kondisi_tanaman || '').toLowerCase().includes('baik') ? 'Hidup' : ((selectedRow?.kondisi_tanaman || '').toLowerCase().includes('mati') || (selectedRow?.kondisi_tanaman || '').toLowerCase().includes('sakit') ? 'Mati' : '')
+  });
+
+  const handleSimpan = async () => {
+    if (!form.kondisiTanaman && !isTindakLanjut) {
+      toast.error('Kondisi Tanaman wajib diisi');
+      return;
+    }
+    
+    try {
+      setIsSubmitting(true);
+      const token = localStorage.getItem('token');
+      const API_URL = import.meta.env.VITE_API_PELAKSANAAN_URL || 'http://127.0.0.1:8000/api';
+      
+      const payload = {
+        kondisi_tanaman: isTindakLanjut ? 'Sudah Disulam' : form.kondisiTanaman,
+        keterangan: form.catatan,
+        foto_url: form.fotoUrl
+      };
+
+      const res = await fetch(`${API_URL}/tanaman/${selectedRow.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      if (res.ok) {
+        toast.success('Data berhasil disimpan');
+        // Ideally we should refetch the data, but for now we just go back to the table
+        // The table will remount when going back to rekap, but we can just use handleBackToTable and wait for a full reload.
+        // Or we can reload the page to get the updated data immediately for simplicity.
+        window.location.reload();
+      } else {
+        toast.error('Gagal menyimpan data');
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error('Terjadi kesalahan');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   const title = isEdit 
     ? `Edit Data ${isTindakLanjut ? 'Penyulaman' : 'Monitoring'}` 
     : `Input Data ${isTindakLanjut ? 'Penyulaman' : 'Monitoring'}`;
@@ -37,7 +90,7 @@ export const InputEditView: React.FC<InputEditViewProps> = ({
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
             {title}
-            <span className="px-3 py-1 bg-white border border-emerald-200 text-emerald-700 text-sm rounded-md font-bold">PU-03</span>
+            <span className="px-3 py-1 bg-white border border-emerald-200 text-emerald-700 text-sm rounded-md font-bold">{selectedPu?.nama || 'PU-03'}</span>
             <span className="px-3 py-1 bg-white border border-blue-200 text-blue-700 text-sm rounded-md font-bold">{selectedRow?.idTanaman || (isTindakLanjut ? 'PU-03-TK-001' : 'PRG26-0007-PU03-003')}</span>
           </h1>
           <p className="text-sm text-gray-500 mt-1">{subTitle}</p>
@@ -56,17 +109,17 @@ export const InputEditView: React.FC<InputEditViewProps> = ({
             <div className="font-semibold text-gray-900 mt-2 flex items-center gap-1.5">
               {isTindakLanjut ? `${activeProgram.periode} - Tindak Lanjut ${activeProgram.periode}` : `${activeProgram.periode} - Monitoring ${activeProgram.periode}`}
             </div>
-            <div className="text-gray-500 mt-2">Penyuluh</div><div className="mt-2">:</div><div className="font-semibold text-gray-900 mt-2">Ahmad Fauzi, SP</div>
-            <div className="text-gray-500 font-bold mt-3">Selected PU</div><div className="mt-3">:</div><div className="mt-3"><span className="px-2 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded font-bold">PU-03</span></div>
+            <div className="text-gray-500 mt-2">Penyuluh</div><div className="mt-2">:</div><div className="font-semibold text-gray-900 mt-2">{activeProgram.penyuluh?.name || 'Ahmad Fauzi, SP'}</div>
+            <div className="text-gray-500 font-bold mt-3">Selected PU</div><div className="mt-3">:</div><div className="mt-3"><span className="px-2 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded font-bold">Semua PU</span></div>
           </div>
           <div className="grid grid-cols-[130px_10px_1fr] gap-1">
-            <div className="text-gray-500">ID {isTindakLanjut ? 'Titik/Tanaman' : 'Tanaman'}</div><div>:</div><div className="font-semibold text-gray-900">{selectedRow?.idTanaman || (isTindakLanjut ? 'PU-03-TK-001' : 'PRG26-0007-PU03-003')}</div>
-            <div className="text-gray-500 mt-2">Lokasi</div><div className="mt-2">:</div><div className="font-semibold text-gray-900 mt-2 whitespace-pre-line leading-relaxed">{activeProgram.lokasi}</div>
-            <div className="text-gray-500 mt-2">Koordinat / Geotag</div><div className="mt-2">:</div><div className="font-semibold text-gray-900 mt-2 whitespace-pre-line">{selectedRow?.koordinat?.replace('\n', ' / ') || (isTindakLanjut ? '-6.342512° S / 108.323145° E' : '6.841401° S / 107.564910° E')}</div>
+            <div className="text-gray-500">ID {isTindakLanjut ? 'Titik/Tanaman' : 'Tanaman'}</div><div>:</div><div className="font-semibold text-gray-900">TNMN-{selectedRow?.id}</div>
+            <div className="text-gray-500 mt-2">Lokasi</div><div className="mt-2">:</div><div className="font-semibold text-gray-900 mt-2 whitespace-pre-line leading-relaxed">{activeProgram.lokasi || '-'}</div>
+            <div className="text-gray-500 mt-2">Koordinat / Geotag</div><div className="mt-2">:</div><div className="font-semibold text-gray-900 mt-2 whitespace-pre-line">-</div>
           </div>
           {!isTindakLanjut && (
             <div className="grid grid-cols-[130px_10px_1fr] gap-1">
-              <div className="text-gray-500">Jenis Tanaman</div><div>:</div><div className="font-semibold text-gray-900">{selectedRow?.jenisTanaman || 'Sonneratia'}</div>
+              <div className="text-gray-500">Jenis Tanaman</div><div>:</div><div className="font-semibold text-gray-900">{selectedRow?.nama_tanaman || selectedRow?.seed?.name || 'Sonneratia'}</div>
             </div>
           )}
         </div>
@@ -95,7 +148,7 @@ export const InputEditView: React.FC<InputEditViewProps> = ({
             <div className="grid grid-cols-3 gap-5 mb-5">
               <div>
                 <label className="block text-xs font-bold text-gray-700 mb-1.5">ID {isTindakLanjut ? 'Titik / Tanaman' : 'Tanaman'}</label>
-                <input type="text" disabled defaultValue={selectedRow?.idTanaman || (isTindakLanjut ? 'PU-03-TK-001' : 'PRG26-0007-PU03-003')} className="w-full border border-gray-200 bg-gray-50 text-gray-500 rounded-lg p-2.5 text-sm font-medium" />
+                <input type="text" disabled defaultValue={`TNMN-${selectedRow?.id}`} className="w-full border border-gray-200 bg-gray-50 text-gray-500 rounded-lg p-2.5 text-sm font-medium" />
               </div>
               {isTindakLanjut ? (
                 <div>
@@ -105,7 +158,7 @@ export const InputEditView: React.FC<InputEditViewProps> = ({
               ) : (
                 <div>
                   <label className="block text-xs font-bold text-gray-700 mb-1.5">Jenis Tanaman</label>
-                  <input type="text" disabled defaultValue={selectedRow?.jenisTanaman || 'Sonneratia'} className="w-full border border-gray-200 bg-gray-50 text-gray-500 rounded-lg p-2.5 text-sm font-medium" />
+                  <input type="text" disabled defaultValue={selectedRow?.nama_tanaman || selectedRow?.seed?.name || 'Sonneratia'} className="w-full border border-gray-200 bg-gray-50 text-gray-500 rounded-lg p-2.5 text-sm font-medium" />
                 </div>
               )}
               
@@ -144,11 +197,17 @@ export const InputEditView: React.FC<InputEditViewProps> = ({
                 ) : (
                   <>
                     <div className="relative h-10.5">
-                      <select className="w-full h-full border border-gray-300 rounded-lg px-3 text-sm font-medium focus:ring-[#008A4B] focus:border-[#008A4B] bg-white cursor-pointer appearance-none" defaultValue={isEdit ? (selectedRow?.kondisiTanaman || 'Perlu Perawatan') : ""}>
+                      <select 
+                        className="w-full h-full border border-gray-300 rounded-lg px-3 text-sm font-medium focus:ring-[#008A4B] focus:border-[#008A4B] bg-white cursor-pointer appearance-none" 
+                        value={form.kondisiTanaman}
+                        onChange={(e) => setForm({ ...form, kondisiTanaman: e.target.value })}
+                      >
                         <option value="" disabled hidden>Pilih kondisi</option>
                         <option value="Sehat">Sehat</option>
                         <option value="Perlu Perawatan">Perlu Perawatan</option>
                         <option value="Rusak Ringan">Rusak Ringan</option>
+                        <option value="Sakit">Sakit</option>
+                        <option value="Mati">Mati</option>
                       </select>
                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -166,13 +225,13 @@ export const InputEditView: React.FC<InputEditViewProps> = ({
                    </div>
                 ) : (
                   <div className="flex gap-2 h-10.5">
-                    <button className={`flex-1 border rounded-lg text-sm font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
-                      (!isEdit || selectedRow?.status === 'Hidup') ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                    <button type="button" className={`flex-1 border rounded-lg text-sm font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                      form.status === 'Hidup' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-gray-200 text-gray-500 bg-gray-50 opacity-60 cursor-not-allowed'
                     }`}>
                       <HiOutlineCheckCircle className="w-4 h-4" /> Hidup
                     </button>
-                    <button className={`flex-1 border rounded-lg text-sm font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
-                      (isEdit && selectedRow?.status === 'Mati') ? 'border-red-500 bg-red-50 text-red-700' : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                    <button type="button" className={`flex-1 border rounded-lg text-sm font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                      form.status === 'Mati' ? 'border-red-500 bg-red-50 text-red-700' : 'border-gray-200 text-gray-500 bg-gray-50 opacity-60 cursor-not-allowed'
                     }`}>
                       <HiOutlineXCircle className="w-4 h-4" /> Mati
                     </button>
@@ -188,11 +247,22 @@ export const InputEditView: React.FC<InputEditViewProps> = ({
                    </div>
                 ) : (
                   <div className="relative h-10.5">
-                    <input type="number" defaultValue={isEdit ? selectedRow?.tinggiSaatMonitoring?.replace(' cm', '') || '26' : ''} className="w-full h-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-medium focus:ring-[#008A4B] focus:border-[#008A4B]" />
-                    <span className="absolute right-3 top-3 text-sm text-gray-500 font-medium">cm</span>
+                    <input type="number" disabled defaultValue={selectedRow?.tinggiSaatMonitoring?.replace(' cm', '') || '26'} className="w-full h-full border border-gray-200 bg-gray-50 rounded-lg px-3 py-2 text-sm font-medium text-gray-400" />
+                    <span className="absolute right-3 top-3 text-sm text-gray-400 font-medium">cm</span>
                   </div>
                 )}
               </div>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-xs font-bold text-gray-700 mb-1.5">URL Foto {isTindakLanjut ? 'Penyulaman' : 'Monitoring'}</label>
+              <input 
+                type="text" 
+                placeholder="https://example.com/foto.jpg"
+                className="w-full border border-gray-300 rounded-lg p-3 text-sm font-medium focus:ring-[#008A4B] focus:border-[#008A4B]" 
+                value={form.fotoUrl}
+                onChange={(e) => setForm({ ...form, fotoUrl: e.target.value })}
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-5 mb-5">
@@ -233,7 +303,9 @@ export const InputEditView: React.FC<InputEditViewProps> = ({
               <div className="border border-gray-300 rounded-lg p-3 bg-white relative">
                 <textarea 
                   className="w-full border-none p-0 text-xs text-gray-600 focus:ring-0 resize-none bg-transparent outline-none h-14 leading-relaxed"
-                  defaultValue={isTindakLanjut ? "Penyulaman telah dilakukan pada titik ini. Bibit pengganti ditanam dan area sekitar dibersihkan." : (isEdit ? "Daun masih hijau, namun pertumbuhan lebih lambat dibanding tanaman lain pada PU-03.\nArea sekitar cukup berlumpur dan perlu pemantauan lanjutan." : "")}
+                  value={form.catatan}
+                  onChange={(e) => setForm({ ...form, catatan: e.target.value })}
+                  placeholder={isTindakLanjut ? "Keterangan penyulaman..." : "Catatan kondisi tanaman saat ini..."}
                 ></textarea>
                 <div className="text-right text-[10px] text-gray-400 font-medium">{isTindakLanjut ? '91/500' : (isEdit ? '135/500' : '0/500')}</div>
               </div>
@@ -355,8 +427,14 @@ export const InputEditView: React.FC<InputEditViewProps> = ({
            <HiOutlineArrowLeft className="w-4 h-4 stroke-2" /> Kembali ke Tambah Data PU
          </button>
          <div className="flex items-center gap-3">
-           <button onClick={handleBackToTable} className="px-8 py-2.5 bg-[#008A4B] text-white rounded-full text-sm font-bold hover:bg-emerald-800 flex items-center gap-2 shadow-sm cursor-pointer transition-colors">
-             <HiCheckCircle className="w-5 h-5" /> {isEdit ? 'Simpan Perubahan' : `Simpan ${isTindakLanjut ? 'Hasil Penyulaman' : 'Monitoring'}`}
+           <button 
+             onClick={handleSimpan} 
+             disabled={isSubmitting}
+             className={`px-8 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 shadow-sm cursor-pointer transition-colors ${
+               isSubmitting ? 'bg-emerald-300 cursor-not-allowed' : 'bg-[#008A4B] text-white hover:bg-emerald-800'
+             }`}
+           >
+             <HiCheckCircle className="w-5 h-5" /> {isSubmitting ? 'Menyimpan...' : (isEdit ? 'Simpan Perubahan' : `Simpan ${isTindakLanjut ? 'Hasil Penyulaman' : 'Monitoring'}`)}
            </button>
          </div>
       </div>

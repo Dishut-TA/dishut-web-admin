@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { HiOutlineChevronLeft } from 'react-icons/hi2';
+import { getLaporanProyekByIdAPI } from '@/services/investasi.service';
+import toast from 'react-hot-toast';
 
 type StatusLaporan = 'Menunggu Verifikasi' | 'Revisi' | 'Diverifikasi';
 
@@ -34,6 +36,26 @@ const SectionTitle = ({ title }: { title: string }) => (
 
 const DetailLaporanProyekKTH: React.FC = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const [data, setData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!id) return;
+    const fetchDetail = async () => {
+      try {
+        setIsLoading(true);
+        const res = await getLaporanProyekByIdAPI(id);
+        setData(res);
+      } catch (err: any) {
+        toast.error(err.message || 'Gagal memuat detail laporan');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchDetail();
+  }, [id]);
+
   const [statusLaporan, setStatusLaporan] = useState<StatusLaporan>('Menunggu Verifikasi');
 
   const getStatusDisplay = () => {
@@ -44,6 +66,10 @@ const DetailLaporanProyekKTH: React.FC = () => {
   };
 
   const statusDisplay = getStatusDisplay();
+
+  if (isLoading) {
+    return <div className="p-8 text-center text-gray-500">Memuat detail laporan...</div>;
+  }
 
   return (
     <div className="flex flex-col w-full max-w-4xl mx-auto pb-20 animate-in fade-in duration-300 relative">
@@ -77,26 +103,26 @@ const DetailLaporanProyekKTH: React.FC = () => {
       <div className="px-4 sm:px-0">
         <h2 className="text-base font-bold text-gray-800 mb-4">Informasi Laporan</h2>
         <div className="flex flex-col gap-3">
-          <InfoRow label="Nama Investasi" value="Ekowisata Kebun Stroberi" />
-          <InfoRow label="Periode Laporan" value="24 Agustus 2025" />
-          <InfoRow label="Status" value={statusDisplay.text} valueColor={statusDisplay.color} />
+          <InfoRow label="Nama Investasi" value={data?.program?.nama_program || data?.program?.nama_program_investasi || data?.nama_program_investasi || "Ekowisata Kebun Stroberi"} />
+          <InfoRow label="Periode Laporan" value={data?.created_at ? new Date(data.created_at).toLocaleDateString('id-ID') : "24 Agustus 2025"} />
+          <InfoRow label="Status" value={data?.status_verifikasi || statusDisplay.text} valueColor={statusDisplay.color} />
           
-          {statusLaporan === 'Revisi' && (
+          {(statusLaporan === 'Revisi' || data?.status_verifikasi === 'Revisi') && (
             <InfoRow 
               label="Catatan" 
-              value="Dokumentasi milestone belum lengkap, mohon tambahkan foto terbaru." 
+              value={data?.catatan_verifikasi || "Dokumentasi milestone belum lengkap, mohon tambahkan foto terbaru."} 
               isItalic={true} 
             />
           )}
-          {statusLaporan === 'Diverifikasi' && (
+          {(statusLaporan === 'Diverifikasi' || data?.status_verifikasi === 'Diverifikasi') && (
             <InfoRow label="Catatan" value="-" />
           )}
         </div>
 
         <SectionTitle title="Informasi Milestone" />
         <div className="flex flex-col gap-3">
-          <InfoRow label="Nama Milestone" value="Milestone 1" />
-          <InfoRow label="Batas Milestone" value="22/04/2024" />
+          <InfoRow label="Nama Milestone" value={data?.milestone?.judul_milestone || "Milestone 1"} />
+          <InfoRow label="Batas Milestone" value={data?.milestone?.target_tanggal ? new Date(data.milestone.target_tanggal).toLocaleDateString('id-ID') : "22/04/2024"} />
           <InfoRow 
             label="Status" 
             value={
@@ -105,25 +131,33 @@ const DetailLaporanProyekKTH: React.FC = () => {
               </span>
             } 
           />
-          <InfoRow label="Dokumen Milestone" value="RencanaProyekPembangunanEkowisata.pdf" isLink={true} valueColor="text-gray-800" />
+          <InfoRow label="Dokumen Milestone" value={data?.milestone?.dokumens?.[0]?.file_url ? 'Dokumen_Milestone.pdf' : "RencanaProyekPembangunanEkowisata.pdf"} isLink={true} valueColor="text-gray-800" />
           <InfoRow 
             label="Deskripsi" 
-            value="Lorem ipsum dolor sit amet consectetur. Faucibus faucibus urna nulla amet at nascetur. Enim aliquam sed nibh bibendum. Pulvinar nec risus et vulputate consequat tortor. Quisque tristique in dapibus laoreet eu augue. Maecenas quam eget habitant non. Lobortis lobortis dui phasellus sodales consectetur faucibus mauris eros odio. Diam tortor massa et venenatis ornare tristique nulla." 
+            value={data?.deskripsi_kemajuan || "Lorem ipsum dolor sit amet consectetur. Faucibus faucibus urna nulla amet at nascetur."} 
             valueColor="text-gray-500 font-normal leading-relaxed text-justify"
           />
         </div>
 
         <SectionTitle title="Penggunaan Dana" />
         <div className="flex flex-col gap-3">
-          <InfoRow label="Dana Terpakai" value="Rp 27.000.000" />
-          <InfoRow label="Sisa Dana" value="Rp 3.000.000" />
+          <InfoRow label="Dana Terpakai" value={`Rp ${data?.dana_terpakai ? data.dana_terpakai.toLocaleString('id-ID') : '27.000.000'}`} />
+          <InfoRow label="Sisa Dana" value={`Rp ${data?.sisa_dana ? data.sisa_dana.toLocaleString('id-ID') : '3.000.000'}`} />
         </div>
 
         <SectionTitle title="Dokumen Perkembangan" />
         <div className="flex flex-col gap-3">
-          <span className="text-sm text-gray-800 font-medium underline cursor-pointer hover:text-gray-600 w-fit">
-            dokumen_pendukung.pdf
-          </span>
+          {data?.dokumens && data.dokumens.length > 0 ? (
+            data.dokumens.map((dok: any, index: number) => (
+              <span key={index} onClick={() => window.open(dok.file_url, '_blank')} className="text-sm text-gray-800 font-medium underline cursor-pointer hover:text-gray-600 w-fit">
+                {`Dokumen_Pendukung_${index + 1}`}
+              </span>
+            ))
+          ) : (
+            <span className="text-sm text-gray-800 font-medium underline cursor-pointer hover:text-gray-600 w-fit">
+              dokumen_pendukung.pdf
+            </span>
+          )}
         </div>
         
         {statusLaporan === 'Menunggu Verifikasi' && (

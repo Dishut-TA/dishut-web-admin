@@ -1,7 +1,7 @@
 import { FiClock } from 'react-icons/fi';
 import { ACTIVITIES } from '../data/mockData';
 
-export default function RecentActivities() {
+export default function RecentActivities({ }: { activities?: any[] }) {
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 mb-6">
       <div className="flex justify-between items-center mb-5">

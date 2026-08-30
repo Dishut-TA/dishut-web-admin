@@ -157,30 +157,29 @@ const ModalBuatPenugasan: React.FC<ModalProps> = ({ isOpen, onClose }) => {
       const token = localStorage.getItem('token');
       const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
       
+      let payload: any = {
+        penyuluh_id: parseInt(penyuluh),
+        tanggal_mulai: tanggal,
+        batas_waktu: periode,
+        arahan: catatan
+      };
+
       if (kategori === 'pelaksanaan') {
-        const payload = {
-          penyuluh_id: parseInt(penyuluh),
-          tanggal_mulai: tanggal,
-          batas_waktu: periode,
-          arahan: catatan
-        };
-        const res = await fetch(`${API_URL}/pelaksanaan/${lokasiAtauProgram}/penugasan`, {
-          method: 'POST', headers, body: JSON.stringify(payload)
-        });
-        if (!res.ok) throw new Error("Gagal menyimpan penugasan pelaksanaan");
+        const sourceData = JSON.parse(lokasiAtauProgram);
+        payload.source_id = sourceData.id;
+        payload.source_type = sourceData.type;
+        payload.jenis_kegiatan = 'Pelaksanaan Penanaman';
       } else {
-        const payloadValidasi = {
-          zone_id: parseInt(lokasiAtauProgram),
-          penyuluh_id: parseInt(penyuluh),
-          tanggal_mulai: tanggal,
-          batas_waktu: periode,
-          arahan: catatan
-        };
-        const res = await fetch(`${API_URL}/field-validations/assign`, {
-          method: 'POST', headers, body: JSON.stringify(payloadValidasi)
-        });
-        if (!res.ok) throw new Error("Gagal menyimpan penugasan validasi");
+        payload.source_id = parseInt(lokasiAtauProgram);
+        payload.source_type = 'App\\Models\\AnalysisResultZone';
+        payload.jenis_kegiatan = 'Validasi Lokasi';
       }
+
+      const res = await fetch(`${API_URL}/penugasan/assign`, {
+        method: 'POST', headers, body: JSON.stringify(payload)
+      });
+      
+      if (!res.ok) throw new Error("Gagal menyimpan penugasan");
 
       toast.success('Penugasan berhasil dibuat!', { id: loadingId });
       onClose();

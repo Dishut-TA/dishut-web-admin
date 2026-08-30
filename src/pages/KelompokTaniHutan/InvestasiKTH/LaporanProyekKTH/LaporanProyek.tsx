@@ -1,48 +1,29 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HiOutlineFunnel, HiOutlineEye, HiOutlinePlus } from 'react-icons/hi2';
 
-interface LaporanProyekData {
-  id: string;
-  no: number;
-  tanggal: string;
-  investasi: string;
-  milestone: string;
-}
-
-const mockData: LaporanProyekData[] = [
-  {
-    id: 'LPR-001',
-    no: 1,
-    tanggal: '15/02/2026',
-    investasi: 'Investasi Ekowisata Pinus',
-    milestone: 'Milestone 1',
-  },
-  {
-    id: 'LPR-002',
-    no: 2,
-    tanggal: '15/02/2026',
-    investasi: 'Investasi Ekowisata Pinus',
-    milestone: 'Milestone 2',
-  },
-  {
-    id: 'LPR-003',
-    no: 3,
-    tanggal: '15/02/2026',
-    investasi: 'Investasi Ekowisata Pinus',
-    milestone: 'Milestone 3',
-  },
-  {
-    id: 'LPR-004',
-    no: 4,
-    tanggal: '15/02/2026',
-    investasi: 'Investasi Ekowisata Pinus',
-    milestone: 'Milestone 4',
-  },
-];
+import { getLaporanProyekAPI } from '@/services/investasi.service';
+import toast from 'react-hot-toast';
 
 const LaporanProyekIndexKTH: React.FC = () => {
   const navigate = useNavigate();
+  const [data, setData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLaporan = async () => {
+      try {
+        setIsLoading(true);
+        const res = await getLaporanProyekAPI();
+        setData(res);
+      } catch (err: any) {
+        toast.error(err.message || 'Gagal memuat laporan');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchLaporan();
+  }, []);
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8">
@@ -79,19 +60,27 @@ const LaporanProyekIndexKTH: React.FC = () => {
             </thead>
             
             <tbody className="divide-y divide-gray-100">
-              {mockData.map((item) => (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-8 text-center text-gray-500">Memuat laporan...</td>
+                </tr>
+              ) : data.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-8 text-center text-gray-500">Belum ada laporan proyek.</td>
+                </tr>
+              ) : data.map((item: any, index: number) => (
                 <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-6 py-4 text-sm font-medium text-gray-700 text-center">
-                    {item.no}
+                    {index + 1}
                   </td>
                   <td className="px-6 py-4 text-sm font-medium text-gray-600 text-center whitespace-nowrap">
-                    {item.tanggal}
+                    {item.created_at ? new Date(item.created_at).toLocaleDateString('id-ID') : '-'}
                   </td>
                   <td className="px-6 py-4 text-sm font-bold text-gray-800 whitespace-nowrap">
-                    {item.investasi}
+                    {item.program?.nama_program || item.nama_program_investasi || 'Program Investasi'}
                   </td>
                   <td className="px-6 py-4 text-sm font-semibold text-gray-600 whitespace-nowrap">
-                    {item.milestone}
+                    {item.milestone?.judul_milestone || `Milestone ${item.milestone_id}`}
                   </td>
                   <td className="px-6 py-4 flex justify-center whitespace-nowrap">
                     <button 

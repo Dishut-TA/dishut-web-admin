@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { HiOutlinePaperAirplane, HiOutlineCloudArrowUp, HiOutlineChevronLeft } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 import { createProgramCsrAPI } from '@/services/program-csr.service';
+import { rehabilitasiService } from '@/services/rehabilitasi.service';
 
 const AjukanProgramCSR: React.FC = () => {
   const navigate = useNavigate();
@@ -13,9 +14,54 @@ const AjukanProgramCSR: React.FC = () => {
     jenisPohon: '',
     jumlahBibit: '',
     anggaran: '',
-    deskripsi: ''
+    deskripsi: '',
+    kth_id: '1'
   });
   const [fileProposal, setFileProposal] = useState<File | null>(null);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [isFetchingProjects, setIsFetchingProjects] = useState(true);
+  const [selectedProjectId, setSelectedProjectId] = useState('');
+
+  React.useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const res = await rehabilitasiService.getValidZones();
+        const validZones = (res.data || []).filter((z: any) => z.status_kelayakan === 'Layak');
+        setProjects(validZones);
+      } catch (error) {
+        toast.error('Gagal memuat daftar project lahan kritis.');
+      } finally {
+        setIsFetchingProjects(false);
+      }
+    };
+    fetchProjects();
+  }, []);
+
+  const handleProjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = e.target.value;
+    setSelectedProjectId(selectedId);
+
+    const foundZone = projects.find(p => String(p.id) === String(selectedId));
+    
+    if (foundZone) {
+      const validation = foundZone.field_validations?.length > 0 ? foundZone.field_validations[0] : null;
+      const lokasi = validation?.nama_lokasi || foundZone.result?.project?.project_code || 'Lokasi tidak diketahui';
+      
+      setForm(prev => ({
+        ...prev,
+        judul: foundZone.result?.project?.nama_project ? `Program CSR - ${foundZone.result?.project?.nama_project}` : `Program CSR - ${lokasi}`,
+        luasLahan: foundZone.luas_ha ? String(foundZone.luas_ha) : '',
+        kth_id: foundZone.kth_id ? String(foundZone.kth_id) : '1'
+      }));
+    } else {
+      setForm(prev => ({
+        ...prev,
+        judul: '',
+        luasLahan: '',
+        kth_id: '1'
+      }));
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -34,7 +80,8 @@ const AjukanProgramCSR: React.FC = () => {
 
     try {
       const formData = new FormData();
-      formData.append('kth_id', '1');
+      formData.append('kth_id', form.kth_id);
+      formData.append('analysis_result_zone_id', selectedProjectId);
       formData.append('nama_program', form.judul);
       formData.append('target_luas_lahan', form.luasLahan);
       formData.append('jenis_tanaman', form.jenisPohon);
@@ -73,6 +120,28 @@ const AjukanProgramCSR: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 gap-6">
+            <label className="block">
+              <span className="text-sm font-bold text-[#185325]">Lokasi Lahan Prioritas (Hasil Rencana Rehabilitasi) <span className="text-red-500">*</span></span>
+              <select 
+                required
+                value={selectedProjectId}
+                onChange={handleProjectChange}
+                disabled={isFetchingProjects}
+                className="mt-2 w-full px-5 py-3 border border-gray-300 rounded-full text-sm focus:ring-1 focus:ring-[#185325] focus:border-[#185325] outline-none transition-colors disabled:bg-gray-50"
+              >
+                <option value="">-- Pilih Lokasi Prioritas --</option>
+                {projects.map((proj) => {
+                  const validation = proj.field_validations?.length > 0 ? proj.field_validations[0] : null;
+                  const lokasi = validation?.nama_lokasi || proj.result?.project?.project_code || 'Lokasi tidak diketahui';
+                  return (
+                    <option key={proj.id} value={proj.id}>
+                      {lokasi}
+                    </option>
+                  );
+                })}
+              </select>
+            </label>
+
             <label className="block">
                 <span className="text-sm font-bold text-[#185325]">Judul Program <span className="text-red-500">*</span></span>
                 <input required type="text" name="judul" value={form.judul} onChange={handleInputChange} className="mt-2 w-full px-5 py-3 border border-gray-300 rounded-full text-sm focus:ring-1 focus:ring-[#185325] focus:border-[#185325] outline-none transition-colors" placeholder="Contoh: Reboisasi DAS Hulu Sungai" />

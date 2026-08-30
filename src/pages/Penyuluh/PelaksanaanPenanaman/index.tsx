@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   HiOutlineClipboardDocumentList, 
   HiOutlineCheckCircle,
   HiOutlineEye,
   HiChevronRight,
-  HiChevronLeft,
   HiOutlineCalendar,
   HiOutlineMagnifyingGlass,
   HiChevronDown,
@@ -15,7 +14,6 @@ import {
 } from 'react-icons/hi2';
 import { PiPlant } from 'react-icons/pi';
 
-// --- CUSTOM SVG ICONS UNTUK KESESUAIAN DESAIN ---
 const HourglassIcon = ({ className }: { className?: string }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75a4.5 4.5 0 0 1-4.884 4.484c-1.076-.091-2.264.071-2.95.904l-7.152 8.684a2.548 2.548 0 1 1-3.586-3.586l8.684-7.152c.833-.686.995-1.874.904-2.95a4.5 4.5 0 0 1 6.336-4.486l-3.322 3.322a1.25 1.25 0 0 0 .543 2.105l3.428.857a1.25 1.25 0 0 0 1.488-1.488l-.857-3.428a1.25 1.25 0 0 0-2.105-.543l-3.322 3.322a4.5 4.5 0 0 1 4.484-4.884Z" style={{display: 'none'}} />
@@ -61,129 +59,6 @@ interface ProgramData {
 // ==========================================
 // 2. MOCK DATA
 // ==========================================
-const mockData: ProgramData[] = [
-  { 
-    id: '1', 
-    idPenugasan: 'TGS-2026-021', 
-    idProgram: 'PRG-2026-0021', 
-    namaProgram: 'Rehabilitasi DAS Cimanuk', 
-    lokasi: 'Desa Sukamukti, Kec. Pacet\nKab. Cianjur', 
-    kth: 'KTH Mekar Jaya', 
-    targetKegiatan: 'Penanaman', 
-    targetBibit: '500 bibit', 
-    totalPu: '10 PU', 
-    periodeMulai: '20 Jun 2026', 
-    periodeSelesai: '05 Jul 2026', 
-    sisaHari: '(3 hari lagi)', 
-    sisaHariColor: 'text-red-500',
-    progresPu: '0 / 10 PU', 
-    progresBibit: '0 / 500 bibit', 
-    progresPercent: 0, 
-    status: 'Ditugaskan' 
-  },
-  { 
-    id: '2', 
-    idPenugasan: 'TGS-2026-018', 
-    idProgram: 'PRG-2026-0018', 
-    namaProgram: 'Rehabilitasi DAS Cisangkuy', 
-    lokasi: 'Desa Mandalakasih, Kec. Pameungpeuk\nKab. Garut', 
-    kth: 'KTH Lestari', 
-    targetKegiatan: 'Penanaman', 
-    targetBibit: '600 bibit', 
-    totalPu: '12 PU', 
-    periodeMulai: '18 Jun 2026', 
-    periodeSelesai: '03 Jul 2026', 
-    sisaHari: '(1 hari lagi)', 
-    sisaHariColor: 'text-red-500',
-    progresPu: '6 / 12 PU', 
-    progresBibit: '300 / 600 bibit', 
-    progresPercent: 50, 
-    status: 'Berjalan' 
-  },
-  { 
-    id: '3', 
-    idPenugasan: 'TGS-2026-019', 
-    idProgram: 'PRG-2026-0009', 
-    namaProgram: 'Rehabilitasi DAS Citanduy', 
-    lokasi: 'Desa Padasuka, Kec. Cijeungjing\nKab. Ciamis', 
-    kth: 'KTH Rahayu', 
-    targetKegiatan: 'Penanaman', 
-    targetBibit: '450 bibit', 
-    totalPu: '9 PU', 
-    periodeMulai: '10 Jun 2026', 
-    periodeSelesai: '25 Jun 2026', 
-    sisaHari: '(Terlewat 2 hari)', 
-    sisaHariColor: 'text-red-500',
-    progresPu: '4 / 9 PU', 
-    progresBibit: '200 / 450 bibit', 
-    progresPercent: 44, 
-    status: 'Berjalan' 
-  },
-  { 
-    id: '4', 
-    idPenugasan: 'TGS-2026-014', 
-    idProgram: 'PRG-2026-0012', 
-    namaProgram: 'Rehabilitasi DAS Cidurian', 
-    lokasi: 'Desa Mekarsari, Kec. Ibun\nKab. Bandung', 
-    kth: 'KTH Suka Alam', 
-    targetKegiatan: 'Penanaman', 
-    targetBibit: '700 bibit', 
-    totalPu: '14 PU', 
-    periodeMulai: '01 Jun 2026', 
-    periodeSelesai: '15 Jun 2026', 
-    sisaHari: '', 
-    sisaHariColor: '',
-    progresPu: '14 / 14 PU', 
-    progresBibit: '700 / 700 bibit', 
-    progresPercent: 100, 
-    status: 'Selesai' 
-  },
-  { 
-    id: '5', 
-    idPenugasan: 'TGS-2026-017', 
-    idProgram: 'PRG-2026-0015', 
-    namaProgram: 'Rehabilitasi DAS Ciletuh', 
-    lokasi: 'Desa Girijaya, Kec. Cisolok\nKab. Sukabumi', 
-    kth: 'KTH Harapan', 
-    targetKegiatan: 'Penanaman', 
-    targetBibit: '550 bibit', 
-    totalPu: '11 PU', 
-    periodeMulai: '05 Mei 2026', 
-    periodeSelesai: '20 Mei 2026', 
-    sisaHari: '', 
-    sisaHariColor: '',
-    progresPu: '11 / 11 PU', 
-    progresBibit: '550 / 550 bibit', 
-    progresPercent: 100, 
-    status: 'Selesai' 
-  },
-  { 
-    id: '6', 
-    idPenugasan: 'TGS-2026-020', 
-    idProgram: 'PRG-2026-0024', 
-    namaProgram: 'Rehabilitasi DAS Cipeles', 
-    lokasi: 'Desa Sukarame, Kec. Caringin\nKab. Bogor', 
-    kth: 'KTH Hijau Lestari', 
-    targetKegiatan: 'Penanaman', 
-    targetBibit: '360 bibit', 
-    totalPu: '6 PU', 
-    periodeMulai: '20 Jul 2026', 
-    periodeSelesai: '04 Agu 2026', 
-    sisaHari: '(28 hari lagi)', 
-    sisaHariColor: 'text-red-500',
-    progresPu: '0 / 6 PU', 
-    progresBibit: '0 / 360 bibit', 
-    progresPercent: 0, 
-    status: 'Ditugaskan' 
-  },
-];
-
-const SUMMARY_CARDS = [
-  { title: 'Total Penugasan', sub: 'Seluruh penugasan kegiatan', value: '6', icon: <HiOutlineClipboardDocumentList className="w-8 h-8" />, bg: 'bg-orange-50', text: 'text-orange-500' },
-  { title: 'Ditugaskan', sub: 'Belum dimulai', value: '2', icon: <HourglassIcon className="w-8 h-8" />, bg: 'bg-blue-50', text: 'text-blue-500' },
-  { title: 'Berjalan', sub: 'Dalam proses kegiatan', value: '2', icon: <HiOutlineArrowPath className="w-8 h-8" />, bg: 'bg-purple-50', text: 'text-purple-600' },
-  { title: 'Selesai', sub: 'Kegiatan telah selesai', value: '2', icon: <HiOutlineCheckCircle className="w-8 h-8" />, bg: 'bg-emerald-50', text: 'text-emerald-500' },
-];
 
 // ==========================================
 // 3. MICRO COMPONENTS
@@ -215,25 +90,6 @@ const Header = () => (
         Daftar penugasan kegiatan rehabilitasi yang diberikan kepada Anda.
       </p>
     </div>
-  </div>
-);
-
-const SummaryCards = () => (
-  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-    {SUMMARY_CARDS.map((card, idx) => (
-      <div key={idx} className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
-        <div className={`p-3 rounded-lg shrink-0 ${card.bg} ${card.text}`}>
-          {card.icon}
-        </div>
-        <div>
-          <div className="flex items-baseline gap-2 mb-0.5">
-            <h3 className="text-2xl font-bold text-slate-900">{card.value}</h3>
-          </div>
-          <p className="text-sm font-bold text-slate-800">{card.title}</p>
-          <p className="text-[11px] font-medium text-slate-400">{card.sub}</p>
-        </div>
-      </div>
-    ))}
   </div>
 );
 
@@ -355,34 +211,127 @@ const KegiatanTable = ({ data, navigate }: { data: ProgramData[], navigate: any 
   </div>
 );
 
-const Pagination = () => (
-  <div className="flex items-center justify-between text-xs text-slate-500 px-5 py-4 border-t border-slate-100">
-    <span className="font-medium">Menampilkan 1 - 6 dari 6 data</span>
-    <div className="flex items-center gap-2">
-      <button className="p-1.5 rounded-full border border-slate-200 bg-white text-slate-400 hover:bg-slate-50 disabled:opacity-50"><HiChevronLeft className="w-4 h-4" /></button>
-      <button className="px-3 py-1.5 rounded-full bg-[#008A4B] text-white font-semibold">1</button>
-      <button className="p-1.5 rounded-full border border-slate-200 bg-white text-slate-400 hover:bg-slate-50 disabled:opacity-50"><HiChevronRight className="w-4 h-4" /></button>
-    </div>
-  </div>
-);
-
-// ==========================================
-// 5. MAIN PAGE COMPONENT
-// ==========================================
 const PelaksanaanPenanamanIndex: React.FC = () => {
+  const [programs, setPrograms] = useState<ProgramData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
-  const [data] = useState<ProgramData[]>(mockData);
+
+  useEffect(() => {
+    const fetchPenugasan = async () => {
+      try {
+        // Use dynamically imported getMyPenugasanAPI
+        const { getMyPenugasanAPI } = await import('@/services/penugasan.service');
+        const res = await getMyPenugasanAPI();
+        const apiData = res.data || [];
+        
+        const pelaksanaanData = apiData
+          .filter((p: any) => p.jenis_kegiatan === 'Pelaksanaan Penanaman' && p.status !== 'Menunggu Penugasan')
+          .map((p: any) => {
+            const detail = p.penugasanable || {};
+            let programName = '-';
+            let location = '-';
+            let kth = '-';
+            let targetBibit = '0';
+            let totalPu = '-';
+
+            if (p.penugasanable_type === 'App\\Models\\DonationProgram') {
+              programName = detail.name || '-';
+              location = detail.location || '-';
+              kth = detail.kth?.name || '-';
+              targetBibit = detail.target_amount || '0';
+              totalPu = (detail.analysis_result_zone || detail.analysisResultZone)?.jumlah_pu || '-';
+            } else if (p.penugasanable_type === 'App\\Models\\ProgramApbd' || p.penugasanable_type === 'App\\Models\\ProgramCsr') {
+              programName = detail.nama_program || '-';
+              location = detail.lokasi || (detail.kth ? `${detail.kth.desa_kelurahan}, ${detail.kth.kabupaten_kota}` : '-');
+              kth = detail.kth?.nama || '-';
+              targetBibit = detail.target_bibit || detail.jumlah_bibit || '0';
+              totalPu = (detail.analysis_result_zone || detail.analysisResultZone)?.jumlah_pu || '-';
+            }
+
+            return {
+              id: String(p.id),
+              idPenugasan: `TGS-${p.id}`,
+              idProgram: detail.id ? `PRG-${detail.id}` : '-',
+              namaProgram: programName,
+              lokasi: location,
+              kth: kth,
+              targetKegiatan: 'Pelaksanaan Penanaman',
+              targetBibit: targetBibit + ' bibit',
+              totalPu: totalPu ? `${totalPu} PU` : '-', 
+              periodeMulai: p.tanggal_mulai ? new Date(p.tanggal_mulai).toLocaleDateString('id-ID') : '-',
+              periodeSelesai: p.batas_waktu ? new Date(p.batas_waktu).toLocaleDateString('id-ID') : '-',
+              sisaHari: '',
+              sisaHariColor: '',
+              progresPu: '0',
+              progresBibit: '0',
+              progresPercent: 0,
+              status: p.status === 'Menunggu Verifikasi' ? 'Selesai' : (p.status as StatusPelaksanaan)
+            };
+          });
+
+        setPrograms(pelaksanaanData);
+      } catch (error) {
+        console.error('Error fetching penugasan:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchPenugasan();
+  }, []);
 
   return (
-    <div className="w-full mx-auto pb-12 bg-[#F8FAFC] min-h-screen ont-sans">
-      <Header />
-      <SummaryCards />
-      
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col p-4">
-        <FilterSection />
-        <div className="border border-slate-200 rounded-lg overflow-hidden mt-2">
-          <KegiatanTable data={data} navigate={navigate} />
-          <Pagination />
+    <div className="w-full bg-[#F8FAFC] min-h-screen font-sans text-slate-800">
+      <div className="max-w-[1600px] mx-auto">
+        <Header />
+        
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
+            <div className="p-3 rounded-lg shrink-0 bg-orange-50 text-orange-500">
+              <HiOutlineClipboardDocumentList className="w-8 h-8" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-slate-900">{programs.length}</h3>
+              <p className="text-sm font-bold text-slate-800">Total Penugasan</p>
+            </div>
+          </div>
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
+            <div className="p-3 rounded-lg shrink-0 bg-blue-50 text-blue-500">
+              <HourglassIcon className="w-8 h-8" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-slate-900">{programs.filter(d => d.status === 'Ditugaskan').length}</h3>
+              <p className="text-sm font-bold text-slate-800">Ditugaskan</p>
+            </div>
+          </div>
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
+            <div className="p-3 rounded-lg shrink-0 bg-purple-50 text-purple-600">
+              <HiOutlineArrowPath className="w-8 h-8" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-slate-900">{programs.filter(d => d.status === 'Berjalan').length}</h3>
+              <p className="text-sm font-bold text-slate-800">Berjalan</p>
+            </div>
+          </div>
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
+            <div className="p-3 rounded-lg shrink-0 bg-emerald-50 text-emerald-500">
+              <HiOutlineCheckCircle className="w-8 h-8" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-slate-900">{programs.filter(d => d.status === 'Selesai').length}</h3>
+              <p className="text-sm font-bold text-slate-800">Selesai</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200">
+          <div className="p-5">
+             <FilterSection />
+          </div>
+          {isLoading ? (
+            <div className="p-8 text-center text-slate-500">Loading data penugasan...</div>
+          ) : (
+            <KegiatanTable data={programs} navigate={navigate} />
+          )}
         </div>
       </div>
     </div>

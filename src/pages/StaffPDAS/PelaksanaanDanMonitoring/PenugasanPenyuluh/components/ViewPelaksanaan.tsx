@@ -1,31 +1,124 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 import { 
   HiOutlineMapPin, HiOutlineCalendar, HiOutlineCheckCircle, HiCheckCircle, 
   HiOutlineXMark, HiOutlineEye, HiOutlineInformationCircle, 
   HiOutlinePhoto, HiOutlineDocumentText, HiOutlineUser, HiOutlineUsers, 
   HiOutlineBriefcase, HiCheck, HiOutlineArrowLeft, HiOutlinePrinter
 } from 'react-icons/hi2';
-import { MOCK_PU_LIST, MOCK_TANAMAN } from '../data/mockData';
+import { MOCK_TANAMAN } from '../data/mockData';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+
+let DefaultIcon = L.icon({
+    iconUrl: icon,
+    shadowUrl: iconShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41]
+});
+L.Marker.prototype.options.icon = DefaultIcon;
 
 interface ViewProps {
   status: string;
   activeId: string;
+  data?: any;
 }
 
-export default function ViewPelaksanaan({ status, activeId }: ViewProps) {
+export default function ViewPelaksanaan({ status, activeId, data }: ViewProps) {
   const navigate = useNavigate();
   const [selectedPU, setSelectedPU] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const getStatusInfo = () => {
-    switch (status) {
-      case 'Berjalan': return { color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200', text: 'Berjalan', desc: 'Pelaksanaan sedang berlangsung' };
-      case 'Selesai': return { color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'Selesai', desc: 'Pelaksanaan telah selesai diverifikasi' };
-      case 'Menunggu Verifikasi': default: return { color: 'text-yellow-600', bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'Menunggu Verifikasi', desc: 'Menunggu Pemeriksaan Tim Evaluasi' };
+  const handleApprove = async () => {
+    try {
+      setIsSubmitting(true);
+      const token = localStorage.getItem('token');
+      await axios.post(`http://127.0.0.1:8000/api/penugasan/${activeId}/approve`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Penugasan berhasil disetujui dan diselesaikan');
+      navigate('/admin/staff/monitoring/monitoring-program', {
+        state: { statusFilter: 'Siap Monitoring' }
+      });
+    } catch (error) {
+      console.error('Error approving penugasan:', error);
+      toast.error('Gagal menyetujui penugasan');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  // LOG UNTUK DEBUGGING
+  console.log("=== DEBUG VIEW PELAKSANAAN ===");
+  console.log("Status dari Prop:", status);
+  console.log("Data dari Prop:", data);
+  console.log("===============================");
+
+  const getStatusInfo = () => {
+    const s = (status || '').toLowerCase().trim();
+    if (s.includes('berjalan')) {
+      return { color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200', text: 'Berjalan', desc: 'Pelaksanaan sedang berlangsung' };
+    }
+    if (s.includes('selesai')) {
+      return { color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'Selesai', desc: 'Pelaksanaan telah selesai diverifikasi' };
+    }
+    if (s.includes('menunggu verifikasi')) {
+      return { color: 'text-yellow-600', bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'Menunggu Verifikasi', desc: 'Menunggu Pemeriksaan Tim Evaluasi' };
+    }
+    
+    // Tampilkan raw status jika tidak ada yang cocok, bukan fallback ke Menunggu Verifikasi
+    return { color: 'text-gray-600', bg: 'bg-gray-50', border: 'border-gray-200', text: status || 'Unknown', desc: 'Status tidak diketahui' };
+  };
+
   const statusInfo = getStatusInfo();
+  
+  const targetKegiatan = data?.detail?.total_seeds_collected || data?.detail?.jumlah_bibit || 500;
+  const rawJumlahPu = data?.detail?.analysis_result_zone?.jumlah_pu || data?.detail?.analysisResultZone?.jumlah_pu || 10;
+  // Batasi jumlah PU agar tidak membuat browser crash (maksimal 50 untuk render Leaflet yang aman)
+  const jumlahPu = Math.min(Math.max(Number(rawJumlahPu) || 10, 1), 50);
+  
+  const luasHa = data?.detail?.analysis_result_zone?.luas_ha || data?.detail?.analysisResultZone?.luas_ha || data?.detail?.target_luas_lahan || 10;
+  
+  const sourceType = data?.source_type || '';
+  const sourceCode = sourceType.includes('DonationProgram') ? 'DNS' : sourceType.includes('ProgramApbd') ? 'APBD' : 'CSR';
+  const tahunProgram = data?.detail?.start_date ? new Date(data.detail.start_date).getFullYear() : data?.detail?.tanggal_mulai ? new Date(data.detail.tanggal_mulai).getFullYear() : new Date().getFullYear();
+  const formattedId = `P-${sourceCode}-${tahunProgram}-${activeId.toString().padStart(3, '0')}`;
+  
+  const kthName = data?.detail?.kth?.name || data?.detail?.kth?.nama || 'KTH Tidak Ditemukan';
+  const penyuluhName = data?.penyuluh || 'Penyuluh Tidak Ditemukan';
+  const programName = data?.program || 'Rehabilitasi Lahan';
+  const lokasi = data?.lokasi || 'Lokasi Tidak Ditemukan';
+  const startDate = data?.detail?.start_date || data?.detail?.tanggal_mulai || '18 Juni 2026';
+  const endDate = data?.detail?.end_date || data?.detail?.tanggal_selesai || '03 Juli 2026';
+
+  // Gunakan useMemo agar tidak membuat ulang array (dan koordinat Math.random baru) di setiap re-render, yang bisa memicu Leaflet re-render berlebihan (crash)
+  const puList = useMemo(() => {
+    return Array.from({ length: jumlahPu }).map((_, idx) => {
+      const no = idx + 1;
+      const kode = `PU-${no.toString().padStart(2, '0')}`;
+      const target = Math.floor(targetKegiatan / jumlahPu) + (no === 1 ? targetKegiatan % jumlahPu : 0);
+      const realisasi = target; 
+      const selisih = realisasi - target;
+      return {
+        no,
+        kode,
+        luas: (luasHa / jumlahPu).toFixed(2),
+        target,
+        realisasi,
+        selisih: selisih === 0 ? '0' : selisih > 0 ? `+${selisih}` : `${selisih}`,
+        status: 'Sesuai',
+        lat: -7.033 + (Math.random() * 0.01 - 0.005),
+        lng: 107.522 + (Math.random() * 0.01 - 0.005)
+      };
+    });
+  }, [jumlahPu, targetKegiatan, luasHa]);
+  
+  const selectedPUData = puList.find(p => p.kode === selectedPU);
 
   return (
     <div className="max-w-[1600px] mx-auto space-y-6 animate-in fade-in duration-300">
@@ -56,14 +149,14 @@ export default function ViewPelaksanaan({ status, activeId }: ViewProps) {
           <p className={`text-xs font-medium ${statusInfo.color}`}>{statusInfo.desc}</p>
         </div>
         <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-6 gap-x-4 w-full">
-          <div className="space-y-1"><div className="flex items-center gap-1.5 text-gray-500"><HiOutlineDocumentText className="w-4 h-4"/> <span className="text-xs font-bold">ID Program</span></div><p className="text-sm font-semibold text-gray-900">{activeId}</p></div>
-          <div className="space-y-1"><div className="flex items-center gap-1.5 text-gray-500"><HiOutlineBriefcase className="w-4 h-4"/> <span className="text-xs font-bold">Program</span></div><p className="text-sm font-semibold text-gray-900">Rehabilitasi DAS Cimanuk</p></div>
-          <div className="space-y-1"><div className="flex items-center gap-1.5 text-gray-500"><HiOutlineUsers className="w-4 h-4"/> <span className="text-xs font-bold">KTH</span></div><p className="text-sm font-semibold text-gray-900">KTH Mekar Jaya</p></div>
-          <div className="space-y-1"><div className="flex items-center gap-1.5 text-gray-500"><HiOutlineUser className="w-4 h-4"/> <span className="text-xs font-bold">Penyuluh</span></div><p className="text-sm font-semibold text-gray-900">Rina Herlina, S.Hut.</p></div>
-          <div className="space-y-1"><div className="flex items-center gap-1.5 text-gray-500"><HiOutlineMapPin className="w-4 h-4"/> <span className="text-xs font-bold">Lokasi</span></div><p className="text-sm font-semibold text-gray-900">Desa Mandalakasih,<br/>Kec. Pameungpeuk</p></div>
-          <div className="space-y-1"><div className="flex items-center gap-1.5 text-gray-500"><HiOutlineCalendar className="w-4 h-4"/> <span className="text-xs font-bold">Periode Penanaman</span></div><p className="text-sm font-semibold text-gray-900">18 Juni - 03 Juli 2026</p></div>
-          <div className="space-y-1"><div className="flex items-center gap-1.5 text-gray-500"><HiOutlineCheckCircle className="w-4 h-4"/> <span className="text-xs font-bold">Target PO</span></div><p className="text-sm font-semibold text-gray-900">500 tanaman</p></div>
-          <div className="space-y-1"><div className="flex items-center gap-1.5 text-gray-500"><HiOutlineInformationCircle className="w-4 h-4"/> <span className="text-xs font-bold">Total PU</span></div><p className="text-sm font-semibold text-gray-900">10 PU</p></div>
+          <div className="space-y-1"><div className="flex items-center gap-1.5 text-gray-500"><HiOutlineDocumentText className="w-4 h-4"/> <span className="text-xs font-bold">ID Program</span></div><p className="text-sm font-semibold text-gray-900">{formattedId}</p></div>
+          <div className="space-y-1"><div className="flex items-center gap-1.5 text-gray-500"><HiOutlineBriefcase className="w-4 h-4"/> <span className="text-xs font-bold">Program</span></div><p className="text-sm font-semibold text-gray-900">{programName}</p></div>
+          <div className="space-y-1"><div className="flex items-center gap-1.5 text-gray-500"><HiOutlineUsers className="w-4 h-4"/> <span className="text-xs font-bold">KTH</span></div><p className="text-sm font-semibold text-gray-900">{kthName}</p></div>
+          <div className="space-y-1"><div className="flex items-center gap-1.5 text-gray-500"><HiOutlineUser className="w-4 h-4"/> <span className="text-xs font-bold">Penyuluh</span></div><p className="text-sm font-semibold text-gray-900">{penyuluhName}</p></div>
+          <div className="space-y-1"><div className="flex items-center gap-1.5 text-gray-500"><HiOutlineMapPin className="w-4 h-4"/> <span className="text-xs font-bold">Lokasi</span></div><p className="text-sm font-semibold text-gray-900">{lokasi}</p></div>
+          <div className="space-y-1"><div className="flex items-center gap-1.5 text-gray-500"><HiOutlineCalendar className="w-4 h-4"/> <span className="text-xs font-bold">Periode Penanaman</span></div><p className="text-sm font-semibold text-gray-900">{startDate} - {endDate}</p></div>
+          <div className="space-y-1"><div className="flex items-center gap-1.5 text-gray-500"><HiOutlineCheckCircle className="w-4 h-4"/> <span className="text-xs font-bold">Target PO</span></div><p className="text-sm font-semibold text-gray-900">{targetKegiatan} tanaman</p></div>
+          <div className="space-y-1"><div className="flex items-center gap-1.5 text-gray-500"><HiOutlineInformationCircle className="w-4 h-4"/> <span className="text-xs font-bold">Total PU</span></div><p className="text-sm font-semibold text-gray-900">{jumlahPu} PU</p></div>
         </div>
       </div>
 
@@ -72,16 +165,16 @@ export default function ViewPelaksanaan({ status, activeId }: ViewProps) {
           <div className="px-5 py-4 border-b border-gray-100"><h3 className="text-base font-bold text-gray-900">Ringkasan Progres Pelaksanaan PO</h3></div>
           <div className="p-5 flex-1 flex flex-col justify-between">
             <div className="grid grid-cols-4 gap-4 mb-6">
-              <div className="border border-emerald-100 rounded-lg p-3 text-center bg-white shadow-sm"><p className="text-[10px] font-bold text-gray-500 uppercase flex items-center justify-center gap-1"><HiOutlineCheckCircle className="w-3.5 h-3.5"/> Target</p><p className="text-2xl font-bold text-emerald-600 my-1">500</p></div>
-              <div className="border border-gray-200 rounded-lg p-3 text-center bg-white shadow-sm"><p className="text-[10px] font-bold text-gray-500 uppercase">Realisasi</p><p className="text-2xl font-bold text-blue-600 my-1">500</p></div>
+              <div className="border border-emerald-100 rounded-lg p-3 text-center bg-white shadow-sm"><p className="text-[10px] font-bold text-gray-500 uppercase flex items-center justify-center gap-1"><HiOutlineCheckCircle className="w-3.5 h-3.5"/> Target</p><p className="text-2xl font-bold text-emerald-600 my-1">{targetKegiatan}</p></div>
+              <div className="border border-gray-200 rounded-lg p-3 text-center bg-white shadow-sm"><p className="text-[10px] font-bold text-gray-500 uppercase">Realisasi</p><p className="text-2xl font-bold text-blue-600 my-1">{targetKegiatan}</p></div>
               <div className="border border-gray-200 rounded-lg p-3 text-center bg-white shadow-sm"><p className="text-[10px] font-bold text-gray-500 uppercase">Selisih</p><p className="text-2xl font-bold text-gray-800 my-1">0</p></div>
               <div className="border border-gray-200 rounded-lg p-3 text-center bg-white shadow-sm"><p className="text-[10px] font-bold text-gray-500 uppercase">Capaian</p><p className="text-2xl font-bold text-emerald-600 my-1 border-b-4 border-emerald-500 inline-block">100%</p></div>
             </div>
             <div className="grid grid-cols-5 gap-3 mb-6">
-              <div className="border border-gray-200 rounded-lg p-2.5 text-center"><p className="text-[9px] font-bold text-gray-400 flex items-center justify-center gap-1 mb-1"><HiOutlineCheckCircle className="w-3 h-3 text-emerald-500"/> Selesai</p><p className="text-sm font-bold text-gray-900">10 / 10</p><p className="text-[9px] text-gray-400">PU</p></div>
-              <div className="border border-gray-200 rounded-lg p-2.5 text-center"><p className="text-[9px] font-bold text-gray-400 mb-1">Belum Selesai</p><p className="text-sm font-bold text-gray-900">0 / 10</p><p className="text-[9px] text-gray-400">PU</p></div>
-              <div className="border border-gray-200 rounded-lg p-2.5 text-center"><p className="text-[9px] font-bold text-gray-400 flex items-center justify-center gap-1 mb-1"><HiOutlinePhoto className="w-3 h-3"/> Foto</p><p className="text-sm font-bold text-gray-900">500 / 500</p></div>
-              <div className="border border-gray-200 rounded-lg p-2.5 text-center"><p className="text-[9px] font-bold text-gray-400 flex items-center justify-center gap-1 mb-1"><HiOutlineMapPin className="w-3 h-3"/> Koordinat</p><p className="text-sm font-bold text-gray-900">500 / 500</p></div>
+              <div className="border border-gray-200 rounded-lg p-2.5 text-center"><p className="text-[9px] font-bold text-gray-400 flex items-center justify-center gap-1 mb-1"><HiOutlineCheckCircle className="w-3 h-3 text-emerald-500"/> Selesai</p><p className="text-sm font-bold text-gray-900">{jumlahPu} / {jumlahPu}</p><p className="text-[9px] text-gray-400">PU</p></div>
+              <div className="border border-gray-200 rounded-lg p-2.5 text-center"><p className="text-[9px] font-bold text-gray-400 mb-1">Belum Selesai</p><p className="text-sm font-bold text-gray-900">0 / {jumlahPu}</p><p className="text-[9px] text-gray-400">PU</p></div>
+              <div className="border border-gray-200 rounded-lg p-2.5 text-center"><p className="text-[9px] font-bold text-gray-400 flex items-center justify-center gap-1 mb-1"><HiOutlinePhoto className="w-3 h-3"/> Foto</p><p className="text-sm font-bold text-gray-900">{targetKegiatan} / {targetKegiatan}</p></div>
+              <div className="border border-gray-200 rounded-lg p-2.5 text-center"><p className="text-[9px] font-bold text-gray-400 flex items-center justify-center gap-1 mb-1"><HiOutlineMapPin className="w-3 h-3"/> Koordinat</p><p className="text-sm font-bold text-gray-900">{targetKegiatan} / {targetKegiatan}</p></div>
               <div className="border border-gray-200 rounded-lg p-2.5 text-center"><p className="text-[9px] font-bold text-gray-400 mb-1">Dokumentasi</p><p className="text-sm font-bold text-gray-900">8 / 8</p></div>
             </div>
             <div>
@@ -104,14 +197,20 @@ export default function ViewPelaksanaan({ status, activeId }: ViewProps) {
             </div>
           </div>
           <div className="p-4 flex-1 relative">
-            <div className="w-full h-full min-h-65 rounded-lg bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1000&auto=format&fit=crop')] bg-cover bg-center border border-gray-200 relative overflow-hidden">
-              <div className="absolute inset-0 bg-black/10"></div>
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-wrap gap-1 justify-center w-64">
-                 <div className="w-16 h-16 bg-emerald-500/40 border border-emerald-500 flex items-center justify-center text-white font-bold text-[10px]">PU-01</div>
-                 <div className="w-16 h-16 bg-emerald-500/40 border border-emerald-500 flex items-center justify-center text-white font-bold text-[10px]">PU-02</div>
-                 <div className="w-20 h-20 bg-yellow-400/60 border-2 border-yellow-400 flex items-center justify-center text-yellow-900 font-bold text-[10px] transform rotate-3">PU-03</div>
-              </div>
-              <span className="absolute bottom-4 left-4 text-white font-bold drop-shadow-md text-sm">Google Map</span>
+            <div className="w-full h-full min-h-[300px] rounded-lg border border-gray-200 relative overflow-hidden z-0">
+              <MapContainer center={[-7.033, 107.522]} zoom={12} style={{ height: '100%', width: '100%', minHeight: '300px' }} scrollWheelZoom={false}>
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                {puList.map(pu => (
+                  <Marker key={pu.kode} position={[pu.lat, pu.lng]}>
+                    <Popup>
+                      <b>{pu.kode}</b><br/>Target: {pu.target}<br/>Realisasi: {pu.realisasi}
+                    </Popup>
+                  </Marker>
+                ))}
+              </MapContainer>
             </div>
           </div>
         </div>
@@ -136,7 +235,7 @@ export default function ViewPelaksanaan({ status, activeId }: ViewProps) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  {MOCK_PU_LIST.map((row) => (
+                  {puList.map((row) => (
                     <tr key={row.no} onClick={() => setSelectedPU(row.kode)} className={`transition-colors cursor-pointer ${selectedPU === row.kode ? 'bg-emerald-50/50' : 'hover:bg-gray-50'}`}>
                       <td className="px-4 py-4 text-center text-xs">{row.no}</td>
                       <td className="px-4 py-4 font-semibold text-gray-900 text-xs">{row.kode}</td>
@@ -174,13 +273,13 @@ export default function ViewPelaksanaan({ status, activeId }: ViewProps) {
               </div>
               <div className="p-5 overflow-y-auto custom-scrollbar">
                 <div className="grid grid-cols-4 gap-3 mb-6">
-                  <div className="border border-gray-100 rounded-lg p-3 text-center"><p className="text-[10px] font-bold text-gray-500">Luas (Ha)</p><p className="text-lg font-bold text-gray-900 mt-1">0,55</p></div>
-                  <div className="border border-gray-100 rounded-lg p-3 text-center"><p className="text-[10px] font-bold text-gray-500">Target</p><p className="text-lg font-bold text-gray-900 mt-1">50</p></div>
-                  <div className="border border-gray-100 rounded-lg p-3 text-center"><p className="text-[10px] font-bold text-gray-500">Realisasi</p><p className="text-lg font-bold text-gray-900 mt-1">52</p></div>
-                  <div className="border border-gray-100 rounded-lg p-3 text-center"><p className="text-[10px] font-bold text-gray-500">Selisih</p><p className="text-lg font-bold text-emerald-600 mt-1">+2</p></div>
+                  <div className="border border-gray-100 rounded-lg p-3 text-center"><p className="text-[10px] font-bold text-gray-500">Luas (Ha)</p><p className="text-lg font-bold text-gray-900 mt-1">{selectedPUData?.luas || 0}</p></div>
+                  <div className="border border-gray-100 rounded-lg p-3 text-center"><p className="text-[10px] font-bold text-gray-500">Target</p><p className="text-lg font-bold text-gray-900 mt-1">{selectedPUData?.target || 0}</p></div>
+                  <div className="border border-gray-100 rounded-lg p-3 text-center"><p className="text-[10px] font-bold text-gray-500">Realisasi</p><p className="text-lg font-bold text-gray-900 mt-1">{selectedPUData?.realisasi || 0}</p></div>
+                  <div className="border border-gray-100 rounded-lg p-3 text-center"><p className="text-[10px] font-bold text-gray-500">Selisih</p><p className={`text-lg font-bold mt-1 ${selectedPUData?.selisih?.toString().includes('-') ? 'text-red-600' : 'text-emerald-600'}`}>{selectedPUData?.selisih || 0}</p></div>
                 </div>
                 <div className="flex border-b border-gray-200 mb-4 sticky top-0 bg-white z-10">
-                  <button className="px-4 py-2 text-xs font-bold border-b-2 transition-colors border-emerald-600 text-emerald-700">Data Tanaman (52)</button>
+                  <button className="px-4 py-2 text-xs font-bold border-b-2 transition-colors border-emerald-600 text-emerald-700">Data Tanaman ({selectedPUData?.realisasi || 0})</button>
                   <button className="px-4 py-2 text-xs font-bold border-b-2 transition-colors border-transparent text-gray-500">Dokumentasi</button>
                   <button className="px-4 py-2 text-xs font-bold border-b-2 transition-colors border-transparent text-gray-500">Informasi PU</button>
                 </div>
@@ -253,13 +352,19 @@ export default function ViewPelaksanaan({ status, activeId }: ViewProps) {
             <div className="md:col-span-3 h-full">
               <div className="h-full bg-[#f0fdf4] border border-[#dcfce7] rounded-xl p-6 flex flex-col items-center justify-center text-center">
                 <p className="text-[10px] text-gray-500 mb-2">Data siap disetujui sebagai</p>
-                <h3 className="text-xl font-bold text-emerald-700 mb-4">PO SELESAI</h3>
+                <h3 className="text-xl font-bold text-emerald-700 mb-4">P0 SELESAI</h3>
                 <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center border border-emerald-100 shadow-sm"><HiCheck className="w-6 h-6 text-emerald-300 stroke-3" /></div>
               </div>
             </div>
           </div>
           <div className="pt-5 border-t border-gray-100 flex items-center justify-end gap-4">
-            <button className="px-6 py-2.5 bg-[#1F7A4D] hover:bg-emerald-800 text-white text-sm font-bold rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm cursor-pointer"><HiCheck className="w-4 h-4 stroke-3"/> Setujui & Selesaikan PO</button>
+            <button 
+              onClick={handleApprove}
+              disabled={isSubmitting}
+              className={`px-6 py-2.5 bg-[#1F7A4D] hover:bg-emerald-800 text-white text-sm font-bold rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm cursor-pointer ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+            >
+              <HiCheck className="w-4 h-4 stroke-3"/> {isSubmitting ? 'Memproses...' : 'Setujui & Selesaikan PO'}
+            </button>
           </div>
         </div>
       )}

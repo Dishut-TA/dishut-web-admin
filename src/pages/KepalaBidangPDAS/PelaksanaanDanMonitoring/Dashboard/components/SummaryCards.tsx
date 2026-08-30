@@ -1,4 +1,4 @@
-export default function SummaryCards() {
+export default function SummaryCards({ }: { stats?: any }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm flex flex-col justify-between">

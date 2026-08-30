@@ -57,7 +57,7 @@ export default function TableList() {
       <div className="px-6 py-4 border-b border-slate-100">
         <h2 className="text-base font-bold text-slate-900">Daftar Program Monitoring</h2>
       </div>
-      
+
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm text-slate-600 min-w-250">
           <thead className="text-xs text-slate-600 font-bold border-b border-slate-100 bg-slate-50/50">
@@ -99,7 +99,7 @@ export default function TableList() {
                 </td>
                 <td className="py-4 px-6">
                   <div className="flex items-center justify-center gap-2">
-                    <button 
+                    <button
                       className="px-3 py-1.5 bg-white border border-[#008A4B] text-[#008A4B] hover:bg-emerald-50 text-xs font-semibold rounded-lg transition-colors"
                       onClick={() => navigate(`/admin/staff/monitoring/verifikasi/detail/${row.id}`, { state: { status: row.status } })}
                     >
@@ -115,7 +115,7 @@ export default function TableList() {
           </tbody>
         </table>
       </div>
-      
+
       {/* PAGINATION */}
       <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-white text-sm text-slate-500">
         <span>Menampilkan 1–6 dari 6 data</span>

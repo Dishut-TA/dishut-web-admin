@@ -12,70 +12,56 @@ import {
   HiOutlineClipboardDocumentCheck,
   HiOutlineFunnel
 } from 'react-icons/hi2';
+import { getMyPenugasanAPI } from '../../../services/penugasan.service';
 
 interface TugasValidasi {
   id: string;
+  displayId: string;
   sumber: string;
   lokasi: string;
   batasWaktu: string;
   sisaHari: string;
   sisaHariColor: string;
-  status: 'Ditugaskan' | 'Selesai';
+  status: string;
+  zone_id: number;
+  raw_data: any;
 }
 
-const mockData: TugasValidasi[] = [
-  { 
-    id: 'TGS-2026-011', 
-    sumber: 'Analisis CPI', 
-    lokasi: 'Desa Mandalakasih, Kec. Pameungpeuk, Kab. Garut', 
-    batasWaktu: '18 Juni 2026', 
-    sisaHari: '(2 hari lagi)', 
-    sisaHariColor: 'text-red-500', 
-    status: 'Ditugaskan', 
-  },
-  { 
-    id: 'TGS-2026-012', 
-    sumber: 'Proposal CSR', 
-    lokasi: 'Desa Mekarjaya, Kec. Cikajang, Kab. Garut', 
-    batasWaktu: '20 Juni 2026', 
-    sisaHari: '(4 hari lagi)', 
-    sisaHariColor: 'text-red-500', 
-    status: 'Ditugaskan', 
-  },
-  { 
-    id: 'TGS-2026-009', 
-    sumber: 'Analisis CPI', 
-    lokasi: 'Desa Cisurupan, Kec. Pamulihan, Kab. Garut', 
-    batasWaktu: '22 Juni 2026', 
-    sisaHari: '(6 hari lagi)', 
-    sisaHariColor: 'text-orange-500', 
-    status: 'Ditugaskan', 
-  },
-  { 
-    id: 'TGS-2026-010', 
-    sumber: 'Analisis CPI', 
-    lokasi: 'Desa Cihawuk, Kec. Kertasari, Kab. Bandung', 
-    batasWaktu: '25 Juni 2026', 
-    sisaHari: '(9 hari lagi)', 
-    sisaHariColor: 'text-orange-500', 
-    status: 'Selesai', 
-  },
-  { 
-    id: 'TGS-2026-008', 
-    sumber: 'Analisis CPI', 
-    lokasi: 'Desa Sukalaksana, Kec. Cibatu, Kab. Garut', 
-    batasWaktu: '05 Juli 2026', 
-    sisaHari: '(19 hari lagi)', 
-    sisaHariColor: 'text-orange-500', 
-    status: 'Selesai', 
-  },
-];
+const formatDate = (dateString: string) => {
+  if (!dateString) return '-';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+};
 
-const SUMMARY_CARDS = [
-  { title: 'Total Penugasan', sub: 'Semua penugasan validasi', value: '5', icon: <HiOutlineClipboardDocumentList className="w-8 h-8" />, bg: 'bg-blue-50', text: 'text-blue-600' },
-  { title: 'Ditugaskan', sub: 'Belum mulai dikerjakan', value: '3', icon: <HiOutlineClipboardDocumentCheck className="w-8 h-8" />, bg: 'bg-yellow-50', text: 'text-yellow-600' },
-  { title: 'Selesai', sub: 'Validasi telah diselesaikan', value: '2', icon: <HiOutlineCheckCircle className="w-8 h-8" />, bg: 'bg-emerald-50', text: 'text-emerald-500' },
-];
+const calculateSisaHari = (batasWaktu: string) => {
+  if (!batasWaktu) return { text: '', color: '' };
+  const batas = new Date(batasWaktu);
+  const sekarang = new Date();
+  const selisihWaktu = batas.getTime() - sekarang.getTime();
+  const selisihHari = Math.ceil(selisihWaktu / (1000 * 3600 * 24));
+  
+  if (selisihHari < 0) return { text: '(Terlambat)', color: 'text-red-600' };
+  if (selisihHari === 0) return { text: '(Hari ini)', color: 'text-orange-500' };
+  if (selisihHari <= 3) return { text: `(${selisihHari} hari lagi)`, color: 'text-red-500' };
+  if (selisihHari <= 7) return { text: `(${selisihHari} hari lagi)`, color: 'text-orange-500' };
+  return { text: `(${selisihHari} hari lagi)`, color: 'text-emerald-500' };
+};
+
+const getSumberName = (type: string) => {
+  if (type.includes('AnalysisResultZone')) return 'Analisis CPI';
+  if (type.includes('ProgramApbd')) return 'Program APBD';
+  if (type.includes('ProgramCsr')) return 'Program CSR';
+  if (type.includes('DonationProgram')) return 'Program Donasi';
+  return 'Lainnya';
+};
+
+const getLokasiString = (penugasanable: any) => {
+  if (!penugasanable) return '-';
+  if (penugasanable.desa && penugasanable.kecamatan && penugasanable.kabupaten) {
+    return `Desa ${penugasanable.desa}, Kec. ${penugasanable.kecamatan}, Kab. ${penugasanable.kabupaten}`;
+  }
+  return penugasanable.lokasi || penugasanable.location || '-';
+};
 
 const SumberBadge = ({ text }: { text: string }) => {
   const isCPI = text === 'Analisis CPI';
@@ -89,7 +75,9 @@ const SumberBadge = ({ text }: { text: string }) => {
 const StatusBadge = ({ status }: { status: string }) => {
   const styles: Record<string, string> = {
     'Ditugaskan': 'bg-yellow-50 text-yellow-600',
+    'Berjalan': 'bg-yellow-50 text-yellow-600',
     'Selesai': 'bg-emerald-50 text-emerald-600',
+    'Menunggu': 'bg-slate-50 text-slate-600',
   };
   return (
     <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${styles[status]}`}>
@@ -107,7 +95,18 @@ const Header = () => (
   </div>
 );
 
-const SummaryCards = () => (
+const SummaryCards = ({ data }: { data: TugasValidasi[] }) => {
+  const total = data.length;
+  const berjalan = data.filter(d => d.status === 'Berjalan' || d.status === 'Ditugaskan').length;
+  const selesai = data.filter(d => d.status === 'Selesai').length;
+
+  const SUMMARY_CARDS = [
+    { title: 'Total Penugasan', sub: 'Semua penugasan validasi', value: total.toString(), icon: <HiOutlineClipboardDocumentList className="w-8 h-8" />, bg: 'bg-blue-50', text: 'text-blue-600' },
+    { title: 'Ditugaskan', sub: 'Belum mulai dikerjakan', value: berjalan.toString(), icon: <HiOutlineClipboardDocumentCheck className="w-8 h-8" />, bg: 'bg-yellow-50', text: 'text-yellow-600' },
+    { title: 'Selesai', sub: 'Validasi telah diselesaikan', value: selesai.toString(), icon: <HiOutlineCheckCircle className="w-8 h-8" />, bg: 'bg-emerald-50', text: 'text-emerald-500' },
+  ];
+
+  return (
   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
     {SUMMARY_CARDS.map((card, idx) => (
       <div key={idx} className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
@@ -124,7 +123,8 @@ const SummaryCards = () => (
       </div>
     ))}
   </div>
-);
+  );
+};
 
 const FilterSection = () => (
   <div className="flex flex-col md:flex-row gap-4 mb-6 mt-2">
@@ -181,7 +181,7 @@ const ValidasiTable = ({ data, navigate }: { data: TugasValidasi[], navigate: an
         {data.map((item, idx) => (
           <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
             <td className="px-4 py-4">{idx + 1}</td>
-            <td className="px-4 py-4 font-semibold text-[#008A4B]">{item.id}</td>
+            <td className="px-4 py-4 font-semibold text-[#008A4B]">{item.displayId}</td>
             <td className="px-4 py-4"><SumberBadge text={item.sumber} /></td>
             <td className="px-4 py-4">
               <div className="max-w-62.5 whitespace-normal font-medium text-slate-800 leading-relaxed">
@@ -194,9 +194,9 @@ const ValidasiTable = ({ data, navigate }: { data: TugasValidasi[], navigate: an
             </td>
             <td className="px-4 py-4"><StatusBadge status={item.status} /></td>
             <td className="px-4 py-4 text-center">
-              {item.status === 'Ditugaskan' && (
+              {(item.status === 'Ditugaskan' || item.status === 'Berjalan' || item.status === 'Menunggu') && (
                 <button 
-                  onClick={() => navigate(`/admin/penyuluh/validasi-lokasi/detail/${item.id}`, { state: { status: item.status } })}
+                  onClick={() => navigate(`/admin/penyuluh/validasi-lokasi/detail/${item.id}`, { state: { data: item, status: item.status } })}
                   className="inline-flex items-center justify-between w-36 px-4 py-2 text-xs font-bold text-white bg-primary rounded-full hover:bg-emerald-800 transition-colors shadow-sm"
                 >
                   Mulai Validasi <HiChevronRight className="w-4 h-4 stroke-2" />
@@ -204,7 +204,7 @@ const ValidasiTable = ({ data, navigate }: { data: TugasValidasi[], navigate: an
               )}
               {item.status === 'Selesai' && (
                 <button 
-                  onClick={() => navigate(`/admin/penyuluh/validasi-lokasi/detail/${item.id}`, { state: { status: item.status } })}
+                  onClick={() => navigate(`/admin/penyuluh/validasi-lokasi/detail/${item.id}`, { state: { data: item, status: item.status } })}
                   className="inline-flex items-center justify-center gap-1.5 w-36 px-4 py-2 text-xs font-bold text-[#008A4B] bg-white border border-[#008A4B] rounded-full hover:bg-emerald-50 transition-colors"
                 >
                   <HiOutlineEye className="w-4 h-4 stroke-2" /> Lihat Detail
@@ -231,12 +231,47 @@ const Pagination = () => (
 
 const ValidasiLokasi: React.FC = () => {
   const navigate = useNavigate();
-  const [data] = useState<TugasValidasi[]>(mockData);
+  const [data, setData] = useState<TugasValidasi[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await getMyPenugasanAPI();
+        if (res.data) {
+          // Filter hanya yang Validasi Lokasi
+          const validasi = res.data.filter((item: any) => item.jenis_kegiatan === 'Validasi Lokasi');
+          
+          const mappedData: TugasValidasi[] = validasi.map((item: any) => {
+            const sisa = calculateSisaHari(item.batas_waktu);
+            return {
+              id: item.id.toString(),
+              displayId: 'TGS-' + String(item.id).padStart(3, '0'),
+              sumber: getSumberName(item.penugasanable_type),
+              lokasi: getLokasiString(item.penugasanable),
+              batasWaktu: formatDate(item.batas_waktu),
+              sisaHari: sisa.text,
+              sisaHariColor: sisa.color,
+              status: item.status,
+              zone_id: item.penugasanable_id,
+              raw_data: item
+            };
+          });
+          setData(mappedData);
+        }
+      } catch (error) {
+        console.error("Failed to fetch penugasan", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   return (
     <div className="w-full mx-auto pb-12 bg-[#F8FAFC] min-h-screen font-sans">
       <Header />
-      <SummaryCards />
+      {!isLoading && <SummaryCards data={data} />}
       
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col p-4">
         <FilterSection />

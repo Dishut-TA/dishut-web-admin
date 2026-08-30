@@ -11,6 +11,7 @@ import {
 interface DetailRencanaPOModalProps {
   isOpen: boolean;
   onClose: () => void;
+  data?: any;
 }
 
 const SproutIcon = ({ className }: { className?: string }) => (
@@ -33,48 +34,75 @@ const UsersIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const DetailRencanaPOModal: React.FC<DetailRencanaPOModalProps> = ({ isOpen, onClose }) => {
+const DetailRencanaPOModal: React.FC<DetailRencanaPOModalProps> = ({ isOpen, onClose, data }) => {
   if (!isOpen) return null;
+
+  const targetKegiatan = data?.detail?.total_seeds_collected || data?.detail?.jumlah_bibit || data?.detail?.target_amount || 0;
+  const tahunProgram = data?.detail?.start_date ? new Date(data.detail.start_date).getFullYear() 
+                     : data?.detail?.tanggal_mulai ? new Date(data.detail.tanggal_mulai).getFullYear() 
+                     : data?.detail?.created_at ? new Date(data.detail.created_at).getFullYear() : '-';
+  const sumberDana = data?.source_type === 'App\\Models\\DonationProgram' ? 'Donasi' : data?.source_type === 'App\\Models\\ProgramApbd' ? 'APBD' : 'CSR';
+
+  // Calculate or get Total PU
+  const targetLuasLahan = data?.detail?.analysis_result_zone?.luas_ha || data?.detail?.analysisResultZone?.luas_ha || data?.detail?.target_luas_lahan || 0;
+  const totalPu = data?.detail?.analysis_result_zone?.jumlah_pu || data?.detail?.analysisResultZone?.jumlah_pu || (targetLuasLahan ? Math.ceil(targetLuasLahan * 1) : '-');
+
+  // Format tanggal pelaksanaan
+  const formatTgl = (tgl: string) => {
+    if (!tgl) return '-';
+    return new Date(tgl).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+  };
+  const tglMulai = data?.detail?.start_date || data?.detail?.tanggal_mulai;
+  const tglSelesai = data?.detail?.end_date || data?.detail?.tanggal_selesai;
 
   return (
     <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
       <div className="bg-[#f8faf9] rounded-2xl shadow-xl w-full max-w-275 max-h-[95vh] overflow-y-auto flex flex-col animate-in fade-in zoom-in-95 duration-200">
         
-        {/* HEADER MODAL */}
-        <div className="px-6 py-5 bg-white border-b border-gray-100 flex items-start justify-between sticky top-0 z-10 rounded-t-2xl">
-          <div className="flex gap-4">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-emerald-50 text-emerald-700">
-              <SproutIcon className="w-7 h-7" />
+        {/* HEADER */}
+        <div className="px-6 py-5 bg-white border-b border-gray-100 flex items-center justify-between sticky top-0 z-10 rounded-t-2xl">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 shadow-sm border border-emerald-100">
+              <HiOutlineDocumentText className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-1">Detail Rencana Penanaman P0</h2>
-              <p className="text-sm text-gray-500">Informasi rencana penanaman sebagai pembanding untuk monitoring.</p>
+              <h2 className="text-xl font-bold text-gray-900">Detail Rencana Penanaman P0</h2>
+              <p className="text-sm text-gray-500 mt-0.5 flex items-center gap-2">
+                <span className="font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Rencana Awal</span>
+                &bull; Data acuan sebelum pelaksanaan
+              </p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-50 border border-gray-200 rounded-full transition-colors">
-            <HiOutlineXMark className="w-5 h-5" />
+          <button onClick={onClose} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors">
+            <HiOutlineXMark className="w-6 h-6" />
           </button>
         </div>
 
+        {/* BODY */}
         <div className="p-6 space-y-6">
-          <div className="bg-white rounded-xl border border-gray-100 p-5 grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <div className="flex items-center gap-2 mb-4">
-                <HiOutlineInformationCircle className="w-5 h-5 text-emerald-700" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {/* KARTU INFO UTAMA */}
+            <div className="lg:col-span-2 bg-white rounded-xl p-5 border border-gray-100 shadow-sm relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-bl-full -mr-8 -mt-8 z-0"></div>
+              <div className="relative z-10 flex items-center gap-2 mb-4 pb-3 border-b border-gray-50">
+                <div className="w-2 h-6 bg-emerald-500 rounded-full"></div>
                 <h3 className="text-sm font-bold text-emerald-800">Informasi Program</h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-sm text-gray-700">
-                <div className="flex"><span className="w-32 text-gray-500">ID Program</span><span className="font-semibold">: PRG-2026-0021</span></div>
+                <div className="flex"><span className="w-32 text-gray-500">ID Program</span><span className="font-semibold">: {data.id}</span></div>
                 <div className="flex"><span className="w-32 text-gray-500">Jenis Kegiatan</span><span className="font-semibold">: Penanaman</span></div>
-                <div className="flex"><span className="w-32 text-gray-500">Nama Program</span><span className="font-semibold">: Rehabilitasi DAS Cimanuk</span></div>
-                <div className="flex"><span className="w-32 text-gray-500">Target Kegiatan</span><span className="font-semibold">: 500 tanaman</span></div>
-                <div className="flex"><span className="w-32 text-gray-500">Lokasi Program</span><span className="font-semibold">: Desa Sukamaju, Kec. Rancabali</span></div>
-                <div className="flex"><span className="w-32 text-gray-500">Tahun Program</span><span className="font-semibold">: 2026</span></div>
-                <div className="flex"><span className="w-32 text-gray-500">Wilayah</span><span className="font-semibold">: Kab. Bandung</span></div>
-                <div className="flex"><span className="w-32 text-gray-500">Deskripsi</span><span className="font-semibold pr-4 leading-relaxed">: Rehabilitasi lahan kritis di daerah hulu DAS Cimanuk.</span></div>
-                <div className="flex"><span className="w-32 text-gray-500">Sumber Dana</span><span className="font-semibold">: APBD</span></div>
+                <div className="flex"><span className="w-32 text-gray-500">Nama Program</span><span className="font-semibold">: {data?.program || '-'}</span></div>
+                <div className="flex"><span className="w-32 text-gray-500">Target Kegiatan</span><span className="font-semibold">: {targetKegiatan} tanaman</span></div>
+                <div className="flex"><span className="w-32 text-gray-500">Lokasi Program</span><span className="font-semibold pr-4 leading-relaxed whitespace-pre-line">: {data?.lokasi?.replace('\n', ' ') || '-'}</span></div>
+                <div className="flex"><span className="w-32 text-gray-500">Tahun Program</span><span className="font-semibold">: {tahunProgram}</span></div>
+                <div className="flex"><span className="w-32 text-gray-500">Wilayah</span><span className="font-semibold">: {data?.wilayah !== '-' ? data?.wilayah : (data?.lokasi?.split(',')[1]?.trim() || '-')}</span></div>
+                <div className="flex"><span className="w-32 text-gray-500">Deskripsi</span><span className="font-semibold pr-4 leading-relaxed">: {data?.detail?.description || data?.detail?.deskripsi_rencana || '-'}</span></div>
+                <div className="flex"><span className="w-32 text-gray-500">Sumber Dana</span><span className="font-semibold">: {sumberDana}</span></div>
               </div>
             </div>
+            
+            {/* PETA LOKASI */}
             <div className="h-full min-h-50">
               <div className="flex items-center gap-2 mb-3">
                 <HiOutlineMap className="w-4 h-4 text-emerald-700" />
@@ -116,7 +144,7 @@ const DetailRencanaPOModal: React.FC<DetailRencanaPOModalProps> = ({ isOpen, onC
               <div className="p-4 border border-gray-100 rounded-xl bg-gray-50/50 flex flex-col justify-center">
                 <p className="text-xs text-gray-500 mb-2 font-medium">Periode Pelaksanaan</p>
                 <p className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                  <HiOutlineCalendar className="w-4 h-4 text-emerald-600" /> 01 Jul 2026 - 31 Jul 2026
+                  <HiOutlineCalendar className="w-4 h-4 text-emerald-600" /> {formatTgl(tglMulai)} s/d {formatTgl(tglSelesai)}
                 </p>
               </div>
               <div className="p-4 border border-gray-100 rounded-xl bg-gray-50/50 flex items-center gap-4">
@@ -125,7 +153,7 @@ const DetailRencanaPOModal: React.FC<DetailRencanaPOModalProps> = ({ isOpen, onC
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 font-medium">Total PU (Petak Ukur)</p>
-                  <p className="text-base font-bold text-gray-900">10 PU <span className="text-[10px] font-normal text-gray-500">(Petak Ukur)</span></p>
+                  <p className="text-base font-bold text-gray-900">{totalPu} <span className="text-[10px] font-normal text-gray-500">(Petak Ukur)</span></p>
                 </div>
               </div>
               <div className="p-4 border border-gray-100 rounded-xl bg-gray-50/50 flex flex-col justify-center">
@@ -143,91 +171,32 @@ const DetailRencanaPOModal: React.FC<DetailRencanaPOModalProps> = ({ isOpen, onC
               <div className="p-4 border border-gray-100 rounded-xl flex items-center gap-3 shadow-sm">
                 <SproutIcon className="w-8 h-8 text-emerald-600 opacity-80" />
                 <div>
-                  <p className="text-xl font-bold text-gray-900 leading-none">500</p>
+                  <p className="text-xl font-bold text-gray-900 leading-none">{targetKegiatan}</p>
                   <p className="text-[10px] text-gray-500 mt-1">Total Target Tanaman</p>
                 </div>
               </div>
               <div className="p-4 border border-gray-100 rounded-xl flex items-center gap-3 shadow-sm">
                 <HiOutlineMap className="w-8 h-8 text-emerald-600 opacity-80" />
                 <div>
-                  <p className="text-xl font-bold text-gray-900 leading-none">12,50 <span className="text-sm font-medium">Ha</span></p>
+                  <p className="text-xl font-bold text-gray-900 leading-none">{targetLuasLahan || '-'} <span className="text-sm font-medium">Ha</span></p>
                   <p className="text-[10px] text-gray-500 mt-1">Luas Area Penanaman</p>
                 </div>
               </div>
               <div className="p-4 border border-gray-100 rounded-xl flex items-center gap-3 shadow-sm">
                 <LeafIcon className="w-8 h-8 text-emerald-600 opacity-80" />
                 <div>
-                  <p className="text-xl font-bold text-gray-900 leading-none">40</p>
+                  <p className="text-xl font-bold text-gray-900 leading-none">{data?.detail?.seeds?.length || '-'}</p>
                   <p className="text-[10px] text-gray-500 mt-1">Jenis Tanaman</p>
                 </div>
               </div>
               <div className="p-4 border border-gray-100 rounded-xl flex items-center gap-3 shadow-sm">
                 <UsersIcon className="w-8 h-8 text-emerald-600 opacity-80" />
                 <div>
-                  <p className="text-xl font-bold text-gray-900 leading-none">1</p>
+                  <p className="text-xl font-bold text-gray-900 leading-none">{data?.detail?.kth_id || data?.detail?.kth ? '1' : '0'}</p>
                   <p className="text-[10px] text-gray-500 mt-1">KTH Terlibat</p>
                 </div>
               </div>
             </div>
-
-            {/* TABEL GANDA */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Tabel Sumber Daya */}
-              <div>
-                <h4 className="text-sm font-bold text-gray-800 mb-3">Rencana Sumber Daya</h4>
-                <div className="overflow-x-auto rounded-xl border border-gray-100">
-                  <table className="w-full text-left text-xs text-gray-600">
-                    <thead className="bg-gray-50 border-b border-gray-100 font-bold text-gray-900">
-                      <tr>
-                        <th className="px-4 py-3 text-center">No</th>
-                        <th className="px-4 py-3">Sumber Daya</th>
-                        <th className="px-4 py-3">Spesifikasi / Keterangan</th>
-                        <th className="px-4 py-3 text-right">Jumlah</th>
-                        <th className="px-4 py-3 text-center">Satuan</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50">
-                      <tr><td className="px-4 py-3 text-center">1</td><td className="px-4 py-3 font-medium text-gray-800">Bibit Pohon</td><td className="px-4 py-3">Sesuai daftar jenis tanaman</td><td className="px-4 py-3 text-right font-medium">500</td><td className="px-4 py-3 text-center">batang</td></tr>
-                      <tr><td className="px-4 py-3 text-center">2</td><td className="px-4 py-3 font-medium text-gray-800">Pupuk Organik</td><td className="px-4 py-3">Pupuk kandang / kompos</td><td className="px-4 py-3 text-right font-medium">250</td><td className="px-4 py-3 text-center">kg</td></tr>
-                      <tr><td className="px-4 py-3 text-center">3</td><td className="px-4 py-3 font-medium text-gray-800">Ajir / Pancang</td><td className="px-4 py-3">Panjang 1 m</td><td className="px-4 py-3 text-right font-medium">500</td><td className="px-4 py-3 text-center">batang</td></tr>
-                      <tr><td className="px-4 py-3 text-center">4</td><td className="px-4 py-3 font-medium text-gray-800">Mulsa</td><td className="px-4 py-3">Jerami / serasah</td><td className="px-4 py-3 text-right font-medium">250</td><td className="px-4 py-3 text-center">kg</td></tr>
-                      <tr><td className="px-4 py-3 text-center">5</td><td className="px-4 py-3 font-medium text-gray-800">Tenaga Kerja</td><td className="px-4 py-3">Kegiatan tanam</td><td className="px-4 py-3 text-right font-medium">10</td><td className="px-4 py-3 text-center">HOK</td></tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Tabel Jenis Tanaman */}
-              <div>
-                <h4 className="text-sm font-bold text-gray-800 mb-3">Jenis Tanaman yang Direncanakan</h4>
-                <div className="overflow-x-auto rounded-xl border border-gray-100">
-                  <table className="w-full text-left text-xs text-gray-600">
-                    <thead className="bg-gray-50 border-b border-gray-100 font-bold text-gray-900">
-                      <tr>
-                        <th className="px-4 py-3 text-center">No</th>
-                        <th className="px-4 py-3">Jenis Tanaman</th>
-                        <th className="px-4 py-3 text-right">Jumlah (Batang)</th>
-                        <th className="px-4 py-3 text-center">Persentase</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50">
-                      <tr><td className="px-4 py-3 text-center">1</td><td className="px-4 py-3 font-medium text-gray-800">Mahoni (Swietenia macrophylla)</td><td className="px-4 py-3 text-right">200</td><td className="px-4 py-3 text-center">40%</td></tr>
-                      <tr><td className="px-4 py-3 text-center">2</td><td className="px-4 py-3 font-medium text-gray-800">Sengon (Falcataria moluccana)</td><td className="px-4 py-3 text-right">150</td><td className="px-4 py-3 text-center">30%</td></tr>
-                      <tr><td className="px-4 py-3 text-center">3</td><td className="px-4 py-3 font-medium text-gray-800">Albasia (Paraserianthes falcataria)</td><td className="px-4 py-3 text-right">100</td><td className="px-4 py-3 text-center">20%</td></tr>
-                      <tr><td className="px-4 py-3 text-center">4</td><td className="px-4 py-3 font-medium text-gray-800">Pete (Parkia speciosa)</td><td className="px-4 py-3 text-right">50</td><td className="px-4 py-3 text-center">10%</td></tr>
-                    </tbody>
-                    <tfoot className="bg-gray-50 font-bold text-gray-900 border-t border-gray-200">
-                      <tr>
-                        <td colSpan={2} className="px-4 py-3 text-right">Total</td>
-                        <td className="px-4 py-3 text-right">500</td>
-                        <td className="px-4 py-3 text-center">100%</td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
-              </div>
-            </div>
-
           </div>
         </div>
 

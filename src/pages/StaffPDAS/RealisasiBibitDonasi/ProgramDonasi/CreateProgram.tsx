@@ -6,8 +6,7 @@ import ProgramImagePicker from './components/ProgramImagePicker';
 import SelectedBibitList from './components/SelectedBibitList';
 import { getBibitsAPI, getSeedSpecificationsAPI } from '@/services/bibit.service';
 import { createDonationProgramAPI } from '@/services/program-donasi.service'; 
-
-const API_URL = "http://127.0.0.1:8000/api";
+import { rehabilitasiService } from '@/services/rehabilitasi.service';
 
 interface MergedBibitSpec {
   spec_id: number;
@@ -44,21 +43,18 @@ const CreateProgram: React.FC = () => {
   useEffect(() => {
     const fetchMasterDataAndProjects = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const headers: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
-
-        const [bibitRes, specRes, projRes] = await Promise.all([ 
+        const [bibitRes, specRes, zonesRes] = await Promise.all([ 
           getBibitsAPI(), 
           getSeedSpecificationsAPI(),
-          fetch(`${API_URL}/projects?status=completed`, { headers })
+          rehabilitasiService.getValidZones()
         ]);
 
         const bibitsData = bibitRes.payload || [];
         const specs = specRes.payload || [];
-        const projJson = await projRes.json();
-        const projList = projJson.payload || projJson.data || [];
-
-        setProjects(projList);
+        
+        // Filter zones with status_kelayakan 'Layak'
+        const validZones = (zonesRes.data || []).filter((z: any) => z.status_kelayakan === 'Layak');
+        setProjects(validZones);
 
         const mergedData = specs.reduce((acc: MergedBibitSpec[], spec: any) => {
           const bibit = bibitsData.find((b: any) => Number(b.id) === Number(spec.seed_id));
@@ -73,7 +69,7 @@ const CreateProgram: React.FC = () => {
 
         setBibitOptions(mergedData);
       } catch (error) {
-        toast.error('Gagal memuat data master atau daftar project.');
+        toast.error('Gagal memuat data master atau daftar lahan kritis.');
       } finally {
         setIsFetchingBibit(false);
       }
@@ -85,26 +81,25 @@ const CreateProgram: React.FC = () => {
     const selectedId = e.target.value;
     setSelectedProjectId(selectedId);
 
-    const foundProject = projects.find(p => String(p.id) === String(selectedId));
+    const foundZone = projects.find(p => String(p.id) === String(selectedId));
     
-    if (foundProject && foundProject.hasil && foundProject.hasil.pratinjau_tabel) {
-      const firstZone = foundProject.hasil.pratinjau_tabel[0];
-      const namaKth = firstZone?.nama_kelompok || 'Belum ada data KTH terpetakan';
-      const desa = firstZone?.desa_kelurahan || firstZone?.desa || '';
-      const kabupaten = firstZone?.kota_kabupaten || firstZone?.kabupaten || '';
-      const formatLokasiWilayah = desa && kabupaten ? `${desa}, ${kabupaten}, Jawa Barat` : (foundProject.nama_project || '');
+    if (foundZone) {
+      const namaKth = foundZone.nama_kelompok || 'Belum ada data KTH terpetakan';
+      const validation = foundZone.field_validations?.length > 0 ? foundZone.field_validations[0] : null;
+      const lokasi = validation?.nama_lokasi || foundZone.result?.project?.project_code || 'Lokasi tidak diketahui';
       
       setForm(prev => ({ 
         ...prev, 
-        lokasiLahan: formatLokasiWilayah, 
-        namaProgram: foundProject.nama_project ? `Rehabilitasi - ${foundProject.nama_project}` : '',
+        lokasiLahan: lokasi, 
+        namaProgram: `Program Rehabilitasi - ${lokasi}`,
         kthPelaksana: namaKth 
       }));
     } else {
       setForm(prev => ({ 
         ...prev, 
-        lokasiLahan: foundProject?.nama_project || '', 
-        kthPelaksana: 'Data hasil analisis kosong' 
+        lokasiLahan: '', 
+        namaProgram: '',
+        kthPelaksana: '' 
       }));
     }
   };
@@ -144,6 +139,7 @@ const CreateProgram: React.FC = () => {
       formData.append('location', form.lokasiLahan); 
       formData.append('description', form.deskripsi);
       formData.append('kth_id', '1'); 
+      formData.append('analysis_result_id', selectedProjectId);
       formData.append('total_seeds_collected', '0');
       formData.append('total_seeds_realized', '0');
       if (imageFile) formData.append('image', imageFile);
@@ -195,11 +191,15 @@ const CreateProgram: React.FC = () => {
                   className="w-full bg-white border border-slate-200 rounded-full px-4 py-3.5 text-slate-800 focus:ring-2 focus:ring-[#009262]/20 focus:border-[#009262] transition-all cursor-pointer shadow-sm"
                 >
                   <option value="" disabled>-- Pilih Project Analisis --</option>
-                  {projects.map((proj) => (
-                    <option key={proj.id} value={proj.id}>
-                      {proj.nama_project || proj.kode_project} ({proj.status})
-                    </option>
-                  ))}
+                  {projects.map((proj) => {
+                    const validation = proj.field_validations?.length > 0 ? proj.field_validations[0] : null;
+                    const lokasi = validation?.nama_lokasi || proj.result?.project?.project_code || 'Lokasi tidak diketahui';
+                    return (
+                      <option key={proj.id} value={proj.id}>
+                        {lokasi}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 
