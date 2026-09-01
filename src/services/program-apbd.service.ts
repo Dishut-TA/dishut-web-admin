@@ -53,3 +53,28 @@ export const updateProgramApbdStatusAPI = async (id: string | number, status: 'T
   
   return json;
 };
+
+export const updateProgramApbdAPI = async (id: string | number, payload: any) => {
+  const res = await fetch(`${API_URL}/program-apbds/${id}`, {
+    method: "PUT",
+    headers: getHeaders(),
+    body: JSON.stringify(payload),
+  });
+  
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || "Gagal mengupdate Program APBD");
+  
+  return json;
+};
+
+export const deleteProgramApbdAPI = async (id: string | number) => {
+  const res = await fetch(`${API_URL}/program-apbds/${id}`, {
+    method: "DELETE",
+    headers: getHeaders(),
+  });
+  
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || "Gagal menghapus Program APBD");
+  
+  return json;
+};

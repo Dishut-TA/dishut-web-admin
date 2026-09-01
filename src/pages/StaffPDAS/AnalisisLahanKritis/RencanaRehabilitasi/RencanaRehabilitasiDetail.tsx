@@ -154,7 +154,8 @@ const RencanaRehabilitasiDetail: React.FC = () => {
               <div>
                 <label className="block text-xs font-bold text-gray-700 mb-1.5">Luas Lahan Total (Ha)</label>
                 <input 
-                  type="number" 
+                  type="number"
+                  disabled 
                   value={luasLahanTotal}
                   onChange={(e) => setLuasLahanTotal(Number(e.target.value))}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-full focus:ring-1 focus:ring-green-500 focus:border-green-500 outline-none text-sm transition-all"
@@ -167,7 +168,8 @@ const RencanaRehabilitasiDetail: React.FC = () => {
                   <div>
                     <label className="block text-[11px] font-semibold text-gray-600 mb-1.5">Panjang (meter)</label>
                     <input 
-                      type="number" 
+                      type="number"
+                      disabled
                       value={panjangPU}
                       onChange={(e) => setPanjangPU(Number(e.target.value))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-full focus:ring-1 focus:ring-green-500 focus:border-green-500 outline-none text-sm bg-white transition-all"

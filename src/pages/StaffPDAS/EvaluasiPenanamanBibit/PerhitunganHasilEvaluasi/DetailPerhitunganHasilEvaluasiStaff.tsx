@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   HiOutlineChevronLeft, HiOutlineCheckBadge, HiOutlineDocumentText, 
   HiOutlineExclamationTriangle
@@ -16,6 +16,10 @@ const DetailPerhitunganHasilEvaluasiStaff: React.FC = () => {
   
   const mockStatus: string = 'SIAP DIHITUNG'; 
   
+  const location = useLocation();
+  const stateData = location.state?.updatedData;
+  const isDataFilled = location.state?.isDataFilled || false;
+
   const [isCalculating, setIsCalculating] = useState(false);
   const [hasCalculated, setHasCalculated] = useState(mockStatus === 'HASIL TERVALIDASI');
   const [showTindakLanjut, setShowTindakLanjut] = useState(false);
@@ -29,11 +33,11 @@ const DetailPerhitunganHasilEvaluasiStaff: React.FC = () => {
     statusPendanaan: 'Dihentikan'
   };
 
-  const [dataPetakUkur, setDataPetakUkur] = useState<PetakUkur[]>([
-    { periode: 'P2', pu: 'PU-1', jenisBibit: 'Mahoni (Swietenia macrophylla)', rencana: 110, tumbuh: 40, tinggi: 123.2, koordinat: '-6.21, 106.82', kondisiLahan: 'Baik / Normal' },
-    { periode: 'P2', pu: 'PU-2', jenisBibit: 'Mahoni (Swietenia macrophylla)', rencana: 110, tumbuh: 40, tinggi: 120.5, koordinat: '-6.22, 106.83', kondisiLahan: 'Baik / Normal' },
-    { periode: 'P2', pu: 'PU-3', jenisBibit: 'Pinus (Pinus merkusii)', rencana: 63, tumbuh: 60, tinggi: 115.0, koordinat: '-6.23, 106.84', kondisiLahan: 'Baik / Normal' },
-    { periode: 'P2', pu: 'PU-4', jenisBibit: 'Pinus (Pinus merkusii)', rencana: 40, tumbuh: 28, tinggi: 110.0, koordinat: '-6.24, 106.85', kondisiLahan: 'Banyak Gulma' },
+  const [dataPetakUkur] = useState<PetakUkur[]>(stateData || [
+    { periode: 'P2', pu: 'PU-1', jenisBibit: 'Mahoni (Swietenia macrophylla)', rencana: 110, monitoringTumbuh: 100, tumbuh: 0, rencanaTinggi: 120, tinggi: 0, koordinat: '', kondisiLahan: 'Baik / Normal' },
+    { periode: 'P2', pu: 'PU-2', jenisBibit: 'Mahoni (Swietenia macrophylla)', rencana: 110, monitoringTumbuh: 105, tumbuh: 0, rencanaTinggi: 120, tinggi: 0, koordinat: '', kondisiLahan: 'Baik / Normal' },
+    { periode: 'P2', pu: 'PU-3', jenisBibit: 'Pinus (Pinus merkusii)', rencana: 63, monitoringTumbuh: 60, tumbuh: 0, rencanaTinggi: 110, tinggi: 0, koordinat: '', kondisiLahan: 'Baik / Normal' },
+    { periode: 'P2', pu: 'PU-4', jenisBibit: 'Pinus (Pinus merkusii)', rencana: 40, monitoringTumbuh: 35, tumbuh: 0, rencanaTinggi: 110, tinggi: 0, koordinat: '', kondisiLahan: 'Banyak Gulma' },
   ]);
 
   const [hasilIntegrasi, setHasilIntegrasi] = useState({
@@ -44,19 +48,6 @@ const DetailPerhitunganHasilEvaluasiStaff: React.FC = () => {
     isPerluTindakLanjut: false
   });
 
-  const handleEdit = <K extends keyof PetakUkur>(index: number, field: K, value: PetakUkur[K]) => {
-    const newData = [...dataPetakUkur];
-    newData[index][field] = value;
-    setDataPetakUkur(newData);
-  };
-
-  const handleGetLocation = (idx: number) => {
-    const loadingToast = toast.loading('Sedang mencari titik koordinat...');
-    setTimeout(() => {
-        handleEdit(idx, 'koordinat', `-6.25, 106.86`);
-        toast.success('Titik koordinat berhasil diperbarui!', { id: loadingToast });
-    }, 1000);
-  };
 
   const hitungPersenPerPU = (rencana: number, tumbuh: number) => {
     if (rencana === 0) return "0.00";
@@ -179,17 +170,34 @@ const DetailPerhitunganHasilEvaluasiStaff: React.FC = () => {
         {!hasCalculated ? (
           <>
             <TableDataPetakUkur 
-              mockStatus={mockStatus} hasCalculated={hasCalculated} dataPetakUkur={dataPetakUkur}
-              handleEdit={handleEdit} handleGetLocation={handleGetLocation} hitungPersenPerPU={hitungPersenPerPU}
+              mockStatus={mockStatus} hasCalculated={true} dataPetakUkur={dataPetakUkur}
+              hitungPersenPerPU={hitungPersenPerPU}
             />
-            <div className="flex justify-end py-4 border-t border-gray-100">
-              <button 
-                onClick={handleHitungDanMuatPeta} 
-                disabled={isCalculating} 
-                className="px-8 py-3.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors shadow-md flex items-center gap-2 disabled:opacity-75"
-              >
-                {isCalculating ? 'Memproses Data Sesuai Aturan...' : 'Simpan, Hitung (Permen LHK) & Peta WebGIS'}
-              </button>
+            <div className="flex justify-end py-4 border-t border-gray-100 mt-4">
+              {!isDataFilled ? (
+                <button 
+                  onClick={() => navigate('/admin/staff/evaluasi/hasil/form-lapangan', { state: { dataPetakUkur } })} 
+                  className="px-8 py-3.5 bg-white border-2 border-[#185325] text-[#185325] hover:bg-[#185325]/5 text-sm font-bold rounded-full transition-colors flex items-center gap-2"
+                >
+                  <HiOutlineDocumentText className="w-5 h-5" /> Isi Form Evaluasi Faktual Lapangan
+                </button>
+              ) : (
+                <div className="flex items-center gap-4">
+                  <button 
+                    onClick={() => navigate('/admin/staff/evaluasi/hasil/form-lapangan', { state: { dataPetakUkur } })} 
+                    className="px-8 py-3.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-bold rounded-full transition-colors flex items-center gap-2"
+                  >
+                    Edit Data Lapangan
+                  </button>
+                  <button 
+                    onClick={handleHitungDanMuatPeta} 
+                    disabled={isCalculating} 
+                    className="px-8 py-3.5 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors shadow-md flex items-center gap-2 disabled:opacity-75"
+                  >
+                    {isCalculating ? 'Memproses Data Sesuai Aturan...' : 'Simpan, Hitung (Permen LHK) & Peta WebGIS'}
+                  </button>
+                </div>
+              )}
             </div>
           </>
         ) : (
@@ -201,17 +209,17 @@ const DetailPerhitunganHasilEvaluasiStaff: React.FC = () => {
             />
             
             <TableDataPetakUkur 
-              mockStatus={mockStatus} hasCalculated={hasCalculated} dataPetakUkur={dataPetakUkur}
-              handleEdit={handleEdit} handleGetLocation={handleGetLocation} hitungPersenPerPU={hitungPersenPerPU}
+              mockStatus={mockStatus} hasCalculated={true} dataPetakUkur={dataPetakUkur}
+              hitungPersenPerPU={hitungPersenPerPU}
             />
             
             {!showTindakLanjut && (
               <div className="flex flex-col sm:flex-row justify-end items-center gap-4 border-t border-gray-100 pt-8 mt-4 animate-in fade-in">
                 <button 
-                  onClick={() => setHasCalculated(false)} 
+                  onClick={() => navigate('/admin/staff/evaluasi/hasil/form-lapangan', { state: { dataPetakUkur } })} 
                   className="w-full sm:w-auto px-6 py-3.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-bold rounded-full transition-colors"
                 >
-                  Edit Data / Kalkulasi Ulang
+                  Edit Data Lapangan / Kalkulasi Ulang
                 </button>
                 
                 {hasilIntegrasi.isPerluTindakLanjut && (

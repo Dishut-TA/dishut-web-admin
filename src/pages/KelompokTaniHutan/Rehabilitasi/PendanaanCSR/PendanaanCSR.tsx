@@ -4,10 +4,12 @@ import {
   HiOutlineMagnifyingGlass,
   HiOutlinePlus,
   HiOutlineEye,
+  HiOutlinePencilSquare,
+  HiOutlineTrash,
 } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 
-import { getProgramCsrsAPI } from '@/services/program-csr.service';
+import { getProgramCsrsAPI, deleteProgramCsrAPI } from '@/services/program-csr.service';
 
 const PendanaanCSR: React.FC = () => {
   const navigate = useNavigate();
@@ -30,6 +32,18 @@ const PendanaanCSR: React.FC = () => {
 
     fetchCsr();
   }, []);
+
+  const handleDelete = async (id: string | number) => {
+    if (window.confirm('Apakah Anda yakin ingin menghapus pengajuan program CSR ini?')) {
+      try {
+        await deleteProgramCsrAPI(id);
+        toast.success('Pengajuan CSR berhasil dihapus');
+        setData(prev => prev.filter(item => item.id !== id));
+      } catch (error: any) {
+        toast.error(error.message || 'Gagal menghapus pengajuan CSR');
+      }
+    }
+  };
 
   const formatRupiah = (angka: number) => {
     if (!angka) return 'Rp 0';
@@ -170,16 +184,35 @@ const PendanaanCSR: React.FC = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex justify-center">
+                        <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() =>
                               navigate(
                                 `/admin/kth/rehabilitasi/pendanaan-csr/detail/${item.id}`
                               )
                             }
-                            className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
+                            title="Lihat Detail"
+                            className="p-1.5 text-gray-400 hover:text-[#185325] transition-colors cursor-pointer"
                           >
-                            <HiOutlineEye className="w-5 h-5 text-gray-500 hover:text-[#185325]" />
+                            <HiOutlineEye className="w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={() =>
+                              navigate(
+                                `/admin/kth/rehabilitasi/pendanaan-csr/edit/${item.id}`
+                              )
+                            }
+                            title="Edit"
+                            className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors cursor-pointer"
+                          >
+                            <HiOutlinePencilSquare className="w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item.id)}
+                            title="Hapus"
+                            className="p-1.5 text-gray-400 hover:text-red-600 transition-colors cursor-pointer"
+                          >
+                            <HiOutlineTrash className="w-5 h-5" />
                           </button>
                         </div>
                       </td>

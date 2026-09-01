@@ -1,22 +1,51 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HiOutlineFunnel, HiOutlineEye } from 'react-icons/hi2';
-
-const MOCK_DATA = [
-  { id: 'LK-001', no: 1, periode: 'Jan - Juni 2025', investasi: 'Ekowisata Kebun Stroberi', laba: 'Rp 40.000.000', status: 'Menunggu Verifikasi' },
-  { id: 'LK-002', no: 2, periode: 'Jan - Juni 2025', investasi: 'Ekowisata Kebun Stroberi', laba: 'Rp 40.000.000', status: 'Diverifikasi' },
-  { id: 'LK-003', no: 3, periode: 'Jan - Juni 2025', investasi: 'Ekowisata Kebun Stroberi', laba: 'Rp 40.000.000', status: 'Revisi' },
-];
+import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
+import { getLaporanKeuanganBUPMAPI, getKthProgramsAPI } from '@/services/investasi.service';
 
 const LaporanKeuanganStaffBUPM: React.FC = () => {
   const navigate = useNavigate();
 
+  const [data, setData] = useState<any[]>([]);
+  const [programs, setPrograms] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const [resLaporan, resPrograms] = await Promise.all([
+          getLaporanKeuanganBUPMAPI(),
+          getKthProgramsAPI()
+        ]);
+        setData(resLaporan);
+        setPrograms(resPrograms);
+      } catch (err: any) {
+        toast.error(err.message || 'Gagal memuat data laporan keuangan');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
   const getStatusStyle = (status: string) => {
     switch (status) {
-      case 'Menunggu Verifikasi': return 'text-orange-500 font-bold';
-      case 'Diverifikasi': return 'text-emerald-600 font-bold';
-      case 'Revisi': return 'text-red-500 font-bold';
+      case 'PENDING': return 'text-orange-500 font-bold';
+      case 'VERIFIED': return 'text-emerald-600 font-bold';
+      case 'REJECTED': return 'text-red-500 font-bold';
       default: return 'text-gray-700 font-bold';
+    }
+  };
+
+  const mapStatus = (status: string) => {
+    switch (status) {
+      case 'PENDING': return 'Menunggu Verifikasi';
+      case 'VERIFIED': return 'Diverifikasi';
+      case 'REJECTED': return 'Revisi';
+      default: return status || 'Menunggu Verifikasi';
     }
   };
 
@@ -46,34 +75,50 @@ const LaporanKeuanganStaffBUPM: React.FC = () => {
             </thead>
             
             <tbody className="divide-y divide-gray-100">
-              {MOCK_DATA.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4 text-sm font-medium text-gray-700 text-center">
-                    {item.no}
-                  </td>
-                  <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
-                    {item.periode}
-                  </td>
-                  <td className="px-6 py-4 text-sm font-bold text-gray-800 whitespace-nowrap">
-                    {item.investasi}
-                  </td>
-                  <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
-                    {item.laba}
-                  </td>
-                  <td className={`px-6 py-4 text-sm whitespace-nowrap ${getStatusStyle(item.status)}`}>
-                    {item.status}
-                  </td>
-                  <td className="px-6 py-4 flex justify-center whitespace-nowrap">
-                    <button 
-                      title="Lihat Detail"
-                      onClick={() => navigate(`/admin/staff/bupm/laporan-keuangan/detail/${item.id}`)}
-                      className="p-1.5 text-gray-500 hover:text-[#185325] hover:bg-[#DCECE0] rounded-lg transition-colors border border-transparent hover:border-[#185325]/20"
-                    >
-                      <HiOutlineEye className="w-5 h-5" />
-                    </button>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                    Memuat data laporan keuangan...
                   </td>
                 </tr>
-              ))}
+              ) : data.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                    Belum ada laporan keuangan.
+                  </td>
+                </tr>
+              ) : (
+                data.map((item, index) => (
+                  <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-6 py-4 text-sm font-medium text-gray-700 text-center">
+                      {index + 1}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
+                      {item.periode_awal && item.periode_akhir 
+                        ? `${new Date(item.periode_awal).toLocaleDateString('id-ID')} - ${new Date(item.periode_akhir).toLocaleDateString('id-ID')}` 
+                        : '-'}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-bold text-gray-800 whitespace-nowrap">
+                      {item.program?.nama_program_investasi || item.program?.nama_program || programs.find(p => p.id === item.program_id)?.nama_program || programs.find(p => p.id === item.program_id)?.nama_program_investasi || '-'}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
+                      Rp {item.laba_bersih?.toLocaleString('id-ID') || 0}
+                    </td>
+                    <td className={`px-6 py-4 text-sm whitespace-nowrap ${getStatusStyle(item.status_verifikasi)}`}>
+                      {mapStatus(item.status_verifikasi)}
+                    </td>
+                    <td className="px-6 py-4 flex justify-center whitespace-nowrap">
+                      <button 
+                        title="Lihat Detail"
+                        onClick={() => navigate(`/admin/staff/bupm/laporan-keuangan/detail/${item.id}`)}
+                        className="p-1.5 text-gray-500 hover:text-[#185325] hover:bg-[#DCECE0] rounded-lg transition-colors border border-transparent hover:border-[#185325]/20"
+                      >
+                        <HiOutlineEye className="w-5 h-5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

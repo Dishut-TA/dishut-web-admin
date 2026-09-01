@@ -18,7 +18,7 @@ const DetailInvestasiKABIDBUPM: React.FC = () => {
 
   const programFromState = location.state?.program;
 
-  const docLabels = ['Dokumen Proposal Bisnis', 'Dokumen Proyeksi Keuangan', 'Dokumen Hukum & Perizinan'];
+  const docLabels = ['Dokumen Perjanjian Investasi', 'Dokumen Rencana Bisnis', 'Template Perjanjian Investor'];
   const defaultFileNames = ['Proposal_Bisnis.pdf', 'Proyeksi_Keuangan.pdf', 'Perizinan_Usaha.pdf'];
 
   const projectData = {

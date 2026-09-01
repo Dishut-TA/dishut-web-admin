@@ -70,3 +70,15 @@ export const updateProgramCsrStatusAPI = async (id: string | number, payload: an
   
   return json;
 };
+
+export const deleteProgramCsrAPI = async (id: string | number) => {
+  const res = await fetch(`${API_URL}/program-csrs/${id}`, {
+    method: "DELETE",
+    headers: getHeaders(),
+  });
+  
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || "Gagal menghapus pengajuan CSR");
+  
+  return json;
+};

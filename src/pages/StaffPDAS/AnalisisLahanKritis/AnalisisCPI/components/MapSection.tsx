@@ -1,9 +1,9 @@
 import React, { useRef, useEffect } from 'react';
-import { 
-  HiOutlinePlus, 
-  HiOutlineMapPin, 
-  HiOutlineUsers, 
-  HiOutlineArrowTopRightOnSquare 
+import {
+  HiOutlinePlus,
+  HiOutlineMapPin,
+  HiOutlineUsers,
+  HiOutlineArrowTopRightOnSquare
 } from 'react-icons/hi2';
 import { MapContainer, TileLayer, GeoJSON, Marker, Popup, useMap } from 'react-leaflet';
 // import { pdf } from '@react-pdf/renderer';
@@ -31,7 +31,7 @@ const FitBoundsToGeoJSON = ({ geoData }: { geoData: any }) => {
     if (geoData && geoData.features && geoData.features.length > 0) {
       const geoJsonLayer = L.geoJSON(geoData);
       const bounds = geoJsonLayer.getBounds();
-      
+
       if (bounds.isValid()) {
         map.fitBounds(bounds, { padding: [40, 40] });
       }
@@ -71,8 +71,8 @@ const MapSection: React.FC<MapSectionProps> = ({ geoData, isLoading, onOpenInput
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-4 md:p-6 border border-gray-100 mb-6 relative">
-      
-      {/* CSS CUSTOM POPUP MODERN */}
+
+
       <style>{`
         .modern-popup .leaflet-popup-content-wrapper {
           padding: 0 !important;
@@ -123,21 +123,21 @@ const MapSection: React.FC<MapSectionProps> = ({ geoData, isLoading, onOpenInput
           </div>
         ) : geoData ? (
           <MapContainer center={[-6.9204, 107.6046]} zoom={9} style={{ height: '100%', width: '100%' }}>
-            
+
             <FitBoundsToGeoJSON geoData={geoData} />
-            
+
             <TileLayer
               attribution='&copy; OpenStreetMap contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            
+
             <GeoJSON
               key={geoData.projectId || Math.random()}
               data={geoData}
               style={getFeatureStyle}
               onEachFeature={onEachFeatureHandler}
             />
-            
+
             {geoData.features?.map((feature: any, index: number) => {
               try {
                 const centroid = turf.centerOfMass(feature);
@@ -163,7 +163,7 @@ const MapSection: React.FC<MapSectionProps> = ({ geoData, isLoading, onOpenInput
                   <Marker key={`marker-${index}`} position={[lat, lng]}>
                     <Popup className="modern-popup" closeButton={true}>
                       <div className="font-sans animate-in zoom-in-95 fade-in duration-300">
-                        
+
                         {/* HEADER POPUP */}
                         <div className="relative bg-white p-4 pb-3 border-b border-gray-100 z-10">
                           <div className="pr-5">
@@ -178,10 +178,10 @@ const MapSection: React.FC<MapSectionProps> = ({ geoData, isLoading, onOpenInput
                             </span>
                           </div>
                         </div>
-                        
+
                         {/* BODY POPUP */}
                         <div className="p-4 bg-gray-50/80 flex flex-col gap-4">
-                          
+
                           {/* Statistik (CPI & Luas) */}
                           <div className="grid grid-cols-2 gap-3">
                             <div className="bg-white p-2.5 rounded-xl border border-gray-100 shadow-sm text-center transition-transform hover:-translate-y-0.5 hover:shadow-md">
@@ -197,40 +197,40 @@ const MapSection: React.FC<MapSectionProps> = ({ geoData, isLoading, onOpenInput
                           {/* Info Kelembagaan (KTH & Ketua) */}
                           <div className="bg-white rounded-xl border border-gray-100 p-3 shadow-sm">
                             <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
-                               <HiOutlineUsers className="w-3.5 h-3.5"/> Info Kelompok Tani
+                              <HiOutlineUsers className="w-3.5 h-3.5" /> Info Kelompok Tani
                             </p>
                             <div className="flex flex-col gap-2 text-xs">
                               <div className="flex justify-between items-center border-b border-gray-50 pb-2">
-                                 <span className="text-gray-500">KTH:</span> 
-                                 <span className="font-bold text-[#185325] text-right truncate max-w-30">{kth}</span>
+                                <span className="text-gray-500">KTH:</span>
+                                <span className="font-bold text-[#185325] text-right truncate max-w-30">{kth}</span>
                               </div>
                               <div className="flex justify-between items-center">
-                                 <span className="text-gray-500">Ketua:</span> 
-                                 <span className="font-semibold text-gray-700 text-right truncate max-w-30">{ketua}</span>
+                                <span className="text-gray-500">Ketua:</span>
+                                <span className="font-semibold text-gray-700 text-right truncate max-w-30">{ketua}</span>
                               </div>
                             </div>
                           </div>
 
                           <div className="flex justify-between items-center bg-green-50 text-green-700 p-2.5 rounded-xl border border-green-100">
-                             <div className="flex items-center gap-2">
-                               <div className="bg-green-100 p-1.5 rounded-lg">
-                                 <HiOutlineMapPin className="w-4 h-4 shrink-0 text-green-600" />
-                               </div>
-                               <div className="flex flex-col text-[9px] font-mono font-medium gap-0.5">
-                                 <span>Lat: {lat.toFixed(5)}</span>
-                                 <span>Lng: {lng.toFixed(5)}</span>
-                               </div>
-                             </div>
-                             <button 
-                               title="Buka di Google Maps"
-                               onClick={(e) => {
-                                 e.stopPropagation();
-                                 window.open(`https://www.google.com/maps?q=${lat},${lng}`, '_blank');
-                               }}
-                               className="bg-white p-2 rounded-lg text-green-600 hover:bg-green-600 hover:text-white transition-colors border border-green-200 cursor-pointer shadow-sm active:scale-95"
-                             >
-                                <HiOutlineArrowTopRightOnSquare className="w-3.5 h-3.5" />
-                             </button>
+                            <div className="flex items-center gap-2">
+                              <div className="bg-green-100 p-1.5 rounded-lg">
+                                <HiOutlineMapPin className="w-4 h-4 shrink-0 text-green-600" />
+                              </div>
+                              <div className="flex flex-col text-[9px] font-mono font-medium gap-0.5">
+                                <span>Lat: {lat.toFixed(5)}</span>
+                                <span>Lng: {lng.toFixed(5)}</span>
+                              </div>
+                            </div>
+                            <button
+                              title="Buka di Google Maps"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(`https://www.google.com/maps?q=${lat},${lng}`, '_blank');
+                              }}
+                              className="bg-white p-2 rounded-lg text-green-600 hover:bg-green-600 hover:text-white transition-colors border border-green-200 cursor-pointer shadow-sm active:scale-95"
+                            >
+                              <HiOutlineArrowTopRightOnSquare className="w-3.5 h-3.5" />
+                            </button>
                           </div>
 
                         </div>

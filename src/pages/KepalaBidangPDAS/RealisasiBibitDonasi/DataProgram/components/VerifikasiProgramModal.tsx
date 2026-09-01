@@ -37,6 +37,13 @@ const VerifikasiProgramModal: React.FC<VerifikasiProgramModalProps> = ({
           </p>
 
           <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200 mb-6 space-y-3">
+            {program.description && (
+              <div className="flex flex-col gap-1 text-sm border-b border-gray-200 pb-3 mb-1">
+                <span className="text-gray-500 font-semibold">Deskripsi Program</span>
+                <span className="text-gray-800 leading-relaxed">{program.description}</span>
+              </div>
+            )}
+            
             <div className="flex justify-between text-sm">
               <span className="text-gray-500 font-semibold">Lokasi Penanaman</span>
               <span className="text-gray-800 font-bold">{program.lokasi}</span>

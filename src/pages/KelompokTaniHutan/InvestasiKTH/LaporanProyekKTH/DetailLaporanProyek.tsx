@@ -47,6 +47,15 @@ const DetailLaporanProyekKTH: React.FC = () => {
         setIsLoading(true);
         const res = await getLaporanProyekByIdAPI(id);
         setData(res);
+        
+        if (res.status_verifikasi) {
+           const mapStatus: any = {
+             'PENDING': 'Menunggu Verifikasi',
+             'REJECTED': 'Revisi',
+             'VERIFIED': 'Diverifikasi'
+           };
+           setStatusLaporan(mapStatus[res.status_verifikasi] || 'Menunggu Verifikasi');
+        }
       } catch (err: any) {
         toast.error(err.message || 'Gagal memuat detail laporan');
       } finally {
@@ -73,22 +82,7 @@ const DetailLaporanProyekKTH: React.FC = () => {
 
   return (
     <div className="flex flex-col w-full max-w-4xl mx-auto pb-20 animate-in fade-in duration-300 relative">
-      
-      {/* 🔴 DEV-ONLY TOGGLER: Boleh dihapus jika sudah diintegrasikan dengan API / Backend asli */}
-      <div className="absolute top-0 right-0 flex gap-2 z-50">
-        {(['Menunggu Verifikasi', 'Revisi', 'Diverifikasi'] as StatusLaporan[]).map((s) => (
-          <button 
-            key={s} 
-            onClick={() => setStatusLaporan(s)} 
-            className={`text-[10px] font-bold px-3 py-1.5 rounded-lg border shadow-sm transition-colors ${
-              statusLaporan === s ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-500 hover:bg-gray-50'
-            }`}
-          >
-            Tes {s}
-          </button>
-        ))}
-      </div>
-      {/* 🔴 END DEV-ONLY TOGGLER */}
+
 
       <div className="relative mb-10 flex items-center justify-center">
         <button 
@@ -105,9 +99,9 @@ const DetailLaporanProyekKTH: React.FC = () => {
         <div className="flex flex-col gap-3">
           <InfoRow label="Nama Investasi" value={data?.program?.nama_program || data?.program?.nama_program_investasi || data?.nama_program_investasi || "Ekowisata Kebun Stroberi"} />
           <InfoRow label="Periode Laporan" value={data?.created_at ? new Date(data.created_at).toLocaleDateString('id-ID') : "24 Agustus 2025"} />
-          <InfoRow label="Status" value={data?.status_verifikasi || statusDisplay.text} valueColor={statusDisplay.color} />
+          <InfoRow label="Status" value={statusDisplay.text} valueColor={statusDisplay.color} />
           
-          {(statusLaporan === 'Revisi' || data?.status_verifikasi === 'Revisi') && (
+          {(statusLaporan === 'Revisi' || data?.status_verifikasi === 'REJECTED') && (
             <InfoRow 
               label="Catatan" 
               value={data?.catatan_verifikasi || "Dokumentasi milestone belum lengkap, mohon tambahkan foto terbaru."} 
@@ -141,8 +135,8 @@ const DetailLaporanProyekKTH: React.FC = () => {
 
         <SectionTitle title="Penggunaan Dana" />
         <div className="flex flex-col gap-3">
-          <InfoRow label="Dana Terpakai" value={`Rp ${data?.dana_terpakai ? data.dana_terpakai.toLocaleString('id-ID') : '27.000.000'}`} />
-          <InfoRow label="Sisa Dana" value={`Rp ${data?.sisa_dana ? data.sisa_dana.toLocaleString('id-ID') : '3.000.000'}`} />
+          <InfoRow label="Dana Terpakai" value={`Rp ${data?.dana_terpakai ? Number(data.dana_terpakai).toLocaleString('id-ID') : '27.000.000'}`} />
+          <InfoRow label="Sisa Dana" value={`Rp ${data?.sisa_dana ? Number(data.sisa_dana).toLocaleString('id-ID') : '3.000.000'}`} />
         </div>
 
         <SectionTitle title="Dokumen Perkembangan" />

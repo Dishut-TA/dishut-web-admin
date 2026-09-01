@@ -14,7 +14,7 @@ import { getDonationProgramsAPI, updateDonationProgramAPI } from '@/services/pro
 export interface ProgramDataExtended {
   id: string;
   nama: string;
-  deskripsi: string;
+  description: string;
   lokasi: string;
   terkumpul: string;
   totalTerealisasi: string;
@@ -75,7 +75,7 @@ const KabidProgramDonasi: React.FC = () => {
         return {
           id: item.id.toString(),
           nama: item.name,
-          deskripsi: item.description || '', 
+          description: item.description || '', 
           lokasi: item.location,
           terkumpul: item.total_seeds_collected.toLocaleString('id-ID'),
           totalTerealisasi: item.total_seeds_realized.toLocaleString('id-ID'),
@@ -88,6 +88,10 @@ const KabidProgramDonasi: React.FC = () => {
           raw_total_seeds_collected: item.total_seeds_collected,
           raw_total_seeds_realized: item.total_seeds_realized
         };
+      }).sort((a: ProgramDataExtended, b: ProgramDataExtended) => {
+        if (a.status === 'Menunggu Verifikasi' && b.status !== 'Menunggu Verifikasi') return -1;
+        if (a.status !== 'Menunggu Verifikasi' && b.status === 'Menunggu Verifikasi') return 1;
+        return 0;
       });
 
       setProgramsData(mappedData);

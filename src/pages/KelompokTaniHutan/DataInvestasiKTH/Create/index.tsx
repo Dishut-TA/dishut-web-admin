@@ -15,7 +15,7 @@ export interface InvestasiFormState {
     deskripsi: string;
     coverFile?: File | null;
     milestones: { id: number; nama: string; batas: string; deskripsi: string }[];
-    dokumen: Record<string, File | null>;
+    dokumen: { name: string; file: File | null; isRequired: boolean }[];
 }
 
 const steps = ['Informasi Investasi', 'Milestone', 'Dokumen', 'Review'];
@@ -32,7 +32,11 @@ const CreateInvestasi: React.FC = () => {
         deskripsi: '',
         coverFile: null,
         milestones: [],
-        dokumen: {}
+        dokumen: [
+            { name: 'Dokumen Perjanjian Investasi', file: null, isRequired: true },
+            { name: 'Dokumen Rencana Bisnis', file: null, isRequired: true },
+            { name: 'Template Perjanjian Investor', file: null, isRequired: true }
+        ]
     });
 
     useEffect(() => {

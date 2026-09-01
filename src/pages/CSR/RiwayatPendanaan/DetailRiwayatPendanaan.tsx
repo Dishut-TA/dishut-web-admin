@@ -150,7 +150,7 @@ const DetailRiwayatPendanaan: React.FC = () => {
 
         <div className="pt-8 pb-8">
           <h3 className="text-sm md:text-base font-medium text-gray-600 mb-3">
-            Pilihan Intervensi
+            Rekomendasi Intervensi
           </h3>
           <p className="text-sm text-gray-500 leading-relaxed text-justify">
             {data.rekomendasi_intervensi || '-'}

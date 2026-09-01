@@ -27,16 +27,16 @@ const VerifikasiDonaturModal: React.FC<VerifikasiDonaturModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-lg bg-white rounded-3xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div className="w-full max-w-lg bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
         
-        <div className="flex items-center justify-between p-6 border-b border-gray-100">
+        <div className="flex items-center justify-between p-6 border-b border-gray-100 shrink-0">
           <h2 className="text-xl font-bold text-gray-800">Verifikasi Donasi</h2>
           <button onClick={onClose} className="p-2 rounded-full text-gray-400 hover:bg-gray-100 transition-colors">
             <HiOutlineXMark className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-6 md:p-8 space-y-6">
+        <div className="p-6 md:p-8 space-y-6 overflow-y-auto">
           
           <div className="bg-gray-50 rounded-2xl p-5 border border-gray-200 flex flex-col gap-3">
             <div className="flex justify-between items-center pb-2 border-b border-gray-200">
@@ -65,6 +65,21 @@ const VerifikasiDonaturModal: React.FC<VerifikasiDonaturModalProps> = ({
             <div className="flex justify-between items-center bg-primary text-white p-4 rounded-xl mt-2 shadow-md">
                <span className="text-sm font-medium">Total Nominal Transfer:</span>
                <span className="text-xl font-medium">{formatRupiah(nominalTotal)}</span>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Bukti Pembayaran</h3>
+            <div className="bg-gray-50 rounded-xl border border-gray-200 p-2 flex justify-center items-center">
+              {donatur.proof_url || donatur.receipt_path ? (
+                <img 
+                  src={donatur.proof_url || donatur.receipt_path || ''} 
+                  alt="Bukti Pembayaran" 
+                  className="max-w-full max-h-60 object-contain rounded-lg shadow-sm"
+                />
+              ) : (
+                <span className="text-sm text-gray-400 py-6">Bukti pembayaran tidak tersedia</span>
+              )}
             </div>
           </div>
 

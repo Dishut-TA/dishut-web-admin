@@ -23,7 +23,7 @@ const MasterBibit: React.FC = () => {
   const [formData, setFormData] = useState({
     namaBibit: '',
     namaLatin: '',
-    kategori: 'Kayu-kayuan',
+    kategori: '',
   });
 
   const fetchBibit = async () => {
@@ -41,7 +41,7 @@ const MasterBibit: React.FC = () => {
 
   const handleOpenAdd = () => {
     setModalMode('add');
-    setFormData({ namaBibit: '', namaLatin: '', kategori: 'Kayu-kayuan' });
+    setFormData({ namaBibit: '', namaLatin: '', kategori: '' });
     setIsModalOpen(true);
   };
 
@@ -237,6 +237,7 @@ const MasterBibit: React.FC = () => {
                       onChange={(e) => setFormData({...formData, kategori: e.target.value})}
                       className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm bg-white outline-none focus:ring-2 focus:ring-[#185325]/20 focus:border-[#185325] transition-all cursor-pointer"
                     >
+                      <option value="" disabled>Pilih Kategori Tanaman</option>
                       <option value="Kayu-kayuan">Kayu-kayuan</option>
                       <option value="MPTS / Buah">MPTS / Buah</option>
                       <option value="HHBK">HHBK (Bambu, Rotan, dll)</option>

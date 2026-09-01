@@ -118,16 +118,14 @@ const DetailProgramAPBD: React.FC = () => {
           </div>
         </div>
 
-        <hr className="border-gray-100 mb-8" />
-
-        <div className="mb-8">
-          <h3 className="text-base font-bold text-gray-800 mb-3">
-            Pilihan Intervensi
-          </h3>
-          <p className="text-sm text-gray-600 leading-relaxed text-justify">
-            {data.pilihan_intervensi || '-'}
-          </p>
-        </div>
+          <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 mb-8">
+            <span className="text-gray-500 text-xs font-bold uppercase tracking-wider block mb-1">
+              Rekomendasi Intervensi
+            </span>
+            <span className="text-gray-800 font-bold text-sm">
+              {data.analysis_result_zone?.rekomendasi_intervensi || data.pilihan_intervensi || '-'}
+            </span>
+          </div>
 
         <hr className="border-gray-100 mb-8" />
 

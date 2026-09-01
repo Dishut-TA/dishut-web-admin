@@ -126,6 +126,7 @@ import DetailPelaporanDonasi from "./pages/StaffPDAS/PelaksanaanDanMonitoring/Pe
 import MasterPenyuluh from "./pages/StaffPDAS/PelaksanaanDanMonitoring/MasterPenyuluh";
 import DetailPenyuluh from "./pages/StaffPDAS/PelaksanaanDanMonitoring/MasterPenyuluh/DetailPenyuluh";
 import DetailLaporanKeuanganKTH from "./pages/KelompokTaniHutan/InvestasiKTH/LaporanInvestasi/LaporanKeuangan/DetailLaporanKeuanganKTH";
+import EditLaporanKeuangan from "./pages/KelompokTaniHutan/InvestasiKTH/LaporanInvestasi/LaporanKeuangan/EditLaporanKeuangan";
 import DetailLaporanProyekKTH from "./pages/KelompokTaniHutan/InvestasiKTH/LaporanProyekKTH/DetailLaporanProyek";
 import DetailLaporanProyekStaffBUPM from "./pages/StaffBUPM/LaporanProyek/DetailLaporanProyekStaffBUPM";
 import LaporanKeuanganStaffBUPM from "./pages/StaffBUPM/LaporanKeuanganStaffBUPM/LaporanKeuanganStaffBUPM";
@@ -170,6 +171,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const DashboardStaffPDAS = lazy(() => import("./pages/StaffPDAS/DashboardStaffPDAS/DashboardStaffPDAS"));
 const ProgramAPBDList = lazy(() => import("./pages/StaffPDAS/Investasi/ProgramAPBD/ProgramAPBDList"));
 const CreateProgramAPBD = lazy(() => import("./pages/StaffPDAS/Investasi/ProgramAPBD/CreateProgram"));
+const EditProgramAPBD = lazy(() => import("./pages/StaffPDAS/Investasi/ProgramAPBD/EditProgram"));
 const ProgramCSRList = lazy(() => import("./pages/StaffPDAS/Investasi/ProgramCSR/ProgramCSRList"));
 const VerifikasiBerkasCSR = lazy(() => import("./pages/StaffPDAS/Investasi/ProgramCSR/VerifikasiBerkas"));
 // const MonitoringRiwayatList = lazy(() => import("./pages/StaffPDAS/Investasi/MonitoringRiwayat"));
@@ -206,6 +208,7 @@ const VerifikasiAPBD = lazy(() => import("./pages/KepalaBidangPDAS/Investasi/Pro
 const DaftarUsulanCSR = lazy(() => import("./pages/KepalaBidangPDAS/Investasi/ProgramCSRKABID/DaftarUsulanCSR"));
 const VerifikasiCSR = lazy(() => import("./pages/KepalaBidangPDAS/Investasi/ProgramCSRKABID/VerifikasiCSR"));
 const RiwayatKeputusan = lazy(() => import("./pages/KepalaBidangPDAS/Investasi/RiwayatKeputusan/RiwayatKeputusan"));
+const EditDataLapanganEvaluasi = lazy(() => import("./pages/StaffPDAS/EvaluasiPenanamanBibit/PerhitunganHasilEvaluasi/EditDataLapanganEvaluasi"));
 
 const RoleBasedRedirect = () => {
   const userStr = localStorage.getItem("user");
@@ -267,6 +270,7 @@ function App() {
                   {/* Rehabilitasi / Investasi */}
                   <Route path="rehabilitasi/program-apbd" element={<ProgramAPBDList />} />
                   <Route path="rehabilitasi/program-apbd/create" element={<CreateProgramAPBD />} />
+                  <Route path="rehabilitasi/program-apbd/edit/:id" element={<EditProgramAPBD />} />
                   <Route path="rehabilitasi/program-apbd/detail/:id" element={<DetailProgramAPBD />} />
                   <Route path="rehabilitasi/program-csr" element={<ProgramCSRList />} />
                   <Route path="rehabilitasi/program-csr/detail/:id" element={<VerifikasiBerkasCSR />} />
@@ -311,6 +315,7 @@ function App() {
                   <Route path="evaluasi/penugasan/detail/:id" element={<DetailPenugasanEvaluasiStaff />} />
                   <Route path="evaluasi/hasil" element={<PerhitunganHasilEvaluasiStaff />} />
                   <Route path="evaluasi/hasil/detail/:id" element={<DetailPerhitunganHasilEvaluasiStaff />} />
+                  <Route path="evaluasi/hasil/form-lapangan" element={<EditDataLapanganEvaluasi />} />
                   <Route path="evaluasi/data/create/:id" element={<InputEvaluasi />} />
                   <Route path="evaluasi/laporan" element={<LaporanEvaluasiStaffPDAS />} />
                   <Route path="evaluasi/laporan/create/:id" element={<CreateLaporanEvaluasiStaffPDAS />} />
@@ -416,6 +421,7 @@ function App() {
                   <Route path="laporan-investasi/usaha/create" element={<CreateLaporanUsaha />} />
                   <Route path="laporan-investasi/keuangan" element={<LaporanKeuangan />} />
                   <Route path="laporan-investasi/keuangan/create" element={<CreateLaporanKeuangan />} />
+                  <Route path="laporan-investasi/keuangan/edit/:id" element={<EditLaporanKeuangan />} />
                   <Route path="laporan-investasi/keuangan/detail/:id" element={<DetailLaporanKeuanganKTH />} />
                   <Route path="laporan-investasi/pengeluaran" element={<BiayaPengeluaranIndex />} />
                   <Route path="laporan-investasi/pengeluaran/create" element={<CreateLaporanBiayaPengeluaran />} />

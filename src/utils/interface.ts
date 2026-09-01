@@ -160,6 +160,7 @@ export interface DetailBibit {
 export interface ProgramData {
   id: string;
   nama: string;
+  description?: string;
   lokasi: string;
   jenisBibit: DetailBibit[]; 
   terkumpul: string | number;

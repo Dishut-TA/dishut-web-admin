@@ -61,6 +61,13 @@ const DetailProgramModal: React.FC<DetailProgramModalProps> = ({
               <p className="text-base font-bold text-gray-800">{program.nama}</p>
             </div>
 
+            {program.description && (
+              <div className="md:col-span-2">
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Deskripsi Program</h3>
+                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{program.description}</p>
+              </div>
+            )}
+
             <div>
               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Lokasi</h3>
               <p className="text-sm font-medium text-gray-700">{program.lokasi}</p>

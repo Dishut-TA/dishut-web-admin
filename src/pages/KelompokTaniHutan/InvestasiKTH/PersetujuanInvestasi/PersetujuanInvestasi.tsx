@@ -35,7 +35,7 @@ const PersetujuanInvestasi: React.FC = () => {
     <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-8">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-800">
-          Persetujuan Investasi
+          Persetujuan Investor
         </h1>
         <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 transition-colors shadow-sm active:scale-95">
           <HiOutlineFunnel className="w-4 h-4" /> Filter

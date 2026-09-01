@@ -62,6 +62,46 @@ export const createKthAPI = async (payload: KthPayload) => {
   }
 };
 
+export const updateKthAPI = async (id: string | number, payload: KthPayload) => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_URL}/kths/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` })
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Gagal memperbarui data KTH');
+    return data;
+  } catch (error: any) {
+    throw new Error(error.message || 'Gagal terhubung ke server.');
+  }
+};
+
+export const deleteKthAPI = async (id: string | number) => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_URL}/kths/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` })
+      },
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Gagal menghapus data KTH');
+    return data;
+  } catch (error: any) {
+    throw new Error(error.message || 'Gagal terhubung ke server.');
+  }
+};
+
 export const importKthExcelAPI = async (file: File) => {
   try {
     const token = localStorage.getItem('token');

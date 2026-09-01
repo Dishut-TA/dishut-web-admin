@@ -80,6 +80,7 @@ const ProgramDonasi: React.FC = () => {
         return {
           id: item.id.toString(),
           nama: item.name,
+          description: item.description || '',
           lokasi: item.location,
           terkumpul: item.total_seeds_collected.toLocaleString('id-ID'),
           totalTerealisasi: item.total_seeds_realized.toLocaleString('id-ID'),

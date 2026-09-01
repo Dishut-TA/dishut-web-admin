@@ -77,7 +77,7 @@ const InputDataModal: React.FC<InputDataModalProps> = ({
     try {
       const formData = new FormData();
       formData.append("nama_project", namaProject);
-      formData.append("target_resolution", "5000");
+      formData.append("target_resolution", "100");
       formData.append("save_intermediate", "0");
 
       Object.entries(files).forEach(([key, file]) => {

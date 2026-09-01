@@ -135,10 +135,10 @@ const VerifikasiAPBD: React.FC = () => {
 
         <div className="pt-8 flex-1">
           <label className="block text-sm font-bold text-gray-800 mb-3">
-            Pilihan Intervensi
+            Rekomendasi Intervensi
           </label>
           <div className="relative text-sm text-gray-600 leading-relaxed text-justify">
-            <p>{data.pilihan_intervensi || 'Tidak ada intervensi tersedia.'}</p>
+            <p>{data.analysis_result_zone?.rekomendasi_intervensi || data.pilihan_intervensi || 'Tidak ada rekomendasi intervensi tersedia.'}</p>
           </div>
         </div>
 

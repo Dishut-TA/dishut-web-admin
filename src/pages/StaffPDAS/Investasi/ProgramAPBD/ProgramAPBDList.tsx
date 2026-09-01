@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HiOutlinePlus, HiOutlineEye, HiOutlineXCircle } from 'react-icons/hi2';
+import { HiOutlinePlus, HiOutlineEye, HiOutlineXCircle, HiOutlinePencilSquare, HiOutlineTrash } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
-import { getProgramApbdsAPI } from '@/services/program-apbd.service';
+import { getProgramApbdsAPI, deleteProgramApbdAPI } from '@/services/program-apbd.service';
 
 const ProgramAPBDList: React.FC = () => {
   const navigate = useNavigate();
@@ -22,6 +22,18 @@ const ProgramAPBDList: React.FC = () => {
     };
     fetchPrograms();
   }, []);
+
+  const handleDelete = async (id: string | number) => {
+    if (window.confirm('Apakah Anda yakin ingin menghapus program APBD ini?')) {
+      try {
+        await deleteProgramApbdAPI(id);
+        toast.success('Program APBD berhasil dihapus');
+        setData(prev => prev.filter(item => item.id !== id));
+      } catch (error: any) {
+        toast.error(error.message || 'Gagal menghapus program APBD');
+      }
+    }
+  };
 
   const formatRupiah = (angka: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(angka);
@@ -111,6 +123,12 @@ const ProgramAPBDList: React.FC = () => {
                         <div className="flex items-center justify-center gap-2">
                           <button onClick={() => navigate(`/admin/staff/rehabilitasi/program-apbd/detail/${item.id}`)} title="Lihat Detail" className="p-1.5 text-gray-400 hover:text-[#2E7D32] transition-colors cursor-pointer">
                             <HiOutlineEye className="w-5 h-5" />
+                          </button>
+                          <button onClick={() => navigate(`/admin/staff/rehabilitasi/program-apbd/edit/${item.id}`)} title="Edit" className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors cursor-pointer">
+                            <HiOutlinePencilSquare className="w-5 h-5" />
+                          </button>
+                          <button onClick={() => handleDelete(item.id)} title="Hapus" className="p-1.5 text-gray-400 hover:text-red-600 transition-colors cursor-pointer">
+                            <HiOutlineTrash className="w-5 h-5" />
                           </button>
                         </div>
                       </td>

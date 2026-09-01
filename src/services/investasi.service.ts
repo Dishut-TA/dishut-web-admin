@@ -161,3 +161,144 @@ export const createLaporanProyekAPI = async (payload: any) => {
   if (!response.ok) throw new Error(result.message || 'Gagal membuat laporan proyek.');
   return result.payload;
 };
+
+export const getLaporanKeuanganByIdAPI = async (id: string) => {
+  const token = localStorage.getItem('token');
+  const userId = localStorage.getItem('user_id') || '1';
+
+  const response = await fetch(`${API_URL}/kth/laporan-keuangan/${id}`, {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+      'X-User-Id': userId,
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    },
+  });
+
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.message || 'Gagal memuat detail laporan keuangan.');
+  
+  return result.payload;
+};
+
+export const getLaporanKeuanganAPI = async () => {
+  const token = localStorage.getItem('token');
+  const userId = localStorage.getItem('user_id') || '1';
+
+  const response = await fetch(`${API_URL}/kth/laporan-keuangan`, {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+      'X-User-Id': userId,
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    },
+  });
+
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.message || 'Gagal memuat daftar laporan keuangan.');
+  
+  if (Array.isArray(result.payload)) return result.payload;
+  if (Array.isArray(result.payload)) return result.payload;
+  if (result.payload && Array.isArray(result.payload.data)) return result.payload.data;
+  return [];
+};
+
+export const createLaporanKeuanganAPI = async (payload: any) => {
+  const token = localStorage.getItem('token');
+  const userId = localStorage.getItem('user_id') || '1';
+
+  const response = await fetch(`${API_URL}/kth/laporan-keuangan`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'X-User-Id': userId,
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.message || 'Gagal membuat laporan keuangan.');
+  return result.payload;
+};
+
+export const updateLaporanKeuanganAPI = async (id: string, payload: any) => {
+  const token = localStorage.getItem('token');
+  const userId = localStorage.getItem('user_id') || '1';
+
+  const response = await fetch(`${API_URL}/kth/laporan-keuangan/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'X-User-Id': userId,
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.message || 'Gagal memperbarui laporan keuangan.');
+  return result.payload;
+};
+
+export const getLaporanKeuanganBUPMAPI = async () => {
+  const token = localStorage.getItem('token');
+  const userId = localStorage.getItem('user_id') || '1';
+
+  const response = await fetch(`${API_URL}/bupm/laporan-keuangan`, {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+      'X-User-Id': userId,
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    },
+  });
+
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.message || 'Gagal memuat daftar laporan keuangan BUPM.');
+  
+  if (Array.isArray(result.payload)) return result.payload;
+  if (result.payload && Array.isArray(result.payload.data)) return result.payload.data;
+  return [];
+};
+
+export const getLaporanKeuanganBUPMByIdAPI = async (id: string) => {
+  const token = localStorage.getItem('token');
+  const userId = localStorage.getItem('user_id') || '1';
+
+  const response = await fetch(`${API_URL}/bupm/laporan-keuangan/${id}`, {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+      'X-User-Id': userId,
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    },
+  });
+
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.message || 'Gagal memuat detail laporan keuangan BUPM.');
+  
+  return result.payload;
+};
+
+export const verifyLaporanKeuanganBUPMAPI = async (id: string, payload: any) => {
+  const token = localStorage.getItem('token');
+  const userId = localStorage.getItem('user_id') || '1';
+
+  const response = await fetch(`${API_URL}/bupm/laporan-keuangan/${id}/verify`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'X-User-Id': userId,
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.message || 'Gagal memverifikasi laporan keuangan.');
+  return result.payload;
+};

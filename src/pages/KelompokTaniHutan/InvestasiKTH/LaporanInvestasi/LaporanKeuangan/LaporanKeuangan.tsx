@@ -1,21 +1,51 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HiOutlineFunnel, HiPlus, HiOutlineEye } from 'react-icons/hi2';
+import toast from 'react-hot-toast';
+import { getLaporanKeuanganAPI, getKthProgramsAPI } from '@/services/investasi.service';
 
 const LaporanKeuangan = () => {
   const navigate = useNavigate();
+  const [data, setData] = useState<any[]>([]);
+  const [programs, setPrograms] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const MOCK_DATA = [
-    { id: 1, periode: 'Jan - Juni 2025', investasi: 'Ekowisata Kebun Stroberi', pendapatan: 'Rp 120.000.000', pengeluaran: 'Rp 80.000.000', laba: 'Rp 40.000.000', status: 'Menunggu Verifikasi' },
-    { id: 2, periode: 'Jan - Juni 2025', investasi: 'Ekowisata Kebun Stroberi', pendapatan: 'Rp 120.000.000', pengeluaran: 'Rp 80.000.000', laba: 'Rp 40.000.000', status: 'Diverifikasi' },
-    { id: 3, periode: 'Jan - Juni 2025', investasi: 'Ekowisata Kebun Stroberi', pendapatan: 'Rp 120.000.000', pengeluaran: 'Rp 80.000.000', laba: 'Rp 40.000.000', status: 'Revisi' },
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const [resLaporan, resPrograms] = await Promise.all([
+          getLaporanKeuanganAPI(),
+          getKthProgramsAPI()
+        ]);
+        console.log(resLaporan);
+        
+        setData(resLaporan);
+        setPrograms(resPrograms);
+      } catch (err: any) {
+        toast.error(err.message || 'Gagal memuat data laporan keuangan');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Menunggu Verifikasi': return 'text-orange-500 font-bold';
-      case 'Diverifikasi': return 'text-emerald-600 font-bold';
-      case 'Revisi': return 'text-red-500 font-bold';
+      case 'PENDING': return 'text-orange-500 font-bold';
+      case 'VERIFIED': return 'text-emerald-600 font-bold';
+      case 'REJECTED': return 'text-red-500 font-bold';
       default: return 'text-gray-700';
+    }
+  };
+
+  const mapStatus = (status: string) => {
+    switch (status) {
+      case 'PENDING': return 'Menunggu Verifikasi';
+      case 'VERIFIED': return 'Diverifikasi';
+      case 'REJECTED': return 'Revisi';
+      default: return status || 'Menunggu Verifikasi';
     }
   };
 
@@ -52,22 +82,42 @@ const LaporanKeuangan = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 font-medium text-gray-700">
-              {MOCK_DATA.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4 text-center">{item.id}</td>
-                  <td className="px-6 py-4">{item.periode}</td>
-                  <td className="px-6 py-4 font-bold text-gray-800">{item.investasi}</td>
-                  <td className="px-6 py-4">{item.pendapatan}</td>
-                  <td className="px-6 py-4">{item.pengeluaran}</td>
-                  <td className="px-6 py-4">{item.laba}</td>
-                  <td className={`px-6 py-4 ${getStatusColor(item.status)}`}>{item.status}</td>
-                  <td className="px-6 py-4 text-center">
-                    <button onClick={() => {navigate (`/admin/kth/laporan-investasi/keuangan/detail/${item.id}`)}} className="p-1.5 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors border border-transparent hover:border-emerald-200">
-                      <HiOutlineEye className="w-5 h-5" />
-                    </button>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
+                    Memuat data laporan keuangan...
                   </td>
                 </tr>
-              ))}
+              ) : data.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
+                    Belum ada laporan keuangan.
+                  </td>
+                </tr>
+              ) : (
+                data.map((item, index) => (
+                  <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-6 py-4 text-center">{index + 1}</td>
+                    <td className="px-6 py-4">
+                      {item.periode_awal && item.periode_akhir 
+                        ? `${new Date(item.periode_awal).toLocaleDateString('id-ID')} - ${new Date(item.periode_akhir).toLocaleDateString('id-ID')}` 
+                        : '-'}
+                    </td>
+                    <td className="px-6 py-4 font-bold text-gray-800">
+                      {item.program?.nama_program_investasi || item.program?.nama_program || programs.find(p => p.id === item.program_id)?.nama_program || programs.find(p => p.id === item.program_id)?.nama_program_investasi || '-'}
+                    </td>
+                    <td className="px-6 py-4">Rp {item.total_pendapatan?.toLocaleString('id-ID') || 0}</td>
+                    <td className="px-6 py-4">Rp {item.total_pengeluaran?.toLocaleString('id-ID') || 0}</td>
+                    <td className="px-6 py-4">Rp {item.laba_bersih?.toLocaleString('id-ID') || 0}</td>
+                    <td className={`px-6 py-4 ${getStatusColor(item.status_verifikasi)}`}>{mapStatus(item.status_verifikasi)}</td>
+                    <td className="px-6 py-4 text-center">
+                      <button onClick={() => {navigate(`/admin/kth/laporan-investasi/keuangan/detail/${item.id}`)}} className="p-1.5 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors border border-transparent hover:border-emerald-200">
+                        <HiOutlineEye className="w-5 h-5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

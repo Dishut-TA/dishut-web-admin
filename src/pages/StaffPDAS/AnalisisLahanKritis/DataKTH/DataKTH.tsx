@@ -1,16 +1,29 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  HiOutlineMagnifyingGlass, HiOutlinePlus, HiOutlineChevronLeft, HiOutlineChevronRight 
+  HiOutlineMagnifyingGlass, 
+  HiOutlinePlus, 
+  HiOutlineChevronLeft, 
+  HiOutlineChevronRight,
+  HiOutlinePencilSquare,
+  HiOutlineTrash
 } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 import ModalInputKTH from './components/ModalInputKTH'; 
-import { getKthsAPI, type KthResponseData } from '@/services/kth.service';
+import ConfirmAlert from '@/components/ConfirmAlert';
+import { getKthsAPI, deleteKthAPI, type KthResponseData } from '@/services/kth.service';
 
 const DataKTH: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCdk, setSelectedCdk] = useState('');
   const [selectedKabupaten, setSelectedKabupaten] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedKthForEdit, setSelectedKthForEdit] = useState<KthResponseData | null>(null);
+  
+  // State for delete confirmation alert
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+  const [kthToDelete, setKthToDelete] = useState<KthResponseData | null>(null);
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
+
   const [tableData, setTableData] = useState<KthResponseData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -54,6 +67,37 @@ const DataKTH: React.FC = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, selectedCdk, selectedKabupaten]);
+
+  const handleOpenAdd = () => {
+    setSelectedKthForEdit(null);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = (kth: KthResponseData) => {
+    setSelectedKthForEdit(kth);
+    setIsModalOpen(true);
+  };
+
+  const promptDelete = (kth: KthResponseData) => {
+    setKthToDelete(kth);
+    setIsDeleteAlertOpen(true);
+  };
+
+  const executeDelete = async () => {
+    if (!kthToDelete) return;
+    setIsDeleteLoading(true);
+    try {
+      await deleteKthAPI(kthToDelete.id);
+      toast.success('Data KTH berhasil dihapus!');
+      setIsDeleteAlertOpen(false);
+      setKthToDelete(null);
+      fetchData();
+    } catch (error: any) {
+      toast.error(error.message || 'Gagal menghapus data KTH');
+    } finally {
+      setIsDeleteLoading(false);
+    }
+  };
 
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
@@ -102,7 +146,7 @@ const DataKTH: React.FC = () => {
           </div>
 
           <button 
-            onClick={() => setIsModalOpen(true)}
+            onClick={handleOpenAdd}
             className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors shadow-sm active:scale-95 whitespace-nowrap"
           >
             <HiOutlinePlus className="w-4 h-4 stroke-2" /> Tambah KTH
@@ -122,6 +166,7 @@ const DataKTH: React.FC = () => {
                 <th className="px-4 py-4 font-bold">Nama Kelompok</th>
                 <th className="px-4 py-4 font-bold">Ketua Kelompok</th>
                 <th className="px-4 py-4 font-bold">Jenis Usaha</th>
+                <th className="px-4 py-4 font-bold text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -139,6 +184,24 @@ const DataKTH: React.FC = () => {
                     <td className="px-4 py-4 font-semibold text-[#185325]">{row.nama}</td>
                     <td className="px-4 py-4 text-gray-600">{row.ketua}</td>
                     <td className="px-4 py-4 text-gray-600">{row.jenis_usaha}</td>
+                    <td className="px-4 py-4">
+                      <div className="flex items-center justify-center gap-1.5">
+                        <button
+                          onClick={() => handleOpenEdit(row)}
+                          title="Edit Data KTH"
+                          className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        >
+                          <HiOutlinePencilSquare className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => promptDelete(row)}
+                          title="Hapus Data KTH"
+                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <HiOutlineTrash className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))
               ) : (
@@ -183,8 +246,26 @@ const DataKTH: React.FC = () => {
 
       <ModalInputKTH 
         isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedKthForEdit(null);
+        }} 
         onSuccess={fetchData} 
+        kthToEdit={selectedKthForEdit}
+      />
+
+      <ConfirmAlert
+        isOpen={isDeleteAlertOpen}
+        title="Hapus Data KTH?"
+        message={`Apakah Anda yakin ingin menghapus kelompok "${kthToDelete?.nama}"? Data yang dihapus tidak dapat dikembalikan.`}
+        isDanger={true}
+        confirmText="Ya, Hapus"
+        isLoading={isDeleteLoading}
+        onConfirm={executeDelete}
+        onCancel={() => {
+          setIsDeleteAlertOpen(false);
+          setKthToDelete(null);
+        }}
       />
 
     </div>

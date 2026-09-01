@@ -29,12 +29,12 @@ const Step4: React.FC<StepProps> = ({ data, onPrev }) => {
     const loadingToast = toast.loading('Mengirim pengajuan investasi...');
 
     try {
-      const mappedDokumens = Object.values(data.dokumen)
-  .filter((file) => file !== null)
-  .map((file: any) => ({
-    tipe_dokumen: "Proposal", 
-    file_url: file ? URL.createObjectURL(file) : "https://example.com/default-doc.pdf"
-  }));
+      const mappedDokumens = data.dokumen
+        .filter((doc) => doc.file !== null)
+        .map((doc: any) => ({
+          tipe_dokumen: doc.name, 
+          file_url: doc.file ? URL.createObjectURL(doc.file) : "https://example.com/default-doc.pdf"
+        }));
 
       const payload = {
         gambar: data.coverFile ? URL.createObjectURL(data.coverFile) : "https://example.com/cover.jpg",
@@ -74,11 +74,7 @@ const Step4: React.FC<StepProps> = ({ data, onPrev }) => {
     }
   };
 
-  const docLabels = [
-    'Dokumen Proposal Bisnis',
-    'Dokumen Proyeksi Keuangan',
-    'Dokumen Hukum & Perizinan'
-  ];
+
 
   return (
     <div className="animate-in fade-in duration-300 w-full mx-auto bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
@@ -145,14 +141,14 @@ const Step4: React.FC<StepProps> = ({ data, onPrev }) => {
       </div>
 
       <div className="mb-12">
-        <h3 className="font-bold text-gray-800 mb-4">Dokumen Pendukung ({Object.keys(data.dokumen).length})</h3>
+        <h3 className="font-bold text-gray-800 mb-4">Dokumen Pendukung ({data.dokumen.filter(d => d.file).length})</h3>
         <div className="text-sm space-y-3">
-          {Object.entries(data.dokumen).map(([_, file]: [string, any], idx) => (
+          {data.dokumen.map((doc, idx) => (
           <div key={idx} className="flex">
-            <span className="w-56 shrink-0 text-gray-500">{docLabels[idx] || 'Dokumen Pendukung'}</span>
+            <span className="w-56 shrink-0 text-gray-500">{doc.name}</span>
             <span className="w-4 shrink-0">:</span>
             <span className="font-bold text-gray-800 truncate">
-              {file ? file.name : 'Belum diunggah'}
+              {doc.file ? doc.file.name : 'Belum diunggah'}
             </span>
           </div>
         ))}

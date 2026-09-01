@@ -1,18 +1,10 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { HiOutlineChevronLeft, HiOutlinePrinter, HiOutlinePencil } from 'react-icons/hi2';
+import toast from 'react-hot-toast';
+import { getLaporanKeuanganByIdAPI } from '@/services/investasi.service';
 
 type StatusLaporan = 'Menunggu Verifikasi' | 'Diverifikasi' | 'Revisi';
-
-const DATA_PENDAPATAN = [
-  { tanggal: '01/01/2024', keterangan: 'Tiket Masuk', nominal: 'Rp. 80.000.000', dokumen: 'kwitansi.pdf' },
-  { tanggal: '01/01/2024', keterangan: 'Camping', nominal: 'Rp. 40.000.000', dokumen: 'kwitansi.pdf' },
-];
-
-const DATA_PENGELUARAN = [
-  { tanggal: '01/01/2024', keterangan: 'Gaji Pegawai', nominal: 'Rp. 40.000.000', dokumen: 'kwitansi.pdf' },
-  { tanggal: '01/01/2024', keterangan: 'Operasional', nominal: 'Rp. 40.000.000', dokumen: 'kwitansi.pdf' },
-];
 
 const InfoRow = ({
   label,
@@ -66,8 +58,12 @@ const TransactionTable = ({
                 <tr key={idx} className={`border-b border-gray-200 ${textColor}`}>
                   <td className="py-3 px-2">{row.tanggal}</td>
                   <td className="py-3 px-2">{row.keterangan}</td>
-                  <td className="py-3 px-2">{row.nominal}</td>
-                  <td className="py-3 px-2 italic">{row.dokumen}</td>
+                  <td className="py-3 px-2">Rp {Number(row.nominal || 0).toLocaleString('id-ID')}</td>
+                  <td className="py-3 px-2 italic text-emerald-600 underline">
+                    <a href={row.dokumen} target="_blank" rel="noreferrer">
+                      Lihat Bukti
+                    </a>
+                  </td>
                 </tr>
               );
             })}
@@ -84,35 +80,50 @@ const TransactionTable = ({
 
 const DetailLaporanKeuanganKTH: React.FC = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
   const [statusLaporan, setStatusLaporan] = useState<StatusLaporan>('Menunggu Verifikasi');
+  const [data, setData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!id) return;
+    const fetchDetail = async () => {
+      try {
+        setIsLoading(true);
+        const res = await getLaporanKeuanganByIdAPI(id);
+        setData(res);
+        if (res.status_verifikasi) {
+           const mapStatus: any = {
+             'PENDING': 'Menunggu Verifikasi',
+             'REJECTED': 'Revisi',
+             'VERIFIED': 'Diverifikasi'
+           };
+           setStatusLaporan(mapStatus[res.status_verifikasi] || 'Menunggu Verifikasi');
+        }
+      } catch (err: any) {
+        toast.error(err.message || 'Gagal memuat detail laporan keuangan');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchDetail();
+  }, [id]);
 
   const getStatusDisplay = () => {
     if (statusLaporan === 'Menunggu Verifikasi') return { text: 'Menunggu Verifikasi', color: 'text-orange-500' };
-    if (statusLaporan === 'Diverifikasi') return { text: 'Diverifikasi (20/8/2025)', color: 'text-emerald-600' };
+    if (statusLaporan === 'Diverifikasi') return { text: `Diverifikasi${data?.updated_at ? ` (${new Date(data.updated_at).toLocaleDateString('id-ID')})` : ''}`, color: 'text-emerald-600' };
     if (statusLaporan === 'Revisi') return { text: 'Revisi', color: 'text-red-500' };
     return { text: '', color: '' };
   };
 
   const statusDisplay = getStatusDisplay();
 
+  if (isLoading) {
+    return <div className="p-8 text-center text-gray-500">Memuat detail laporan keuangan...</div>;
+  }
+
   return (
     <div className="flex flex-col w-full max-w-4xl mx-auto pb-20 animate-in fade-in duration-300 relative">
-      
-      {/* 🔴 DEV-ONLY TOGGLER: Boleh dihapus jika sudah diintegrasikan dengan API asli */}
-      <div className="absolute top-0 right-0 flex gap-2 z-50">
-        {(['Menunggu Verifikasi', 'Diverifikasi', 'Revisi'] as StatusLaporan[]).map((s) => (
-          <button 
-            key={s} 
-            onClick={() => setStatusLaporan(s)} 
-            className={`text-[10px] font-bold px-3 py-1.5 rounded-lg border shadow-sm transition-colors ${
-              statusLaporan === s ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-500 hover:bg-gray-50'
-            }`}
-          >
-            Tes {s}
-          </button>
-        ))}
-      </div>
-      {/* 🔴 END DEV-ONLY TOGGLER */}
 
       <div className="relative mb-12 flex items-center justify-center">
         <button 
@@ -127,45 +138,45 @@ const DetailLaporanKeuanganKTH: React.FC = () => {
       <div className="px-4 sm:px-0">
         <h3 className="text-base font-bold text-gray-800 mb-4">Informasi Laporan</h3>
         <div className="flex flex-col gap-3">
-          <InfoRow label="Nama Proyek" value="Ekowisata Kebun Stroberi" />
-          <InfoRow label="Periode" value="Januari - Juni 2025" />
-          <InfoRow label="Tanggal Submit" value="5 Juli 2025" />
+          <InfoRow label="Nama Proyek" value={data?.program?.nama_program_investasi || data?.program?.nama_program || "Ekowisata Kebun Stroberi"} />
+          <InfoRow label="Periode" value={data?.periode_awal && data?.periode_akhir ? `${new Date(data.periode_awal).toLocaleDateString('id-ID')} - ${new Date(data.periode_akhir).toLocaleDateString('id-ID')}` : "Januari - Juni 2025"} />
+          <InfoRow label="Tanggal Submit" value={data?.created_at ? new Date(data.created_at).toLocaleDateString('id-ID') : "5 Juli 2025"} />
           <InfoRow label="Status" value={statusDisplay.text} valueColor={statusDisplay.color} />
 
           {statusLaporan === 'Revisi' && (
             <InfoRow
               label="Catatan"
-              value="*Nominal biaya operasional tidak sesuai. Silakan perbaiki laporan kemudian kirim ulang.*"
+              value={data?.catatan_verifikasi || "*Terdapat catatan revisi.*"}
               isItalic={true}
             />
           )}
 
           <div className="mt-4 flex flex-col gap-3">
-            <InfoRow label="Total Pendapatan" value="Rp 120.000.000" />
-            <InfoRow label="Total Pengeluaran" value="Rp 80.000.000" />
-            <InfoRow label="Laba Bersih" value="Rp 40.000.000" />
+            <InfoRow label="Total Pendapatan" value={`Rp ${data?.total_pendapatan?.toLocaleString('id-ID') || 0}`} />
+            <InfoRow label="Total Pengeluaran" value={`Rp ${data?.total_pengeluaran?.toLocaleString('id-ID') || 0}`} />
+            <InfoRow label="Laba Bersih" value={`Rp ${data?.laba_bersih?.toLocaleString('id-ID') || 0}`} />
           </div>
         </div>
 
         <TransactionTable
           title="Tabel Pendapatan"
-          data={DATA_PENDAPATAN}
-          total="Rp 120.000.000"
+          data={data?.rincian_pendapatan || []}
+          total={`Rp ${data?.total_pendapatan?.toLocaleString('id-ID') || 0}`}
         />
 
         <TransactionTable
           title="Pengeluaran"
-          data={DATA_PENGELUARAN}
-          total="Rp 80.000.000"
+          data={data?.rincian_pengeluaran || []}
+          total={`Rp ${data?.total_pengeluaran?.toLocaleString('id-ID') || 0}`}
           isRevisi={statusLaporan === 'Revisi'}  
         />
 
         <div className="bg-[#DCECE0] rounded-xl p-6 mt-10 max-w-2xl">
           <h3 className="text-base font-bold text-gray-800 mb-4">Ringkasan Pembagian Keuntungan</h3>
           <div className="flex flex-col gap-3">
-            <InfoRow label="Laba Bersih" value="Rp 40.000.000" />
-            <InfoRow label="KTH (60%)" value="Rp 24.000.000" />
-            <InfoRow label="Investor (40%)" value="Rp 16.000.000" />
+            <InfoRow label="Laba Bersih" value={`Rp ${data?.laba_bersih?.toLocaleString('id-ID') || 0}`} />
+            <InfoRow label="KTH (60%)" value={`Rp ${((data?.laba_bersih || 0) * 0.6).toLocaleString('id-ID')}`} />
+            <InfoRow label="Investor (40%)" value={`Rp ${((data?.laba_bersih || 0) * 0.4).toLocaleString('id-ID')}`} />
           </div>
         </div>
 
@@ -176,7 +187,10 @@ const DetailLaporanKeuanganKTH: React.FC = () => {
             </button>
           )}
           {statusLaporan === 'Revisi' && (
-            <button className="flex items-center gap-2 px-8 py-3.5 bg-[#185325] text-white text-sm font-bold rounded-full hover:bg-[#123d1c] transition-colors shadow-md active:scale-95">
+            <button 
+              onClick={() => navigate(`/admin/kth/laporan-investasi/keuangan/edit/${id}`)}
+              className="flex items-center gap-2 px-8 py-3.5 bg-[#185325] text-white text-sm font-bold rounded-full hover:bg-[#123d1c] transition-colors shadow-md active:scale-95"
+            >
               <HiOutlinePencil className="w-5 h-5" /> Edit Laporan
             </button>
           )}

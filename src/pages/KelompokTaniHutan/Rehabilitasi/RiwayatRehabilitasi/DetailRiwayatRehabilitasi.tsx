@@ -149,7 +149,7 @@ const DetailRiwayatRehabilitasi: React.FC = () => {
           <InfoRow label="Nama Program" value={data.nama} />
           <InfoRow label="Lokasi" value={data.lokasi} />
           <InfoRow label="KTH Pengusul" value={data.kth} />
-          <InfoRow label="Pilihan Intervensi" value={data.pilihan_intervensi} />
+          <InfoRow label="Rekomendasi Intervensi" value={data.pilihan_intervensi} />
           <InfoRow label="Sumber Dana" value={data.sumberDana} />
           <InfoRow label="Mitra CSR" value={data.mitra} />
           <InfoRow label="Luas Lahan" value={data.luasLahan} />

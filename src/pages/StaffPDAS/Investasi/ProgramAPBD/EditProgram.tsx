@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { HiOutlineChevronLeft, HiOutlinePlusCircle } from 'react-icons/hi2';
+import { useNavigate, useParams } from 'react-router-dom';
+import { HiOutlineChevronLeft, HiOutlinePencilSquare } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
-import { createProgramApbdAPI } from '@/services/program-apbd.service';
+import { updateProgramApbdAPI, getProgramApbdByIdAPI } from '@/services/program-apbd.service';
 import { rehabilitasiService } from '@/services/rehabilitasi.service';
 
-
-const CreateProgramAPBD: React.FC = () => {
+const EditProgramAPBD: React.FC = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
   const [projects, setProjects] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -29,19 +29,43 @@ const CreateProgramAPBD: React.FC = () => {
   const MAX_DESC_LENGTH = 100;
 
   useEffect(() => {
-    const fetchProjects = async () => {
+    const fetchData = async () => {
       try {
-        const res = await rehabilitasiService.getValidZones();
-        const validZones = (res.data || []).filter((z: any) => z.status_kelayakan === 'Layak');
+        const [resProjects, resProgram] = await Promise.all([
+          rehabilitasiService.getValidZones(),
+          getProgramApbdByIdAPI(id as string)
+        ]);
+        
+        const validZones = (resProjects.data || []).filter((z: any) => z.status_kelayakan === 'Layak');
         setProjects(validZones);
+
+        const prog = resProgram;
+        
+        setSelectedProjectId(String(prog.analysis_result_zone_id));
+        setLokasiWilayah(prog.kth?.desa_kelurahan ? `${prog.kth.desa_kelurahan}, ${prog.kth.kecamatan}, ${prog.kth.kabupaten_kota}` : '');
+        
+        setForm({
+          rekomendasi: prog.pilihan_intervensi || '',
+          luasLahan: prog.target_luas_lahan || '',
+          kth_id: prog.kth_id || '',
+          namaKth: prog.kth?.nama_kelompok || '',
+          ketuaKth: prog.kth?.nama_ketua || '',
+          namaProgram: prog.nama_program || '',
+          jumlah_bibit: prog.jumlah_bibit || '',
+          anggaran: prog.anggaran || '',
+          deskripsi: prog.deskripsi_rencana || ''
+        });
+
       } catch (error) {
-        toast.error('Gagal memuat daftar project lahan kritis.');
+        toast.error('Gagal memuat data.');
       } finally {
         setIsFetchingProjects(false);
       }
     };
-    fetchProjects();
-  }, []);
+    if (id) {
+        fetchData();
+    }
+  }, [id]);
 
   const handleProjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedId = e.target.value;
@@ -84,22 +108,22 @@ const CreateProgramAPBD: React.FC = () => {
     if (!selectedProjectId) return toast.error('Pilih lokasi prioritas terlebih dahulu.');
 
     setIsLoading(true);
-    const loadingToast = toast.loading('Memproses Rancangan Program...');
+    const loadingToast = toast.loading('Memproses Perubahan Program...');
 
     const payload = {
       kth_id: form.kth_id,
       nama_program: form.namaProgram,
-      jumlah_bibit: form.jumlah_bibit, // Fix: use jumlah_bibit
+      jumlah_bibit: form.jumlah_bibit,
       deskripsi_rencana: form.deskripsi,
       anggaran: form.anggaran,
       target_luas_lahan: form.luasLahan,
       pilihan_intervensi: form.rekomendasi,
-      analysis_result_zone_id: selectedProjectId // Keep track of the selected zone
+      analysis_result_zone_id: selectedProjectId
     };
 
     try {
-      await createProgramApbdAPI(payload);
-      toast.success('Draft Program APBD berhasil dikirim ke Kepala PDAS!', { id: loadingToast });
+      await updateProgramApbdAPI(id as string, payload);
+      toast.success('Program APBD berhasil diperbarui!', { id: loadingToast });
       navigate(-1);
     } catch (error: any) {
       toast.error(error.message, { id: loadingToast });
@@ -121,11 +145,11 @@ const CreateProgramAPBD: React.FC = () => {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 md:p-10 mt-2">
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-2">
-             <HiOutlinePlusCircle className="w-6 h-6 text-[#185325]" strokeWidth={2} />
-             <h1 className="text-xl font-bold text-gray-800">Rancang Program APBD Baru</h1>
+             <HiOutlinePencilSquare className="w-6 h-6 text-[#185325]" strokeWidth={2} />
+             <h1 className="text-xl font-bold text-gray-800">Edit Program APBD</h1>
           </div>
           <p className="text-sm text-gray-500 font-medium">
-            Rancang program rehabilitasi APBD berdasarkan lahan prioritas di Jawa Barat.
+            Ubah data rancangan program rehabilitasi APBD.
           </p>
         </div>
 
@@ -288,11 +312,11 @@ const CreateProgramAPBD: React.FC = () => {
             </button>
             <button 
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || isFetchingProjects}
               className="flex items-center gap-2 px-10 py-3 bg-[#185325] hover:bg-[#123d1c] text-white text-sm font-bold rounded-full transition-colors active:scale-95 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
             >
               {isLoading && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>}
-              Kirim ke Kepala PDAS
+              Simpan Perubahan
             </button>
           </div>
 
@@ -302,4 +326,4 @@ const CreateProgramAPBD: React.FC = () => {
   );
 };
 
-export default CreateProgramAPBD;
+export default EditProgramAPBD;

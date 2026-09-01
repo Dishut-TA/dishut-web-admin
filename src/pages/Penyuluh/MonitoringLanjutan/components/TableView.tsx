@@ -30,13 +30,13 @@ export const TableView: React.FC<TableViewProps> = ({
   const allPlants = targetPu?.data_tanamans || targetPu?.dataTanamans || [];
   const puName = targetPu?.nama || `PU-${(petakUkurs.indexOf(targetPu) + 1).toString().padStart(2, '0')}`;
 
-  const totalTanaman = allPlants.reduce((acc, curr) => acc + (curr.jumlah || 0), 0);
+  const totalTanaman = allPlants.reduce((acc: any, curr: any) => acc + (curr.jumlah || 0), 0);
   let sudahDiinput = 0;
   let mati = 0;
   let belumDiinput = 0;
   let updateTerakhir = '-';
 
-  allPlants.forEach((t) => {
+  allPlants.forEach((t: any) => {
     const kondisi = t.kondisi_tanaman?.toLowerCase() || '';
     if (kondisi.includes('hidup') || kondisi.includes('sehat') || kondisi.includes('baik')) {
       sudahDiinput += t.jumlah || 0;
@@ -127,7 +127,7 @@ export const TableView: React.FC<TableViewProps> = ({
             <div className="flex flex-col items-center justify-center text-center p-4 border border-slate-100 rounded-xl bg-white shadow-sm h-full">
               <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 mb-2"><HiOutlineCalendar className="w-5 h-5" /></div>
               <p className="text-[9px] text-slate-500 font-semibold mb-1 leading-tight">Update Terakhir</p>
-              <h3 className="text-xs font-bold text-gray-900 break-words w-full text-center">{updateTerakhir !== '-' ? new Date(updateTerakhir).toLocaleDateString('id-ID') : '-'}</h3>
+              <h3 className="text-xs font-bold text-gray-900 wrap-break-words w-full text-center">{updateTerakhir !== '-' ? new Date(updateTerakhir).toLocaleDateString('id-ID') : '-'}</h3>
               <p className="text-[10px] text-gray-500">{updateTerakhir !== '-' ? new Date(updateTerakhir).toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'}) : ''}</p>
             </div>
           </div>

@@ -1,18 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { HiOutlineChevronLeft, HiXMark } from 'react-icons/hi2';
+import toast from 'react-hot-toast';
+import { getLaporanKeuanganBUPMByIdAPI, verifyLaporanKeuanganBUPMAPI } from '@/services/investasi.service';
 
 type StatusLaporan = 'Menunggu Verifikasi' | 'Diverifikasi' | 'Revisi';
-
-const DATA_PENDAPATAN = [
-  { tanggal: '01/01/2024', keterangan: 'Tiket Masuk', nominal: 'Rp. 80.000.000', dokumen: 'kwitansi.pdf' },
-  { tanggal: '01/01/2024', keterangan: 'Camping', nominal: 'Rp. 40.000.000', dokumen: 'kwitansi.pdf' },
-];
-
-const DATA_PENGELUARAN = [
-  { tanggal: '01/01/2024', keterangan: 'Gaji Pegawai', nominal: 'Rp. 40.000.000', dokumen: 'kwitansi.pdf' },
-  { tanggal: '01/01/2024', keterangan: 'Operasional', nominal: 'Rp. 40.000.000', dokumen: 'kwitansi.pdf' },
-];
 
 const InfoRow = ({
   label,
@@ -58,7 +50,6 @@ const TransactionTable = ({
           </thead>
           <tbody>
             {data.map((row, idx) => {
-              // Row menjadi merah jika statusnya Revisi DAN keterangannya 'Operasional' (sesuai gambar)
               const isError = isRevisi && row.keterangan === 'Operasional';
               const textColor = isError ? 'text-red-500' : 'text-gray-800';
 
@@ -66,8 +57,12 @@ const TransactionTable = ({
                 <tr key={idx} className={`border-b border-gray-200 ${textColor}`}>
                   <td className="py-3 px-2">{row.tanggal}</td>
                   <td className="py-3 px-2">{row.keterangan}</td>
-                  <td className="py-3 px-2">{row.nominal}</td>
-                  <td className="py-3 px-2 italic">{row.dokumen}</td>
+                  <td className="py-3 px-2">Rp {Number(row.nominal || 0).toLocaleString('id-ID')}</td>
+                  <td className="py-3 px-2 italic text-emerald-600 underline">
+                    <a href={row.dokumen} target="_blank" rel="noreferrer">
+                      Lihat Bukti
+                    </a>
+                  </td>
                 </tr>
               );
             })}
@@ -87,19 +82,77 @@ const DetailLaporanKeuanganStaffBUPM: React.FC = () => {
   const { id } = useParams();
 
   const [isModalRevisiOpen, setIsModalRevisiOpen] = useState(false);
+  const [data, setData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [statusLaporan, setStatusLaporan] = useState<StatusLaporan>('Menunggu Verifikasi');
+  const [revisiDesc, setRevisiDesc] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
 
-  let statusLaporan: StatusLaporan = 'Menunggu Verifikasi';
-  if (id === 'LK-002') statusLaporan = 'Diverifikasi';
-  else if (id === 'LK-003') statusLaporan = 'Revisi';
+  useEffect(() => {
+    if (!id) return;
+    const fetchDetail = async () => {
+      try {
+        setIsLoading(true);
+        const res = await getLaporanKeuanganBUPMByIdAPI(id);
+        setData(res);
+        if (res.status_verifikasi) {
+           const mapStatus: any = {
+             'PENDING': 'Menunggu Verifikasi',
+             'REJECTED': 'Revisi',
+             'VERIFIED': 'Diverifikasi'
+           };
+           setStatusLaporan(mapStatus[res.status_verifikasi] || 'Menunggu Verifikasi');
+        }
+      } catch (err: any) {
+        toast.error(err.message || 'Gagal memuat detail laporan keuangan');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchDetail();
+  }, [id]);
 
   const getStatusDisplay = () => {
     if (statusLaporan === 'Menunggu Verifikasi') return { text: 'Menunggu Verifikasi', color: 'text-orange-500' };
-    if (statusLaporan === 'Diverifikasi') return { text: 'Diverifikasi', color: 'text-emerald-600' };
+    if (statusLaporan === 'Diverifikasi') return { text: `Diverifikasi${data?.updated_at ? ` (${new Date(data.updated_at).toLocaleDateString('id-ID')})` : ''}`, color: 'text-emerald-600' };
     if (statusLaporan === 'Revisi') return { text: 'Revisi', color: 'text-red-500' };
     return { text: '', color: '' };
   };
 
   const statusDisplay = getStatusDisplay();
+
+  const handleVerify = async (status: 'VERIFIED' | 'REJECTED') => {
+    if (!id) return;
+    try {
+      setIsVerifying(true);
+      await verifyLaporanKeuanganBUPMAPI(id, {
+        status_verifikasi: status,
+        catatan_verifikasi: status === 'REJECTED' ? revisiDesc : 'Nota valid, proceed bagi hasil.'
+      });
+      toast.success(status === 'VERIFIED' ? 'Berhasil menyetujui laporan!' : 'Berhasil menolak laporan dengan catatan revisi!');
+      setStatusLaporan(status === 'VERIFIED' ? 'Diverifikasi' : 'Revisi');
+      setIsModalRevisiOpen(false);
+      setData((prev: any) => ({
+        ...prev,
+        status_verifikasi: status,
+        catatan_verifikasi: status === 'REJECTED' ? revisiDesc : 'Nota valid, proceed bagi hasil.'
+      }));
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal memverifikasi laporan');
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  if (isLoading) {
+    return <div className="p-8 text-center text-gray-500">Memuat detail laporan keuangan...</div>;
+  }
+
+  const persentaseKTH = data?.program?.persentase_keuntungan ? parseFloat(data.program.persentase_keuntungan) : 60;
+  const persentaseInvestor = 100 - persentaseKTH;
+  const labaBersih = Number(data?.laba_bersih || 0);
+  const hakKTH = labaBersih * (persentaseKTH / 100);
+  const hakInvestor = labaBersih * (persentaseInvestor / 100);
 
   return (
     <div className="flex flex-col w-full max-w-4xl mx-auto pb-20 animate-in fade-in duration-300 relative">
@@ -116,45 +169,45 @@ const DetailLaporanKeuanganStaffBUPM: React.FC = () => {
       <div className="px-4 sm:px-0">
         <h3 className="text-base font-bold text-gray-800 mb-4">Informasi Laporan</h3>
         <div className="flex flex-col gap-3">
-          <InfoRow label="Nama Investasi" value="Ekowisata Kebun Stroberi" />
-          <InfoRow label="Periode" value="Januari - Juni 2025" />
-          <InfoRow label="Tanggal Submit" value="5 Juli 2025" />
+          <InfoRow label="Nama Investasi" value={data?.program?.nama_program_investasi || data?.program?.nama_program || "-"} />
+          <InfoRow label="Periode" value={data?.periode_awal && data?.periode_akhir ? `${new Date(data.periode_awal).toLocaleDateString('id-ID')} - ${new Date(data.periode_akhir).toLocaleDateString('id-ID')}` : "-"} />
+          <InfoRow label="Tanggal Submit" value={data?.created_at ? new Date(data.created_at).toLocaleDateString('id-ID') : "-"} />
           <InfoRow label="Status" value={statusDisplay.text} valueColor={statusDisplay.color} />
 
           {statusLaporan === 'Revisi' && (
             <InfoRow
               label="Catatan"
-              value="*Nominal biaya operasional tidak sesuai. Silakan perbaiki laporan kemudian kirim ulang.*"
+              value={data?.catatan_verifikasi || "*Terdapat catatan revisi.*"}
               isItalic={true}
             />
           )}
 
           <div className="mt-4 flex flex-col gap-3">
-            <InfoRow label="Total Pendapatan" value="Rp 120.000.000" />
-            <InfoRow label="Total Pengeluaran" value="Rp 80.000.000" />
-            <InfoRow label="Laba Bersih" value="Rp 40.000.000" />
+            <InfoRow label="Total Pendapatan" value={`Rp ${Number(data?.total_pendapatan || 0).toLocaleString('id-ID')}`} />
+            <InfoRow label="Total Pengeluaran" value={`Rp ${Number(data?.total_pengeluaran || 0).toLocaleString('id-ID')}`} />
+            <InfoRow label="Laba Bersih" value={`Rp ${Number(data?.laba_bersih || 0).toLocaleString('id-ID')}`} />
           </div>
         </div>
 
         <TransactionTable
           title="Tabel Pendapatan"
-          data={DATA_PENDAPATAN}
-          total="Rp 120.000.000"
+          data={data?.rincian_pendapatan || []}
+          total={`Rp ${Number(data?.total_pendapatan || 0).toLocaleString('id-ID')}`}
         />
 
         <TransactionTable
           title="Pengeluaran"
-          data={DATA_PENGELUARAN}
-          total="Rp 80.000.000"
+          data={data?.rincian_pengeluaran || []}
+          total={`Rp ${Number(data?.total_pengeluaran || 0).toLocaleString('id-ID')}`}
           isRevisi={statusLaporan === 'Revisi'} 
         />
 
         <div className="bg-[#DCECE0] rounded-xl p-6 mt-10 max-w-2xl">
           <h3 className="text-base font-bold text-gray-800 mb-4">Ringkasan Pembagian Keuntungan</h3>
           <div className="flex flex-col gap-3">
-            <InfoRow label="Laba Bersih" value="Rp 40.000.000" />
-            <InfoRow label="KTH (60%)" value="Rp 24.000.000" />
-            <InfoRow label="Investor (40%)" value="Rp 16.000.000" />
+            <InfoRow label="Laba Bersih" value={`Rp ${labaBersih.toLocaleString('id-ID')}`} />
+            <InfoRow label={`KTH (${persentaseKTH}%)`} value={`Rp ${hakKTH.toLocaleString('id-ID')}`} />
+            <InfoRow label={`Investor (${persentaseInvestor}%)`} value={`Rp ${hakInvestor.toLocaleString('id-ID')}`} />
           </div>
         </div>
 
@@ -167,9 +220,11 @@ const DetailLaporanKeuanganStaffBUPM: React.FC = () => {
               Revisi
             </button>
             <button 
-              className="flex-1 py-3.5 bg-[#185325] text-white text-sm font-bold rounded-full hover:bg-[#123d1c] transition-colors shadow-sm active:scale-95"
+              onClick={() => handleVerify('VERIFIED')}
+              disabled={isVerifying}
+              className="flex-1 py-3.5 bg-[#185325] text-white text-sm font-bold rounded-full hover:bg-[#123d1c] transition-colors shadow-sm active:scale-95 disabled:opacity-50"
             >
-              Setujui
+              {isVerifying ? 'Memproses...' : 'Setujui'}
             </button>
           </div>
         )}
@@ -196,16 +251,17 @@ const DetailLaporanKeuanganStaffBUPM: React.FC = () => {
                 <textarea 
                   rows={4} 
                   placeholder="Tulis keterangan perubahan" 
+                  value={revisiDesc}
+                  onChange={(e) => setRevisiDesc(e.target.value)}
                   className="w-full text-sm p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#185325] resize-none"
                 ></textarea>
               </div>
               <button 
-                onClick={() => {
-                  setIsModalRevisiOpen(false);
-                }}
-                className="w-full py-3 mt-2 bg-[#185325] text-white text-sm font-bold rounded-full hover:bg-[#123d1c] transition-colors shadow-sm active:scale-95"
+                onClick={() => handleVerify('REJECTED')}
+                disabled={isVerifying || !revisiDesc.trim()}
+                className="w-full py-3 mt-2 bg-[#185325] text-white text-sm font-bold rounded-full hover:bg-[#123d1c] transition-colors shadow-sm active:scale-95 disabled:opacity-50"
               >
-                Kirim
+                {isVerifying ? 'Kirim...' : 'Kirim'}
               </button>
             </div>
 

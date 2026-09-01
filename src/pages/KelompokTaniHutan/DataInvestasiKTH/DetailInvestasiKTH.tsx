@@ -24,9 +24,9 @@ const DetailInvestasiKTH: React.FC = () => {
   };
 
   const docLabels = [
-    'Dokumen Proposal Bisnis',
-    'Dokumen Proyeksi Keuangan',
-    'Dokumen Hukum & Perizinan'
+    'Dokumen Perjanjian Investasi',
+    'Dokumen Rencana Bisnis',
+    'Template Perjanjian Investor'
   ];
 
   const projectData = {
@@ -55,7 +55,7 @@ const DetailInvestasiKTH: React.FC = () => {
     label: docLabels[idx] || 'Dokumen Pendukung',
     file: d.file_url ? d.file_url.split('/').pop() : 'Dokumen.pdf'
   })) || [
-    { label: 'Dokumen Proposal Bisnis', file: 'PerjanjianInvestor.pdf' }
+    { label: 'Dokumen Perjanjian Investasi', file: 'PerjanjianInvestor.pdf' }
   ]
   };
 
