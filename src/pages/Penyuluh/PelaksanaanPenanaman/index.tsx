@@ -1,16 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  HiOutlineClipboardDocumentList, 
+  HiOutlineClipboardDocumentList,
   HiOutlineCheckCircle,
   HiOutlineEye,
   HiChevronRight,
-  HiOutlineCalendar,
   HiOutlineMagnifyingGlass,
   HiChevronDown,
+  HiOutlineCalendar,
   HiOutlineFunnel,
   HiOutlineArrowPath,
-  HiChevronUpDown
+  HiChevronUpDown,
+  HiOutlineDocumentText,
+  HiOutlinePlayCircle
 } from 'react-icons/hi2';
 import { PiPlant } from 'react-icons/pi';
 
@@ -31,10 +33,15 @@ const LeafIcon = () => (
   </svg>
 );
 
-// ==========================================
-// 1. INTERFACES & TYPES
-// ==========================================
 type StatusPelaksanaan = 'Ditugaskan' | 'Berjalan' | 'Selesai';
+type TabPelaksanaan = 'Semua' | StatusPelaksanaan;
+
+const TABS: { label: TabPelaksanaan; icon: React.ReactNode; activeColor: string; inactiveIconColor: string }[] = [
+  { label: 'Semua', icon: <HiOutlineDocumentText className="w-4 h-4" />, activeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200', inactiveIconColor: 'text-emerald-600' },
+  { label: 'Ditugaskan', icon: <HiOutlinePlayCircle className="w-4 h-4" />, activeColor: 'bg-yellow-50 text-yellow-700 border-yellow-200', inactiveIconColor: 'text-yellow-500' },
+  { label: 'Berjalan', icon: <HiOutlineArrowPath className="w-4 h-4" />, activeColor: 'bg-blue-50 text-blue-700 border-blue-200', inactiveIconColor: 'text-blue-500' },
+  { label: 'Selesai', icon: <HiOutlineCheckCircle className="w-4 h-4" />, activeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200', inactiveIconColor: 'text-emerald-500' },
+];
 
 interface ProgramData {
   id: string;
@@ -56,13 +63,6 @@ interface ProgramData {
   status: StatusPelaksanaan;
 }
 
-// ==========================================
-// 2. MOCK DATA
-// ==========================================
-
-// ==========================================
-// 3. MICRO COMPONENTS
-// ==========================================
 const StatusBadge = ({ status }: { status: StatusPelaksanaan }) => {
   const styles: Record<StatusPelaksanaan, string> = {
     'Ditugaskan': 'bg-yellow-50 text-yellow-600',
@@ -76,9 +76,6 @@ const StatusBadge = ({ status }: { status: StatusPelaksanaan }) => {
   );
 };
 
-// ==========================================
-// 4. MACRO COMPONENTS
-// ==========================================
 const Header = () => (
   <div className="mb-6 flex gap-4 items-center">
     <div className="w-14 h-14 bg-emerald-50 rounded-xl flex items-center justify-center border border-emerald-100 shadow-sm shrink-0">
@@ -93,6 +90,7 @@ const Header = () => (
   </div>
 );
 
+// FilterSection tetap sama persis (search + dropdown cosmetic) — dibiarkan, gak diganggu
 const FilterSection = () => (
   <div className="flex flex-col md:flex-row gap-4 mb-6">
     <div className="relative flex-1">
@@ -103,15 +101,6 @@ const FilterSection = () => (
       />
       <HiOutlineMagnifyingGlass className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
     </div>
-
-    <div className="relative w-full md:w-56">
-      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-500">Status</div>
-      <select className="w-full pl-16 pr-8 py-2.5 text-sm font-semibold border border-slate-200 rounded-full appearance-none bg-white focus:outline-none focus:border-[#008A4B]">
-        <option>Semua Status</option>
-      </select>
-      <HiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-    </div>
-
     <div className="relative w-full md:w-64">
       <div className="absolute left-10 top-1.5 text-[10px] font-medium text-slate-400">Periode Pelaksanaan</div>
       <HiOutlineCalendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -120,13 +109,13 @@ const FilterSection = () => (
       </select>
       <HiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
     </div>
-
     <button className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#008A4B] text-white text-sm font-semibold rounded-full hover:bg-emerald-800 transition-colors shadow-sm">
       <HiOutlineFunnel className="w-4 h-4" /> Filter
     </button>
   </div>
 );
 
+// KegiatanTable — logic isi tabel/kolom-nya SAMA PERSIS kayak sebelumnya, cuma nerima data yang sudah difilter dari parent
 const KegiatanTable = ({ data, navigate }: { data: ProgramData[], navigate: any }) => (
   <div className="overflow-x-auto">
     <div className="px-5 py-4 border-b border-slate-100">
@@ -149,7 +138,11 @@ const KegiatanTable = ({ data, navigate }: { data: ProgramData[], navigate: any 
         </tr>
       </thead>
       <tbody className="divide-y divide-slate-100">
-        {data.map((item, idx) => (
+        {data.length === 0 ? (
+          <tr>
+            <td colSpan={11} className="px-5 py-8 text-center text-slate-500">Tidak ada data untuk status ini.</td>
+          </tr>
+        ) : data.map((item, idx) => (
           <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
             <td className="px-5 py-4 font-medium text-slate-700">{idx + 1}</td>
             <td className="px-5 py-4 font-bold text-[#008A4B]">{item.idPenugasan}</td>
@@ -214,12 +207,12 @@ const KegiatanTable = ({ data, navigate }: { data: ProgramData[], navigate: any 
 const PelaksanaanPenanamanIndex: React.FC = () => {
   const [programs, setPrograms] = useState<ProgramData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<TabPelaksanaan>('Semua');
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPenugasan = async () => {
       try {
-        // Use dynamically imported getMyPenugasanAPI
         const { getMyPenugasanAPI } = await import('@/services/penugasan.service');
         const res = await getMyPenugasanAPI();
         const apiData = res.data || [];
@@ -257,7 +250,7 @@ const PelaksanaanPenanamanIndex: React.FC = () => {
               kth: kth,
               targetKegiatan: 'Pelaksanaan Penanaman',
               targetBibit: targetBibit + ' bibit',
-              totalPu: totalPu ? `${totalPu} PU` : '-', 
+              totalPu: totalPu !== '-' ? `${totalPu} PU` : '-',
               periodeMulai: p.tanggal_mulai ? new Date(p.tanggal_mulai).toLocaleDateString('id-ID') : '-',
               periodeSelesai: p.batas_waktu ? new Date(p.batas_waktu).toLocaleDateString('id-ID') : '-',
               sisaHari: '',
@@ -279,11 +272,16 @@ const PelaksanaanPenanamanIndex: React.FC = () => {
     fetchPenugasan();
   }, []);
 
+  // Filter beneran, berdasarkan tab aktif
+  const filteredPrograms = activeTab === 'Semua'
+    ? programs
+    : programs.filter((p) => p.status === activeTab);
+
   return (
     <div className="w-full bg-[#F8FAFC] min-h-screen font-sans text-slate-800">
       <div className="max-w-[1600px] mx-auto">
         <Header />
-        
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
             <div className="p-3 rounded-lg shrink-0 bg-orange-50 text-orange-500">
@@ -325,15 +323,43 @@ const PelaksanaanPenanamanIndex: React.FC = () => {
 
         <div className="bg-white rounded-xl shadow-sm border border-slate-200">
           <div className="p-5">
-             <FilterSection />
+            <FilterSection />
+
+            {/* Tabs — filter beneran, klik ganti activeTab lalu tabel ke-filter otomatis */}
+            <div className="flex flex-nowrap overflow-x-auto gap-3 pb-2 custom-scrollbar-pelaksanaan">
+              {TABS.map((tab) => (
+                <button
+                  key={tab.label}
+                  onClick={() => setActiveTab(tab.label)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold border transition-colors shrink-0
+                    ${activeTab === tab.label
+                      ? tab.activeColor
+                      : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                    }
+                  `}
+                >
+                  <span className={activeTab === tab.label ? '' : tab.inactiveIconColor}>
+                    {tab.icon}
+                  </span>
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           </div>
           {isLoading ? (
             <div className="p-8 text-center text-slate-500">Loading data penugasan...</div>
           ) : (
-            <KegiatanTable data={programs} navigate={navigate} />
+            <KegiatanTable data={filteredPrograms} navigate={navigate} />
           )}
         </div>
       </div>
+
+      <style dangerouslySetInnerHTML={{__html: `
+        .custom-scrollbar-pelaksanaan::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar-pelaksanaan::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar-pelaksanaan::-webkit-scrollbar-thumb { background-color: #e2e8f0; border-radius: 10px; }
+        .custom-scrollbar-pelaksanaan::-webkit-scrollbar-thumb:hover { background-color: #cbd5e1; }
+      `}} />
     </div>
   );
 };
