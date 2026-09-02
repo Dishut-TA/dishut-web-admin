@@ -21,6 +21,18 @@ export const getMyPenugasanAPI = async () => {
   return response.json();
 };
 
+export const getMyKthPenugasanAPI = async () => {
+  const response = await fetch(`${API_URL}/penugasan/kth-saya`, {
+    headers: getHeaders(),
+  });
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("API Error Response:", errorText);
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return response.json();
+};
+
 export const getAllPenugasanAPI = async () => {
   const response = await fetch(`${API_URL}/penugasan`, {
     headers: getHeaders(),

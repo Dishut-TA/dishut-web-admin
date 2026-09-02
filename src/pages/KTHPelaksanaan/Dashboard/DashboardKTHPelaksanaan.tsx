@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   HiOutlineCalendar, 
@@ -9,9 +9,11 @@ import {
   HiOutlineDocumentText
 } from 'react-icons/hi2';
 import { PiPlantFill, PiLeafFill } from 'react-icons/pi';
+import { getMyKthPenugasanAPI } from '@/services/penugasan.service';
+import { useAuth } from '@/context/AuthContext';
 
 interface PenugasanRow {
-  id: string;
+  id: string | number;
   program: string;
   lokasi: string;
   jenisPenugasan: 'Penanaman' | 'Penyulaman';
@@ -20,60 +22,36 @@ interface PenugasanRow {
   target: string;
   status: string;
   keterangan: string;
+  penyuluh?: string;
   rincian?: any;
 }
 
-const mockData: PenugasanRow[] = [
-  {
-    id: 'PRG-001',
-    program: 'Rehabilitasi Lahan Desa Sukamaju',
-    jenisPenugasan: 'Penanaman',
-    sumberProgram: 'Donasi',
-    lokasi: 'Desa Sukamaju, Kec. Cikalongwetan',
-    periode: 'Mei - Jul 2025',
-    target: '200 Pohon',
-    status: 'Aktif',
-    keterangan: 'Mulai Mei 2025\ns.d. Jul 2025',
-    rincian: {
-      targetTanaman: '200 Pohon',
-      jenisTanaman: 'Mahoni, Trembesi',
-      sumberBibit: 'KTH Lestari'
-    }
-  },
-  {
-    id: 'PRG-002',
-    program: 'Rehabilitasi Lahan Desa Mandalasari',
-    jenisPenugasan: 'Penyulaman',
-    sumberProgram: 'CSR PT. Hijau Lestari',
-    lokasi: 'Desa Mandalasari, Kec. Cipongkor',
-    periode: 'Jun - Jul 2025',
-    target: '50 Pohon',
-    status: 'Aktif',
-    keterangan: 'Mulai Jun 2025\ns.d. Jul 2025',
-    rincian: {
-      targetPenyulaman: '50 Pohon',
-      alasan: 'Tanaman mati/rusak',
-      jenisTanaman: 'Sama dengan awal tanam'
-    }
-  },
-  {
-    id: 'PRG-003',
-    program: 'Rehabilitasi Lahan Desa Cikawaru',
-    jenisPenugasan: 'Penanaman',
-    sumberProgram: 'APBD',
-    lokasi: 'Desa Cikawaru, Kec. Cikalongwetan',
-    periode: 'Feb - Apr 2025',
-    target: '150 Pohon',
-    status: 'Aktif',
-    keterangan: 'Mulai Feb 2025\ns.d. Apr 2025',
-  }
-];
-
 const DashboardKTHPelaksanaan: React.FC = () => {
   const navigate = useNavigate();
-  const [expandedRows, setExpandedRows] = useState<string[]>([]);
+  const { user } = useAuth();
+  const [expandedRows, setExpandedRows] = useState<(string | number)[]>([]);
+  const [data, setData] = useState<PenugasanRow[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const toggleRow = (id: string) => {
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const res = await getMyKthPenugasanAPI();
+        setData(res?.data ?? []);
+      } catch (err: any) {
+        console.error('Gagal mengambil data penugasan KTH:', err);
+        setError(err.message || 'Gagal mengambil data penugasan.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const toggleRow = (id: string | number) => {
     setExpandedRows(prev => 
       prev.includes(id) ? prev.filter(rowId => rowId !== id) : [...prev, id]
     );
@@ -87,17 +65,21 @@ const DashboardKTHPelaksanaan: React.FC = () => {
     }
   };
 
+  const totalPenanaman = data.filter(d => d.jenisPenugasan === 'Penanaman').length;
+  const totalPenanamanSelesai = data.filter(d => d.jenisPenugasan === 'Penanaman' && d.status === 'Selesai').length;
+  const totalPenyulaman = data.filter(d => d.jenisPenugasan === 'Penyulaman').length;
+  const totalPenyulamanSelesai = data.filter(d => d.jenisPenugasan === 'Penyulaman' && d.status === 'Selesai').length;
+  const lokasiSet = new Set(data.map(d => d.lokasi));
+  const desaSet = new Set(data.map(d => d.lokasi?.split(',')[0]?.trim()).filter(Boolean));
+
   return (
     <div className="w-full mx-auto pb-12">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-[#14532D]">Selamat Datang, KTH Lestari!</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-[#14532D]">
+            Selamat Datang, {user?.nama_pengguna || 'KTH'}!
+          </h1>
           <p className="text-sm text-gray-500 mt-1">Berikut ringkasan penugasan program rehabilitasi yang diberikan kepada KTH.</p>
-        </div>
-        <div className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 flex items-center gap-2 text-sm font-semibold text-gray-700 shadow-sm cursor-pointer hover:bg-gray-50">
-          <HiOutlineCalendar className="w-4 h-4" />
-          <span>01 Jan 2025 - 31 Mei 2025</span>
-          <HiChevronDown className="w-4 h-4 text-gray-400 ml-2" />
         </div>
       </div>
 
@@ -111,13 +93,13 @@ const DashboardKTHPelaksanaan: React.FC = () => {
             <div>
               <p className="text-xs font-bold text-[#16A34A] mb-1">Penugasan Penanaman</p>
               <div className="flex items-baseline gap-2">
-                <h3 className="text-4xl font-bold text-gray-900">2</h3>
+                <h3 className="text-4xl font-bold text-gray-900">{totalPenanaman}</h3>
                 <span className="text-sm font-medium text-gray-500">Program</span>
               </div>
             </div>
           </div>
           <div className="bg-[#F0FDF4] text-[#16A34A] text-xs font-bold px-3 py-2.5 rounded-lg flex items-center gap-2 border border-[#DCFCE7]">
-            <HiOutlineCalendar className="w-4 h-4" /> 1 Program Selesai
+            <HiOutlineCalendar className="w-4 h-4" /> {totalPenanamanSelesai} Program Selesai
           </div>
         </div>
 
@@ -129,13 +111,13 @@ const DashboardKTHPelaksanaan: React.FC = () => {
             <div>
               <p className="text-xs font-bold text-[#7C3AED] mb-1">Penugasan Penyulaman</p>
               <div className="flex items-baseline gap-2">
-                <h3 className="text-4xl font-bold text-gray-900">1</h3>
+                <h3 className="text-4xl font-bold text-gray-900">{totalPenyulaman}</h3>
                 <span className="text-sm font-medium text-gray-500">Program</span>
               </div>
             </div>
           </div>
           <div className="bg-[#F5F3FF] text-[#7C3AED] text-xs font-bold px-3 py-2.5 rounded-lg flex items-center gap-2 border border-[#EDE9FE]">
-            <HiOutlineCalendar className="w-4 h-4" /> 0 Program Selesai
+            <HiOutlineCalendar className="w-4 h-4" /> {totalPenyulamanSelesai} Program Selesai
           </div>
         </div>
 
@@ -147,13 +129,13 @@ const DashboardKTHPelaksanaan: React.FC = () => {
             <div>
               <p className="text-xs font-bold text-[#2563EB] mb-1">Total Lokasi</p>
               <div className="flex items-baseline gap-2">
-                <h3 className="text-4xl font-bold text-gray-900">3</h3>
+                <h3 className="text-4xl font-bold text-gray-900">{lokasiSet.size}</h3>
                 <span className="text-sm font-medium text-gray-500">Lokasi</span>
               </div>
             </div>
           </div>
           <div className="bg-[#EFF6FF] text-[#2563EB] text-xs font-bold px-3 py-2.5 rounded-lg flex items-center gap-2 border border-[#DBEAFE]">
-            <HiOutlineMapPin className="w-4 h-4" /> Di 2 Desa
+            <HiOutlineMapPin className="w-4 h-4" /> Di {desaSet.size} Desa
           </div>
         </div>
       </div>
@@ -164,6 +146,13 @@ const DashboardKTHPelaksanaan: React.FC = () => {
           <h2 className="font-bold text-gray-900 text-lg">Penugasan Terbaru</h2>
         </div>
 
+        {isLoading ? (
+          <div className="p-10 text-center text-sm text-gray-500">Memuat data penugasan...</div>
+        ) : error ? (
+          <div className="p-10 text-center text-sm text-red-500">{error}</div>
+        ) : data.length === 0 ? (
+          <div className="p-10 text-center text-sm text-gray-500">Belum ada penugasan untuk KTH ini.</div>
+        ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-gray-700 whitespace-nowrap">
             <thead className="bg-[#DCECE0]/50 text-[#3A4D3F] text-xs font-bold uppercase border-b border-gray-100">
@@ -180,7 +169,7 @@ const DashboardKTHPelaksanaan: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 font-medium">
-              {mockData.map((row, index) => {
+              {data.map((row, index) => {
                 const isExpanded = expandedRows.includes(row.id);
                 const isPenanaman = row.jenisPenugasan === 'Penanaman';
 
@@ -200,7 +189,7 @@ const DashboardKTHPelaksanaan: React.FC = () => {
                         </span>
                       </td>
                       <td className="px-2 py-4">{row.sumberProgram}</td>
-                      <td className="px-2 py-4 whitespace-pre-line leading-relaxed">{row.lokasi.replace(', ', ',\n')}</td>
+                      <td className="px-2 py-4 whitespace-pre-line leading-relaxed">{row.lokasi?.replace(', ', ',\n')}</td>
                       <td className="px-2 py-4 whitespace-pre-line leading-relaxed">
                         {row.periode}
                         <br/>
@@ -219,7 +208,6 @@ const DashboardKTHPelaksanaan: React.FC = () => {
                       </td>
                     </tr>
 
-                    {/* Expanded Details Row */}
                     {isExpanded && row.rincian && (
                       <tr className="bg-gray-50/30">
                         <td colSpan={9} className="px-6 pb-6 pt-2">
@@ -254,7 +242,7 @@ const DashboardKTHPelaksanaan: React.FC = () => {
                                     <HiOutlineDocumentText className="w-5 h-5" />
                                   </div>
                                   <div>
-                                    <p className="text-[10px] font-bold text-gray-900 mb-0.5">{isPenanaman ? 'Sumber Bibit' : 'Jenis Tanaman'}</p>
+                                    <p className="text-[10px] font-bold text-gray-900 mb-0.5">{isPenanaman ? 'Sumber Dana' : 'Jenis Tanaman'}</p>
                                     <p className="text-xs text-gray-600 font-semibold">{row.rincian.sumberBibit || row.rincian.jenisTanaman}</p>
                                   </div>
                                 </div>
@@ -282,6 +270,7 @@ const DashboardKTHPelaksanaan: React.FC = () => {
             </tbody>
           </table>
         </div>
+        )}
 
         <div className="bg-[#F8FAFC] border-t border-gray-100 p-4 flex items-center gap-2 text-xs text-gray-500 font-medium">
           <HiOutlineInformationCircle className="w-4 h-4 text-[#16A34A] shrink-0" />
