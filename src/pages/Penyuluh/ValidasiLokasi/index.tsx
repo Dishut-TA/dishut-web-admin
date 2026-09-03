@@ -110,16 +110,6 @@ const SummaryCards = ({ data }: { data: TugasValidasi[] }) => {
   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
     {SUMMARY_CARDS.map((card, idx) => (
       <div key={idx} className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
-        <div className={`p-3 rounded-lg shrink-0 ${card.bg} ${card.text}`}>
-          {card.icon}
-        </div>
-        <div>
-          <div className="flex items-baseline gap-2 mb-0.5">
-            <h3 className="text-2xl font-bold text-slate-900">{card.value}</h3>
-          </div>
-          <p className="text-sm font-bold text-slate-800">{card.title}</p>
-          <p className="text-[11px] font-medium text-slate-400">{card.sub}</p>
-        </div>
       </div>
     ))}
   </div>
@@ -220,11 +210,8 @@ const ValidasiTable = ({ data, navigate }: { data: TugasValidasi[], navigate: an
 
 const Pagination = () => (
   <div className="flex items-center justify-between text-xs text-slate-500 px-4 py-4 border-t border-slate-100">
-    <span className="font-medium">Menampilkan 1 - 5 dari 5 data</span>
+    <span className="font-medium"></span>
     <div className="flex items-center gap-2">
-      <button className="p-1.5 rounded-md border border-slate-200 bg-white text-slate-400 hover:bg-slate-50 disabled:opacity-50"><HiChevronLeft className="w-4 h-4" /></button>
-      <button className="px-3 py-1.5 rounded-md bg-[#008A4B] text-white font-semibold">1</button>
-      <button className="p-1.5 rounded-md border border-slate-200 bg-white text-slate-400 hover:bg-slate-50 disabled:opacity-50"><HiChevronRight className="w-4 h-4" /></button>
     </div>
   </div>
 );
@@ -271,7 +258,6 @@ const ValidasiLokasi: React.FC = () => {
   return (
     <div className="w-full mx-auto pb-12 bg-[#F8FAFC] min-h-screen font-sans">
       <Header />
-      {!isLoading && <SummaryCards data={data} />}
       
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col p-4">
         <FilterSection />

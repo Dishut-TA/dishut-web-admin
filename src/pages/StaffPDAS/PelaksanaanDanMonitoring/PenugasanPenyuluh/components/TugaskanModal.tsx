@@ -24,6 +24,31 @@ interface TugaskanModalProps {
   onSuccess?: () => void;
 }
 
+// Ambil status kekritisan (Analisis CPI) dari data zona, mendukung sumber:
+// - Validasi Lokasi (data.detail = AnalysisResultZone langsung)
+// - Pelaksanaan Penanaman (data.detail.analysis_result_zone / analysisResultZone, hasil relasi Donasi/APBD/CSR)
+const getStatusKekritisan = (item: any | null): string | null => {
+  if (!item) return null;
+  const detail = item.detail || {};
+  return (
+    detail.status_lahan_kritis ||
+    detail.analysis_result_zone?.status_lahan_kritis ||
+    detail.analysisResultZone?.status_lahan_kritis ||
+    null
+  );
+};
+
+// Mapping status kekritisan CPI -> level prioritas penugasan
+// Sangat Kritis -> Tinggi, Kritis -> Sedang, Tidak Kritis / lainnya -> Rendah
+const mapStatusToPrioritas = (status: string | null): string => {
+  if (!status) return '';
+  const s = status.toLowerCase();
+  if (s === 'sangat kritis') return 'Tinggi';
+  if (s === 'kritis') return 'Sedang';
+  if (s === 'tidak kritis') return 'Rendah';
+  return '';
+};
+
 const TugaskanModal: React.FC<TugaskanModalProps> = ({ isOpen, onClose, data, onSuccess }) => {
   const [formData, setFormData] = useState({
     penyuluh: '',
@@ -33,6 +58,22 @@ const TugaskanModal: React.FC<TugaskanModalProps> = ({ isOpen, onClose, data, on
     catatan: '',
     kth: 'kth1' // Default value for locked select
   });
+
+  // Status kekritisan CPI untuk item yang sedang ditugaskan (dipakai untuk auto-set prioritas)
+  const statusKekritisan = getStatusKekritisan(data);
+  const autoPrioritas = mapStatusToPrioritas(statusKekritisan);
+
+  // Setiap kali item yang mau ditugaskan berganti, prioritas otomatis diisi
+  // berdasarkan hasil Analisis CPI (status kekritisan) lokasi tersebut.
+  React.useEffect(() => {
+    if (isOpen && data) {
+      setFormData((prev) => ({
+        ...prev,
+        prioritas: autoPrioritas || prev.prioritas
+      }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, data?.id]);
 
   const [penyuluhList, setPenyuluhList] = useState<any[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -81,7 +122,8 @@ const TugaskanModal: React.FC<TugaskanModalProps> = ({ isOpen, onClose, data, on
         jenis_kegiatan: data.jenisKegiatan,
         tanggal_mulai: formData.tanggal || null,
         batas_waktu: formData.batasWaktu || null,
-        arahan: formData.catatan || null
+        arahan: formData.catatan || null,
+        prioritas: formData.prioritas || null
       };
 
       const res = await fetch(`${API_URL}/penugasan`, {
@@ -256,16 +298,34 @@ const TugaskanModal: React.FC<TugaskanModalProps> = ({ isOpen, onClose, data, on
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Prioritas</label>
-                    <select 
-                      value={formData.prioritas} onChange={(e) => setFormData({...formData, prioritas: e.target.value})}
-                      className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-gray-700"
+                    <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-1.5">
+                      Prioritas
+                      {statusKekritisan && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                          Otomatis dari CPI
+                        </span>
+                      )}
+                    </label>
+                    <select
+                      value={formData.prioritas}
+                      onChange={(e) => setFormData({ ...formData, prioritas: e.target.value })}
+                      disabled={!!autoPrioritas}
+                      className={`w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-gray-700 ${autoPrioritas ? 'bg-gray-50 text-gray-500 cursor-not-allowed' : 'bg-white'}`}
                     >
                       <option value="">-- Pilih Prioritas --</option>
                       <option value="Tinggi">Tinggi</option>
                       <option value="Sedang">Sedang</option>
                       <option value="Rendah">Rendah</option>
                     </select>
+                    {statusKekritisan ? (
+                      <p className="text-[11px] mt-1.5 text-gray-500">
+                        Status kekritisan lahan (Analisis CPI): <span className="font-bold text-gray-700">{statusKekritisan}</span> → Prioritas <span className="font-bold text-gray-700">{autoPrioritas}</span>
+                      </p>
+                    ) : (
+                      <p className="text-[11px] mt-1.5 text-gray-400">
+                        Data status kekritisan CPI tidak ditemukan untuk lokasi ini, silakan pilih prioritas secara manual.
+                      </p>
+                    )}
                   </div>
                 </div>
                 

@@ -133,14 +133,6 @@ export const FormValidasiView = ({ data, navigate }: { data: any, navigate: any 
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-2">Kesesuaian Lokasi <span className="text-red-500">*</span></label>
-                  <select value={formData.kesesuaian} onChange={(e) => setFormData({...formData, kesesuaian: e.target.value})} className="w-full px-3 py-2.5 text-xs font-medium border border-slate-200 rounded-lg bg-white focus:outline-none focus:border-[#008A4B] appearance-none">
-                    <option value="Sesuai dengan penugasan">Sesuai dengan penugasan</option>
-                    <option value="Sebagian sesuai">Sebagian sesuai</option>
-                    <option value="Tidak sesuai">Tidak Sesuai</option>
-                  </select>
-                </div>
-                <div>
                   <label className="block text-[11px] font-bold text-slate-700 mb-2">Catatan Validasi <span className="text-slate-400 font-normal">(Opsional)</span></label>
                   <textarea rows={4} value={formData.catatan} onChange={(e) => setFormData({...formData, catatan: e.target.value})} placeholder="Tambahkan catatan pendukung..." className="w-full px-3 py-2 text-xs font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-[#008A4B] resize-none leading-relaxed text-slate-700"></textarea>
                 </div>

@@ -73,6 +73,18 @@ export const getPenugasanByIdAPI = async (id: string | number) => {
   return response.json();
 };
 
+export const hentikanPenugasanAPI = async (id: string | number, alasan?: string) => {
+  const response = await fetch(`${API_URL}/penugasan/${id}/hentikan`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({ alasan }),
+  });
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return response.json();
+};
+
 export const storeMonitoringAPI = async (id: string | number, data: any) => {
   const response = await fetch(`${API_URL}/penugasan/${id}/tugaskan-monitoring`, {
     method: 'POST',
